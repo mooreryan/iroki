@@ -113,6 +113,7 @@ class PagesController < ApplicationController
 
       @job_finished = "Yes"
       @iroki_result = iroki_output.send_result
+      IrokiOutput.destroy iroki_output.id
 
       # TODO render error on error, not send it as a file
       if iroki_output.error # there was an AbortIf error
