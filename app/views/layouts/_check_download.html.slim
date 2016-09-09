@@ -1,0 +1,12 @@
+.row
+  = form_tag({controller: "pages", action: "jobs"}, multipart: true) do
+    .row
+      = label_tag :job_id
+      = text_area_tag :job_id, @job_id
+    .row
+      = label_tag :dj_row_id
+      = text_area_tag :dj_row_id, @dj_row_id
+    .row
+      = submit_tag("Check for job",
+              class: "expanded button secondary",
+              id: "check_for_job")

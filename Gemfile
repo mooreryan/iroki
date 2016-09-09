@@ -38,6 +38,7 @@ group :development, :test do
   gem 'rspec-rails', '~> 3.5'
   gem 'capybara', '2.7.1'
   gem 'capybara-webkit', '~> 1.11', '>= 1.11.1'
+  gem 'shoulda'
 end
 
 group :development do
@@ -54,5 +55,6 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 
 gem 'foundation-rails', '~> 6.2', '>= 6.2.3.0'
-gem 'iroki', '~> 0.0.21'
+gem 'iroki', '~> 0.0.23'
 gem 'delayed_job_active_record'
+gem 'slim-rails'

@@ -1,0 +1,2 @@
+module IrokiOutputsHelper
+end

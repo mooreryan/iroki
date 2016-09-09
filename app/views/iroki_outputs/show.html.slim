@@ -1,0 +1,18 @@
+p#notice = notice
+
+p
+  strong Email:
+  = @iroki_output.email
+p
+  strong Nexus:
+  = @iroki_output.nexus
+p
+  strong Error:
+  = @iroki_output.error
+p
+  strong Dj:
+  = @iroki_output.dj_id
+
+= link_to 'Edit', edit_iroki_output_path(@iroki_output)
+'|
+= link_to 'Back', iroki_outputs_path

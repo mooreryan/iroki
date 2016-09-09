@@ -1,0 +1,27 @@
+h1 Listing iroki_outputs
+
+table
+  thead
+    tr
+      th Email
+      th Nexus
+      th Error
+      th Dj
+      th
+      th
+      th
+
+  tbody
+    - @iroki_outputs.each do |iroki_output|
+      tr
+        td = iroki_output.email
+        td = iroki_output.nexus
+        td = iroki_output.error
+        td = iroki_output.dj_id
+        td = link_to 'Show', iroki_output
+        td = link_to 'Edit', edit_iroki_output_path(iroki_output)
+        td = link_to 'Destroy', iroki_output, data: { confirm: 'Are you sure?' }, method: :delete
+
+br
+
+= link_to 'New Iroki output', new_iroki_output_path

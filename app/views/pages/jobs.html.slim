@@ -1,0 +1,55 @@
+- provide :title, 'Jobs'
+
+.row
+  h1 Job Info
+
+.row#job_info
+  p Job finished? #{@job_finished}
+  p Total jobs in the queue: #{@jobs_in_queue}
+  p#next_refresh_p
+    span = "Next refresh in "
+    span#next_refresh 5
+    span = " seconds."
+
+- if @iroki_result
+  .row#result
+    h2 Result preview
+    p #{@iroki_result[0, 100]} ...
+
+- if @file_path
+  .row
+    h2 Download
+    p = link_to "Download your file!", download_path(params: {"file_path" => @file_path})
+
+
+
+.row.hideme
+  = render "layouts/check_download"
+
+javascript:
+  function randstr() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 5; i++)
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+  }
+
+  var s = 0;
+
+  var timeIntervalHandle = setInterval(function () {
+    s += 1;
+    document.getElementById("next_refresh").innerHTML = 5 - (s % 5);
+  }, 1000);
+
+  var refreshIntervalHandle = setInterval(function () {
+    document.getElementById("check_for_job").click();
+  }, 5000);
+
+  if (document.getElementById("result")) {
+    clearInterval(timeIntervalHandle);
+    clearInterval(refreshIntervalHandle);
+    document.getElementById("job_info").removeChild(document.getElementById("next_refresh_p"));
+  }
