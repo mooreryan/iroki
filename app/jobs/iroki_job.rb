@@ -7,7 +7,8 @@ class IrokiJob < ApplicationJob
 
   after_enqueue do |job|
     id = job.job_id
-    iroki_out = IrokiOutput.new dj_id: id
+    p :peanut, job.inspect
+    iroki_out = IrokiOutput.new dj_id: id, filename: job.arguments.first[:fname]
     iroki_out.save!
   end
 
@@ -51,9 +52,12 @@ class IrokiJob < ApplicationJob
               auto_color: nil,
               display_auto_color_options: nil,
               newick_f: nil,
-              out_f: nil)
+              out_f: nil,
+              fname: nil)
 
     sleep 2
+
+    @fname = File.basename(fname, File.extname(fname))
 
     begin
       @result = Iroki::Main::main(color_branches: color_branches,

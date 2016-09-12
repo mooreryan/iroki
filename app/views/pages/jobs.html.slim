@@ -14,12 +14,12 @@
 - if @iroki_result
   .row#result
     h2 Result preview
-    p #{@iroki_result[0, 100]} ...
+    p #{@iroki_result[@iroki_result.index("begin trees;") + 34, 100]} ...
 
 - if @file_path
   .row
     h2 Download
-    p = link_to "Download your file!", download_path(params: {"file_path" => @file_path})
+    p = link_to "Download your file!", download_path(params: {"job_id" => @job_id})
 
 
 

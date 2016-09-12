@@ -40,6 +40,9 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     addressable (2.4.0)
+    annotate (2.7.1)
+      activerecord (>= 3.2, < 6.0)
+      rake (>= 10.4, < 12.0)
     arel (7.1.1)
     babel-source (5.8.35)
     babel-transpiler (0.7.0)
@@ -231,6 +234,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  annotate (~> 2.7, >= 2.7.1)
   byebug
   capybara (= 2.7.1)
   capybara-webkit (~> 1.11, >= 1.11.1)

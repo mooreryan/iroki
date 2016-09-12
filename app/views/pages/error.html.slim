@@ -2,7 +2,12 @@
 
 .row
   h1 Error
-  p = @error_message
+
+  - if @error_message
+    p = @error_message
+
+  - if @stale_download_link
+    p = @stale_download_link
 
 .row
   p = link_to "Click here to go back to the upload page", root_path

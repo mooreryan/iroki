@@ -46,6 +46,7 @@ class PagesController < ApplicationController
     #                   newick_f: newick_path,
     #                   out_f: outf.path)
 
+
     @job = IrokiJob.perform_later(color_branches: @color_branches,
                                   color_taxa_names: @color_labels,
                                   exact: @exact,
@@ -57,7 +58,8 @@ class PagesController < ApplicationController
                                   auto_color: @auto_color,
                                   display_auto_color_options: nil,
                                   newick_f: newick_path,
-                                  out_f: outf.path)
+                                  out_f: outf.path,
+                                  fname: @newick.original_filename)
 
     @jawn = 2342
     @job_finished = "No"
@@ -111,28 +113,38 @@ class PagesController < ApplicationController
       # TODO assert exactly one
       iroki_output = IrokiOutput.where(dj_id: @job_id).first
 
-      @job_finished = "Yes"
-      @iroki_result = iroki_output.send_result
-      IrokiOutput.destroy iroki_output.id
-
-      # TODO render error on error, not send it as a file
-      if iroki_output.error # there was an AbortIf error
-        @error_message = iroki_output.error
+      if iroki_output.nil?
+        p "HELLO"
+        @stale_download_link = "Can't find you job (id: #{@job_id}) please submit again. Sorry!"
         render :error
       else
-        time = Time.now.strftime("%Y-%m-%d-%H-%M-%S-%L")
-        file = Tempfile.new %W[#{time}. .nexus.txt]
-        begin
-          file.write @iroki_result
-          file.close
-          @file_path = file.path
+        p :ryan, iroki_output.inspect
 
-            # send_file file.path, type: "text"
-        ensure
-          file.close
-          # file.unlink   # deletes the temp file
+
+        @job_finished = "Yes"
+        @iroki_result = iroki_output.send_result
+        # IrokiOutput.destroy iroki_output.id
+
+        # TODO render error on error, not send it as a file
+        if iroki_output.error # there was an AbortIf error
+          @error_message = iroki_output.error
+          render :error
+        else
+          time = Time.now.strftime("%Y-%m-%d_%H-%M-%S.%L")
+          file = Tempfile.new %W[#{time}. .nexus.txt]
+          begin
+            file.write @iroki_result
+            file.close
+            @file_path = file.path
+
+              # send_file file.path, type: "text"
+          ensure
+            file.close
+            # file.unlink   # deletes the temp file
+          end
         end
       end
+
     else
       @job_finished = "No"
     end
@@ -140,7 +152,19 @@ class PagesController < ApplicationController
 
   def download_result
     # TODO ensure this is deleted afterwards?
-    send_file params[:file_path], type: "text"
+    iroki_output = IrokiOutput.where(dj_id: params[:job_id]).first
+    p :thing, iroki_output.inspect
+
+    if iroki_output
+      begin
+        send_data iroki_output.nexus, filename: "#{iroki_output.filename}.#{iroki_output.created_at.strftime("%Y-%m-%d_%H-%M-%S.%L")}.nexus.txt"
+      ensure
+        IrokiOutput.destroy(iroki_output.id) if iroki_output
+      end
+    else
+      @stale_download_link = "You clicked on a stale download link."
+      render :error
+    end
   end
 
   def num_jobs_in_queue

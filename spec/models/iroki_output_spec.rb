@@ -1,3 +1,16 @@
+# == Schema Information
+#
+# Table name: iroki_outputs
+#
+#  id         :integer          not null, primary key
+#  nexus      :text
+#  error      :text
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  dj_id      :string
+#  filename   :string
+#
+
 require 'rails_helper'
 
 RSpec.describe IrokiOutput, type: :model do

@@ -69,6 +69,6 @@ class IrokiOutputsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def iroki_output_params
-      params.require(:iroki_output).permit(:email, :nexus, :error, :dj_id)
+      params.require(:iroki_output).permit(:nexus, :error, :dj_id)
     end
 end
