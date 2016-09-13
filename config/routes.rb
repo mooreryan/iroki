@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  resources :iroki_inputs
-  resources :iroki_outputs
+  # resources :iroki_inputs
+  # resources :iroki_outputs
   root 'pages#home'
   post 'submit' => 'pages#submit', as: :submit
   post 'jobs'   => 'pages#jobs'
