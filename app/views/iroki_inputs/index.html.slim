@@ -1,0 +1,23 @@
+h1 Listing iroki_inputs
+
+table
+  thead
+    tr
+      th Upload
+      th Newick str
+      th
+      th
+      th
+
+  tbody
+    - @iroki_inputs.each do |iroki_input|
+      tr
+        td = iroki_input.upload_id
+        td = iroki_input.newick_str
+        td = link_to 'Show', iroki_input
+        td = link_to 'Edit', edit_iroki_input_path(iroki_input)
+        td = link_to 'Destroy', iroki_input, data: { confirm: 'Are you sure?' }, method: :delete
+
+br
+
+= link_to 'New Iroki input', new_iroki_input_path

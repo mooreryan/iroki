@@ -1,0 +1,2 @@
+module IrokiInputsHelper
+end

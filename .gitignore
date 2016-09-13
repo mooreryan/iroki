@@ -20,3 +20,4 @@
 spec/features/test_files/screenshot.png
 .idea/
 spec/features/test_files/screenshots/screenshot.png
+.DS_Store

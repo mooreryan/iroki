@@ -1,0 +1,15 @@
+= form_for @iroki_input do |f|
+  - if @iroki_input.errors.any?
+    #error_explanation
+      h2 = "#{pluralize(@iroki_input.errors.count, "error")} prohibited this iroki_input from being saved:"
+      ul
+        - @iroki_input.errors.full_messages.each do |message|
+          li = message
+
+  .field
+    = f.label :upload_id
+    = f.text_field :upload_id
+  .field
+    = f.label :newick_str
+    = f.text_area :newick_str
+  .actions = f.submit

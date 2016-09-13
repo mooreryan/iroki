@@ -1,0 +1,1 @@
+json.partial! "iroki_inputs/iroki_input", iroki_input: @iroki_input

@@ -53,29 +53,34 @@ class IrokiJob < ApplicationJob
               display_auto_color_options: nil,
               newick_f: nil,
               out_f: nil,
-              fname: nil)
+              fname: nil,
+              upload_id: nil,
+              iroki_input: nil)
 
     sleep 2
 
     @fname = File.basename(fname, File.extname(fname))
 
+    paths = iroki_input.to_tmp_file!
+
     begin
-      @result = Iroki::Main::main(color_branches: color_branches,
-                                  color_taxa_names: color_taxa_names,
-                                  exact: exact,
-                                  remove_bootstraps_below: remove_bootstraps_below,
-                                  color_map_f: color_map_f,
-                                  biom_f: biom_f,
-                                  single_color: single_color,
-                                  name_map_f: name_map_f,
-                                  auto_color: auto_color,
-                                  display_auto_color_options: display_auto_color_options,
-                                  newick_f: newick_f,
-                                  out_f: out_f)
+      @result = Iroki::Main::iroki_job(color_branches: color_branches,
+                                       color_taxa_names: color_taxa_names,
+                                       exact: exact,
+                                       remove_bootstraps_below: remove_bootstraps_below,
+                                       color_map_f: paths[:color_map],
+                                       biom_f: paths[:biom],
+                                       single_color: single_color,
+                                       name_map_f: paths[:name_map],
+                                       auto_color: auto_color,
+                                       display_auto_color_options: display_auto_color_options,
+                                       newick_f: paths[:newick])
     rescue AbortIf::Exit => ex
       handle_error ex
     rescue AbortIf::Error => ex
       handle_error ex
+    ensure
+      IrokiInput.destroy(iroki_input.id) if iroki_input
     end
   end
 

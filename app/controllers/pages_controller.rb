@@ -22,16 +22,35 @@ class PagesController < ApplicationController
       basein = "apple"
     end
 
-    newick_path    = @newick.tempfile.path if @newick
-    color_map_path = @color_map.tempfile.path if @color_map
-    name_map_path  = @name_map.tempfile.path if @name_map
-    biom_file_path = @biom_file.tempfile.path if @biom_file
 
-    outf =
-        Tempfile.new ["#{basein}.", ".nex"]
+    newick_str, color_map_str, name_map_str, biom_file_str = nil
+
+    if @newick
+      newick_path = @newick.tempfile.path
+      newick_str = File.read(newick_path)
+    end
+
+    if @color_map
+      color_map_path = @color_map.tempfile.path
+      color_map_str = File.read color_map_path
+    end
+
+    if @name_map
+      name_map_path  = @name_map.tempfile.path
+      name_map_str   = File.read name_map_path
+    end
+
+    if @biom_file
+      biom_file_path = @biom_file.tempfile.path
+      biom_file_str = File.read biom_file_path
+    end
+
+
+    # outf =
+    #     Tempfile.new ["#{basein}.", ".nex"]
 
     # begin
-    flash.now[:notice] = "Processing #{newick_path}"
+    # flash.now[:notice] = "Processing #{newick_path}"
 
     # Iroki::Main::main(color_branches: @color_branches,
     #                   color_taxa_names: @color_labels,
@@ -47,6 +66,20 @@ class PagesController < ApplicationController
     #                   out_f: outf.path)
 
 
+    # Make a rec in IrokiInput
+    timestr = Time.now.strftime("%Y%m%d%H%M%S%L")
+    randstr = 10.times.map { ('a'..'z').to_a.sample }.join
+    upload_id = %W[timestr randstr].join # use this to query the db
+
+
+    iroki_input = IrokiInput.new upload_id: upload_id,
+                                 newick_str: newick_str,
+                                 color_map_str: color_map_str,
+                                 name_map_str: name_map_str,
+                                 biom_str: biom_file_str
+
+    iroki_input.save!
+
     @job = IrokiJob.perform_later(color_branches: @color_branches,
                                   color_taxa_names: @color_labels,
                                   exact: @exact,
@@ -58,8 +91,9 @@ class PagesController < ApplicationController
                                   auto_color: @auto_color,
                                   display_auto_color_options: nil,
                                   newick_f: newick_path,
-                                  out_f: outf.path,
-                                  fname: @newick.original_filename)
+                                  fname: @newick.original_filename,
+                                  upload_id: upload_id,
+                                  iroki_input: iroki_input)
 
     @jawn = 2342
     @job_finished = "No"
@@ -157,7 +191,7 @@ class PagesController < ApplicationController
 
     if iroki_output
       begin
-        send_data iroki_output.nexus, filename: "#{iroki_output.filename}.#{iroki_output.created_at.strftime("%Y-%m-%d_%H-%M-%S.%L")}.nexus.txt"
+          send_data iroki_output.nexus, filename: "#{iroki_output.filename}.#{iroki_output.created_at.strftime("%Y-%m-%d_%H-%M-%S.%L")}.nexus.txt"
       ensure
         IrokiOutput.destroy(iroki_output.id) if iroki_output
       end
