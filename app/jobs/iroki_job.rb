@@ -57,7 +57,7 @@ class IrokiJob < ApplicationJob
               upload_id: nil,
               iroki_input: nil)
 
-    sleep 2
+    # sleep 2
 
     @fname = File.basename(fname, File.extname(fname))
 
