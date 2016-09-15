@@ -1,5 +1,5 @@
 .row
-  = form_tag({controller: "pages", action: "jobs"}, multipart: true) do
+  = form_tag({controller: "pages", action: "jobs"}, remote: false) do
     .row
       = label_tag :job_id
       = text_area_tag :job_id, @job_id
