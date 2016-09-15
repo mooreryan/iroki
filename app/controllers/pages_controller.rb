@@ -114,22 +114,12 @@ class PagesController < ApplicationController
   end
 
   def contact
-    @jawn = 2342
-    @job_finished = "No"
-    @foo = FooJob.perform_later email: "arstnen@gmail.com"
-    @job_id = @foo.job_id
-    @jobs_in_queue = Delayed::Job.all.count
-    @dj_row_id = @foo.provider_job_id
-    # IrokiJob.perform_later email: "foo", exact: "apple"
-    render :jobs
   end
 
   def error
   end
 
   def citation
-    BarJob.perform_later
-
   end
 
   def jobs
