@@ -14,14 +14,14 @@
 
 class IrokiInput < ApplicationRecord
   def to_tmp_file!
-    { newick: write_tmp_file!(self.newick_str),
+    { newick:    write_tmp_file!(self.newick_str),
       color_map: write_tmp_file!(self.color_map_str),
-      name_map: write_tmp_file!(self.name_map_str),
-      biom: write_tmp_file!(self.biom_str) }
+      name_map:  write_tmp_file!(self.name_map_str),
+      biom:      write_tmp_file!(self.biom_str) }
   end
 
   def write_tmp_file! str
-    tmp = Tempfile.new
+    tmp = Tempfile.new 'foo'
     tmp.write str
     tmp.close
 

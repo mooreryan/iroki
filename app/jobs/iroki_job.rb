@@ -7,8 +7,14 @@ class IrokiJob < ApplicationJob
 
   after_enqueue do |job|
     id = job.job_id
-    p :peanut, job.inspect
-    iroki_out = IrokiOutput.new dj_id: id, filename: job.arguments.first[:fname]
+
+    if job.arguments.first
+      filename = job.arguments.first[:fname]
+    else
+      filename = nil
+    end
+
+    iroki_out = IrokiOutput.new dj_id: id, filename: filename
     iroki_out.save!
   end
 
@@ -59,8 +65,11 @@ class IrokiJob < ApplicationJob
 
     # sleep 2
 
+    raise ArgumentError, "fname cannot be nil" if fname.nil?
+
     @fname = File.basename(fname, File.extname(fname))
 
+    # iroki_input is the result of a call to IrokiInput.new
     paths = iroki_input.to_tmp_file!
 
     begin
@@ -75,6 +84,7 @@ class IrokiJob < ApplicationJob
                                        auto_color: auto_color,
                                        display_auto_color_options: display_auto_color_options,
                                        newick_f: paths[:newick])
+
     rescue AbortIf::Exit => ex
       handle_error ex
     rescue AbortIf::Error => ex
