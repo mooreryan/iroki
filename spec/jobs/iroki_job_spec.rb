@@ -16,7 +16,7 @@ RSpec.describe IrokiJob, type: :job do
     expect { job }.to have_enqueued_job.on_queue "iroki"
   end
 
-  it "raises error if fname is not nil" do
+  it "handles error if fname nil" do
     expect { IrokiJob.perform_now fname: nil }.to raise_error ArgumentError
   end
 

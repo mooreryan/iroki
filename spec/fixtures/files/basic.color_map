@@ -1,0 +1,8 @@
+#sample	label	branch
+s1	green
+s2	branch:red	label:blue
+s3	label:blue	branch:red
+s4	blue	red
+s5	red	blue
+s6	branch:red
+s7	label:blue

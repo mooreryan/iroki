@@ -15,6 +15,33 @@ class PagesController < ApplicationController
     @single_color     = params[:single_color]
     @auto_color       = params[:auto_color]
 
+    unless @newick
+      @error_message = "Missing the Newick file."
+      render(:error) and return
+    end
+
+    if @newick && !@color_map && !@name_map && !@biom_file
+      @error_message = "Need at least one of color map, name map, or biom file."
+      render(:error) and return
+    end
+
+    # unless @color_map
+    #   @error_message = "Missing the color map file."
+    #   render(:error) and return
+    # end
+
+    # unless @newick
+    #   @error_message = "Missing the Newick file."
+    #   render(:error) and return
+    # end
+    #
+    # unless @newick
+    #   @error_message = "Missing the Newick file."
+    #   render(:error) and return
+    # end
+
+
+
     if @newick
       basein = File.basename(@newick.original_filename,
                              File.extname(@newick.original_filename))
@@ -28,6 +55,7 @@ class PagesController < ApplicationController
     if @newick
       newick_path = @newick.tempfile.path
       newick_str = File.read(newick_path)
+      newick_orig_fname = @newick.original_filename
     end
 
     if @color_map
@@ -91,7 +119,7 @@ class PagesController < ApplicationController
                                   auto_color: @auto_color,
                                   display_auto_color_options: nil,
                                   newick_f: newick_path,
-                                  fname: @newick.original_filename,
+                                  fname: newick_orig_fname,
                                   upload_id: upload_id,
                                   iroki_input: iroki_input)
 
@@ -194,4 +222,8 @@ class PagesController < ApplicationController
   def num_jobs_in_queue
     @jobs_in_queue = Delayed::Job.all.count
   end
+end
+
+def present_and_not_empty? obj
+  obj && !obj.empty?
 end
