@@ -4,9 +4,38 @@ def delete_keys hash, keys
   keys.each { |key| hash.delete key }
 end
 
+def bad_mime_types
+  ["application/atom+xml",
+   "image/bmp",
+   "text/css",
+   "text/csv",
+   "text/html",
+   "text/vcard",
+   "text/calendar",
+   "image/gif",
+   "image/jpeg",
+   "image/png",
+   "image/svg+xml",
+   "image/tiff",
+   "application/gzip",
+   "application/x-javascript",
+   "application/json",
+   "video/mpeg",
+   "multipart/form-data",
+   "application/pdf",
+   "application/rss+xml",
+   "application/x-www-form-urlencoded",
+   "application/vnd.web-console.v2",
+   "application/xml",
+   "application/x-yaml",
+   "application/zip",
+  ]
+end
+
 RSpec.describe PagesController, type: :controller do
   let(:newick_file) {
-    fixture_file_upload("files/color_map_override.tre", "application/octet-stream")
+    fixture_file_upload("files/color_map_override.tre",
+                        "application/octet-stream")
   }
   let(:color_map) {
     fixture_file_upload("files/color_map_override.color_map",
@@ -35,6 +64,19 @@ RSpec.describe PagesController, type: :controller do
   end
 
   describe "POST #submit" do
+    shared_examples_for "bad file type" do |fname|
+      context "when #{fname} is the wrong file type" do
+        it "renders error page and sets @error_message" do
+          bad_mime_types.each do |type|
+            params_hash[fname].content_type = type
+
+            expect(post :submit, params: params_hash).to render_template :error
+            expect(controller.instance_variables).to include :@error_message
+          end
+        end
+      end
+    end
+
     shared_examples_for "when missing file" do |*fnames|
       context "when missing #{fnames.join ', '}" do
         it "renders error page" do
@@ -67,7 +109,25 @@ RSpec.describe PagesController, type: :controller do
     context "when the form isn't properly filled out" do
       include_examples "when missing file", :newick_file
       include_examples "when missing file", :color_map, :name_map, :biom_file
+
+      include_examples "bad file type", :newick_file
+      include_examples "bad file type", :color_map
+      include_examples "bad file type", :name_map
+      include_examples "bad file type", :biom_file
+
     end
+
+    # context "when uploading bad file types" do
+    #   it "renders error page with bad Newick file" do
+    #     file = fixture_file_upload("files/color_map_override.tre",
+    #                                "image/jpg")
+    #
+    #     params_hash[:newick_file] = file
+    #
+    #     expect(post :submit, params: params_hash).
+    #         to render_template :error
+    #   end
+    # end
   end
 
   describe "GET #about" do

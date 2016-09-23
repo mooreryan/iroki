@@ -53,22 +53,42 @@ class PagesController < ApplicationController
     newick_str, color_map_str, name_map_str, biom_file_str = nil
 
     if @newick
+      unless %w[text/plain application/octet-stream].include? @newick.content_type
+        @error_message = "Newick file looks to be the wrong type."
+        render(:error) and return
+      end
+
       newick_path = @newick.tempfile.path
       newick_str = File.read(newick_path)
       newick_orig_fname = @newick.original_filename
     end
 
     if @color_map
+      unless %w[text/plain application/octet-stream].include? @color_map.content_type
+        @error_message = "Color map looks to be the wrong type."
+        render(:error) and return
+      end
+
       color_map_path = @color_map.tempfile.path
       color_map_str = File.read color_map_path
     end
 
     if @name_map
+      unless %w[text/plain application/octet-stream].include? @name_map.content_type
+        @error_message = "Name map looks to be the wrong type."
+        render(:error) and return
+      end
+
       name_map_path  = @name_map.tempfile.path
       name_map_str   = File.read name_map_path
     end
 
     if @biom_file
+      unless %w[text/plain application/octet-stream].include? @biom_file.content_type
+        @error_message = "Biom file looks to be the wrong type."
+        render(:error) and return
+      end
+
       biom_file_path = @biom_file.tempfile.path
       biom_file_str = File.read biom_file_path
     end
@@ -209,7 +229,7 @@ class PagesController < ApplicationController
 
     if iroki_output
       begin
-          send_data iroki_output.nexus, filename: "#{iroki_output.filename}.#{iroki_output.created_at.strftime("%Y-%m-%d_%H-%M-%S.%L")}.nexus.txt"
+        send_data iroki_output.nexus, filename: "#{iroki_output.filename}.#{iroki_output.created_at.strftime("%Y-%m-%d_%H-%M-%S.%L")}.nexus.txt"
       ensure
         IrokiOutput.destroy(iroki_output.id) if iroki_output
       end
