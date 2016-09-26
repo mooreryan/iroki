@@ -63,6 +63,7 @@ RSpec.describe PagesController, type: :controller do
     end
   end
 
+  # @note Everything that should render :error here is handled by controller logic
   describe "POST #submit" do
     shared_examples_for "bad file type" do |fname|
       context "when #{fname} is the wrong file type" do
@@ -116,18 +117,6 @@ RSpec.describe PagesController, type: :controller do
       include_examples "bad file type", :biom_file
 
     end
-
-    # context "when uploading bad file types" do
-    #   it "renders error page with bad Newick file" do
-    #     file = fixture_file_upload("files/color_map_override.tre",
-    #                                "image/jpg")
-    #
-    #     params_hash[:newick_file] = file
-    #
-    #     expect(post :submit, params: params_hash).
-    #         to render_template :error
-    #   end
-    # end
   end
 
   describe "GET #about" do
@@ -149,6 +138,25 @@ RSpec.describe PagesController, type: :controller do
       get :error
       expect(response).to have_http_status(:success)
     end
+
+    it "destroys the IrokiOutput record if IrokiOutput.error is not nil"
+  end
+
+  describe "GET #citation" do
+    it "returns http success" do
+      get :citation
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  describe "GET #download_result" do
+    it "returns http success" do
+      get :download_result
+
+      expect(response).to have_http_status(:success)
+    end
+
+    it "destroys the IrokiOutput record after download"
   end
 
 end

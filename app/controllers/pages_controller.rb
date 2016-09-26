@@ -143,7 +143,6 @@ class PagesController < ApplicationController
                                   upload_id: upload_id,
                                   iroki_input: iroki_input)
 
-    @jawn = 2342
     @job_finished = "No"
     @job_id = @job.job_id
     @jobs_in_queue = Delayed::Job.all.count
@@ -171,35 +170,33 @@ class PagesController < ApplicationController
   end
 
   def jobs
-    p params
-    @jawn = 2342
     @jobs_in_queue = Delayed::Job.all.count
 
     @job_id = params[:job_id]
     @dj_row_id = params[:dj_row_id]
 
     dj_rec = Delayed::Job.where(id: @dj_row_id)
-    p 1, dj_rec.inspect
 
     if dj_rec.empty? # it is def done
       # TODO assert exactly one
       iroki_output = IrokiOutput.where(dj_id: @job_id).first
 
       if iroki_output.nil?
-        p "HELLO"
         @stale_download_link = "Can't find you job (id: #{@job_id}) please submit again. Sorry!"
         render :error
       else
-        p :ryan, iroki_output.inspect
 
 
         @job_finished = "Yes"
         @iroki_result = iroki_output.send_result
         # IrokiOutput.destroy iroki_output.id
 
-        # TODO render error on error, not send it as a file
         if iroki_output.error # there was an AbortIf error
           @error_message = iroki_output.error
+
+          # TODO spec me
+          IrokiOutput.destroy iroki_output.id
+
           render :error
         else
           time = Time.now.strftime("%Y-%m-%d_%H-%M-%S.%L")
@@ -225,7 +222,6 @@ class PagesController < ApplicationController
   def download_result
     # TODO ensure this is deleted afterwards?
     iroki_output = IrokiOutput.where(dj_id: params[:job_id]).first
-    p :thing, iroki_output.inspect
 
     if iroki_output
       begin

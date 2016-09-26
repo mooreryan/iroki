@@ -4,6 +4,8 @@ RSpec.describe IrokiJob, type: :job do
   include ActiveJob::TestHelper
 
   let(:test_dir) { File.join File.dirname(__FILE__), "..", "test_files" }
+  let(:nexus) { File.read File.join test_dir, "basic.nex" }
+
   before(:each) { ActiveJob::Base.queue_adapter = :test }
 
   subject(:job) { described_class.perform_later }
@@ -40,29 +42,17 @@ RSpec.describe IrokiJob, type: :job do
     end
   end
 
-  context "after perform" do
+  context "after successful perform" do
     it "adds the nexus string to the IrokiOutput record" do
-      use_delayed_job
-
-      newick = File.read File.join test_dir, "basic.tre"
-      color_map = File.read File.join test_dir, "basic.color_map"
-      nexus = File.read File.join test_dir, "basic.nex"
-      upload_id = "arstoien"
-
-      iroki_input = IrokiInput.new upload_id: upload_id,
-                                   newick_str: newick,
-                                   color_map_str: color_map
-      iroki_input.save!
-
-      IrokiJob.perform_later fname: "apple",
-                             iroki_input: iroki_input,
-                             color_branches: true,
-                             color_taxa_names: true,
-                             exact: true
-
-      run_last_job
+      run_succussful_job
 
       expect(IrokiOutput.last.nexus).to eq nexus
+    end
+
+    it "deletes the IrokiInput record" do
+      run_succussful_job
+
+      expect(IrokiInput.last).to be nil
     end
   end
 
@@ -84,4 +74,26 @@ def run_last_job
   dw = Delayed::Worker.new
   dj = Delayed::Job.last
   dw.run dj
+end
+
+def run_succussful_job
+  use_delayed_job
+
+  newick = File.read File.join test_dir, "basic.tre"
+  color_map = File.read File.join test_dir, "basic.color_map"
+
+  upload_id = "arstoien"
+
+  iroki_input = IrokiInput.new upload_id: upload_id,
+                               newick_str: newick,
+                               color_map_str: color_map
+  iroki_input.save!
+
+  IrokiJob.perform_later fname: "apple",
+                         iroki_input: iroki_input,
+                         color_branches: true,
+                         color_taxa_names: true,
+                         exact: true
+
+  run_last_job
 end
