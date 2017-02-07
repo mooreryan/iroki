@@ -61,6 +61,7 @@ $foundation-palette: (
 $light-gray: #e6e6e6;
 $medium-gray: #cacaca;
 $dark-gray: #8a8a8a;
+$darker-gray: #404040;
 $black: #0a0a0a;
 $white: #fefefe;
 /* $body-background: $white; */
@@ -160,7 +161,8 @@ $list-nested-side-margin: 1.25rem;
 $defnlist-margin-bottom: 1rem;
 $defnlist-term-weight: $global-weight-bold;
 $defnlist-term-margin-bottom: 0.3rem;
-$blockquote-color: $dark-gray;
+//$blockquote-color: $dark-gray;
+$blockquote-color: $darker-gray;
 $blockquote-padding: rem-calc(9 20 0 19);
 $blockquote-border: 1px solid $medium-gray;
 $cite-font-size: rem-calc(13);
