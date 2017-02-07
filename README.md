@@ -1,24 +1,20 @@
-# README
+# Iroki #
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Rails 5 source for the [Iroki webapp](www.iroki.net), a phylogenetic tree
+customization program.
 
-Things you may want to cover:
+## Citation ##
 
-* Ruby version
+Iroki is research software. If you use Iroki, please cite the Iroki preprint:
 
-* System dependencies
+```
+Moore RM, Harrison AO, McAllister SM, Marine R, Chan C, Wommack KE. 2017. Iroki: automatic customization for phylogenetic trees. doi: https://doi.org/10.1101/106138
+```
 
-* Configuration
+## Documentation
 
-* Database creation
+Please see the [Iroki wiki](https://github.com/mooreryan/iroki/wiki) for lots of information on how to run Iroki.
 
-* Database initialization
+## Iroki library code & api
 
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+The Iroki api can be found [here](https://github.com/mooreryan/iroki).
