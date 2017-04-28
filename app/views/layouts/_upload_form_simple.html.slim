@@ -50,6 +50,15 @@
           .medium-6.columns
             = radio_button_tag(:single_color, false)
             = label_tag(:single_color_false, "Two color")
+      .row
+        h4 Gradient luminosity
+        .row
+          .medium-6.columns
+            = label_tag(:min_lumin, "Minimum luminosity")
+            = select_tag(:min_lumin, options_for_select((1..100).zip(1..100), 35))
+          .medium-6.columns
+            = label_tag(:max_lumin, "Maximum luminosity")
+            = select_tag(:max_lumin, options_for_select((1..100).zip(1..100), 70))
       hr.row
       .row
         = submit_tag("Submit",

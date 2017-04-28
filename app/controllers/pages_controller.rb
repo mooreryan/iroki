@@ -14,6 +14,8 @@ class PagesController < ApplicationController
     @remove_below     = params[:remove_below]
     @single_color     = params[:single_color]
     @auto_color       = params[:auto_color]
+    @min_lumin        = params[:min_lumin]
+    @max_lumin        = params[:max_lumin]
 
     unless @newick
       @error_message = "Missing the Newick file."
@@ -93,6 +95,16 @@ class PagesController < ApplicationController
       biom_file_str = File.read biom_file_path
     end
 
+    if @min_lumin && @max_lumin
+      if @min_lumin.to_i > @max_lumin.to_i
+        @error_message = "Minimum luminosity (#{@min_lumin}}) was greater than maximum luminosity (#{@max_lumin})"
+        render(:error) and return
+      end
+
+      @min_lumin = @min_lumin.to_i
+      @max_lumin = @max_lumin.to_i
+    end
+
 
     # outf =
     #     Tempfile.new ["#{basein}.", ".nex"]
@@ -141,7 +153,9 @@ class PagesController < ApplicationController
                                   newick_f: newick_path,
                                   fname: newick_orig_fname,
                                   upload_id: upload_id,
-                                  iroki_input: iroki_input)
+                                  iroki_input: iroki_input,
+                                  min_lumin: @min_lumin,
+                                  max_lumin: @max_lumin)
 
     @job_finished = "No"
     @job_id = @job.job_id

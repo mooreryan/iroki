@@ -115,7 +115,55 @@ RSpec.describe PagesController, type: :controller do
       include_examples "bad file type", :color_map
       include_examples "bad file type", :name_map
       include_examples "bad file type", :biom_file
+    end
 
+    context "luminosity options" do
+      it "actually passes the luminosity opts"
+
+      context "when min luminosity is greater than max luminosity" do
+        it "renders error page" do
+          params_hash.merge!({min_lumin: 50, max_lumin: 40})
+
+          expect(post :submit, params: params_hash).to render_template :error
+        end
+
+        it "sets @error_message" do
+          params_hash.merge!({min_lumin: 50, max_lumin: 40})
+          post :submit, params: params_hash
+
+          expect(controller.instance_variables).to include :@error_message
+        end
+      end
+
+      context "when min and max luminosity are equal" do
+        it "returns http success" do
+          params_hash.merge!({min_lumin: 50, max_lumin: 50})
+          post :submit, params: params_hash
+
+          expect(response).to have_http_status(:success)
+        end
+
+        it "renders the jobs template" do
+          params_hash.merge!({min_lumin: 50, max_lumin: 50})
+
+          expect(post :submit, params: params_hash).to render_template :jobs
+        end
+      end
+
+      context "when min is lower than max luminosity" do
+        it "returns http success" do
+          params_hash.merge!({min_lumin: 40, max_lumin: 50})
+          post :submit, params: params_hash
+
+          expect(response).to have_http_status(:success)
+        end
+
+        it "renders the jobs template" do
+          params_hash.merge!({min_lumin: 40, max_lumin: 50})
+
+          expect(post :submit, params: params_hash).to render_template :jobs
+        end
+      end
     end
   end
 

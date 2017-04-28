@@ -61,7 +61,9 @@ class IrokiJob < ApplicationJob
               out_f: nil,
               fname: nil,
               upload_id: nil,
-              iroki_input: nil)
+              iroki_input: nil,
+              min_lumin: nil,
+              max_lumin: nil)
 
     # sleep 2
 
@@ -83,7 +85,9 @@ class IrokiJob < ApplicationJob
                                        name_map_f: paths[:name_map],
                                        auto_color: auto_color,
                                        display_auto_color_options: display_auto_color_options,
-                                       newick_f: paths[:newick])
+                                       newick_f: paths[:newick],
+                                       min_lumin: min_lumin,
+                                       max_lumin: max_lumin)
 
     rescue AbortIf::Exit => ex
       handle_error ex

@@ -67,7 +67,7 @@ $white: #fefefe;
 /* $body-background: $white; */
 $body-background: map-get($foundation-palette, primary);
 $body-font-color: $black;
-$body-font-family: 'Raleway', 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
+$body-font-family: 'Raleway', 'Roboto', Helvetica, sans-serif;
 /* $body-font-family: Optima, 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; */
 $body-antialiased: true;
 $global-margin: 1rem;

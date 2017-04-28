@@ -93,7 +93,9 @@ def run_succussful_job
                          iroki_input: iroki_input,
                          color_branches: true,
                          color_taxa_names: true,
-                         exact: true
+                         exact: true,
+                         min_lumin: 10,
+                         max_lumin: 50
 
   run_last_job
 end

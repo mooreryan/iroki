@@ -91,7 +91,7 @@ GEM
     globalid (0.3.7)
       activesupport (>= 4.1.0)
     i18n (0.7.0)
-    iroki (0.0.27)
+    iroki (0.0.33)
       abort_if (~> 0.1.0)
       bio (~> 1.5)
       color (~> 1.8)
@@ -245,7 +245,7 @@ DEPENDENCIES
   delayed_job_active_record
   dotenv-rails
   foundation-rails (~> 6.2, >= 6.2.3.0)
-  iroki (~> 0.0.27)
+  iroki (~> 0.0.33)
   jbuilder (~> 2.5)
   jquery-rails
   listen (~> 3.0.5)
