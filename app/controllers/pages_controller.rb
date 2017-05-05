@@ -12,7 +12,7 @@ class PagesController < ApplicationController
     @color_labels     = params[:color_labels]
     @exact            = params[:exact]
     @remove_below     = params[:remove_below]
-    @single_color     = params[:single_color]
+    @single_color     = params[:single_color] == "false" ? false : true
     @auto_color       = params[:auto_color]
     @min_lumin        = params[:min_lumin]
     @max_lumin        = params[:max_lumin]
@@ -56,7 +56,7 @@ class PagesController < ApplicationController
 
     if @newick
       unless %w[text/plain application/octet-stream].include? @newick.content_type
-        @error_message = "Newick file looks to be the wrong type."
+        @error_message = "Newick file looks to be the wrong type. (Try adding .txt to the end of the file name....)"
         render(:error) and return
       end
 
@@ -67,7 +67,7 @@ class PagesController < ApplicationController
 
     if @color_map
       unless %w[text/plain application/octet-stream].include? @color_map.content_type
-        @error_message = "Color map looks to be the wrong type."
+        @error_message = "Color map looks to be the wrong type. (Try adding .txt to the end of the file name....)"
         render(:error) and return
       end
 
@@ -77,7 +77,7 @@ class PagesController < ApplicationController
 
     if @name_map
       unless %w[text/plain application/octet-stream].include? @name_map.content_type
-        @error_message = "Name map looks to be the wrong type."
+        @error_message = "Name map looks to be the wrong type. (Try adding .txt to the end of the file name....)"
         render(:error) and return
       end
 
@@ -87,7 +87,7 @@ class PagesController < ApplicationController
 
     if @biom_file
       unless %w[text/plain application/octet-stream].include? @biom_file.content_type
-        @error_message = "Biom file looks to be the wrong type."
+        @error_message = "Biom file looks to be the wrong type. (Try adding .txt to the end of the file name....)"
         render(:error) and return
       end
 

@@ -117,6 +117,24 @@ RSpec.describe PagesController, type: :controller do
       include_examples "bad file type", :biom_file
     end
 
+    context "single_color option" do
+      it "passes 'false' as a boolean false" do
+        params_hash[:single_color] = "false"
+        post :submit, params: params_hash
+
+        single_color_val = controller.instance_variable_get :@single_color
+        expect(single_color_val).to be false
+      end
+
+      it "passes 'true' as a boolean false" do
+        params_hash[:single_color] = "true"
+        post :submit, params: params_hash
+
+        single_color_val = controller.instance_variable_get :@single_color
+        expect(single_color_val).to be true
+      end
+    end
+
     context "luminosity options" do
       it "actually passes the luminosity opts"
 

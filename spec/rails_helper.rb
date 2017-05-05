@@ -14,6 +14,10 @@ Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 require 'capybara/rspec'
 # Set the default driver
 Capybara.javascript_driver = :webkit
+Capybara::Webkit.configure do |config|
+  config.allow_url "https://www.google-analytics.com/analytics.js"
+  config.timeout = 5
+end
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
