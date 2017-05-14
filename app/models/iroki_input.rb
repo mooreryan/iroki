@@ -21,10 +21,14 @@ class IrokiInput < ApplicationRecord
   end
 
   def write_tmp_file! str
-    tmp = Tempfile.new 'foo'
-    tmp.write str
-    tmp.close
+    if str.nil? || str.empty?
+      return nil
+    else
+      tmp = Tempfile.new 'foo'
+      tmp.write str
+      tmp.close
 
-    tmp.path
+      return tmp.path
+    end
   end
 end

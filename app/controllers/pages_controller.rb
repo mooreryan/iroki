@@ -4,6 +4,7 @@ class PagesController < ApplicationController
   end
 
   def submit
+    p [:JAWN, params[:single_color]]
     @newick           = params[:newick_file]
     @color_map        = params[:color_map]
     @name_map         = params[:name_map]
@@ -12,10 +13,18 @@ class PagesController < ApplicationController
     @color_labels     = params[:color_labels]
     @exact            = params[:exact]
     @remove_below     = params[:remove_below]
-    @single_color     = params[:single_color] == "false" ? false : true
     @auto_color       = params[:auto_color]
     @min_lumin        = params[:min_lumin]
     @max_lumin        = params[:max_lumin]
+
+    case params[:single_color]
+      when "true"
+        @single_color = true
+      when "false"
+        @single_color = false
+      else
+        @single_color = nil
+    end
 
     unless @newick
       @error_message = "Missing the Newick file."

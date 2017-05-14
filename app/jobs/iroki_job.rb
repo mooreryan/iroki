@@ -73,6 +73,7 @@ class IrokiJob < ApplicationJob
 
     # iroki_input is the result of a call to IrokiInput.new
     paths = iroki_input.to_tmp_file!
+    printf "in iroki job, paths: %s", paths.inspect
 
     begin
       @result = Iroki::Main::iroki_job(color_branches: color_branches,
