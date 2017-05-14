@@ -4,7 +4,6 @@ class PagesController < ApplicationController
   end
 
   def submit
-    p [:JAWN, params[:single_color]]
     @newick           = params[:newick_file]
     @color_map        = params[:color_map]
     @name_map         = params[:name_map]
