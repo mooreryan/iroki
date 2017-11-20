@@ -1,0 +1,20 @@
+- provide :title, ''
+
+= javascript_include_tag "https://d3js.org/d3.v4.min.js", "data-turbolinks-track" => false
+= javascript_include_tag "viewer", "data-turbolinks-track" => false
+
+
+.row.expanded.thick-border
+  .medium-3.large-6.columns
+    .row
+      h3 Tree Viewer!
+    .row.upload-form
+      = render "layouts/viewer_form"
+  .medium-9.large-6.columns
+    .row
+      h3 Here is where you will see the tree
+    .row#tree-div
+
+
+javascript:
+  upload_button("uploader", load_dataset);

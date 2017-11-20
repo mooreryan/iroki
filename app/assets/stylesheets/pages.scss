@@ -5,3 +5,44 @@
 .hideme {
   display: none;
 }
+
+
+
+// This is for the viewer
+#show-length {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.links {
+  fill: none;
+  stroke: #000;
+}
+
+.link-extensions {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .25;
+}
+
+.labels {
+  font: sans-serif;
+}
+
+.link--active {
+  stroke: #000 !important;
+  stroke-width: 1.5px;
+}
+
+.link-extension--active {
+  stroke-opacity: .6;
+}
+
+.label--active {
+  font-weight: bold;
+}
+
+div {
+  border: 1px dotted #666;
+}

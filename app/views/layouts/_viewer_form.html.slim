@@ -1,0 +1,97 @@
+.row
+  .row
+    ul.tabs#option-tabs data-tabs=""
+      .small-5.columns.center-it
+        li.tabs-title.is-active.center-it
+          a href="" Upload a tree to view!
+
+.row.tabs-content data-tabs-content="option-tabs"
+  .row.tabs-panel.is-active
+    hr.row
+
+    h4 Upload tree
+    <div class="row">
+      <label for="uploader">Pick your newick tree!</label>
+      <input type="file" name="newick" id="uploader">
+    </div>
+
+    hr.row
+
+    h4 Background color
+    <div class="row" id="color-select">
+      <p> Change color! </p>
+
+      <label for="black">Black</label>
+      <input id="black" name="color" type="radio">
+
+      <label for="white">White</label>
+      <input id="white" name="color" type="radio" checked>
+
+      <label for="blue">Blue</label>
+      <input id="blue" name="color" type="radio">
+
+      <label for="red">Red</label>
+      <input id="red" name="color" type="radio">
+    </div>
+
+    hr.row
+
+    h4 Tree options
+    <div class="row" id="branch-length-select">
+      h5 Branch style
+
+      select name="branch-style"
+        option id="variable-length" value="Normal-o-gram" Normal-o-gram
+        option id="constant-length" value="Clad-o-gram" Clad-o-gram
+    </div>
+
+    <div class="row" id="angle-select">
+      h5 Which way?
+
+      <form id="angle-select-form">
+        <label for="side-to-side">Side to side</label>
+        <input type="radio" name="angle" id="side-to-side">
+
+        <label for="up-and-down">Up and down</label>
+        <input type="radio" name="angle" id="up-and-down" checked>
+      </form>
+    </div>
+
+    hr.row
+
+    h4 Label options
+
+    <div class="row" id="font-size-select">
+      <p>Change the font size!</p>
+      <label for="font-size"></label>
+      <input type="range" min="8" max="24" value="16" class="slider" id="font-size-slider">
+    </div>
+
+    <div class="row" id="show-labels-select">
+      <p>Do you like labels!?</p>
+      <label for="show-labels">Yes/No</label>
+      <input type="checkbox" name="show-labels" id="show-labels" checked>
+    </div>
+
+    hr.row
+
+    h4 Branch options
+
+
+    <div class="row" id="branch-type-select">
+      h5 Branch shape
+
+      <label for="rectangle-type">Rectangle types</label>
+      <input id="rectangle-type" name="branch-type" type="radio">
+
+      <label for="straight-type">Straight types</label>
+      <input id="straight-type" name="branch-type" type="radio">
+    </div>
+
+
+    <div class="row" id="branch-width-select">
+      <p>Branch width</p>
+
+      <label for="branch-width"></label>
+      <input type="range" min="1" max="10" value="2" class="slider" id="branch-width-slider">
+    </div>
