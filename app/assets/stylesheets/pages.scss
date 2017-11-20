@@ -46,3 +46,11 @@
 div {
   border: 1px dotted #666;
 }
+
+// TODO this would be better as columns instead of 50px everytime
+label {
+  display: inline-block;
+  width: 100px;
+  text-align: left;
+  border: 1px dotted red;
+}

@@ -64,17 +64,17 @@ function lalala(tree_input) {
 
     // Defaults for up and down
     var the_x = "x";
-    var the_y = "radius"; // document.getElementById("variable-length").checked ? "radius" : "y";
+    var the_y = "radius"; // document.getElementById("variable-length").selected ? "radius" : "y";
     var setRadius = set_radius_up_and_down;
 
     // Check default radio buttons
     var variable_length_button = document.getElementById("variable-length");
     var constant_length_button = document.getElementById("constant-length");
-    variable_length_button.checked = true;
+    variable_length_button.selected = true;
 
     var rectangle_type_button = document.getElementById("rectangle-type");
     var straight_type_button  = document.getElementById("straight-type");
-    rectangle_type_button.checked = true;
+    rectangle_type_button.selected = true;
 
     var show_labels_button = document.getElementById("show-labels");
     d3.select("input#show-labels").on("change", function() {
@@ -265,7 +265,7 @@ function lalala(tree_input) {
         start_point = d.source[the_x] + " " + d.source[the_y]
         end_point   = d.target[the_x] + " " + d.target[the_y]
 
-        if (document.getElementById("up-and-down").checked) {
+        if (document.getElementById("up-and-down").selected) {
             mid_point = d.target[the_x] + " " + d.source[the_y];
         } else {
             mid_point = d.source[the_x] + " " + d.target[the_y];
@@ -277,11 +277,11 @@ function lalala(tree_input) {
 
 
     function set_x_and_y() {
-        is_variable_length_checked = document.getElementById("variable-length").selected;
-        new_y_val = is_variable_length_checked ? "radius" : "y";
+        is_variable_length_selected = document.getElementById("variable-length").selected;
+        new_y_val = is_variable_length_selected ? "radius" : "y";
 
 
-        if (document.getElementById("side-to-side").checked) {
+        if (document.getElementById("side-to-side").selected) {
             // Do side to side
             the_x =  new_y_val;
             the_y = "x";
@@ -308,9 +308,9 @@ function lalala(tree_input) {
         labels
             .transition(tr).attr("dx", function(d) { return d[the_x] + label_offset_horizontal(); })
             .transition(tr).attr("dy", function(d) { return d[the_y] + label_offset_vertical(); })
-            .attr("text-anchor", function(d) { return document.getElementById("side-to-side").checked ? "start" : "middle"; });
+            .attr("text-anchor", function(d) { return document.getElementById("side-to-side").selected ? "start" : "middle"; });
 
-        links.transition(tr).attr("d", rectangle_type_button.checked ? rectangle_link : straight_link);
+        links.transition(tr).attr("d", rectangle_type_button.selected ? rectangle_link : straight_link);
 
 
     }
@@ -319,13 +319,13 @@ function lalala(tree_input) {
         current_leaf_label_size = parseInt(font_size_slider.value)
 
         // // divide by three centers it on the branch
-        return document.getElementById("side-to-side").checked ? Math.floor(current_leaf_label_size / 3) : current_leaf_label_size;
+        return document.getElementById("side-to-side").selected ? Math.floor(current_leaf_label_size / 3) : current_leaf_label_size;
     }
 
     function label_offset_horizontal() {
         current_leaf_label_size = parseInt(font_size_slider.value)
 
-        return document.getElementById("side-to-side").checked ? Math.floor(current_leaf_label_size / 2) : 0;
+        return document.getElementById("side-to-side").selected ? Math.floor(current_leaf_label_size / 2) : 0;
 
         return 0;
     }
@@ -340,10 +340,10 @@ function lalala(tree_input) {
             .on("change", function() {
                 set_x_and_y();
 
-                if (rectangle_type_button.checked) {
+                if (rectangle_type_button.selected) {
                     current_link_function = rectangle_link;
                     links.transition(tr).attr("d", rectangle_link);
-                } else if (straight_type_button.checked) {
+                } else if (straight_type_button.selected) {
                     current_link_function = straight_link;
                     links.transition(tr).attr("d", straight_link);
                 } else {
@@ -361,10 +361,10 @@ function lalala(tree_input) {
             on("change", function() {
                 set_x_and_y();
 
-                if (rectangle_type_button.checked) {
+                if (rectangle_type_button.selected) {
                     current_link_function = rectangle_link;
                     links.transition(tr).attr("d", rectangle_link);
-                } else if (straight_type_button.checked) {
+                } else if (straight_type_button.selected) {
                     current_link_function = straight_link;
                     links.transition(tr).attr("d", straight_link);
                 } else {

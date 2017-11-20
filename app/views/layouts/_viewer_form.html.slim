@@ -11,27 +11,7 @@
 
     h4 Upload tree
     <div class="row">
-      <label for="uploader">Pick your newick tree!</label>
       <input type="file" name="newick" id="uploader">
-    </div>
-
-    hr.row
-
-    h4 Background color
-    <div class="row" id="color-select">
-      <p> Change color! </p>
-
-      <label for="black">Black</label>
-      <input id="black" name="color" type="radio">
-
-      <label for="white">White</label>
-      <input id="white" name="color" type="radio" checked>
-
-      <label for="blue">Blue</label>
-      <input id="blue" name="color" type="radio">
-
-      <label for="red">Red</label>
-      <input id="red" name="color" type="radio">
     </div>
 
     hr.row
@@ -48,13 +28,28 @@
     <div class="row" id="angle-select">
       h5 Which way?
 
-      <form id="angle-select-form">
-        <label for="side-to-side">Side to side</label>
-        <input type="radio" name="angle" id="side-to-side">
+      form id="angle-select-form"
+        select name="which-way"
+          option id="side-to-side" name="which-way" value="side-to-side" Side to side
+          option id="up-and-down" selected="" name="which-way" value="up-and-down" Up and down
+    </div>
 
-        <label for="up-and-down">Up and down</label>
-        <input type="radio" name="angle" id="up-and-down" checked>
-      </form>
+    hr.row
+
+    h4 Branch options
+
+    <div class="row" id="branch-type-select">
+      h5 Branch shape
+
+      select name="branch-shape"
+        option id="rectangle-type" name="branch-shape" selected="" value="rectangle-type" Rectangles
+        option id="straight-type" name="branch-shape" value="straight-type" Straight lines
+    </div>
+
+
+    <div class="row" id="branch-width-select">
+      <label for="branch-width">Width: </label>
+      <input type="range" min="1" max="10" value="2" class="slider" id="branch-width-slider">
     </div>
 
     hr.row
@@ -62,36 +57,11 @@
     h4 Label options
 
     <div class="row" id="font-size-select">
-      <p>Change the font size!</p>
-      <label for="font-size"></label>
+      <label for="font-size">Size: </label>
       <input type="range" min="8" max="24" value="16" class="slider" id="font-size-slider">
     </div>
 
     <div class="row" id="show-labels-select">
-      <p>Do you like labels!?</p>
-      <label for="show-labels">Yes/No</label>
+      <label for="show-labels">Show labels?</label>
       <input type="checkbox" name="show-labels" id="show-labels" checked>
-    </div>
-
-    hr.row
-
-    h4 Branch options
-
-
-    <div class="row" id="branch-type-select">
-      h5 Branch shape
-
-      <label for="rectangle-type">Rectangle types</label>
-      <input id="rectangle-type" name="branch-type" type="radio">
-
-      <label for="straight-type">Straight types</label>
-      <input id="straight-type" name="branch-type" type="radio">
-    </div>
-
-
-    <div class="row" id="branch-width-select">
-      <p>Branch width</p>
-
-      <label for="branch-width"></label>
-      <input type="range" min="1" max="10" value="2" class="slider" id="branch-width-slider">
     </div>
