@@ -421,7 +421,20 @@ function lalala(tree_input) {
     */
 
 
+    function change_height() {
+        var height_option = document.getElementById("height-option");
 
+        // Update label with slider value
+        console.log(height_option.value);
+        d3.select("label[for=height-option]").html("Background height: " + height_option.value);
+    }
+
+    function change_width() {
+    }
+
+    function draw_tree() {
+        // HERE
+    }
 
 
 
@@ -430,6 +443,12 @@ function lalala(tree_input) {
 
 
     // Listeners
+
+    // background size
+    d3.select("#height-option")
+        .on("change", function() { change_height(); });
+    d3.select("#width-option")
+        .on("change", function() { change_width(); });
 
     // background color
     d3.select("#color-select #black")
@@ -475,14 +494,5 @@ function lalala(tree_input) {
 
     // Up and down or side to side?
     d3.select("form#angle-select-form").on("change", update_angle);
-
-
-
-
-
-
-
-
-
 
 }

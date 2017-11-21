@@ -15,6 +15,15 @@
     </div>
 
     hr.row
+    h4 Size
+    .row#size-options
+      form id="background-size-form"
+        label name="background-size" for="height-option" Background height
+        input name="background-size" id="height-option" type="range" min="100" max="2000" step="100" value="500"
+        label name="background-size" for="width-option" Background width
+        input name="background-size" id="width-option" type="range" min="100" max="2000" step="100" value="500"
+
+    hr.row
 
     h4 Tree options
     <div class="row" id="branch-length-select">
