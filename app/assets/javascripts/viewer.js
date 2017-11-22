@@ -415,8 +415,6 @@ function lalala(tree_input) {
 
 
         // SVG size
-
-
         var svg = d3.select("#tree-div")
             .append("svg")
             .attr("width", x_size)
@@ -433,11 +431,29 @@ function lalala(tree_input) {
             .size([g_x_size, g_y_size]) // adjust the 360 if you want to have a partial circle
             .separation(function(a, b) { return 1; });
 
-        // Here is the actual tree making
-        var root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
-        // // if it is a leave node, then it will have a node.value == 1
-            .sum(function(d) { return d.branchset ? 0 : 1; })
-            .sort(function(a, b) { return (a.value - b.value) || d3.ascending(a.data.length, b.data.length); });
+        // sort ids ascending
+        function compare_ids(a, b) {
+            return a.id.localeCompare(b.id);
+        }
+
+        var root;
+        if (document.getElementById("ascending").selected) {
+            root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+                .sum(function(d) { return d.branchset ? 0 : 1; })
+                .sort(function(a, b) { return (b.value - a.value); }); // TODO should this be height or value?
+        } else if (document.getElementById("descending").selected) {
+            root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+                .sum(function(d) { return d.branchset ? 0 : 1; })
+                .sort(function(a, b) { return (a.value - b.value); });
+        } else {
+            root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+                .sum(function(d) { return d.branchset ? 0 : 1; })
+        }
+
+        // var root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+        // // // if it is a leave node, then it will have a node.value == 1
+        //     .sum(function(d) { return d.branchset ? 0 : 1; })
+        //     // .sort(function(a, b) { return (a.value - b.value) || d3.ascending(a.data.length, b.data.length); });
 
         // console.log(parseNewick(life).branchset);
 
@@ -506,6 +522,69 @@ function lalala(tree_input) {
             .attr("font-size", leaf_label_size + "px")
             .text(function(d) { return d.data.name; })
 
+        // add a scale bar
+        var lengths = root.links().map(function(d) { return Math.abs(d.source.data.length - d.target.data.length); });
+        var median_length = lengths.sort()[Math.floor(lengths.length / 2)];
+
+        function scale_bar(d, length_label) {
+            var path_length;
+            var scale_bar_midpoint;
+            var x_offset, y_offset;
+            var text_anchor;
+
+            function d_attr(d) {
+                console.log("in d_attr()");
+                console.log("g_x_size: " + g_x_size);
+                console.log("g_y_size: " + g_y_size);
+                if (document.getElementById("up-and-down").selected) {
+                    path_length = Math.abs(d.target[the_y] - d.source[the_y]);
+
+                    scale_bar_midpoint = [g_x_size, (g_y_size / 2)];
+
+                    x_offset = -(10 + 8);
+                    y_offset = 0;
+                    text_anchor = "right";
+
+                    return "M " + g_x_size + " " + ((g_y_size / 2) - (path_length / 2)) +
+                        " L "   + g_x_size + " " + ((g_y_size / 2) + (path_length / 2));
+                } else {
+                    // TODO why do the x and y need to flip here?
+                    path_length = Math.abs(d.target[the_x] - d.source[the_x]);
+
+                    scale_bar_midpoint = [(g_y_size / 2), g_x_size];
+
+                    x_offset = 0;
+                    y_offset = -(10 + 8);
+                    text_anchor = "middle";
+
+                    return "M " + ((g_y_size / 2) - (path_length / 2)) + " " + g_x_size +
+                        " L "   + ((g_y_size / 2) + (path_length / 2)) + " " + g_x_size;
+                }
+            }
+
+            chart.append("path")
+                .attr("d", d_attr(d))
+                .style("stroke", "green")
+                .attr("stroke-width", "10px")
+                .attr("id", "ryan");
+
+            chart.append("text")
+                .attr("dx", scale_bar_midpoint[0] + x_offset)
+                .attr("dy", scale_bar_midpoint[1] + y_offset)
+                .attr("font-size", "16px")
+                .attr("text-anchor", text_anchor)
+                .text(length_label);
+        }
+
+        for (i = 0; i < lengths.length; ++i) {
+            var d = root.links()[i];
+
+            if (Math.abs(d.source.data.length - d.target.data.length) == median_length) {
+                scale_bar(d, median_length / 2); // the / 2 is cos it is the actual length in the tree
+                break;
+            }
+        }
+
         branch_length_listener(links, labels, circles);
 
         // update the angle to make sure it matches current listeners
@@ -513,11 +592,6 @@ function lalala(tree_input) {
 
 
     }
-
-
-
-
-
 
 
     // Listeners
@@ -530,21 +604,30 @@ function lalala(tree_input) {
     d3.select("#padding-option")
         .on("change", function() { change_padding(); });
 
-    // background color
-    d3.select("#color-select #black")
-        .on("change", function() { change_color("black") });
-    d3.select("#color-select #white")
-        .on("change", function() { change_color("white") });
-    d3.select("#color-select #blue")
-        .on("change", function() { change_color("blue") });
-    d3.select("#color-select #red")
-        .on("change", function() { change_color("red") });
+    // sorting
+    d3.select("#sort-options").on("change", draw_tree);
 
-    // circle adder
-    d3.select("#add-circles #green")
-        .on("click", function() { add_circle("green") });
-    d3.select("#add-circles #purple")
-        .on("click", function() { add_circle("purple") });
+    // chart position
+    // d3.select("#x-position")
+    //     .on("change", function() { draw_tree(); });
+    // d3.select("#y-position")
+        // .on("change", function() { draw_tree(); });
+
+    // // background color
+    // d3.select("#color-select #black")
+    //     .on("change", function() { change_color("black") });
+    // d3.select("#color-select #white")
+    //     .on("change", function() { change_color("white") });
+    // d3.select("#color-select #blue")
+    //     .on("change", function() { change_color("blue") });
+    // d3.select("#color-select #red")
+    //     .on("change", function() { change_color("red") });
+
+    // // circle adder
+    // d3.select("#add-circles #green")
+    //     .on("click", function() { add_circle("green") });
+    // d3.select("#add-circles #purple")
+    //     .on("click", function() { add_circle("purple") });
 
 
     // font size
