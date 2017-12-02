@@ -7,90 +7,80 @@
 
 .row.tabs-content data-tabs-content="option-tabs"
   .row.tabs-panel.is-active
-    hr.row
-
-    h4 Upload tree
-    <div class="row">
-      <input type="file" name="newick" id="uploader">
-    </div>
 
     hr.row
-    h4 Size
-    .row#size-options
-      form id="background-size-form"
-        label name="background-size" for="height-option" Height
-        input name="background-size" id="height-option" type="range" min="0" max="5000" step="250" value="500"
+    h4 Upload tree!
 
-        label name="background-size" for="width-option" Width
-        input name="background-size" id="width-option" type="range" min="0" max="5000" step="250" value="500"
+    .row
+      label for="uploader" Upload your tree!
+      input id="uploader" type="file" name="newick"
 
-        label name="background-size" for="padding-option" Padding
-        input name="background-size" id="padding-option" type="range" min="0.1" max="0.5" step="0.05" value="0.15"
+    form id="tree-form"
+      hr.row
+      h4 Size!
 
-    / hr.row
-    / h4 Position
-    / .row#position-options
-    /   form id="chart-position-form"
-    /     label name="chart-position" for="x-position" X position
-    /     input name="chart-position" id="x-position" type="range" min="-1000" max="1000" step="100" value="0"
-    /     label name="chart-position" for="y-position" Y position
-    /     input name="chart-position" id="y-position" type="range" min="-1000" max="1000" step="100" value="0"
+      .row
+        label for="svg-height" Height!
+        input id="svg-height" class="slider" type="range" min="0" max="1000" step="250" value="500"
 
-    hr.row
+        label for="svg-width" Width!
+        input id="svg-width" class="slider" type="range" min="0" max="1000" step="250" value="500"
 
-    h4 Tree options
-    <div class="row" id="branch-length-select">
-      h5 Branch style
+        label for="height-padding" Height padding!
+        input id="height-padding" class="slider" type="range" min="0.1" max="0.5" step="0.05" value="0.15"
 
-      select name="branch-style"
-        option id="variable-length" value="Normal-o-gram" Normal-o-gram
-        option id="constant-length" value="Clad-o-gram" Clad-o-gram
-    </div>
+        label for="width-padding" Width padding!
+        input id="width-padding" class="slider" type="range" min="0.1" max="0.5" step="0.05" value="0.3"
 
-    <div class="row" id="angle-select">
-      h5 Which way?
+      hr.row
+      h4 Tree options!
 
-      form id="angle-select-form"
-        select name="which-way"
-          option id="side-to-side" selected="" name="which-way" value="side-to-side" Side to side
-          option id="up-and-down" name="which-way" value="up-and-down" Up and down
-    </div>
+      .row
+        label for="tree-shape" The shape of your dreams!?
+        select id="tree-shape"
+          option id="rectangular-tree" value="rectangular-tree" selected="" Rectangle-ish!
+          option id="circular-tree" value="circular-tree" Circle-ish!
+          option id="radial-tree" value="radial-tree" Radial-ish!
 
-    form id="sort-options"
-      h5 Sort options
-      select
-        option id="not-sorted" value="not-sorted" Not sorted
-        option id="ascending" value="ascending" Ascending
-        option id="descending" value="descending" selected="" Descending
+      .row
+        label for="tree-branch-style" What's your style?!
+        select id="tree-branch-style"
+          option id="normalogram" value="Normal-o-gram" selected="" Normal-o-gram!
+          option id="cladogram" value="Clad-o-gram" Clad-o-gram!
 
-    hr.row
+      /.row
+      /  label for="tree-direction" Which way?!
+      /  select id="tree-direction"
+      /    option id="side-to-side" value="side-to-side" selected="" Side to side!
+      /    option id="up-and-down" value="up-and-down" Up and down!
 
-    h4 Branch options
+      .row
+        label for="tree-sort" Sort?!
+        select id="tree-sort"
+          option id="not-sorted" value="not-sorted" Not sorted!
+          option id="ascending" value="ascending" Ascending!
+          option id="descending" value="descending" selected="" Descending!
 
-    <div class="row" id="branch-type-select">
-      h5 Branch shape
+      hr.row
+      h4 Branch options!
 
-      select name="branch-shape"
-        option id="rectangle-type" name="branch-shape" selected="" value="rectangle-type" Rectangles
-        option id="straight-type" name="branch-shape" value="straight-type" Straight lines
-    </div>
+      .row
+        label for="branch-shape" Shape?!
+        select id="branch-shape"
+          option id="rectangle-type" value="rectangle-type" selected="" Rectangles!
+          option id="straight-type" value="straight-type" Straight lines!
 
+      .row
+        label for="branch-width" Width!
+        input id="branch-width" type="range" min="1" max="10" value="2" class="slider"
 
-    <div class="row" id="branch-width-select">
-      <label for="branch-width">Width: </label>
-      <input type="range" min="1" max="10" value="2" class="slider" id="branch-width-slider">
-    </div>
+      hr.row
+      h4 Label options!
 
-    hr.row
+      .row
+        label for="label-size" Size!
+        input id="label-size" type="range" min="8" max="24" value="16" class="slider"
 
-    h4 Label options
-
-    <div class="row" id="font-size-select">
-      <label for="font-size">Size: </label>
-      <input type="range" min="8" max="24" value="16" class="slider" id="font-size-slider">
-    </div>
-
-    <div class="row" id="show-labels-select">
-      <label for="show-labels">Show labels?</label>
-      <input type="checkbox" name="show-labels" id="show-labels" checked>
-    </div>
+      .row
+        label for="label-show" Show labels?!
+        input id="label-show" type="checkbox" name="label-show" checked=""
