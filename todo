@@ -1,1 +1,4 @@
-- consider rotations instead of swapping x and y coords
+## Bugs
+
+- The length of the leaves in the cladogram should match the length of the longest branch in the normalogram in recatangle mode.
+

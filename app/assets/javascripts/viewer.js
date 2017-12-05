@@ -48,10 +48,16 @@ function upload_button(el, callback) {
 
 
 var LAYOUT_STATE, LAYOUT_CIRCLE, LAYOUT_STRAIGHT;
+var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
 var the_x, the_y;
 var SIZE, INNER_SIZE;
 var OUTER_WIDTH, OUTER_HEIGHT, HEIGHT_PADDING, WIDTH_PADDING, INNER_WIDTH, INNER_HEIGHT;
 var root, svg, chart, data, circles, labels, linkExtension, link;
+
+var SHOW_LABELS;
+
+var LABEL_SIZE;
+var BRANCH_WIDTH;
 
 var align_tip_labels;
 
@@ -84,19 +90,46 @@ function lalala(tree_input)
   {
     clear_elem("svg-tree");
 
+    BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
+
+    LABEL_SIZE = parseInt(document.getElementById("label-size").value);
+
+    TREE_BRANCH_CLADOGRAM  = "cladogram";
+    TREE_BRANCH_NORMAL     = "normalogram";
+    TREE_BRANCH_STYLE      = document.getElementById("tree-branch-style").value;
+
+    // Show or hide align tip labels
+    SHOW_LABELS = document.getElementById("label-show").checked;
+    if (!SHOW_LABELS || TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
+      document.getElementById("align-tip-labels").setAttribute("disabled", "");
+      document.getElementById("align-tip-labels").removeAttribute("checked");
+      align_tip_labels = false;
+    } else {
+      document.getElementById("align-tip-labels").removeAttribute("disabled");
+      align_tip_labels = document.getElementById("align-tip-labels").checked;
+    }
+
+    // Show/hide labels size
+    if (SHOW_LABELS) {
+      document.getElementById("label-size").removeAttribute("disabled");
+    } else {
+      document.getElementById("label-size").setAttribute("disabled", "");
+    }
+
     the_x = "x";
-    the_y = "y";
+    the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
 
     LAYOUT_CIRCLE = "circular-tree";
     LAYOUT_STRAIGHT = "rectangular-tree";
     LAYOUT_STATE = document.getElementById("tree-shape").value;
     console.log("at the start of draw_tree() layout_state is " + LAYOUT_STATE);
 
-    align_tip_labels = 0;
-
-
-    // SIZE   = 300;
-    // INNER_SIZE = SIZE - 100;
+    // Set the align tip labels button to false if it is a cladogram
+    if (TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
+      elem = null;
+      elem = document.getElementById("align-tip-labels");
+      elem.checked = false;
+    }
 
 
     // Set the height to match the width
@@ -109,9 +142,6 @@ function lalala(tree_input)
       elem = null;
       elem = document.getElementById("height-padding");
       elem.disabled = true;
-
-      document.getElementById("outer-height-label").classList.add("disabled-label");
-      document.getElementById("height-padding-label").classList.add("disabled-label");
 
       OUTER_WIDTH  = parseInt(document.getElementById("outer-width").value);
       OUTER_HEIGHT = OUTER_WIDTH;
@@ -129,9 +159,6 @@ function lalala(tree_input)
       elem = null;
       elem = document.getElementById("height-padding");
       elem.disabled = false;
-
-      document.getElementById("outer-height-label").classList.remove("disabled-label");
-      document.getElementById("height-padding-label").classList.remove("disabled-label");
 
       OUTER_WIDTH  = parseInt(document.getElementById("outer-width").value);
       OUTER_HEIGHT = parseInt(document.getElementById("outer-height").value);
@@ -154,13 +181,6 @@ function lalala(tree_input)
     rectangle_cluster = d3.cluster()
       .size([INNER_WIDTH * 2, INNER_HEIGHT * 2])
       .separation(function(a, b) { return 1; });
-
-    if (the_y == "y") {
-      var button = document.getElementById("align-tip-labels");
-      button.disabled = true;
-
-      document.getElementById("align-tip-labels-label").classList.add("disabled-label");
-    }
 
     root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
       .sum(function(d) { return d.branchset ? 0 : 1; })
@@ -208,11 +228,11 @@ function lalala(tree_input)
     function pick_transform(d)
     {
       if (LAYOUT_STATE == LAYOUT_CIRCLE && is_leaf(d)) {
-        return circle_transform(d, the_x, "y");
+        return circle_transform(d, the_x, align_tip_labels ? "y" : the_y);
       } else if (LAYOUT_STATE == LAYOUT_CIRCLE) {
         return circle_transform(d, the_x, the_y);
       } else if (LAYOUT_STATE == LAYOUT_STRAIGHT && is_leaf(d)) {
-        return rectangle_transform(d, the_x, "y");
+        return rectangle_transform(d, the_x, align_tip_labels ? "y" : the_y);
       } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
         return rectangle_transform(d, the_x, the_y);
       } else {
@@ -232,22 +252,25 @@ function lalala(tree_input)
       })
       .style("fill", function(d) { return d.color; } )
 
-    labels = chart.append("g")
-      .selectAll("text")
-      .data(root.descendants())
-      .enter().append("text")
-      .attr("class", function(d) {
-        return is_leaf(d) ? "leaf" : "inner";
-      })
-      .attr("dy", text_y_offset)
-      .attr("dx", text_x_offset)
-      .attr("text-anchor", function(d) {
-        return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
-      })
-      .attr("transform", function(d) {
-        return pick_transform(d);
-      })
-      .text(function(d) { return d.data.name; })
+    if (SHOW_LABELS) {
+      labels = chart.append("g")
+        .selectAll("text")
+        .data(root.descendants())
+        .enter().append("text")
+        .attr("class", function(d) {
+          return is_leaf(d) ? "leaf" : "inner";
+        })
+        .style("font-size", LABEL_SIZE)
+        .attr("dy", text_y_offset)
+        .attr("dx", text_x_offset)
+        .attr("text-anchor", function(d) {
+          return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+        })
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .text(function(d) { return d.data.name; })
+    }
 
     if (align_tip_labels) {
       // Draw the link extensions
@@ -259,6 +282,8 @@ function lalala(tree_input)
           return !d.target.children;
         }))
         .enter().append("path")
+        .attr("stroke-width", BRANCH_WIDTH)
+        .attr("stroke-dasharray", "1, 5")
         .attr("class", "dotted-links")
         .each(function (d) {
           d.target.linkExtensionNode = this;
@@ -275,42 +300,12 @@ function lalala(tree_input)
       .selectAll("path")
       .data(root.links())
       .enter().append("path")
+      .attr("stroke-width", BRANCH_WIDTH)
       .each(function(d) { d.target.linkNode = this; })
       .attr("d", function(d) {
         return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
       })
       .attr("stroke", function(d) { return d.target.color; });
-
-    // d3.select("#circle-or-not").on("click", function() { update_circles(true); });
-    // d3.select("#the-y").on("click", function() {
-    //   if (the_y == "y") {
-    //     // Disable the align_tip_labels button
-    //     var button = document.getElementById("align-tip-labels");
-    //     button.disabled = !button.disabled;
-    //     document.getElementById("align-tip-labels-label").classList.remove("disabled-label");
-    //
-    //
-    //     the_y = "radius"; // normalogram
-    //   } else {
-    //     the_y = "y"; // cladogram
-    //     align_tip_labels ^= 1;
-    //     // Disable the align_tip_labels button
-    //     var button = document.getElementById("align-tip-labels");
-    //     button.disabled = !button.disabled;
-    //     document.getElementById("align-tip-labels-label").classList.add("disabled-label");
-    //   }
-    //
-    //   update_circles(false);
-    // });
-    //
-    // d3.select("#align-tip-labels").on("click", function () {
-    //   align_tip_labels ^= 1;
-    //
-    //   update_circles(false);
-    // });
-
-    // TODO merge this function in with draw_tree()
-    // update_circles(true);
   }
 
 

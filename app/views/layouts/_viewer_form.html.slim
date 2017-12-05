@@ -21,10 +21,10 @@
 
       .row
         label id="outer-width-label" for="outer-width" Width!
-        input id="outer-width" class="slider" type="range" min="0" max="1000" step="250" value="500"
+        input id="outer-width" class="slider" type="range" min="0" max="3000" step="250" value="500"
 
         label id="outer-height-label" for="outer-height" Height!
-        input id="outer-height" class="slider" type="range" min="0" max="1000" step="250" value="500"
+        input id="outer-height" class="slider" type="range" min="0" max="3000" step="250" value="500"
 
         label id="width-padding-label" for="width-padding" Width padding!
         input id="width-padding" class="slider" type="range" min="0.1" max="0.5" step="0.05" value="0.3"
@@ -45,8 +45,8 @@
       .row
         label for="tree-branch-style" What's your style?!
         select id="tree-branch-style"
-          option id="normalogram" value="Normal-o-gram" selected="" Normal-o-gram!
-          option id="cladogram" value="Clad-o-gram" Clad-o-gram!
+          option id="normalogram" value="normalogram" selected="" Normal-o-gram!
+          option id="cladogram" value="cladogram" Clad-o-gram!
 
       /.row
       /  label for="tree-direction" Which way?!
@@ -78,13 +78,14 @@
       h4 Label options!
 
       .row
-        label id="align-tip-labels-label" for="align-tip-labels" Align tip labels?
-        input id="align-tip-labels" type="button"
+        label for="label-show" Show labels?!
+        input id="label-show" type="checkbox" name="label-show" checked=""
+
+      .row
+        label for="align-tip-labels" Align tip labels?!
+        input id="align-tip-labels" type="checkbox"
 
       .row
         label for="label-size" Size!
         input id="label-size" type="range" min="8" max="24" value="16" class="slider"
 
-      .row
-        label for="label-show" Show labels?!
-        input id="label-show" type="checkbox" name="label-show" checked=""
