@@ -1,6 +1,10 @@
 // Copyright 2011 Jason Davies https://github.com/jasondavies/newick.js
 function parseNewick(a){for(var e=[],r={},s=a.split(/\s*(;|\(|\)|,|:)\s*/),t=0;t<s.length;t++){var n=s[t];switch(n){case"(":var c={};r.branchset=[c],e.push(r),r=c;break;case",":var c={};e[e.length-1].branchset.push(c),r=c;break;case")":r=e.pop();break;case":":break;default:var h=s[t-1];")"==h||"("==h||","==h?r.name=n:":"==h&&(r.length=parseFloat(n))}}return r}
 
+//
+// Stuff from the old viewer goes here
+//
+
 function clear_elem(id) {
   chart_elem = document.getElementById(id);
 
@@ -10,9 +14,11 @@ function clear_elem(id) {
   }
 }
 
-// load dataset and create table
+
+// load dataset 
 function load_dataset(file) {
   clear_elem("svg-tree");
+  console.log("about to call lalala()");
   lalala(file);
 }
 
@@ -35,27 +41,382 @@ function upload_button(el, callback) {
   }
 }
 
+
+//
+// Stuff from the old viewer stops here
+//
+
+
+var LAYOUT_STATE, LAYOUT_CIRCLE, LAYOUT_STRAIGHT;
+var the_x, the_y;
+var SIZE, INNER_SIZE;
+var OUTER_WIDTH, OUTER_HEIGHT, HEIGHT_PADDING, WIDTH_PADDING, INNER_WIDTH, INNER_HEIGHT;
+var root, svg, chart, data, circles, labels, linkExtension, link;
+
+var align_tip_labels;
+
+// To hold temporary DOM elements
+var elem;
+
 // The mega function
-function lalala(tree_input) {
-  draw_tree2();
+function lalala(tree_input)
+{
 
+  console.log("first line of lalala()");
+  // One listener to rule them all
+  d3.select("#tree-form").on("change", function() { console.log("apple pie!"); draw_tree(); });
 
+  draw_tree();
 
-  // Everything from here down is for draw_tree2
-
-  function get_int(id) {
-    return parseInt(document.getElementById(id).value);
+  var circle_cluster, rectangle_cluster;
+  function is_leaf(d)
+  {
+    return d.value == 1;
   }
 
-  function get_value(id) {
-    return document.getElementById(id).value;
+  function set_value_of(id, val)
+  {
+    var elem = document.getElementById(id);
+    elem.value = val;
   }
 
-  function set_distance_from_root(d, y0, k) {
-    d["distance_from_root"] = (y0 += d.data.length) * k;
-    if (d.children) d.children.forEach(function (d) {
-      set_distance_from_root(d, y0, k);
-    });
+  function draw_tree()
+  {
+    clear_elem("svg-tree");
+
+    the_x = "x";
+    the_y = "y";
+
+    LAYOUT_CIRCLE = "circular-tree";
+    LAYOUT_STRAIGHT = "rectangular-tree";
+    LAYOUT_STATE = document.getElementById("tree-shape").value;
+    console.log("at the start of draw_tree() layout_state is " + LAYOUT_STATE);
+
+    align_tip_labels = 0;
+
+
+    // SIZE   = 300;
+    // INNER_SIZE = SIZE - 100;
+
+
+    // Set the height to match the width
+    if (LAYOUT_STATE == LAYOUT_CIRCLE) {
+      // Disable the height slider
+      elem = null;
+      elem = document.getElementById("outer-height");
+      elem.disabled = true;
+
+      elem = null;
+      elem = document.getElementById("height-padding");
+      elem.disabled = true;
+
+      document.getElementById("outer-height-label").classList.add("disabled-label");
+      document.getElementById("height-padding-label").classList.add("disabled-label");
+
+      OUTER_WIDTH  = parseInt(document.getElementById("outer-width").value);
+      OUTER_HEIGHT = OUTER_WIDTH;
+
+      WIDTH_PADDING = parseFloat(document.getElementById("width-padding").value);
+      HEIGHT_PADDING = WIDTH_PADDING;
+
+      set_value_of("outer-height", OUTER_WIDTH);
+      set_value_of("height-padding", WIDTH_PADDING);
+    } else {
+      elem = null;
+      elem = document.getElementById("outer-height");
+      elem.disabled = false;
+
+      elem = null;
+      elem = document.getElementById("height-padding");
+      elem.disabled = false;
+
+      document.getElementById("outer-height-label").classList.remove("disabled-label");
+      document.getElementById("height-padding-label").classList.remove("disabled-label");
+
+      OUTER_WIDTH  = parseInt(document.getElementById("outer-width").value);
+      OUTER_HEIGHT = parseInt(document.getElementById("outer-height").value);
+
+      WIDTH_PADDING  = parseFloat(document.getElementById("width-padding").value);
+      HEIGHT_PADDING = parseFloat(document.getElementById("height-padding").value);
+    }
+
+    INNER_WIDTH  = Math.round(OUTER_WIDTH * (1 - WIDTH_PADDING));
+    INNER_HEIGHT = Math.round(OUTER_HEIGHT * (1 - HEIGHT_PADDING));
+
+
+    console.log("first line of draw tree");
+
+    // When setting size for circular layout, use width by convention, but they will be the same.
+    circle_cluster = d3.cluster()
+      .size([360, INNER_WIDTH])
+      .separation(function(a, b) { return 1; });
+
+    rectangle_cluster = d3.cluster()
+      .size([INNER_WIDTH * 2, INNER_HEIGHT * 2])
+      .separation(function(a, b) { return 1; });
+
+    if (the_y == "y") {
+      var button = document.getElementById("align-tip-labels");
+      button.disabled = true;
+
+      document.getElementById("align-tip-labels-label").classList.add("disabled-label");
+    }
+
+    root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+      .sum(function(d) { return d.branchset ? 0 : 1; })
+      .sort(function(a, b) { return (a.value - b.value) || d3.ascending(a.data.length, b.data.length); });
+
+    if (LAYOUT_STATE == LAYOUT_CIRCLE) {
+      circle_cluster(root);
+      setRadius(root, root.data.length = 0, INNER_WIDTH / maxLength(root));
+
+    } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+      rectangle_cluster(root);
+      // TODO should this be width or height
+      setRadius(root, root.data.length = 0, (INNER_WIDTH*2) / maxLength(root));
+    }
+
+    svg = d3.select("#tree-div")
+      .append("svg")
+      .attr("width", OUTER_WIDTH * 2)
+      .attr("height", OUTER_HEIGHT * 2)
+      .attr("id", "svg-tree")
+      .style("background-color", "white"); // TODO make bg color an option
+
+    var chart_width, chart_height;
+    var chart_transform_width, chart_transform_height;
+    if (LAYOUT_STATE == LAYOUT_CIRCLE) {
+      chart_width  = OUTER_WIDTH;
+      chart_height = OUTER_HEIGHT;
+
+      chart_transform_width  = OUTER_WIDTH;
+      chart_transform_height = OUTER_HEIGHT;
+    } else {
+      chart_width  = INNER_WIDTH * 2;
+      chart_height = INNER_HEIGHT * 2;
+
+      chart_transform_width  = OUTER_WIDTH * WIDTH_PADDING;
+      chart_transform_height = OUTER_HEIGHT * HEIGHT_PADDING;
+    }
+    chart = svg.append("g")
+      .attr("width", chart_width)
+      .attr("height", chart_height)
+      .attr("transform",
+        "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
+      .attr("id", "apple-chart");
+
+    function pick_transform(d)
+    {
+      if (LAYOUT_STATE == LAYOUT_CIRCLE && is_leaf(d)) {
+        return circle_transform(d, the_x, "y");
+      } else if (LAYOUT_STATE == LAYOUT_CIRCLE) {
+        return circle_transform(d, the_x, the_y);
+      } else if (LAYOUT_STATE == LAYOUT_STRAIGHT && is_leaf(d)) {
+        return rectangle_transform(d, the_x, "y");
+      } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+        return rectangle_transform(d, the_x, the_y);
+      } else {
+        // TODO handle radial layout
+      }
+    }
+    circles = chart.append("g")
+      .selectAll("circle")
+      .data(root.descendants())
+      .enter().append("circle")
+      .attr("class", function(d) {
+        return is_leaf(d) ? "leaf" : "inner";
+      })
+      .attr("r", 5)
+      .attr("transform", function(d) {
+        return pick_transform(d);
+      })
+      .style("fill", function(d) { return d.color; } )
+
+    labels = chart.append("g")
+      .selectAll("text")
+      .data(root.descendants())
+      .enter().append("text")
+      .attr("class", function(d) {
+        return is_leaf(d) ? "leaf" : "inner";
+      })
+      .attr("dy", text_y_offset)
+      .attr("dx", text_x_offset)
+      .attr("text-anchor", function(d) {
+        return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+      })
+      .attr("transform", function(d) {
+        return pick_transform(d);
+      })
+      .text(function(d) { return d.data.name; })
+
+    if (align_tip_labels) {
+      // Draw the link extensions
+      linkExtension = chart.append("g")
+        .attr("class", "link-extensions")
+        .attr("id", "qwfp")
+        .selectAll("path")
+        .data(root.links().filter(function (d) {
+          return !d.target.children;
+        }))
+        .enter().append("path")
+        .attr("class", "dotted-links")
+        .each(function (d) {
+          d.target.linkExtensionNode = this;
+        })
+        .attr("d", function (d) {
+          return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircleExtension(d) : link_rectangle_extension(d, the_x, "y");
+        });
+    } else {
+      d3.selectAll(".link-extensions").remove();
+    }
+
+    link = chart.append("g")
+      .attr("class", "links")
+      .selectAll("path")
+      .data(root.links())
+      .enter().append("path")
+      .each(function(d) { d.target.linkNode = this; })
+      .attr("d", function(d) {
+        return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
+      })
+      .attr("stroke", function(d) { return d.target.color; });
+
+    // d3.select("#circle-or-not").on("click", function() { update_circles(true); });
+    // d3.select("#the-y").on("click", function() {
+    //   if (the_y == "y") {
+    //     // Disable the align_tip_labels button
+    //     var button = document.getElementById("align-tip-labels");
+    //     button.disabled = !button.disabled;
+    //     document.getElementById("align-tip-labels-label").classList.remove("disabled-label");
+    //
+    //
+    //     the_y = "radius"; // normalogram
+    //   } else {
+    //     the_y = "y"; // cladogram
+    //     align_tip_labels ^= 1;
+    //     // Disable the align_tip_labels button
+    //     var button = document.getElementById("align-tip-labels");
+    //     button.disabled = !button.disabled;
+    //     document.getElementById("align-tip-labels-label").classList.add("disabled-label");
+    //   }
+    //
+    //   update_circles(false);
+    // });
+    //
+    // d3.select("#align-tip-labels").on("click", function () {
+    //   align_tip_labels ^= 1;
+    //
+    //   update_circles(false);
+    // });
+
+    // TODO merge this function in with draw_tree()
+    // update_circles(true);
+  }
+
+
+
+  function text_x_offset(d)
+  {
+    if (LAYOUT_STATE == LAYOUT_CIRCLE) { // circular
+      return d[the_x] < 90 || d[the_x] > 270 ? "0.6em" : "-0.6em";
+    } else {
+      return "0em";
+    }
+  }
+
+  function text_y_offset(d)
+  {
+    if (LAYOUT_STATE == LAYOUT_CIRCLE) { // circular
+      return "0.2em"  // center the label on the branch;
+    } else {
+      return "1.2em";
+    }
+  }
+
+  function circular_text_anchor(d)
+  {
+    return d[the_x] < 90 || d[the_x] > 270 ? "start" : "end";
+  }
+
+  function straight_text_anchor(d)
+  {
+    return "middle";
+  }
+
+// These functions update the layout
+  function circle_transform(d, x, y)
+  {
+    return "rotate(" + d[x] +
+      ") translate(" + d[y] + ", 0)" +
+      (d[x] < 90 || d[x] > 270 ? "" : "rotate(180)");
+  }
+
+  function rectangle_transform(d, x, y)
+  {
+    return "rotate(0) translate(" + d[x] + " " + d[y] + ")";
+  }
+
+  function straight_link(d) {
+    return "M " + (d.source[the_x] - INNER_WIDTH) + " " + d.source[the_y] + " L " + (d.target[the_x] - INNER_HEIGHT) + " " + d.target[the_y];
+  }
+
+  function rectangle_link(d, x, y) {
+    var start_point, mid_point, end_point;
+
+    start_point = d.source[x] + " " + d.source[y];
+    end_point   = d.target[x] + " " + d.target[y];
+
+    // Only side to side is an option
+    mid_point = d.target[x] + " " + d.source[y];
+
+    // if (document.getElementById("up-and-down").selected) {
+    //   mid_point = (d.target[the_x] - (INNER_WIDTH - INNER_WIDTH)) + " " + d.source[the_y];
+    // } else {
+    //   mid_point = (d.source[the_x] - (INNER_WIDTH - INNER_WIDTH)) + " " + d.target[the_y];
+    // }
+
+    return "M " + start_point + " L " + mid_point + " L " + end_point;
+  }
+
+  function link_rectangle_extension(d, x, y)
+  {
+    var start_point = d.target[x] + " " + d.target["radius"];
+    var end_point   = d.target[x] + " " + d.target["y"];
+
+    return "M " + start_point +  " L" + end_point;
+  }
+
+
+
+
+
+
+  function linkCircle(d) {
+    return linkStep(d.source[the_x], d.source[the_y], d.target[the_x], d.target[the_y]);
+  }
+
+// TODO need an option for labels lined up on the radius or labels at
+// the end of the links.
+  function linkCircleExtension(d) {
+    // the_y must be radius
+    return linkStep(d.target[the_x], d.target[the_y], d.target[the_x], INNER_WIDTH);
+  }
+
+// Like d3.svg.diagonal.radial, but with square corners.
+  function linkStep(startAngle, startRadius, endAngle, endRadius) {
+    var c0 = Math.cos(startAngle = (startAngle ) / 180 * Math.PI),
+      s0 = Math.sin(startAngle),
+      c1 = Math.cos(endAngle = (endAngle ) / 180 * Math.PI),
+      s1 = Math.sin(endAngle);
+    return "M" + startRadius * c0 + "," + startRadius * s0
+      + (endAngle === startAngle ? "" : "A" + startRadius + "," + startRadius + " 0 0 " + (endAngle > startAngle ? 1 : 0) + " " + startRadius * c1 + "," + startRadius * s1)
+      + "L" + endRadius * c1 + "," + endRadius * s1;
+  }
+
+// Set the radius of each node by recursively summing and scaling the distance from the root.
+  function setRadius(d, y0, k) {
+    d.radius = (y0 += d.data.length) * k;
+    if (d.children) d.children.forEach(function(d) { setRadius(d, y0, k); });
   }
 
 // Compute the maximum cumulative length of any node in the tree.
@@ -63,351 +424,5 @@ function lalala(tree_input) {
     return d.data.length + (d.children ? d3.max(d.children, maxLength) : 0);
   }
 
-  function source_is_root(d) {
-    return d.source.parent ? false : true;
-  }
-
-  function circle_link(d) {
-    if (source_is_root(d)) {
-      return straight_link(d);
-    } else {
-      // TODO replace these centers and the r_adjust
-      var center_x = 200;
-      var center_y = 200;
-      var r_adjust = 1.75;
-
-      var source_radius = Math.sqrt(Math.pow(center_x - d.source[the_x], 2) + Math.pow(center_y - d.source[the_y], 2));
-
-      var angle_between = d.source.theta - d.target.theta;
-      // var angle_between = Math.atan2(d.source[the_y] - d.target[the_y], d.source[the_x] - d.target[the_x]);
-      var pos_neg = angle_between < 0 ? "0" : "1"; // then clockwise, eles counter clockwise
-      var large_small = "0";
-
-      console.log("lala");
-      console.log("source: " + d.source.data.name + " precalc r: " + d.source.clado_radius + " source radius: " + source_radius + " theta: " + d.source.theta +
-        " angle between: " + angle_between);
-      console.log(d.target.data.name + " " + d.target.theta);
-      console.log("jawn x: " + ((source_radius * Math.cos(angle_between)) + center_x));
-      console.log("jawn y: " + ((source_radius * Math.sin(angle_between)) + center_y));
-
-
-      return "M " + d.source[the_x] + " " + d.source[the_y] +
-        "A " + source_radius + " " + source_radius + " 0 " + large_small + " " + pos_neg + " " +
-        ((source_radius * Math.cos(angle_between > 0 ? angle_between : -angle_between)) + center_x) + " " +
-        ((source_radius * Math.sin(angle_between < 0 ? angle_between : -angle_between)) + center_y) +
-        // d.source.clado_radius * Math.cos(angle_between) + center_x + " " +
-        // d.source.clado_radius * Math.sin(angle_between) + center_y +
-        // d.target[the_x] + " " + d.target[the_y] +
-        " L "  + d.target[the_x] + " " + d.target[the_y] ;
-      //
-
-      // console.log("lala");
-      // console.log(d.source.data.name + " " + d.source.clado_radius + " " + d.source.theta);
-      // console.log(d.target.data.name + " " + d.target.clado_radius + " " + d.target.theta);
-      //
-      // return "M " + d.source[the_x] + " " + d.source[the_y] +
-      //   "L " + //+ d.source.clado_radius + " " + d.source.clado_radius + " 0 1 0 " +
-      //   d.source.clado_radius * Math.cos(d.target.theta) + center_x + " " +
-      //   d.source.clado_radius * Math.sin(d.target.theta) + center_y +
-      //   " L " + d.target[the_x] + " " + d.target[the_y];
-    }
-  }
-
-  function straight_link(d) {
-    return "M " + d.source[the_x] + " " + d.source[the_y] + " L " + d.target[the_x] + " " + d.target[the_y];
-  }
-
-  function rectangle_link(d) {
-    var start_point, mid_point, end_point;
-
-    start_point = d.source[the_x] + " " + d.source[the_y]
-    end_point = d.target[the_x] + " " + d.target[the_y]
-
-    // Only side to side is an option
-    mid_point = d.source[the_x] + " " + d.target[the_y];
-
-    // if (document.getElementById("up-and-down").selected) {
-    //   mid_point = d.target[the_x] + " " + d.source[the_y];
-    // } else {
-    //   mid_point = d.source[the_x] + " " + d.target[the_y];
-    // }
-
-    return "M " + start_point + " L " + mid_point + " L " + end_point;
-  }
-
-// Keep labels from running into the branches
-  function label_offset_vertical() {
-    var is_side_to_side = true; // document.getElementById("side-to-side").selected
-
-    var side_to_side_offset = Math.floor(label_size / 3);
-    var up_and_down_offset = label_size;
-
-    return is_side_to_side ? side_to_side_offset : up_and_down_offset;
-  }
-
-  function label_offset_horizontal() {
-    var is_side_to_side = true; // document.getElementById("side-to-side").selected
-
-    var side_to_side_offset = Math.floor(label_size / 2);
-    var up_and_down_offset = 0;
-
-    return is_side_to_side ? side_to_side_offset : up_and_down_offset;
-  }
-
-  function theta(x, xmin, xmax)
-  {
-    var theta = 2 * Math.PI * ((parseFloat(x) - parseFloat(xmin)) / parseFloat(xmax));
-
-    return theta;
-  }
-
-  function new_x_and_y(x, y, xmin, xmax)
-  {
-    var r_adjust = 1.75;
-
-    // TODO replace these centers
-    var center_x = 200;
-    var center_y = 200;
-    var radius = parseFloat(y) / r_adjust;
-    var t = theta(x, xmin, xmax);
-
-    var new_x = radius * Math.cos(t) + center_x;
-    var new_y = radius * Math.sin(t) + center_y;
-
-    console.log("calculating --- radius: " + radius + " theta: " + t + " orig x: " + x + " orig y: " + y);
-
-    return { "x" : new_x, "y" : new_y, "theta" : t,  "radius" : radius };
-
-  }
-
-  function add_polar_coords(root) {
-    // Need to temporarily change the_x and the_y back into their rectangle forms
-    // var clado_x = "y";
-    // var normalo_x = "distance_from_root";
-    // var tmp_y = "x"; // variable name y direction is always like distance from the root
-
-    var clado_y = "y";
-    var normalo_y = "distance_from_root";
-    var tmp_x = "x";
-
-    var clado_xmin = 9999999;
-    var clado_xmax = -1;
-
-    var normalo_xmin = 9999999;
-    var normalo_xmax = -1;
-
-    var xmin = 999999;
-    var xmax = -1;
-
-    root.each(function(d) {
-      if (parseFloat(d[tmp_x]) < parseFloat(xmin)) { xmin = d[tmp_x]; }
-      if (parseFloat(d[tmp_x]) > parseFloat(xmax)) { xmax = d[tmp_x]; }
-      //
-      // if (parseFloat(d[normalo_x]) < parseFloat(normalo_xmin)) { normalo_xmin = d[normalo_x]; }
-      // if (parseFloat(d[normalo_x]) > parseFloat(normalo_xmax)) { normalo_xmax = d[normalo_x]; }
-    });
-
-    root.each(function(d) {
-      var clado_coords = new_x_and_y(d[tmp_x], d[clado_y], xmin, xmax);
-
-      d.clado_pol_x = clado_coords.x;
-      d.clado_pol_y = clado_coords.y;
-
-      // theta will be the same regardless of clado or normalo. It is only based on the x.
-      d.theta = clado_coords.theta;
-      d.clado_radius = clado_coords.radius;
-
-      var normalo_coords = new_x_and_y(d[tmp_x], d[normalo_y], xmin, xmax);
-
-      d.normalo_pol_x = normalo_coords.x;
-      d.normalo_pol_y = normalo_coords.y;
-      d.normalo_radius = normalo_coords.radius;
-
-      console.log(
-        " --- normalo_pol_x: " + d.normalo_pol_x + " normalo_pol_y: " + d.normalo_pol_y);
-      // console.log("clado_pol_x: " + d.clado_pol_x + " clado_pol_y: " + d.clado_pol_y +
-      //   " --- normalo_pol_x: " + d.normalo_pol_x + " normalo_pol_y: " + d.normalo_pol_y);
-
-    });
-  }
-
-
-// One listener to rule them all
-  d3.select("#tree-form").on("change", draw_tree2);
-
-// Size options for the svg
-  var svg_height, svg_width, height_padding, width_padding;
-// The fake x and y for the g elem inside the svg (holds the chart). Regardless of orientation, 'x' values are for
-// spacing out labels and 'y' values are for showing distances from the root.
-  var g_y_size, g_x_size;
-
-// Tree options
-  var tree_shape, tree_style, tree_direction, tree_sort;
-
-// These control the direction
-  var the_x, the_y;
-
-// Branch options
-  var branch_shape, branch_width;
-
-// Label options
-  var label_size, label_show, label_opacity;
-
-// Tree elements
-  var svg, chart, cluster, root, links, circles, labels;
-
-// Link types
-  var link_function;
-
-  function draw_tree2() {
-    console.log("calling draw_tree2()");
-    clear_elem("svg-tree");
-
-    /* Get the values of all sliders and stuff */
-
-    // Size sliders
-    svg_height = get_int("svg-height");
-    svg_width = get_int("svg-width");
-
-    height_padding = parseFloat(document.getElementById("height-padding").value); // a num from 0 to 1
-    width_padding  = parseFloat(document.getElementById("width-padding").value); // a num from 0 to 1
-
-    // Tree options
-    tree_shape = get_value("tree-shape"); // circle or rectangle
-    tree_style = get_value("tree-branch-style"); // normal or cladogram
-    // tree_direction = get_value("tree-direction");
-    tree_sort = get_value("tree-sort");
-
-    // Branch options
-    branch_shape = get_value("branch-shape");
-    branch_width = get_value("branch-width");
-
-    // Label options
-    label_size = get_value("label-size");
-    label_show = document.getElementById("label-show").checked;
-
-    label_opacity = label_show ? "1" : "0";
-
-
-
-    g_x_size  = svg_height - (svg_height * height_padding);
-    g_y_size = svg_width - (svg_width * width_padding);
-
-    console.log("gx: " + g_x_size + ". gy: " + g_y_size + ". svg_width: " + svg_width + ". svg_height: " + svg_height);
-
-    // Set attributes
-    d3.selectAll("text").attr("opacity", label_opacity);
-
-    // Set the link function
-    link_function = document.getElementById("rectangle-type").selected ? rectangle_link : straight_link;
-    // link_function = circle_link;
-
-    svg = d3.select("#tree-div")
-      .append("svg")
-      .attr("width", svg_width)
-      .attr("height", svg_height)
-      .attr("id", "svg-tree")
-      .style("background-color", "white"); // TODO make bg color an option
-
-    chart = svg.append("g")
-      .attr("id", "apple-chart")
-      .attr("width", g_x_size)
-      .attr("height", g_y_size)
-      // Center the g elem in the svg
-      .attr("transform", "translate(" + (svg_width * width_padding / 2) + "," + (svg_height * height_padding / 2) + ")")
-
-    cluster = d3.cluster() // this adds the x and y attrs
-      .size([g_x_size, g_y_size])
-      .separation(function (a, b) {
-        return 1;
-      }); // TODO this doesn't seem to do anything
-
-    // Sort and make the hierarchy
-    root = d3.hierarchy(parseNewick(tree_input), function (d) {
-      return d.branchset;
-    })
-    // TODO add sort options
-      .sort(function (a, b) {
-        return (a.value - b.value) || d3.ascending(a.data.length, b.data.length);
-      });
-
-    // Do the lala clustering
-    cluster(root);
-    // set_distance_from_root(root, root.data.length = 0, 1); //g_y_size / maxLength(root));
-    set_distance_from_root(root, root.data.length = 0, g_y_size / maxLength(root));
-    add_polar_coords(root);
-
-    ryan = root;
-
-    // Set x and y.  Controls the direction, cladogram style, circle style, etc.
-    // Needs to be done right after setting polar coords as that will change it to rectangle types.
-    if (document.getElementById("rectangular-tree").selected) {
-      the_x = document.getElementById("cladogram").selected ? "y" : "distance_from_root"; //
-      the_y = "x"; // y direction is always like distance from the root
-    } else if (document.getElementById("circular-tree").selected) {
-      the_x = document.getElementById("cladogram").selected ? "clado_pol_y" : "normalo_pol_y";
-      the_y = document.getElementById("cladogram").selected ? "clado_pol_x" : "normalo_pol_x";
-    } else { // Radial
-      // TODO
-    }
-
-
-    // Enter links
-    links = chart.append("g")
-      .attr("class", "links")
-      .selectAll("path")
-      .data(root.links())
-      .enter().append("path")
-      .attr("stroke-width", function () {
-        return branch_width + "px";
-      })
-      .style("stroke", "black") // TODO make branch color an option
-      .attr("d", link_function); // draws the proper type of link
-
-    // TODO Enter circles
-    circles = chart.append("g")
-      .attr("class", "circles")
-      .selectAll("circle")
-      .data(root.links()) // just links to leaves
-      .enter().append("circle")
-      .attr("r", 5)
-      .attr("cx", function(d) { return d.source[the_x]; } )
-      .attr("cy", function(d) { return d.source[the_y]; } )
-      .style("fill", "black");
-
-    chart.append("g")
-      .attr("class", "circles")
-      .selectAll("circle")
-      .data(root.leaves())
-      .enter().append("circle")
-      .attr("r", 5)
-      .attr("cx", function(d) { return d[the_x]; })
-      .attr("cy", function(d) { return d[the_y]; })
-      .style("fill", "blue");
-
-    labels = chart.append("g")
-      .attr("class", "labels")
-      .selectAll("text")
-      .data(root.leaves())
-      .enter().append("text")
-      .attr("class", "leaf-labels")
-      .attr("dx", function (d) {
-        return d[the_x] + label_offset_horizontal();
-      })
-      .attr("dy", function (d) {
-        return d[the_y] + label_offset_vertical();
-      })
-      .attr("text-anchor", "left")
-      .attr("font-size", label_size + "px")
-      .text(function (d) {
-        return d.data.name;
-      })
-
-    // TODO add scale bar
-  }
 }
-var ryan;
-function foo()
-{
-  d3.select("#apple-chart").append("circle").attr("cx", "200").attr("cy", "200").style("fill-opacity", "0.0").style("stroke", "orange").style("stroke-width", 2).attr("r", "66"); d3.select("#apple-chart").append("circle").attr("cx", "200").attr("cy", "200").style("fill-opacity", "0.0").style("stroke", "orange").style("stroke-width", 2).attr("r", "133"); d3.select("#apple-chart").append("circle").attr("cx", "200").attr("cy", "200").style("fill-opacity", "0.0").style("stroke", "orange").style("stroke-width", 2).attr("r", "200")
-}
+

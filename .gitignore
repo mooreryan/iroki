@@ -22,3 +22,6 @@ spec/features/test_files/screenshot.png
 spec/features/test_files/screenshots/screenshot.png
 .DS_Store
 gemfilelock.backup
+
+app/assets/javascripts/viewer.js.backup
+app/assets/javascripts/viewer_old.js

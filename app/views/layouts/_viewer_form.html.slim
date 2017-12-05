@@ -20,17 +20,17 @@
       h4 Size!
 
       .row
-        label for="svg-height" Height!
-        input id="svg-height" class="slider" type="range" min="0" max="1000" step="250" value="500"
+        label id="outer-width-label" for="outer-width" Width!
+        input id="outer-width" class="slider" type="range" min="0" max="1000" step="250" value="500"
 
-        label for="svg-width" Width!
-        input id="svg-width" class="slider" type="range" min="0" max="1000" step="250" value="500"
+        label id="outer-height-label" for="outer-height" Height!
+        input id="outer-height" class="slider" type="range" min="0" max="1000" step="250" value="500"
 
-        label for="height-padding" Height padding!
-        input id="height-padding" class="slider" type="range" min="0.1" max="0.5" step="0.05" value="0.15"
-
-        label for="width-padding" Width padding!
+        label id="width-padding-label" for="width-padding" Width padding!
         input id="width-padding" class="slider" type="range" min="0.1" max="0.5" step="0.05" value="0.3"
+
+        label id="height-padding-label" for="height-padding" Height padding!
+        input id="height-padding" class="slider" type="range" min="0.1" max="0.5" step="0.05" value="0.15"
 
       hr.row
       h4 Tree options!
@@ -76,6 +76,10 @@
 
       hr.row
       h4 Label options!
+
+      .row
+        label id="align-tip-labels-label" for="align-tip-labels" Align tip labels?
+        input id="align-tip-labels" type="button"
 
       .row
         label for="label-size" Size!
