@@ -25,7 +25,20 @@
     hr.row
 
     form id="tree-form"
-      h4 Size!
+      h4 Viewer size!
+      .row
+        .small-12.columns
+          label for="viewer-size-fixed" Fixed viewer width?!
+          input id="viewer-size-fixed" type="checkbox" checked=""
+        .small-4.columns
+          label for="viewer-height" Viewer height!
+          input id="viewer-height" class="slider" type="range" min="500" max="2000" step="500" value="500"
+        .small-4.columns
+          label for="viewer-width" Viewer width!
+          input id="viewer-width" class="slider" type="range" min="500" max="2000" step="500" value="500"
+
+      hr.row
+      h4 Tree size!
 
       .row
         .small-6.columns

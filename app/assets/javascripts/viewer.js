@@ -66,6 +66,8 @@ var INNER_DOT_SIZE, LEAF_DOT_SIZE;
 
 var TREE_ROTATION;
 
+var VIEWER_WIDTH, VIEWER_HEIGHT, VIEWER_SIZE_FIXED;
+
 var align_tip_labels;
 
 // To hold temporary DOM elements
@@ -264,6 +266,24 @@ function lalala(tree_input)
       rectangle_cluster(root);
       // TODO should this be width or height
       setRadius(root, root.data.length = 0, (INNER_HEIGHT*2) / maxLength(root));
+    }
+
+    VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
+    if (VIEWER_SIZE_FIXED) {
+      document.getElementById("viewer-height").removeAttribute("disabled");
+      document.getElementById("viewer-width").removeAttribute("disabled");
+
+      VIEWER_HEIGHT = parseInt(document.getElementById("viewer-height").value);
+      VIEWER_WIDTH = parseInt(document.getElementById("viewer-width").value);
+      //
+      document.getElementById("tree-div")
+        .setAttribute("style", "overflow: scroll; display: block; height: " + VIEWER_HEIGHT + "px; width: " + VIEWER_WIDTH + "px;");
+
+    } else {
+      document.getElementById("viewer-height").setAttribute("disabled", "");
+      document.getElementById("viewer-width").setAttribute("disabled", "");
+
+      document.getElementById("tree-div").removeAttribute("style");
     }
 
     svg = d3.select("#tree-div")
