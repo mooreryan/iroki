@@ -54,10 +54,15 @@ var SIZE, INNER_SIZE;
 var OUTER_WIDTH, OUTER_HEIGHT, HEIGHT_PADDING, WIDTH_PADDING, INNER_WIDTH, INNER_HEIGHT;
 var root, svg, chart, data, circles, labels, linkExtension, link;
 
-var SHOW_LABELS;
+var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
 
-var LABEL_SIZE;
+var INNER_LABEL_SIZE, LEAF_LABEL_SIZE;
 var BRANCH_WIDTH;
+var SHOW_INNER_DOTS, SHOW_LEAF_DOTS;
+
+var LABEL_ROTATION;
+
+var INNER_DOT_SIZE, LEAF_DOT_SIZE;
 
 var align_tip_labels;
 
@@ -85,6 +90,11 @@ function lalala(tree_input)
     return d.value == 1;
   }
 
+  function is_inner(d)
+  {
+    return !is_leaf(d);
+  }
+
   function set_value_of(id, val)
   {
     var elem = document.getElementById(id);
@@ -95,21 +105,52 @@ function lalala(tree_input)
   {
     clear_elem("svg-tree");
 
+    LAYOUT_CIRCLE = "circular-tree";
+    LAYOUT_STRAIGHT = "rectangular-tree";
+    LAYOUT_STATE = document.getElementById("tree-shape").value;
+
     // Enable the save button
     document.getElementById("save-svg").removeAttribute("disabled");
     document.getElementById("save-png").removeAttribute("disabled");
 
+
+
+    // Dots
+    SHOW_INNER_DOTS = document.getElementById("show-inner-dots").checked;
+    SHOW_LEAF_DOTS = document.getElementById("show-leaf-dots").checked;
+    INNER_DOT_SIZE = parseInt(document.getElementById("inner-dots-size").value);
+    LEAF_DOT_SIZE = parseInt(document.getElementById("leaf-dots-size").value);
+    if (SHOW_INNER_DOTS) {
+      document.getElementById("inner-dots-size").removeAttribute("disabled");
+    } else {
+      document.getElementById("inner-dots-size").setAttribute("disabled", "");
+    }
+    if (SHOW_LEAF_DOTS) {
+      document.getElementById("leaf-dots-size").removeAttribute("disabled");
+    } else {
+      document.getElementById("leaf-dots-size").setAttribute("disabled", "");
+    }
+
+
     BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
 
-    LABEL_SIZE = parseInt(document.getElementById("label-size").value);
+    INNER_LABEL_SIZE = parseInt(document.getElementById("inner-label-size").value);
+    LEAF_LABEL_SIZE = parseInt(document.getElementById("leaf-label-size").value);
 
     TREE_BRANCH_CLADOGRAM  = "cladogram";
     TREE_BRANCH_NORMAL     = "normalogram";
     TREE_BRANCH_STYLE      = document.getElementById("tree-branch-style").value;
+    the_x = "x";
+    the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
+
+
+    SHOW_INNER_LABELS = document.getElementById("show-inner-labels").checked;
+    SHOW_LEAF_LABELS = document.getElementById("show-leaf-labels").checked;
+
+    LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value);
 
     // Show or hide align tip labels
-    SHOW_LABELS = document.getElementById("label-show").checked;
-    if (!SHOW_LABELS || TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
+    if (!SHOW_LEAF_LABELS || TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
       document.getElementById("align-tip-labels").setAttribute("disabled", "");
       document.getElementById("align-tip-labels").removeAttribute("checked");
       align_tip_labels = false;
@@ -119,19 +160,24 @@ function lalala(tree_input)
     }
 
     // Show/hide labels size
-    if (SHOW_LABELS) {
-      document.getElementById("label-size").removeAttribute("disabled");
+    if (SHOW_LEAF_LABELS) {
+      document.getElementById("leaf-label-size").removeAttribute("disabled");
     } else {
-      document.getElementById("label-size").setAttribute("disabled", "");
+      document.getElementById("leaf-label-size").setAttribute("disabled", "");
     }
 
-    the_x = "x";
-    the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
+    // If it's circle the label rotation gets disabled
+    if (LAYOUT_STATE == LAYOUT_STRAIGHT && (SHOW_LEAF_LABELS || SHOW_INNER_LABELS)) {
+      document.getElementById("label-rotation").removeAttribute("disabled");
+    } else {
+      document.getElementById("label-rotation").setAttribute("disabled", "");
+    }
 
-    LAYOUT_CIRCLE = "circular-tree";
-    LAYOUT_STRAIGHT = "rectangular-tree";
-    LAYOUT_STATE = document.getElementById("tree-shape").value;
-    console.log("at the start of draw_tree() layout_state is " + LAYOUT_STATE);
+    if (SHOW_INNER_LABELS) {
+      document.getElementById("inner-label-size").removeAttribute("disabled");
+    } else {
+      document.getElementById("inner-label-size").setAttribute("disabled", "");
+    }
 
     // Set the align tip labels button to false if it is a cladogram
     if (TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
@@ -248,28 +294,42 @@ function lalala(tree_input)
         // TODO handle radial layout
       }
     }
-    circles = chart.append("g")
-      .selectAll("circle")
-      .data(root.descendants())
-      .enter().append("circle")
-      .attr("class", function(d) {
-        return is_leaf(d) ? "leaf" : "inner";
-      })
-      .attr("r", 5)
-      .attr("transform", function(d) {
-        return pick_transform(d);
-      })
-      .style("fill", function(d) { return d.color; } )
 
-    if (SHOW_LABELS) {
+    if (SHOW_INNER_DOTS) {
+      chart.append("g")
+        .selectAll("circle")
+        .data(root.descendants().filter(function (d) {
+          return is_inner(d);
+        }))
+        .enter().append("circle")
+        .attr("class", "inner")
+        .attr("r", INNER_DOT_SIZE)
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .style("fill", function(d) { return d.color; } );
+    }
+
+    if (SHOW_LEAF_DOTS) {
+      chart.append("g")
+        .selectAll("circle")
+        .data(root.descendants().filter(is_leaf))
+        .enter().append("circle")
+        .attr("class", "leaf")
+        .attr("r", LEAF_DOT_SIZE)
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .style("fill", function(d) { return d.color; } );
+    }
+
+    if (SHOW_INNER_LABELS) {
       labels = chart.append("g")
         .selectAll("text")
-        .data(root.descendants())
+        .data(root.descendants().filter(is_inner))
         .enter().append("text")
-        .attr("class", function(d) {
-          return is_leaf(d) ? "leaf" : "inner";
-        })
-        .style("font-size", LABEL_SIZE)
+        .attr("class", "inner")
+        .style("font-size", INNER_LABEL_SIZE)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
         .attr("text-anchor", function(d) {
@@ -280,6 +340,25 @@ function lalala(tree_input)
         })
         .text(function(d) { return d.data.name; })
     }
+
+    if (SHOW_LEAF_LABELS) {
+      labels = chart.append("g")
+        .selectAll("text")
+        .data(root.descendants().filter(is_leaf))
+        .enter().append("text")
+        .attr("class", "leaf")
+        .style("font-size", LEAF_LABEL_SIZE)
+        .attr("dy", text_y_offset)
+        .attr("dx", text_x_offset)
+        .attr("text-anchor", function(d) {
+          return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+        })
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .text(function(d) { return d.data.name; })
+    }
+
 
     if (align_tip_labels) {
       // Draw the link extensions
@@ -329,7 +408,13 @@ function lalala(tree_input)
     if (LAYOUT_STATE == LAYOUT_CIRCLE) { // circular
       return d[the_x] < 90 || d[the_x] > 270 ? "0.6em" : "-0.6em";
     } else {
-      return "0em";
+      if (LABEL_ROTATION == 90) {
+        return "0.6em"; // They're going up and down so move away from branch
+      } else if (LABEL_ROTATION == -90) {
+        return "-0.6em";
+      } else {
+        return "0em";
+      }
     }
   }
 
@@ -338,7 +423,11 @@ function lalala(tree_input)
     if (LAYOUT_STATE == LAYOUT_CIRCLE) { // circular
       return "0.2em"  // center the label on the branch;
     } else {
-      return "1.2em";
+      if (LABEL_ROTATION == 90 || LABEL_ROTATION == -90) {
+        return "0.3em"; // They're going up and down so center them
+      } else {
+        return "1.2em";
+      }
     }
   }
 
@@ -349,7 +438,13 @@ function lalala(tree_input)
 
   function straight_text_anchor(d)
   {
-    return "middle";
+    if (LABEL_ROTATION == 0) {
+      return "middle";
+    } else if (LABEL_ROTATION < 0) {
+      return "end";
+    } else {
+      return "start";
+    }
   }
 
 // These functions update the layout
@@ -362,7 +457,8 @@ function lalala(tree_input)
 
   function rectangle_transform(d, x, y)
   {
-    return "rotate(0) translate(" + d[x] + " " + d[y] + ")";
+    return "rotate(0) translate(" + d[x] + " " + d[y] + ") rotate(" +
+      LABEL_ROTATION + ")";
   }
 
   function straight_link(d) {
