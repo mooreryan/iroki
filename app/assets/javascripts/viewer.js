@@ -68,6 +68,11 @@ var elem;
 function lalala(tree_input)
 {
 
+  // Listen for save
+  // See https://github.com/vibbits/phyd3/blob/9e5cf7edef72b1e8d4e8355eb5ab4668734816e5/js/phyd3.phylogram.js#L915
+  d3.select("#save-svg").on("click", save_svg_data);
+  d3.select("#save-png").on("click", save_png_data);
+
   console.log("first line of lalala()");
   // One listener to rule them all
   d3.select("#tree-form").on("change", function() { console.log("apple pie!"); draw_tree(); });
@@ -89,6 +94,10 @@ function lalala(tree_input)
   function draw_tree()
   {
     clear_elem("svg-tree");
+
+    // Enable the save button
+    document.getElementById("save-svg").removeAttribute("disabled");
+    document.getElementById("save-png").removeAttribute("disabled");
 
     BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
 
@@ -282,6 +291,9 @@ function lalala(tree_input)
           return !d.target.children;
         }))
         .enter().append("path")
+        .style("fill", "none")
+        .style("stroke", "#000")
+        .style("stroke-opacity", "0.25")
         .attr("stroke-width", BRANCH_WIDTH)
         .attr("stroke-dasharray", "1, 5")
         .attr("class", "dotted-links")
@@ -300,6 +312,8 @@ function lalala(tree_input)
       .selectAll("path")
       .data(root.links())
       .enter().append("path")
+      .style("fill", "none")
+      .style("stroke", "#000")
       .attr("stroke-width", BRANCH_WIDTH)
       .each(function(d) { d.target.linkNode = this; })
       .attr("d", function(d) {
@@ -421,3 +435,35 @@ function lalala(tree_input)
 
 }
 
+
+
+// These are for saving
+function svg_elem_to_string(id)
+{
+  var svg_elem = document.getElementById(id);
+
+  if (svg_elem) {
+    return (new XMLSerializer()).serializeToString(svg_elem);
+  }
+}
+
+// TODO png should keep background color
+function save_png_data()
+{
+  var svg_string = svg_elem_to_string("svg-tree");
+
+  var canvas = document.createElement("canvas");
+  canvg(canvas, svg_string);
+  canvas.toBlobHD(function(blob) {
+    saveAs(blob, "tree.png");
+  })
+}
+
+function save_svg_data()
+{
+  saveAs(
+    new Blob([svg_elem_to_string("svg-tree")],
+    { type : "application/svg+xml" }),
+    "tree.svg"
+  );
+}

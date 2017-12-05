@@ -12,9 +12,15 @@
     h4 Upload tree!
 
     .row
-      label for="uploader" Upload your tree!
-      input id="uploader" type="file" name="newick"
-
+      .small-6.columns
+        label for="uploader" Upload your tree!
+        input id="uploader" type="file" name="newick"
+      .small-3.columns
+        label for="save-svg" Save!?
+        input id="save-svg" type="button" value="Save as SVG!" disabled=""
+      .small-3.columns
+        label for="save-png" Save!?
+        input id="save-png" type="button" value="Save as PNG!" disabled=""
     form id="tree-form"
       hr.row
       h4 Size!
