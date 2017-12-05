@@ -43,14 +43,17 @@
   font-weight: bold;
 }
 
-div {
-  border: 1px dotted #666;
+#tree-div {
+  padding: 1%;
 }
 
-// TODO this would be better as columns instead of 50px everytime
-label {
-  display: inline-block;
-  width: 100%;
-  text-align: left;
-  border: 1px dotted red;
-}
+//div {
+//  border: 1px dotted #666;
+//}
+//
+//label {
+//  display: inline-block;
+//  width: 100%;
+//  text-align: left;
+//  border: 1px dotted red;
+//}

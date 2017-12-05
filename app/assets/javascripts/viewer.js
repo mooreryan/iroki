@@ -193,7 +193,7 @@ function lalala(tree_input)
     } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
       rectangle_cluster(root);
       // TODO should this be width or height
-      setRadius(root, root.data.length = 0, (INNER_WIDTH*2) / maxLength(root));
+      setRadius(root, root.data.length = 0, (INNER_HEIGHT*2) / maxLength(root));
     }
 
     svg = d3.select("#tree-div")
