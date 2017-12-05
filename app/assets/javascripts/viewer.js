@@ -70,6 +70,9 @@ var VIEWER_WIDTH, VIEWER_HEIGHT, VIEWER_SIZE_FIXED;
 
 var align_tip_labels;
 
+var SORT_STATE, SORT_NONE, SORT_ASCENDING, SORT_DESCENDING, sort_function;
+
+
 // To hold temporary DOM elements
 var elem;
 
@@ -108,6 +111,37 @@ function lalala(tree_input)
   function draw_tree()
   {
     clear_elem("svg-tree");
+
+    // Get sorting options
+    SORT_NONE = "not-sorted";
+    SORT_ASCENDING = "ascending";
+    SORT_DESCENDING = "descending";
+    SORT_STATE = document.getElementById("tree-sort").value;
+
+
+    // Choose sorting function
+    function sort_ascending(a, b)
+    {
+      return (a.value - b.value) || d3.ascending(a.data.length, b.data.length);
+    }
+
+    function sort_descending(a, b)
+    {
+      return (b.value - a.value) || d3.descending(a.data.length, b.data.length);
+    }
+
+    function sort_none(a, b)
+    {
+      return 0;
+    }
+
+    if (SORT_STATE == SORT_NONE) {
+      sort_function = sort_none;
+    } else if (SORT_STATE == SORT_ASCENDING) {
+      sort_function = sort_ascending;
+    } else {
+      sort_function = sort_descending;
+    }
 
     LAYOUT_CIRCLE = "circular-tree";
     LAYOUT_STRAIGHT = "rectangular-tree";
@@ -256,7 +290,7 @@ function lalala(tree_input)
 
     root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
       .sum(function(d) { return d.branchset ? 0 : 1; })
-      .sort(function(a, b) { return (a.value - b.value) || d3.ascending(a.data.length, b.data.length); });
+      .sort(sort_function);
 
     if (LAYOUT_STATE == LAYOUT_CIRCLE) {
       circle_cluster(root);
