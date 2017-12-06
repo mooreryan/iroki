@@ -116,6 +116,7 @@ function lalala(tree_input)
   listener("show-leaf-labels", "change", draw_tree);
   listener("leaf-label-size", "change", draw_tree);
   listener("align-tip-labels", "change", draw_tree);
+  listener("label-rotation", "change", draw_tree);
 
   listener("show-inner-dots", "change", draw_tree);
   listener("inner-dots-size", "change", draw_tree);
@@ -127,6 +128,7 @@ function lalala(tree_input)
   draw_tree();
 
   var circle_cluster, rectangle_cluster;
+
   function is_leaf(d)
   {
     return d.value == 1;
@@ -185,7 +187,6 @@ function lalala(tree_input)
     document.getElementById("save-png").removeAttribute("disabled");
 
 
-
     // Dots
     SHOW_INNER_DOTS = document.getElementById("show-inner-dots").checked;
     SHOW_LEAF_DOTS = document.getElementById("show-leaf-dots").checked;
@@ -208,9 +209,9 @@ function lalala(tree_input)
     INNER_LABEL_SIZE = parseInt(document.getElementById("inner-label-size").value);
     LEAF_LABEL_SIZE = parseInt(document.getElementById("leaf-label-size").value);
 
-    TREE_BRANCH_CLADOGRAM  = "cladogram";
-    TREE_BRANCH_NORMAL     = "normalogram";
-    TREE_BRANCH_STYLE      = document.getElementById("tree-branch-style").value;
+    TREE_BRANCH_CLADOGRAM = "cladogram";
+    TREE_BRANCH_NORMAL = "normalogram";
+    TREE_BRANCH_STYLE = document.getElementById("tree-branch-style").value;
 
     if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
       // It could be coming from the circle which has a different slider behavior
@@ -295,7 +296,7 @@ function lalala(tree_input)
       elem = document.getElementById("height-padding");
       elem.disabled = true;
 
-      OUTER_WIDTH  = parseInt(document.getElementById("outer-width").value);
+      OUTER_WIDTH = parseInt(document.getElementById("outer-width").value);
       OUTER_HEIGHT = OUTER_WIDTH;
 
       WIDTH_PADDING = parseFloat(document.getElementById("width-padding").value);
@@ -312,14 +313,14 @@ function lalala(tree_input)
       elem = document.getElementById("height-padding");
       elem.disabled = false;
 
-      OUTER_WIDTH  = parseInt(document.getElementById("outer-width").value);
+      OUTER_WIDTH = parseInt(document.getElementById("outer-width").value);
       OUTER_HEIGHT = parseInt(document.getElementById("outer-height").value);
 
-      WIDTH_PADDING  = parseFloat(document.getElementById("width-padding").value);
+      WIDTH_PADDING = parseFloat(document.getElementById("width-padding").value);
       HEIGHT_PADDING = parseFloat(document.getElementById("height-padding").value);
     }
 
-    INNER_WIDTH  = Math.round(OUTER_WIDTH * (1 - WIDTH_PADDING));
+    INNER_WIDTH = Math.round(OUTER_WIDTH * (1 - WIDTH_PADDING));
     INNER_HEIGHT = Math.round(OUTER_HEIGHT * (1 - HEIGHT_PADDING));
 
     if (TREE_ROTATION == ROTATED) {
@@ -410,15 +411,8 @@ function lalala(tree_input)
 
   }
 
-
-
-  function draw_tree()
+  function set_up_hierarchy()
   {
-    clear_elem("svg-tree");
-    console.log("drawing");
-
-    update_form_constants();
-
     // When setting size for circular layout, use width by convention, but they will be the same.
     circle_cluster = d3.cluster()
       .size([360, the_inner_width])
@@ -442,7 +436,10 @@ function lalala(tree_input)
       // TODO should this be width or height
       setRadius(root, root.data.length = 0, (the_inner_height*2) / maxLength(root));
     }
+  }
 
+  function draw_svg()
+  {
     svg = d3.select("#tree-div")
       .append("svg")
       .attr("width", the_outer_width * 2)
@@ -450,6 +447,18 @@ function lalala(tree_input)
       .attr("id", "svg-tree")
       // .attr("transform", "rotate(" + TREE_ROTATION + ")")
       .style("background-color", "white"); // TODO make bg color an option
+  }
+
+  function draw_tree()
+  {
+    clear_elem("svg-tree");
+    console.log("drawing");
+
+    update_form_constants();
+
+    set_up_hierarchy();
+
+    draw_svg();
 
     var chart_width, chart_height;
     var chart_transform_width, chart_transform_height;
