@@ -30,7 +30,7 @@
       .row
         .small-12.columns
           label for="viewer-size-fixed" Fixed viewer width?!
-          input id="viewer-size-fixed" type="checkbox" checked=""
+          input id="viewer-size-fixed" type="checkbox"
         .small-4.columns
           label for="viewer-height" Viewer height!
           input id="viewer-height" class="slider" type="range" min="500" max="2000" step="500" value="500"
@@ -44,18 +44,18 @@
       .row
         .small-6.columns
           label id="outer-width-label" for="outer-width" Width!
-          input id="outer-width" class="slider" type="range" min="250" max="2500" step="25" value="250"
+          input id="outer-width" class="slider" type="range" min="250" max="500" step="250" value="250"
         .small-6.columns
           label id="width-padding-label" for="width-padding" Width padding!
-          input id="width-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.3"
+          input id="width-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.1"
 
       .row
         .small-6.columns
           label id="outer-height-label" for="outer-height" Height!
-          input id="outer-height" class="slider" type="range" min="250" max="2500" step="50" value="250"
+          input id="outer-height" class="slider" type="range" min="250" max="500" step="250" value="500"
         .small-6.columns
           label id="height-padding-label" for="height-padding" Height padding!
-          input id="height-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.15"
+          input id="height-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.1"
 
       hr.row
       h4 Tree options!
@@ -74,10 +74,10 @@
             option id="normalogram" value="normalogram" selected="" Normal-o-gram!
             option id="cladogram" value="cladogram" Clad-o-gram!
 
-      /.row
-      /  .small-12.columns
-      /    label for="tree-rotation" Tree rotation!
-      /    input id="tree-rotation" class="slider" type="range" min="0" max="270" step="270" value="0"
+      .row
+        .small-12.columns
+          label for="tree-rotation" Tree rotation!
+          input id="tree-rotation" class="slider" type="range" min="0" max="270" step="270" value="0"
 
       /.row
       /  label for="tree-direction" Which way?!
@@ -89,9 +89,9 @@
         .small-12.columns
           label for="tree-sort" Sort?!
           select id="tree-sort"
+            option id="descending" value="descending" selected="" Sort!
+            option id="ascending" value="ascending" Reverse sort!
             option id="not-sorted" value="not-sorted" Not sorted!
-            option id="ascending" value="ascending" Ascending!
-            option id="descending" value="descending" selected="" Descending!
 
       hr.row
       h4 Branch options!
