@@ -18,7 +18,6 @@ function clear_elem(id) {
 // load dataset 
 function load_dataset(file) {
   clear_elem("svg-tree");
-  console.log("about to call lalala()");
   lalala(file);
 }
 
@@ -46,6 +45,8 @@ function upload_button(el, callback) {
 // Stuff from the old viewer stops here
 //
 
+// TODO get this from the CSS
+var FORM_HEIGHT = 650;
 
 var LAYOUT_STATE, LAYOUT_CIRCLE, LAYOUT_STRAIGHT;
 var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
@@ -92,9 +93,8 @@ function lalala(tree_input)
   d3.select("#save-svg").on("click", save_svg_data);
   d3.select("#save-png").on("click", save_png_data);
 
-  console.log("first line of lalala()");
   // One listener to rule them all
-  d3.select("#tree-form").on("change", function() { console.log("apple pie!"); draw_tree(); });
+  d3.select("#tree-form").on("change", draw_tree);
 
   draw_tree();
 
@@ -186,14 +186,29 @@ function lalala(tree_input)
     TREE_BRANCH_NORMAL     = "normalogram";
     TREE_BRANCH_STYLE      = document.getElementById("tree-branch-style").value;
 
-    // if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
-    //   document.getElementById("tree-rotation").removeAttribute("disabled");
-      TREE_ROTATION = parseFloat(document.getElementById("tree-rotation").value);
-    // } else {
-    //   document.getElementById("tree-rotation").setAttribute("disabled", "");
-    //   TREE_ROTATION = NOT_ROTATED;
-    // }
-    // TREE_ROTATION = 0;
+    if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+      // It could be coming from the circle which has a different slider behavior
+      elem = document.getElementById("tree-rotation");
+      var val = elem.value;
+      if (val == "270") {
+        TREE_ROTATION = 270;
+        elem.setAttribute("value", "270");
+      } else  {
+        TREE_ROTATION = 0;
+        elem.setAttribute("value", "0");
+      }
+      elem.setAttribute("min", "0");
+      elem.setAttribute("max", "270");
+      elem.setAttribute("step", "270")
+    } else {
+      elem = document.getElementById("tree-rotation");
+      TREE_ROTATION = parseInt(elem.value);
+      // Flip tree rotation to 0
+      TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
+      elem.setAttribute("min", "0");
+      elem.setAttribute("max", "360");
+      elem.setAttribute("step", "1")
+    }
 
     if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
       LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value) + 90;
@@ -281,10 +296,6 @@ function lalala(tree_input)
     INNER_WIDTH  = Math.round(OUTER_WIDTH * (1 - WIDTH_PADDING));
     INNER_HEIGHT = Math.round(OUTER_HEIGHT * (1 - HEIGHT_PADDING));
 
-
-    console.log("first line of draw tree");
-
-
     if (TREE_ROTATION == ROTATED) {
       // Need to flip height and width
       the_inner_width = INNER_HEIGHT;
@@ -352,16 +363,6 @@ function lalala(tree_input)
     the_x = "x";
     the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
 
-
-    console.log(
-      "the_x: " + the_x +
-      " the_y: " + the_y +
-      " the_inner_width: " + the_inner_width +
-      " the_outer_width: " + the_outer_width +
-      " the_inner_height: " + the_inner_height +
-      " the_outer_height: " + the_outer_height
-    );
-
     // When setting size for circular layout, use width by convention, but they will be the same.
     circle_cluster = d3.cluster()
     // TODO handle rotation
@@ -389,18 +390,18 @@ function lalala(tree_input)
 
     VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
     if (VIEWER_SIZE_FIXED) {
-      document.getElementById("viewer-height").removeAttribute("disabled");
-      document.getElementById("viewer-width").removeAttribute("disabled");
+      // document.getElementById("viewer-height").removeAttribute("disabled");
+      // document.getElementById("viewer-width").removeAttribute("disabled");
 
-      VIEWER_HEIGHT = parseInt(document.getElementById("viewer-height").value);
-      VIEWER_WIDTH = parseInt(document.getElementById("viewer-width").value);
+      // VIEWER_HEIGHT = parseInt(document.getElementById("viewer-height").value);
+      // VIEWER_WIDTH = parseInt(document.getElementById("viewer-width").value);
       //
       document.getElementById("tree-div")
-        .setAttribute("style", "overflow: scroll; display: block; height: " + VIEWER_HEIGHT + "px; width: " + VIEWER_WIDTH + "px;");
+        .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
 
     } else {
-      document.getElementById("viewer-height").setAttribute("disabled", "");
-      document.getElementById("viewer-width").setAttribute("disabled", "");
+      // document.getElementById("viewer-height").setAttribute("disabled", "");
+      // document.getElementById("viewer-width").setAttribute("disabled", "");
 
       document.getElementById("tree-div").removeAttribute("style");
     }
@@ -567,10 +568,10 @@ function lalala(tree_input)
   function text_x_offset(d)
   {
     // TODO replace these with function params
-    var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
+    // var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
 
     if (LAYOUT_STATE == LAYOUT_CIRCLE) { // circular
-      return test ? "0.6em" : "-0.6em";
+      return circular_label_flipping_test(d[the_x]) ? "0.6em" : "-0.6em";
     } else {
       if (LABEL_ROTATION == 90) {
         return "0.6em"; // They're going up and down so move away from branch
@@ -605,12 +606,42 @@ function lalala(tree_input)
     }
   }
 
+
+
+  // Depending on the tree rotation, you need to have a different test for whether the labels flip.
+  function circular_label_flipping_test(x)
+  {
+    // Returns the value at the bottom of the circle
+    function circle_key_points(rot)
+    {
+      var bottom, top;
+
+      if (rot <= 90) {
+        bottom = 90 - rot;
+        top = bottom + 180;
+      } else if (rot <= 270) {
+        bottom = 360 - (rot - 90);
+        top = bottom - 180;
+      } else {
+        bottom = 360 - (rot - 90);
+        top = bottom + 180;
+      }
+
+      return { "bottom" : bottom, "top" : top };
+    }
+
+    var key_points = circle_key_points(TREE_ROTATION);
+
+    if (TREE_ROTATION <= 90 || TREE_ROTATION > 270) {
+      return x < key_points.bottom || x > key_points.top;
+    } else {
+      return x < key_points.bottom && x > key_points.top;
+    }
+  }
+
   function circular_text_anchor(d)
   {
-    // TODO replace these with function params
-    var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
-
-    return test ? "start" : "end";
+    return circular_label_flipping_test(d[the_x]) ? "start" : "end";
   }
 
   function straight_text_anchor(d) {
@@ -635,12 +666,9 @@ function lalala(tree_input)
 // These functions update the layout
   function circle_transform(d, x, y)
   {
-
-    var test = TREE_ROTATION == ROTATED ? d[x] < 180 : (d[x] < 90 || d[x] > 270);
-
     return "rotate(" + d[x] +
       ") translate(" + d[y] + ", 0)" +
-      (test ?  "" : "rotate(180)");
+      (circular_label_flipping_test(d[x]) ?  "" : "rotate(180)");
   }
 
   function rectangle_transform(d, x, y)

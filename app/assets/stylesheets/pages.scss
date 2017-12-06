@@ -59,12 +59,17 @@
 //  border: 1px dotted red;
 //}
 
+$height: 650px;
 
 form#tree-form {
-  height: 650px;
+  height: $height;
   overflow-y: scroll;
   //border: 1px solid gray;
 }
+
+//#tree-div {
+//  height: $height;
+//}
 
 svg {
   //display: block;

@@ -26,36 +26,24 @@
     hr.row
 
     form id="tree-form"
-      h4 Viewer size!
-      .row
-        .small-12.columns
-          label for="viewer-size-fixed" Fixed viewer width?!
-          input id="viewer-size-fixed" type="checkbox"
-        .small-4.columns
-          label for="viewer-height" Viewer height!
-          input id="viewer-height" class="slider" type="range" min="500" max="2000" step="500" value="500"
-        .small-4.columns
-          label for="viewer-width" Viewer width!
-          input id="viewer-width" class="slider" type="range" min="500" max="2000" step="500" value="500"
-
       hr.row
       h4 Tree size!
 
       .row
         .small-6.columns
           label id="outer-width-label" for="outer-width" Width!
-          input id="outer-width" class="slider" type="range" min="250" max="500" step="250" value="250"
+          input id="outer-width" class="slider" type="range" min="250" max="3000" step="250" value="500"
         .small-6.columns
           label id="width-padding-label" for="width-padding" Width padding!
-          input id="width-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.1"
+          input id="width-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.2"
 
       .row
         .small-6.columns
           label id="outer-height-label" for="outer-height" Height!
-          input id="outer-height" class="slider" type="range" min="250" max="500" step="250" value="500"
+          input id="outer-height" class="slider" type="range" min="250" max="3000" step="250" value="500"
         .small-6.columns
           label id="height-padding-label" for="height-padding" Height padding!
-          input id="height-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.1"
+          input id="height-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.2"
 
       hr.row
       h4 Tree options!
@@ -137,15 +125,24 @@
       h4 Strange dot options!
 
       .row
-        .small-3.columns
+        .small-6.columns
           label for="show-inner-dots" Show inner dots?!
           input id="show-inner-dots" type="checkbox"
-        .small-3.columns
+        .small-6.columns
           label for="inner-dots-size" Inner dot size!
           input id="inner-dots-size" type="range" min="2" max="8" value="5" class="slider"
-        .small-3.columns
+      .row
+        .small-6.columns
           label for="show-leaf-dots" Show leaf dots?!
           input id="show-leaf-dots" type="checkbox"
-        .small-3.columns
+        .small-6.columns
           label for="leaf-dots-size" Leaf dot size!
           input id="leaf-dots-size" type="range" min="2" max="8" value="5" class="slider"
+
+      hr.row
+      h4 Viewer size!
+
+      .row
+        .small-12.columns
+          label for="viewer-size-fixed" Fixed viewer width?!
+          input id="viewer-size-fixed" type="checkbox" checked=""
