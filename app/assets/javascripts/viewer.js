@@ -186,13 +186,13 @@ function lalala(tree_input)
     TREE_BRANCH_NORMAL     = "normalogram";
     TREE_BRANCH_STYLE      = document.getElementById("tree-branch-style").value;
 
-    if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
-      document.getElementById("tree-rotation").removeAttribute("disabled");
+    // if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+    //   document.getElementById("tree-rotation").removeAttribute("disabled");
       TREE_ROTATION = parseFloat(document.getElementById("tree-rotation").value);
-    } else {
-      document.getElementById("tree-rotation").setAttribute("disabled", "");
-      TREE_ROTATION = NOT_ROTATED;
-    }
+    // } else {
+    //   document.getElementById("tree-rotation").setAttribute("disabled", "");
+    //   TREE_ROTATION = NOT_ROTATED;
+    // }
     // TREE_ROTATION = 0;
 
     if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
@@ -557,7 +557,7 @@ function lalala(tree_input)
       .attr("stroke", function(d) { return d.target.color; });
 
     // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
-    if (TREE_ROTATION == ROTATED) {
+    if (TREE_ROTATION == ROTATED && LAYOUT_STATE == LAYOUT_STRAIGHT) {
       foo("svg-tree", "apple-chart");
     }
   }
@@ -566,8 +566,11 @@ function lalala(tree_input)
 
   function text_x_offset(d)
   {
+    // TODO replace these with function params
+    var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
+
     if (LAYOUT_STATE == LAYOUT_CIRCLE) { // circular
-      return d[the_x] < 90 || d[the_x] > 270 ? "0.6em" : "-0.6em";
+      return test ? "0.6em" : "-0.6em";
     } else {
       if (LABEL_ROTATION == 90) {
         return "0.6em"; // They're going up and down so move away from branch
@@ -604,7 +607,10 @@ function lalala(tree_input)
 
   function circular_text_anchor(d)
   {
-    return d[the_x] < 90 || d[the_x] > 270 ? "start" : "end";
+    // TODO replace these with function params
+    var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
+
+    return test ? "start" : "end";
   }
 
   function straight_text_anchor(d) {
@@ -629,9 +635,12 @@ function lalala(tree_input)
 // These functions update the layout
   function circle_transform(d, x, y)
   {
+
+    var test = TREE_ROTATION == ROTATED ? d[x] < 180 : (d[x] < 90 || d[x] > 270);
+
     return "rotate(" + d[x] +
       ") translate(" + d[y] + ", 0)" +
-      (d[x] < 90 || d[x] > 270 ? "" : "rotate(180)");
+      (test ?  "" : "rotate(180)");
   }
 
   function rectangle_transform(d, x, y)
