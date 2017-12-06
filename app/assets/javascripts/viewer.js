@@ -102,7 +102,7 @@ function lalala(tree_input)
   listener("outer-width", "change", draw_tree);
   listener("width-padding", "change", draw_tree);
   listener("outer-height", "change", draw_tree);
-  listener("heigth-padding", "change", draw_tree);
+  listener("height-padding", "change", draw_tree);
 
   listener("tree-shape", "change", draw_tree);
   listener("tree-branch-style", "change", draw_tree);
@@ -143,32 +143,30 @@ function lalala(tree_input)
     elem.value = val;
   }
 
-  function draw_tree()
+  // Choose sorting function
+  function sort_descending(a, b)
   {
-    clear_elem("svg-tree");
+    return (a.value - b.value) || d3.ascending(a.data.length, b.data.length);
+  }
 
+  function sort_ascending(a, b)
+  {
+    return (b.value - a.value) || d3.descending(a.data.length, b.data.length);
+  }
+
+  function sort_none(a, b)
+  {
+    return 0;
+  }
+
+  function update_form_constants()
+  {
+    console.log("updating form constants");
     // Get sorting options
     SORT_NONE = "not-sorted";
     SORT_ASCENDING = "ascending";
     SORT_DESCENDING = "descending";
     SORT_STATE = document.getElementById("tree-sort").value;
-
-
-    // Choose sorting function
-    function sort_descending(a, b)
-    {
-      return (a.value - b.value) || d3.ascending(a.data.length, b.data.length);
-    }
-
-    function sort_ascending(a, b)
-    {
-      return (b.value - a.value) || d3.descending(a.data.length, b.data.length);
-    }
-
-    function sort_none(a, b)
-    {
-      return 0;
-    }
 
     if (SORT_STATE == SORT_NONE) {
       sort_function = sort_none;
@@ -217,13 +215,13 @@ function lalala(tree_input)
     if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
       // It could be coming from the circle which has a different slider behavior
       elem = document.getElementById("tree-rotation");
-      var val = elem.value;
-      if (val == "270") {
-        TREE_ROTATION = 270;
-        elem.setAttribute("value", "270");
-      } else  {
+      var val = parseInt(elem.value);
+      if (val < 180) { // The slider will jump to the beginning so set it to 0.
         TREE_ROTATION = 0;
         elem.setAttribute("value", "0");
+      } else {
+        TREE_ROTATION = 270;
+        elem.setAttribute("value", "270");
       }
       elem.setAttribute("min", "0");
       elem.setAttribute("max", "270");
@@ -235,7 +233,7 @@ function lalala(tree_input)
       TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
       elem.setAttribute("min", "0");
       elem.setAttribute("max", "360");
-      elem.setAttribute("step", "1")
+      elem.setAttribute("step", "180")
     }
 
     if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
@@ -391,9 +389,38 @@ function lalala(tree_input)
     the_x = "x";
     the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
 
+    VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
+    if (VIEWER_SIZE_FIXED) {
+      // document.getElementById("viewer-height").removeAttribute("disabled");
+      // document.getElementById("viewer-width").removeAttribute("disabled");
+
+      // VIEWER_HEIGHT = parseInt(document.getElementById("viewer-height").value);
+      // VIEWER_WIDTH = parseInt(document.getElementById("viewer-width").value);
+      //
+      document.getElementById("tree-div")
+        .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
+
+    } else {
+      // document.getElementById("viewer-height").setAttribute("disabled", "");
+      // document.getElementById("viewer-width").setAttribute("disabled", "");
+
+      document.getElementById("tree-div").removeAttribute("style");
+    }
+
+
+  }
+
+
+
+  function draw_tree()
+  {
+    clear_elem("svg-tree");
+    console.log("drawing");
+
+    update_form_constants();
+
     // When setting size for circular layout, use width by convention, but they will be the same.
     circle_cluster = d3.cluster()
-    // TODO handle rotation
       .size([360, the_inner_width])
       .separation(function(a, b) { return 1; });
 
@@ -414,24 +441,6 @@ function lalala(tree_input)
       rectangle_cluster(root);
       // TODO should this be width or height
       setRadius(root, root.data.length = 0, (the_inner_height*2) / maxLength(root));
-    }
-
-    VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
-    if (VIEWER_SIZE_FIXED) {
-      // document.getElementById("viewer-height").removeAttribute("disabled");
-      // document.getElementById("viewer-width").removeAttribute("disabled");
-
-      // VIEWER_HEIGHT = parseInt(document.getElementById("viewer-height").value);
-      // VIEWER_WIDTH = parseInt(document.getElementById("viewer-width").value);
-      //
-      document.getElementById("tree-div")
-        .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
-
-    } else {
-      // document.getElementById("viewer-height").setAttribute("disabled", "");
-      // document.getElementById("viewer-width").setAttribute("disabled", "");
-
-      document.getElementById("tree-div").removeAttribute("style");
     }
 
     svg = d3.select("#tree-div")
