@@ -83,6 +83,10 @@ var elem;
 // The mega function
 function lalala(tree_input)
 {
+  function listener(id, action, fn)
+  {
+    d3.select("#" + id).on(action, fn);
+  }
 
   // Set rotation constants
   ROTATED = 270;
@@ -93,8 +97,32 @@ function lalala(tree_input)
   d3.select("#save-svg").on("click", save_svg_data);
   d3.select("#save-png").on("click", save_png_data);
 
-  // One listener to rule them all
-  d3.select("#tree-form").on("change", draw_tree);
+
+  // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
+  listener("outer-width", "change", draw_tree);
+  listener("width-padding", "change", draw_tree);
+  listener("outer-height", "change", draw_tree);
+  listener("heigth-padding", "change", draw_tree);
+
+  listener("tree-shape", "change", draw_tree);
+  listener("tree-branch-style", "change", draw_tree);
+  listener("tree-rotation", "change", draw_tree);
+  listener("tree-sort", "change", draw_tree);
+
+  listener("branch-width", "change", draw_tree);
+
+  listener("show-inner-labels", "change", draw_tree);
+  listener("inner-label-size", "change", draw_tree);
+  listener("show-leaf-labels", "change", draw_tree);
+  listener("leaf-label-size", "change", draw_tree);
+  listener("align-tip-labels", "change", draw_tree);
+
+  listener("show-inner-dots", "change", draw_tree);
+  listener("inner-dots-size", "change", draw_tree);
+  listener("show-leaf-dots", "change", draw_tree);
+  listener("leaf-dots-size", "change", draw_tree);
+
+  listener("viewer-size-fixed", "change", draw_tree);
 
   draw_tree();
 
@@ -563,6 +591,47 @@ function lalala(tree_input)
     }
   }
 
+  function update_labels()
+  {
+    // TODO get values of each form element?
+
+    if (SHOW_INNER_LABELS) {
+      labels = chart.append("g")
+        .selectAll("text")
+        .data(root.descendants().filter(is_inner))
+        .enter().append("text")
+        .attr("class", "inner")
+        .style("font-size", INNER_LABEL_SIZE)
+        .attr("dy", text_y_offset)
+        .attr("dx", text_x_offset)
+        .attr("text-anchor", function(d) {
+          return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+        })
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .text(function(d) { return d.data.name; })
+    }
+
+    if (SHOW_LEAF_LABELS) {
+      labels = chart.append("g")
+        .selectAll("text")
+        .data(root.descendants().filter(is_leaf))
+        .enter().append("text")
+        .attr("class", "leaf")
+        .style("font-size", LEAF_LABEL_SIZE)
+        .attr("dy", text_y_offset)
+        .attr("dx", text_x_offset)
+        .attr("text-anchor", function(d) {
+          return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+        })
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .text(function(d) { return d.data.name; })
+    }
+  }
+
 
 
   function text_x_offset(d)
@@ -811,3 +880,4 @@ function foo(svg_id, chart_id)
     g_chart_rotation + " " + g_chart_translation
   );
 }
+
