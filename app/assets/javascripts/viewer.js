@@ -128,26 +128,26 @@ function lalala(tree_input)
   listener("height-padding", "change", draw_tree);
 
   listener("tree-shape", "change", draw_tree);
-  listener("tree-branch-style", "change", draw_tree);
+  listener("tree-branch-style", "change", redraw_tree);
   listener("tree-rotation", "change", draw_tree);
   listener("tree-sort", "change", draw_tree);
 
-  listener("branch-width", "change", function(e) {
+  listener("branch-width", "change", function() {
     update_form_constants();
     draw_links();
     draw_link_extensions();
   });
 
-  listener("show-inner-labels", "change", function(e) { update_and_draw(draw_inner_labels) });
-  listener("inner-label-size", "change", function(e) { update_and_draw(draw_inner_labels) });
-  listener("show-leaf-labels", "change", function(e) { update_and_draw(draw_leaf_labels) });
-  listener("leaf-label-size", "change", function(e) { update_and_draw(draw_leaf_labels) });
-  listener("align-tip-labels", "change", function(e) {
+  listener("show-inner-labels", "change", function() { update_and_draw(draw_inner_labels) });
+  listener("inner-label-size", "change", function() { update_and_draw(draw_inner_labels) });
+  listener("show-leaf-labels", "change", function() { update_and_draw(draw_leaf_labels) });
+  listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels) });
+  listener("align-tip-labels", "change", function() {
     update_form_constants();
     draw_link_extensions();
     draw_leaf_labels();
   });
-  listener("label-rotation", "change", function(e) { update_form_constants(); draw_leaf_labels(); draw_inner_labels()});
+  listener("label-rotation", "change", function() { update_form_constants(); draw_leaf_labels(); draw_inner_labels()});
 
   listener("show-inner-dots", "change", draw_tree);
   listener("inner-dots-size", "change", draw_tree);
@@ -613,7 +613,7 @@ function lalala(tree_input)
         .style("font-size", LEAF_LABEL_SIZE)
 
       labels
-        // What to do for merging
+      // What to do for merging
         .merge(labels)
         .transition(TR)
         // Same things that may change
@@ -651,8 +651,9 @@ function lalala(tree_input)
       // Draw the link extensions.  Don't need merge because they are either on or off.
       linkExtension
         .enter().append("path")
-        // Start from the tip of the actual branch
-        .attr("d", function(d, i) {
+      // Start from the tip of the actual branch
+        .attr("d", function (d, i)
+        {
           return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
         })
         .transition(TR)
@@ -662,12 +663,15 @@ function lalala(tree_input)
         .attr("stroke-width", BRANCH_WIDTH)
         .attr("stroke-dasharray", "1, 5")
         .attr("class", "dotted-links")
-        .each(function (d) {
+        .each(function (d)
+        {
           d.target.linkExtensionNode = this;
         })
-        .attr("d", function (d) {
+        .attr("d", function (d)
+        {
           return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircleExtension(d) : link_rectangle_extension(d, the_x, "y");
-        });
+        })
+        .each("end",);
     } else {
       linkExtension
         .transition(TR)
@@ -716,6 +720,19 @@ function lalala(tree_input)
   {
     update_form_constants();
     draw_fn();
+  }
+
+  // Similar to draw_tree but meant to be called by a listener that doesn't need to replace the svg and g chart as well.
+  function redraw_tree()
+  {
+    update_form_constants();
+    draw_inner_dots();
+    draw_leaf_dots();
+    draw_inner_labels();
+    draw_leaf_labels();
+    draw_link_extensions();
+    draw_links();
+    adjust_tree();
   }
 
   // A magical function
@@ -960,7 +977,7 @@ function save_svg_data()
 {
   saveAs(
     new Blob([svg_elem_to_string("svg-tree")],
-    { type : "application/svg+xml" }),
+      { type : "application/svg+xml" }),
     "tree.svg"
   );
 }
@@ -984,7 +1001,7 @@ function foo(svg_id, chart_id)
   var g_chart_rotation = "rotate(270)";
   var g_chart_translation = "translate(" +
     ((new_height_padding / 2) - new_svg_height) + " " +
-      // Don't need width padding because it is accounted for by the bounding box.  Also need the bbox height not width as it is now rotated.
+    // Don't need width padding because it is accounted for by the bounding box.  Also need the bbox height not width as it is now rotated.
     ((new_svg_width - chart_bbox.height) / 2) + ")";
 
   // Update elements
