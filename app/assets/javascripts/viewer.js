@@ -87,7 +87,8 @@ var TR;
 // The mega function
 function lalala(tree_input)
 {
-  TR = d3.transition().duration(750).ease(d3.easeExp)
+  // TODO this transition doesn't get picked up by the draw functions when they are called by a listener.
+  TR = d3.transition().duration(750).ease(d3.easeExp);
 
   function listener(id, action, fn)
   {
@@ -137,7 +138,11 @@ function lalala(tree_input)
   listener("inner-label-size", "change", function(e) { update_and_draw(draw_inner_labels) });
   listener("show-leaf-labels", "change", function(e) { update_and_draw(draw_leaf_labels) });
   listener("leaf-label-size", "change", function(e) { update_and_draw(draw_leaf_labels) });
-  listener("align-tip-labels", "change", draw_tree);
+  listener("align-tip-labels", "change", function(e) {
+    update_form_constants();
+    draw_link_extensions();
+    draw_leaf_labels();
+  });
   listener("label-rotation", "change", function(e) { update_form_constants(); draw_leaf_labels(); draw_inner_labels()});
 
   listener("show-inner-dots", "change", draw_tree);
@@ -570,23 +575,6 @@ function lalala(tree_input)
           return pick_transform(d);
         });
 
-
-
-      // inner_labels= chart.append("g")
-      //   .selectAll("text")
-      //   .data(root.descendants().filter(is_inner))
-      //   .enter().append("text")
-      //   .attr("class", "inner")
-      //   .style("font-size", INNER_LABEL_SIZE)
-      //   .attr("dy", text_y_offset)
-      //   .attr("dx", text_x_offset)
-      //   .attr("text-anchor", function(d) {
-      //     return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
-      //   })
-      //   .attr("transform", function(d) {
-      //     return pick_transform(d);
-      //   })
-      //   .text(function(d) { return d.data.name; })
     } else {
       inner_labels.transition(TR).style("font-size", 0).remove();
     }
@@ -637,41 +625,36 @@ function lalala(tree_input)
     } else {
       labels.transition(TR).style("font-size", 0).remove();
     }
-
-  //   labels = chart.append("g")
-  //     .selectAll("text")
-  //     .data(root.descendants().filter(is_leaf))
-  //     .enter().append("text")
-  //     .attr("class", "leaf")
-  //     .style("font-size", LEAF_LABEL_SIZE)
-  //     .attr("dy", text_y_offset)
-  //     .attr("dx", text_x_offset)
-  //     .attr("text-anchor", function(d) {
-  //       return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
-  //     })
-  //     .attr("transform", function(d) {
-  //       return pick_transform(d);
-  //     })
-  //     .text(function(d) { return d.data.name; })
-  // }
-
-}
+  }
 
   function draw_link_extensions()
   {
+    linkExtension = d3.select("#link-extension-container")
+      .selectAll("path")
+      .data(root.links().filter(function (d) {
+        return !d.target.children;
+      }));
+
+    var starts = root.links().filter(function(d) {
+      return !d.target.children;
+    }).map(function(d) {
+      return { "the_x" : d.target[the_x], "the_y" : d.target[the_y] };
+    });
+
     if (align_tip_labels) {
-      // Draw the link extensions
-      linkExtension = chart.append("g")
-        .attr("class", "link-extensions")
-        .attr("id", "qwfp")
-        .selectAll("path")
-        .data(root.links().filter(function (d) {
-          return !d.target.children;
-        }))
+      linkExtension.exit().remove();
+
+      // Draw the link extensions.  Don't need merge because they are either on or off.
+      linkExtension
         .enter().append("path")
+        // Start from the tip of the actual branch
+        .attr("d", function(d, i) {
+          return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
+        })
+        .transition(TR)
         .style("fill", "none")
         .style("stroke", "#000")
-        .style("stroke-opacity", "0.25")
+        .style("stroke-opacity", "0.35")
         .attr("stroke-width", BRANCH_WIDTH)
         .attr("stroke-dasharray", "1, 5")
         .attr("class", "dotted-links")
@@ -682,8 +665,13 @@ function lalala(tree_input)
           return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircleExtension(d) : link_rectangle_extension(d, the_x, "y");
         });
     } else {
-      d3.selectAll(".link-extensions").remove();
-    }
+      linkExtension
+        .transition(TR).
+        attr("d", function(d, i) {
+        return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
+      })
+        .remove();
+      }
   }
 
   function draw_links()
@@ -737,7 +725,7 @@ function lalala(tree_input)
     chart.append("g").attr("id", "leaf-label-container");
     draw_leaf_labels();
 
-
+    chart.append("g").attr("id", "link-extension-container");
     draw_link_extensions();
     draw_links();
 
