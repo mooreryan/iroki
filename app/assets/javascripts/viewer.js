@@ -45,6 +45,8 @@ function upload_button(el, callback) {
 // Stuff from the old viewer stops here
 //
 
+
+
 // TODO get this from the CSS
 var FORM_HEIGHT = 650;
 
@@ -80,13 +82,33 @@ var the_inner_width, the_inner_height, the_outer_width, the_outer_height, the_wi
 // To hold temporary DOM elements
 var elem;
 
+var TR;
+
 // The mega function
 function lalala(tree_input)
 {
+  TR = d3.transition().duration(750).ease(d3.easeExp)
+
   function listener(id, action, fn)
   {
     d3.select("#" + id).on(action, fn);
   }
+
+  function pick_transform(d)
+  {
+    if (LAYOUT_STATE == LAYOUT_CIRCLE && is_leaf(d)) {
+      return circle_transform(d, the_x, align_tip_labels ? "y" : the_y);
+    } else if (LAYOUT_STATE == LAYOUT_CIRCLE) {
+      return circle_transform(d, the_x, the_y);
+    } else if (LAYOUT_STATE == LAYOUT_STRAIGHT && is_leaf(d)) {
+      return rectangle_transform(d, the_x, align_tip_labels ? "y" : the_y);
+    } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+      return rectangle_transform(d, the_x, the_y);
+    } else {
+      // TODO handle radial layout
+    }
+  }
+
 
   // Set rotation constants
   ROTATED = 270;
@@ -114,7 +136,7 @@ function lalala(tree_input)
   listener("show-inner-labels", "change", draw_tree);
   listener("inner-label-size", "change", draw_tree);
   listener("show-leaf-labels", "change", draw_tree);
-  listener("leaf-label-size", "change", draw_tree);
+  listener("leaf-label-size", "change", function(e) { update_and_draw(draw_leaf_labels) });
   listener("align-tip-labels", "change", draw_tree);
   listener("label-rotation", "change", draw_tree);
 
@@ -449,17 +471,8 @@ function lalala(tree_input)
       .style("background-color", "white"); // TODO make bg color an option
   }
 
-  function draw_tree()
+  function draw_chart()
   {
-    clear_elem("svg-tree");
-    console.log("drawing");
-
-    update_form_constants();
-
-    set_up_hierarchy();
-
-    draw_svg();
-
     var chart_width, chart_height;
     var chart_transform_width, chart_transform_height;
     if (LAYOUT_STATE == LAYOUT_CIRCLE) {
@@ -482,22 +495,10 @@ function lalala(tree_input)
         "rotate(" + TREE_ROTATION + " " + the_outer_width + " " + the_outer_height + ") " +
         "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
       .attr("id", "apple-chart");
+  }
 
-    function pick_transform(d)
-    {
-      if (LAYOUT_STATE == LAYOUT_CIRCLE && is_leaf(d)) {
-        return circle_transform(d, the_x, align_tip_labels ? "y" : the_y);
-      } else if (LAYOUT_STATE == LAYOUT_CIRCLE) {
-        return circle_transform(d, the_x, the_y);
-      } else if (LAYOUT_STATE == LAYOUT_STRAIGHT && is_leaf(d)) {
-        return rectangle_transform(d, the_x, align_tip_labels ? "y" : the_y);
-      } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
-        return rectangle_transform(d, the_x, the_y);
-      } else {
-        // TODO handle radial layout
-      }
-    }
-
+  function draw_inner_dots()
+  {
     if (SHOW_INNER_DOTS) {
       chart.append("g")
         .selectAll("circle")
@@ -512,7 +513,10 @@ function lalala(tree_input)
         })
         .style("fill", function(d) { return d.color; } );
     }
+  }
 
+  function draw_leaf_dots()
+  {
     if (SHOW_LEAF_DOTS) {
       chart.append("g")
         .selectAll("circle")
@@ -525,7 +529,10 @@ function lalala(tree_input)
         })
         .style("fill", function(d) { return d.color; } );
     }
+  }
 
+  function draw_inner_labels()
+  {
     if (SHOW_INNER_LABELS) {
       labels = chart.append("g")
         .selectAll("text")
@@ -543,13 +550,23 @@ function lalala(tree_input)
         })
         .text(function(d) { return d.data.name; })
     }
+  }
 
+  function draw_leaf_labels()
+  {
     if (SHOW_LEAF_LABELS) {
-      labels = chart.append("g")
+      labels = d3.select("#leaf-label-container")
         .selectAll("text")
-        .data(root.descendants().filter(is_leaf))
+        .data(root.descendants().filter(is_leaf));
+
+      labels.exit().remove();
+
+      // TODO clean up duplicates
+      labels
         .enter().append("text")
         .attr("class", "leaf")
+        .text(function(d) { return d.data.name; })
+        // These are things that may change
         .style("font-size", LEAF_LABEL_SIZE)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
@@ -559,10 +576,42 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .text(function(d) { return d.data.name; })
+        // What to do for merging
+        .merge(labels)
+        .transition(TR)
+        // Same things that may change
+        .style("font-size", LEAF_LABEL_SIZE)
+        .attr("dy", text_y_offset)
+        .attr("dx", text_x_offset)
+        .attr("text-anchor", function(d) {
+          return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+        })
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
     }
 
+  //   labels = chart.append("g")
+  //     .selectAll("text")
+  //     .data(root.descendants().filter(is_leaf))
+  //     .enter().append("text")
+  //     .attr("class", "leaf")
+  //     .style("font-size", LEAF_LABEL_SIZE)
+  //     .attr("dy", text_y_offset)
+  //     .attr("dx", text_x_offset)
+  //     .attr("text-anchor", function(d) {
+  //       return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+  //     })
+  //     .attr("transform", function(d) {
+  //       return pick_transform(d);
+  //     })
+  //     .text(function(d) { return d.data.name; })
+  // }
 
+}
+
+  function draw_link_extensions()
+  {
     if (align_tip_labels) {
       // Draw the link extensions
       linkExtension = chart.append("g")
@@ -588,7 +637,10 @@ function lalala(tree_input)
     } else {
       d3.selectAll(".link-extensions").remove();
     }
+  }
 
+  function draw_links()
+  {
     link = chart.append("g")
       .attr("class", "links")
       .selectAll("path")
@@ -602,55 +654,48 @@ function lalala(tree_input)
         return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
       })
       .attr("stroke", function(d) { return d.target.color; });
+  }
 
-    // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
+  function adjust_tree()
+  {
     if (TREE_ROTATION == ROTATED && LAYOUT_STATE == LAYOUT_STRAIGHT) {
       foo("svg-tree", "apple-chart");
     }
   }
 
-  function update_labels()
+  function update_and_draw(draw_fn)
   {
-    // TODO get values of each form element?
-
-    if (SHOW_INNER_LABELS) {
-      labels = chart.append("g")
-        .selectAll("text")
-        .data(root.descendants().filter(is_inner))
-        .enter().append("text")
-        .attr("class", "inner")
-        .style("font-size", INNER_LABEL_SIZE)
-        .attr("dy", text_y_offset)
-        .attr("dx", text_x_offset)
-        .attr("text-anchor", function(d) {
-          return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
-        })
-        .attr("transform", function(d) {
-          return pick_transform(d);
-        })
-        .text(function(d) { return d.data.name; })
-    }
-
-    if (SHOW_LEAF_LABELS) {
-      labels = chart.append("g")
-        .selectAll("text")
-        .data(root.descendants().filter(is_leaf))
-        .enter().append("text")
-        .attr("class", "leaf")
-        .style("font-size", LEAF_LABEL_SIZE)
-        .attr("dy", text_y_offset)
-        .attr("dx", text_x_offset)
-        .attr("text-anchor", function(d) {
-          return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
-        })
-        .attr("transform", function(d) {
-          return pick_transform(d);
-        })
-        .text(function(d) { return d.data.name; })
-    }
+    update_form_constants();
+    draw_fn();
   }
 
+  // A magical function
+  function draw_tree()
+  {
+    clear_elem("svg-tree");
+    console.log("drawing");
 
+    update_form_constants();
+
+    set_up_hierarchy();
+
+    draw_svg();
+    draw_chart();
+    draw_inner_dots();
+    draw_leaf_dots();
+    draw_inner_labels();
+
+    chart.append("g").attr("id", "leaf-label-container");
+    draw_leaf_labels();
+
+
+    draw_link_extensions();
+    draw_links();
+
+    // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
+    adjust_tree();
+
+  }
 
   function text_x_offset(d)
   {
