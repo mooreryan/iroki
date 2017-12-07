@@ -55,7 +55,7 @@ var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
 var the_x, the_y;
 var SIZE, INNER_SIZE;
 var OUTER_WIDTH, OUTER_HEIGHT, HEIGHT_PADDING, WIDTH_PADDING, INNER_WIDTH, INNER_HEIGHT;
-var root, svg, chart, data, circles, labels, linkExtension, link;
+var root, svg, chart, data, circles, labels, inner_labels, leaf_labels, linkExtension, link;
 
 var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
 
@@ -133,12 +133,12 @@ function lalala(tree_input)
 
   listener("branch-width", "change", draw_tree);
 
-  listener("show-inner-labels", "change", draw_tree);
-  listener("inner-label-size", "change", draw_tree);
-  listener("show-leaf-labels", "change", draw_tree);
+  listener("show-inner-labels", "change", function(e) { update_and_draw(draw_inner_labels) });
+  listener("inner-label-size", "change", function(e) { update_and_draw(draw_inner_labels) });
+  listener("show-leaf-labels", "change", function(e) { update_and_draw(draw_leaf_labels) });
   listener("leaf-label-size", "change", function(e) { update_and_draw(draw_leaf_labels) });
   listener("align-tip-labels", "change", draw_tree);
-  listener("label-rotation", "change", draw_tree);
+  listener("label-rotation", "change", function(e) { update_form_constants(); draw_leaf_labels(); draw_inner_labels()});
 
   listener("show-inner-dots", "change", draw_tree);
   listener("inner-dots-size", "change", draw_tree);
@@ -533,12 +533,33 @@ function lalala(tree_input)
 
   function draw_inner_labels()
   {
+    inner_labels = d3.select("#inner-label-container")
+      .selectAll("text")
+      .data(root.descendants().filter(is_inner));
+
     if (SHOW_INNER_LABELS) {
-      labels = chart.append("g")
-        .selectAll("text")
-        .data(root.descendants().filter(is_inner))
+
+      inner_labels.exit().remove();
+
+      inner_labels
         .enter().append("text")
         .attr("class", "inner")
+        .attr("font-size", 0)
+        .attr("dy", text_y_offset)
+        .attr("dx", text_x_offset)
+        .attr("text-anchor", function(d) {
+          return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+        })
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .text(function(d) { return d.data.name; })
+        .transition(TR)
+        .style("font-size", INNER_LABEL_SIZE);
+
+      inner_labels
+        .merge(inner_labels)
+        .transition(TR)
         .style("font-size", INNER_LABEL_SIZE)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
@@ -547,27 +568,45 @@ function lalala(tree_input)
         })
         .attr("transform", function(d) {
           return pick_transform(d);
-        })
-        .text(function(d) { return d.data.name; })
+        });
+
+
+
+      // inner_labels= chart.append("g")
+      //   .selectAll("text")
+      //   .data(root.descendants().filter(is_inner))
+      //   .enter().append("text")
+      //   .attr("class", "inner")
+      //   .style("font-size", INNER_LABEL_SIZE)
+      //   .attr("dy", text_y_offset)
+      //   .attr("dx", text_x_offset)
+      //   .attr("text-anchor", function(d) {
+      //     return LAYOUT_STATE == LAYOUT_CIRCLE ? circular_text_anchor(d) : straight_text_anchor(d);
+      //   })
+      //   .attr("transform", function(d) {
+      //     return pick_transform(d);
+      //   })
+      //   .text(function(d) { return d.data.name; })
+    } else {
+      inner_labels.transition(TR).style("font-size", 0).remove();
     }
   }
 
   function draw_leaf_labels()
   {
-    if (SHOW_LEAF_LABELS) {
-      labels = d3.select("#leaf-label-container")
-        .selectAll("text")
-        .data(root.descendants().filter(is_leaf));
 
+    labels = d3.select("#leaf-label-container")
+      .selectAll("text")
+      .data(root.descendants().filter(is_leaf));
+
+    if (SHOW_LEAF_LABELS) {
       labels.exit().remove();
 
       // TODO clean up duplicates
       labels
         .enter().append("text")
         .attr("class", "leaf")
-        .text(function(d) { return d.data.name; })
-        // These are things that may change
-        .style("font-size", LEAF_LABEL_SIZE)
+        .attr("font-size", 0)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
         .attr("text-anchor", function(d) {
@@ -576,6 +615,12 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
+        .text(function(d) { return d.data.name; })
+        .transition(TR)
+        // These are things that may change
+        .style("font-size", LEAF_LABEL_SIZE)
+
+      labels
         // What to do for merging
         .merge(labels)
         .transition(TR)
@@ -589,6 +634,8 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
+    } else {
+      labels.transition(TR).style("font-size", 0).remove();
     }
 
   //   labels = chart.append("g")
@@ -683,6 +730,8 @@ function lalala(tree_input)
     draw_chart();
     draw_inner_dots();
     draw_leaf_dots();
+
+    chart.append("g").attr("id", "inner-label-container");
     draw_inner_labels();
 
     chart.append("g").attr("id", "leaf-label-container");
