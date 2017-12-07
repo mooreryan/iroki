@@ -132,7 +132,11 @@ function lalala(tree_input)
   listener("tree-rotation", "change", draw_tree);
   listener("tree-sort", "change", draw_tree);
 
-  listener("branch-width", "change", draw_tree);
+  listener("branch-width", "change", function(e) {
+    update_form_constants();
+    draw_links();
+    draw_link_extensions();
+  });
 
   listener("show-inner-labels", "change", function(e) { update_and_draw(draw_inner_labels) });
   listener("inner-label-size", "change", function(e) { update_and_draw(draw_inner_labels) });
@@ -666,21 +670,31 @@ function lalala(tree_input)
         });
     } else {
       linkExtension
-        .transition(TR).
-        attr("d", function(d, i) {
-        return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
-      })
+        .transition(TR)
+        .attr("d", function(d, i) {
+          return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
+        })
         .remove();
-      }
+    }
   }
 
   function draw_links()
   {
-    link = chart.append("g")
-      .attr("class", "links")
+    link = d3.select("#link-container")
       .selectAll("path")
-      .data(root.links())
-      .enter().append("path")
+      .data(root.links());
+
+    link.enter().append("path")
+      .style("fill", "none")
+      .style("stroke", "#000")
+      .attr("stroke-width", BRANCH_WIDTH)
+      .each(function(d) { d.target.linkNode = this; })
+      .attr("d", function(d) {
+        return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
+      })
+      .attr("stroke", function(d) { return d.target.color; });
+
+    link.merge(link).transition(TR)
       .style("fill", "none")
       .style("stroke", "#000")
       .attr("stroke-width", BRANCH_WIDTH)
@@ -727,6 +741,8 @@ function lalala(tree_input)
 
     chart.append("g").attr("id", "link-extension-container");
     draw_link_extensions();
+
+    chart.append("g").attr("id", "link-container");
     draw_links();
 
     // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
