@@ -55,7 +55,7 @@ var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
 var the_x, the_y;
 var SIZE, INNER_SIZE;
 var OUTER_WIDTH, OUTER_HEIGHT, HEIGHT_PADDING, WIDTH_PADDING, INNER_WIDTH, INNER_HEIGHT;
-var root, svg, chart, data, circles, labels, inner_labels, leaf_labels, linkExtension, link;
+var root, svg, chart, data, circles, labels, inner_labels, leaf_labels, linkExtension, link, inner_dots, leaf_dots;
 
 var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
 
@@ -124,6 +124,7 @@ function lalala(tree_input)
   // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
   listener("outer-width", "change", draw_tree);
   listener("width-padding", "change", draw_tree);
+
   listener("outer-height", "change", draw_tree);
   listener("height-padding", "change", draw_tree);
 
@@ -131,6 +132,17 @@ function lalala(tree_input)
   listener("tree-branch-style", "change", redraw_tree);
   listener("tree-rotation", "change", draw_tree);
   listener("tree-sort", "change", draw_tree);
+  // listener("tree-sort", "change", function() {
+  //   update_form_constants();
+  //   set_up_hierarchy(); // The regular redraw skips this step.
+  //   draw_inner_dots();
+  //   draw_leaf_dots();
+  //   draw_inner_labels();
+  //   draw_leaf_labels();
+  //   draw_link_extensions();
+  //   draw_links();
+  //   adjust_tree();
+  // });
 
   listener("branch-width", "change", function() {
     update_form_constants();
@@ -138,23 +150,27 @@ function lalala(tree_input)
     draw_link_extensions();
   });
 
-  listener("show-inner-labels", "change", function() { update_and_draw(draw_inner_labels) });
-  listener("inner-label-size", "change", function() { update_and_draw(draw_inner_labels) });
-  listener("show-leaf-labels", "change", function() { update_and_draw(draw_leaf_labels) });
-  listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels) });
+  listener("show-inner-labels", "change", function() { update_and_draw(draw_inner_labels); });
+  listener("inner-label-size", "change", function() { update_and_draw(draw_inner_labels); });
+  listener("show-leaf-labels", "change", function() { update_and_draw(draw_leaf_labels); });
+  listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels); });
   listener("align-tip-labels", "change", function() {
     update_form_constants();
     draw_link_extensions();
     draw_leaf_labels();
   });
-  listener("label-rotation", "change", function() { update_form_constants(); draw_leaf_labels(); draw_inner_labels()});
+  listener("label-rotation", "change", function() {
+    update_form_constants();
+    draw_leaf_labels();
+    draw_inner_labels();
+  });
 
-  listener("show-inner-dots", "change", draw_tree);
-  listener("inner-dots-size", "change", draw_tree);
-  listener("show-leaf-dots", "change", draw_tree);
-  listener("leaf-dots-size", "change", draw_tree);
+  listener("show-inner-dots", "change", function() { update_and_draw(draw_inner_dots); });
+  listener("inner-dots-size", "change", function() { update_and_draw(draw_inner_dots); });
+  listener("show-leaf-dots", "change", function() { update_and_draw(draw_leaf_dots); });
+  listener("leaf-dots-size", "change", function() { update_and_draw(draw_leaf_dots); });
 
-  listener("viewer-size-fixed", "change", draw_tree);
+  listener("viewer-size-fixed", "change", update_viewer_size_fixed);
 
   draw_tree();
 
@@ -190,6 +206,27 @@ function lalala(tree_input)
   function sort_none(a, b)
   {
     return 0;
+  }
+
+  function update_viewer_size_fixed()
+  {
+    VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
+    if (VIEWER_SIZE_FIXED) {
+      // document.getElementById("viewer-height").removeAttribute("disabled");
+      // document.getElementById("viewer-width").removeAttribute("disabled");
+
+      // VIEWER_HEIGHT = parseInt(document.getElementById("viewer-height").value);
+      // VIEWER_WIDTH = parseInt(document.getElementById("viewer-width").value);
+      //
+      document.getElementById("tree-div")
+        .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
+
+    } else {
+      // document.getElementById("viewer-height").setAttribute("disabled", "");
+      // document.getElementById("viewer-width").setAttribute("disabled", "");
+
+      document.getElementById("tree-div").removeAttribute("style");
+    }
   }
 
   function update_form_constants()
@@ -265,7 +302,7 @@ function lalala(tree_input)
       TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
       elem.setAttribute("min", "0");
       elem.setAttribute("max", "360");
-      elem.setAttribute("step", "180")
+      elem.setAttribute("step", "1")
     }
 
     if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
@@ -421,24 +458,7 @@ function lalala(tree_input)
     the_x = "x";
     the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
 
-    VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
-    if (VIEWER_SIZE_FIXED) {
-      // document.getElementById("viewer-height").removeAttribute("disabled");
-      // document.getElementById("viewer-width").removeAttribute("disabled");
-
-      // VIEWER_HEIGHT = parseInt(document.getElementById("viewer-height").value);
-      // VIEWER_WIDTH = parseInt(document.getElementById("viewer-width").value);
-      //
-      document.getElementById("tree-div")
-        .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
-
-    } else {
-      // document.getElementById("viewer-height").setAttribute("disabled", "");
-      // document.getElementById("viewer-width").setAttribute("disabled", "");
-
-      document.getElementById("tree-div").removeAttribute("style");
-    }
-
+    update_viewer_size_fixed();
 
   }
 
@@ -471,13 +491,20 @@ function lalala(tree_input)
 
   function draw_svg()
   {
-    svg = d3.select("#tree-div")
-      .append("svg")
-      .attr("width", the_outer_width * 2)
-      .attr("height", the_outer_height * 2)
-      .attr("id", "svg-tree")
-      // .attr("transform", "rotate(" + TREE_ROTATION + ")")
-      .style("background-color", "white"); // TODO make bg color an option
+    if (document.getElementById("svg-tree")) {
+      svg.merge(svg)
+        .transition(TR)
+        .attr("width", the_outer_width * 2)
+        .attr("height", the_outer_height * 2)
+        .style("background-color", "white"); // TODO make bg color an option
+    } else {
+      svg = d3.select("#tree-div")
+        .append("svg")
+        .attr("id", "svg-tree")
+        .attr("width", the_outer_width * 2)
+        .attr("height", the_outer_height * 2)
+        .style("background-color", "white"); // TODO make bg color an option
+    }
   }
 
   function draw_chart()
@@ -497,46 +524,107 @@ function lalala(tree_input)
       chart_transform_width  = the_outer_width * the_width_padding;
       chart_transform_height = the_outer_height * the_height_padding;
     }
-    chart = svg.append("g")
-      .attr("width", chart_width)
-      .attr("height", chart_height)
-      .attr("transform", // the chart size is INNER_blah * 2
-        "rotate(" + TREE_ROTATION + " " + the_outer_width + " " + the_outer_height + ") " +
-        "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
-      .attr("id", "apple-chart");
+
+    if (document.getElementById("apple-chart")) {
+      chart.merge(chart)
+        .transition(TR)
+        .attr("width", chart_width)
+        .attr("height", chart_height)
+        .attr("transform", // the chart size is INNER_blah * 2
+          "rotate(" + TREE_ROTATION + " " + the_outer_width + " " + the_outer_height + ") " +
+          "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
+    } else {
+      chart = svg.append("g")
+        .attr("id", "apple-chart")
+        .attr("width", chart_width)
+        .attr("height", chart_height)
+        .attr("transform", // the chart size is INNER_blah * 2
+          "rotate(" + TREE_ROTATION + " " + the_outer_width + " " + the_outer_height + ") " +
+          "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
+    }
   }
 
   function draw_inner_dots()
   {
+    inner_dots = d3.select("#inner-dots-container")
+      .selectAll("circle")
+      .data(root.descendants().filter(is_inner));
+
     if (SHOW_INNER_DOTS) {
-      chart.append("g")
-        .selectAll("circle")
-        .data(root.descendants().filter(function (d) {
-          return is_inner(d);
-        }))
+      inner_dots
         .enter().append("circle")
         .attr("class", "inner")
+        .attr("r", 0)
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .style("fill", function(d) { return d.color; } )
+        .transition(TR)
         .attr("r", INNER_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
         .style("fill", function(d) { return d.color; } );
+
+      inner_dots.merge(inner_dots)
+        .transition(TR)
+        .attr("r", INNER_DOT_SIZE)
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .style("fill", function(d) { return d.color; } );
+
+    } else {
+      inner_dots.transition(TR).style("r", 0).remove();
     }
+
+    // if (SHOW_INNER_DOTS) {
+    //   chart.append("g")
+    //     .selectAll("circle")
+    //     .data(root.descendants().filter(function (d) {
+    //       return is_inner(d);
+    //     }))
+    //     .enter().append("circle")
+    //     .attr("class", "inner")
+    //     .attr("r", INNER_DOT_SIZE)
+    //     .attr("transform", function(d) {
+    //       return pick_transform(d);
+    //     })
+    //     .style("fill", function(d) { return d.color; } );
+    // }
   }
 
   function draw_leaf_dots()
   {
+    leaf_dots = d3.select("#leaf-dots-container")
+      .selectAll("circle")
+      .data(root.descendants().filter(is_leaf));
+
     if (SHOW_LEAF_DOTS) {
-      chart.append("g")
-        .selectAll("circle")
-        .data(root.descendants().filter(is_leaf))
+      leaf_dots
         .enter().append("circle")
         .attr("class", "leaf")
+        .attr("r", 0)
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .style("fill", function(d) { return d.color; } )
+        .transition(TR)
         .attr("r", LEAF_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
         .style("fill", function(d) { return d.color; } );
+
+      leaf_dots.merge(leaf_dots)
+        .transition(TR)
+        .attr("r", LEAF_DOT_SIZE)
+        .attr("transform", function(d) {
+          return pick_transform(d);
+        })
+        .style("fill", function(d) { return d.color; } );
+    } else {
+      leaf_dots.transition(TR).style("r", 0).remove();
     }
   }
 
@@ -671,7 +759,6 @@ function lalala(tree_input)
         {
           return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircleExtension(d) : link_rectangle_extension(d, the_x, "y");
         })
-        .each("end",);
     } else {
       linkExtension
         .transition(TR)
@@ -722,7 +809,7 @@ function lalala(tree_input)
     draw_fn();
   }
 
-  // Similar to draw_tree but meant to be called by a listener that doesn't need to replace the svg and g chart as well.
+  // Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
   function redraw_tree()
   {
     update_form_constants();
@@ -733,6 +820,26 @@ function lalala(tree_input)
     draw_link_extensions();
     draw_links();
     adjust_tree();
+  }
+
+  // For redrawing tree even when you need to recalculate hierarchy and merge svg and g chart.
+  function set_up_and_redraw()
+  {
+    update_form_constants();
+
+    set_up_hierarchy();
+
+    draw_svg();
+    draw_chart();
+
+    draw_inner_dots();
+    draw_leaf_dots();
+    draw_inner_labels();
+    draw_leaf_labels();
+    draw_link_extensions();
+    draw_links();
+    adjust_tree();
+
   }
 
   // A magical function
@@ -747,7 +854,11 @@ function lalala(tree_input)
 
     draw_svg();
     draw_chart();
+
+    chart.append("g").attr("id", "inner-dots-container");
     draw_inner_dots();
+
+    chart.append("g").attr("id", "leaf-dots-container");
     draw_leaf_dots();
 
     chart.append("g").attr("id", "inner-label-container");
