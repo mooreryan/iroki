@@ -148,6 +148,7 @@ function lalala(tree_input)
     update_form_constants();
     draw_links();
     draw_link_extensions();
+    adjust_tree();
   });
 
   listener("show-inner-labels", "change", function() { update_and_draw(draw_inner_labels); });
@@ -158,11 +159,15 @@ function lalala(tree_input)
     update_form_constants();
     draw_link_extensions();
     draw_leaf_labels();
+    adjust_tree();
+
   });
   listener("label-rotation", "change", function() {
     update_form_constants();
     draw_leaf_labels();
     draw_inner_labels();
+    adjust_tree();
+
   });
 
   listener("show-inner-dots", "change", function() { update_and_draw(draw_inner_dots); });
@@ -212,19 +217,11 @@ function lalala(tree_input)
   {
     VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
     if (VIEWER_SIZE_FIXED) {
-      // document.getElementById("viewer-height").removeAttribute("disabled");
-      // document.getElementById("viewer-width").removeAttribute("disabled");
-
-      // VIEWER_HEIGHT = parseInt(document.getElementById("viewer-height").value);
-      // VIEWER_WIDTH = parseInt(document.getElementById("viewer-width").value);
-      //
+      // Base the viewer size on the viewport size
       document.getElementById("tree-div")
         .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
 
     } else {
-      // document.getElementById("viewer-height").setAttribute("disabled", "");
-      // document.getElementById("viewer-width").setAttribute("disabled", "");
-
       document.getElementById("tree-div").removeAttribute("style");
     }
   }
@@ -388,6 +385,7 @@ function lalala(tree_input)
       HEIGHT_PADDING = parseFloat(document.getElementById("height-padding").value);
     }
 
+    // Width padding is the total % of padding.  If it is set to 0.1, then the inner width will be 90% of the svg.
     INNER_WIDTH = Math.round(OUTER_WIDTH * (1 - WIDTH_PADDING));
     INNER_HEIGHT = Math.round(OUTER_HEIGHT * (1 - HEIGHT_PADDING));
 
@@ -438,21 +436,7 @@ function lalala(tree_input)
       $("#outer-height-label").text("Height!");
 
       $("#width-padding-label").text("Width padding!");
-      $("#heigth-padding-label").text("Height padding!");
-
-// d3.select("#outer-width-label")
-      //   .transition().duration(1000)
-      //   .style("color", "red")
-      //   .transition().duration(1000)
-      //   .style("color", "black")
-      //   .text("Width!");
-      //
-      // d3.select("#outer-height-label")
-      //   .transition().duration(1000)
-      //   .style("color", "red")
-      //   .transition().duration(1000)
-      //   .style("color", "black")
-      //   .text("Height!");
+      $("#height-padding-label").text("Height padding!");
 
     }
     the_x = "x";
@@ -471,7 +455,6 @@ function lalala(tree_input)
 
     rectangle_cluster = d3.cluster()
       .size([the_inner_width * 2, the_inner_height * 2])
-      // .size([the_inner_width * 2, the_inner_height * 2])
       .separation(function(a, b) { return 1; });
 
     root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
@@ -485,7 +468,7 @@ function lalala(tree_input)
     } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
       rectangle_cluster(root);
       // TODO should this be width or height
-      setRadius(root, root.data.length = 0, (the_inner_height*2) / maxLength(root));
+      setRadius(root, root.data.length = 0, (the_inner_height * 2) / maxLength(root));
     }
   }
 
@@ -493,7 +476,7 @@ function lalala(tree_input)
   {
     if (document.getElementById("svg-tree")) {
       svg.merge(svg)
-        .transition(TR)
+        // .transition(TR)
         .attr("width", the_outer_width * 2)
         .attr("height", the_outer_height * 2)
         .style("background-color", "white"); // TODO make bg color an option
@@ -527,10 +510,10 @@ function lalala(tree_input)
 
     if (document.getElementById("apple-chart")) {
       chart.merge(chart)
-        .transition(TR)
+        // .transition(TR)
         .attr("width", chart_width)
         .attr("height", chart_height)
-        .attr("transform", // the chart size is INNER_blah * 2
+        .attr("transform",
           "rotate(" + TREE_ROTATION + " " + the_outer_width + " " + the_outer_height + ") " +
           "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
     } else {
@@ -538,7 +521,7 @@ function lalala(tree_input)
         .attr("id", "apple-chart")
         .attr("width", chart_width)
         .attr("height", chart_height)
-        .attr("transform", // the chart size is INNER_blah * 2
+        .attr("transform",
           "rotate(" + TREE_ROTATION + " " + the_outer_width + " " + the_outer_height + ") " +
           "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
     }
@@ -554,12 +537,12 @@ function lalala(tree_input)
       inner_dots
         .enter().append("circle")
         .attr("class", "inner")
-        .attr("r", 0)
-        .attr("transform", function(d) {
-          return pick_transform(d);
-        })
-        .style("fill", function(d) { return d.color; } )
-        .transition(TR)
+        // .attr("r", 0)
+        // .attr("transform", function(d) {
+        //   return pick_transform(d);
+        // })
+        // .style("fill", function(d) { return d.color; } )
+        // .transition(TR)
         .attr("r", INNER_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
@@ -567,7 +550,7 @@ function lalala(tree_input)
         .style("fill", function(d) { return d.color; } );
 
       inner_dots.merge(inner_dots)
-        .transition(TR)
+        // .transition(TR)
         .attr("r", INNER_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
@@ -575,7 +558,10 @@ function lalala(tree_input)
         .style("fill", function(d) { return d.color; } );
 
     } else {
-      inner_dots.transition(TR).style("r", 0).remove();
+      inner_dots
+        // .transition(TR)
+        // .style("r", 0)
+        .remove();
     }
 
     // if (SHOW_INNER_DOTS) {
@@ -604,12 +590,12 @@ function lalala(tree_input)
       leaf_dots
         .enter().append("circle")
         .attr("class", "leaf")
-        .attr("r", 0)
-        .attr("transform", function(d) {
-          return pick_transform(d);
-        })
-        .style("fill", function(d) { return d.color; } )
-        .transition(TR)
+        // .attr("r", 0)
+        // .attr("transform", function(d) {
+        //   return pick_transform(d);
+        // })
+        // .style("fill", function(d) { return d.color; } )
+        // .transition(TR)
         .attr("r", LEAF_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
@@ -617,14 +603,17 @@ function lalala(tree_input)
         .style("fill", function(d) { return d.color; } );
 
       leaf_dots.merge(leaf_dots)
-        .transition(TR)
+        // .transition(TR)
         .attr("r", LEAF_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
         .style("fill", function(d) { return d.color; } );
     } else {
-      leaf_dots.transition(TR).style("r", 0).remove();
+      leaf_dots
+        // .transition(TR)
+        // .style("r", 0)
+        .remove();
     }
   }
 
@@ -651,12 +640,12 @@ function lalala(tree_input)
           return pick_transform(d);
         })
         .text(function(d) { return d.data.name; })
-        .transition(TR)
+        // .transition(TR)
         .style("font-size", INNER_LABEL_SIZE);
 
       inner_labels
         .merge(inner_labels)
-        .transition(TR)
+        // .transition(TR)
         .style("font-size", INNER_LABEL_SIZE)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
@@ -668,7 +657,10 @@ function lalala(tree_input)
         });
 
     } else {
-      inner_labels.transition(TR).style("font-size", 0).remove();
+      inner_labels
+        // .transition(TR)
+        // .style("font-size", 0)
+        .remove();
     }
   }
 
@@ -696,14 +688,13 @@ function lalala(tree_input)
           return pick_transform(d);
         })
         .text(function(d) { return d.data.name; })
-        .transition(TR)
-        // These are things that may change
+        // .transition(TR) // This transistion prevents the bounding box calculation.  TODO need to wait on it.
         .style("font-size", LEAF_LABEL_SIZE)
 
       labels
       // What to do for merging
         .merge(labels)
-        .transition(TR)
+        // .transition(TR)
         // Same things that may change
         .style("font-size", LEAF_LABEL_SIZE)
         .attr("dy", text_y_offset)
@@ -715,7 +706,10 @@ function lalala(tree_input)
           return pick_transform(d);
         })
     } else {
-      labels.transition(TR).style("font-size", 0).remove();
+      labels
+        // .transition(TR)
+        // .style("font-size", 0)
+        .remove();
     }
   }
 
@@ -727,11 +721,11 @@ function lalala(tree_input)
         return !d.target.children;
       }));
 
-    var starts = root.links().filter(function(d) {
-      return !d.target.children;
-    }).map(function(d) {
-      return { "the_x" : d.target[the_x], "the_y" : d.target[the_y] };
-    });
+    // var starts = root.links().filter(function(d) {
+    //   return !d.target.children;
+    // }).map(function(d) {
+    //   return { "the_x" : d.target[the_x], "the_y" : d.target[the_y] };
+    // });
 
     if (align_tip_labels) {
       linkExtension.exit().remove();
@@ -740,11 +734,11 @@ function lalala(tree_input)
       linkExtension
         .enter().append("path")
       // Start from the tip of the actual branch
-        .attr("d", function (d, i)
-        {
-          return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
-        })
-        .transition(TR)
+      //   .attr("d", function (d, i)
+      //   {
+      //     return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
+      //   })
+      //   .transition(TR)
         .style("fill", "none")
         .style("stroke", "#000")
         .style("stroke-opacity", "0.35")
@@ -761,10 +755,10 @@ function lalala(tree_input)
         })
     } else {
       linkExtension
-        .transition(TR)
-        .attr("d", function(d, i) {
-          return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
-        })
+        // .transition(TR)
+        // .attr("d", function(d, i) {
+        //   return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
+        // })
         .remove();
     }
   }
@@ -785,7 +779,8 @@ function lalala(tree_input)
       })
       .attr("stroke", function(d) { return d.target.color; });
 
-    link.merge(link).transition(TR)
+    link.merge(link)
+      // .transition(TR)
       .style("fill", "none")
       .style("stroke", "#000")
       .attr("stroke-width", BRANCH_WIDTH)
@@ -800,6 +795,8 @@ function lalala(tree_input)
   {
     if (TREE_ROTATION == ROTATED && LAYOUT_STATE == LAYOUT_STRAIGHT) {
       foo("svg-tree", "apple-chart");
+    } else if (TREE_ROTATION == NOT_ROTATED && LAYOUT_STATE == LAYOUT_STRAIGHT) {
+      resize_svg("svg-tree", "apple-chart");
     }
   }
 
@@ -807,6 +804,7 @@ function lalala(tree_input)
   {
     update_form_constants();
     draw_fn();
+    adjust_tree();
   }
 
   // Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
@@ -875,7 +873,6 @@ function lalala(tree_input)
 
     // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
     adjust_tree();
-
   }
 
   function text_x_offset(d)
@@ -1093,6 +1090,60 @@ function save_svg_data()
   );
 }
 
+// TODO it doesn't catch label width.  It gets all the info before the transitions take affect.
+function resize_svg(svg_id, chart_id)
+{
+  var the_chart = document.getElementById(chart_id);
+  var the_svg = document.getElementById(svg_id);
+
+  // For some reason, this does not match the bbox that you get when you select it in the console after adjusting? Is it because the new one reflects the new place in the svg?
+  var chart_bbox = the_chart.getBBox();
+
+  if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) {
+    // TODO
+  } else {
+    console.log("adjusting!");
+    console.log(chart_bbox);
+
+    // Set actual width and height of the chart to that of the bounding box so we can center it properly since the translation is based of off the elem width and height and not based on the width and height of the bounding box.
+    the_chart.setAttribute("width", chart_bbox.width);
+    the_chart.setAttribute("height", chart_bbox.height);
+
+    var new_svg_height, new_svg_width, new_height_padding, new_width_padding;
+
+    console.log(chart_bbox.width + " " + chart_bbox.height);
+
+    new_svg_width  = chart_bbox.width / (1 - WIDTH_PADDING);
+    new_svg_height = chart_bbox.height / (1 - HEIGHT_PADDING);
+
+    console.log(new_svg_width + " " + new_svg_height);
+
+    var height_padding_px = new_svg_height * HEIGHT_PADDING;
+    var width_padding_px  = new_svg_width * WIDTH_PADDING;
+
+    var g_chart_translation = "translate(" +
+      // Need to subtract off the bounding box x and y as that is the true start position of the g chart.
+        // TODO sometimes the bbox x and y values are negative
+      ((width_padding_px / 2) - chart_bbox.x) + " " +
+      ((height_padding_px / 2) - chart_bbox.y) + ")";
+
+    the_svg.setAttribute("width", new_svg_width);
+    the_svg.setAttribute("height", new_svg_height);
+
+    the_chart.setAttribute("transform", g_chart_translation);
+
+    // d3.select("#svg-tree")
+    //   .transition(TR)
+    //   .attr("width", new_svg_width).attr("height", new_svg_height);
+    // d3.select("#apple-chart")
+    //   .transition(TR)
+    //   .attr("transform", g_chart_translation);
+
+    chart_bbox = the_chart.getBBox();
+    console.log(chart_bbox);
+  }
+}
+
 function foo(svg_id, chart_id)
 {
   var the_chart = document.getElementById(chart_id);
@@ -1100,14 +1151,16 @@ function foo(svg_id, chart_id)
 
   var chart_bbox = the_chart.getBBox();
 
-  var new_svg_height, new_svg_width, new_height_padding;
+  var new_svg_height, new_svg_width, new_height_padding, new_width_padding;
 
   var jq_svg = $("#svg-tree");
 
-  // SEt up the new variables
+  // Set up the new variables
   new_svg_height = jq_svg.width();
-  new_svg_width = jq_svg.height();
+  new_svg_width  = jq_svg.height();
+
   new_height_padding = new_svg_height * HEIGHT_PADDING;
+  new_width_padding  = new_svg_width * WIDTH_PADDING;
 
   var g_chart_rotation = "rotate(270)";
   var g_chart_translation = "translate(" +
@@ -1125,3 +1178,12 @@ function foo(svg_id, chart_id)
   );
 }
 
+function add_circle(x, y)
+{
+  d3.select("#apple-chart").append("circle").attr("r", 0).transition().style("fill", "green").attr("r", 10).attr("cx", x).attr("cy", y).attr("class", "delete-me");
+}
+
+function delete_circles()
+{
+  d3.select("circle.delete-me").transition().attr("r", 0).remove();
+}
