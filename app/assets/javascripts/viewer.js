@@ -298,7 +298,7 @@ function lalala(tree_input)
       TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
       elem.setAttribute("min", "0");
       elem.setAttribute("max", "360");
-      elem.setAttribute("step", "1")
+      elem.setAttribute("step", "45")
     }
 
     if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
@@ -306,7 +306,6 @@ function lalala(tree_input)
     } else {
       LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value);
     }
-
     SHOW_INNER_LABELS = document.getElementById("show-inner-labels").checked;
     SHOW_LEAF_LABELS = document.getElementById("show-leaf-labels").checked;
 
@@ -452,9 +451,9 @@ function lalala(tree_input)
 
   function set_up_hierarchy()
   {
-    // When setting size for circular layout, use width by convention, but they will be the same.
+    // Circles specify 360 and the RADIUS, but the width is a diameter.
     circle_cluster = d3.cluster()
-      .size([360, the_width])
+      .size([360, the_width / 2])
       .separation(function(a, b) { return 1; });
 
     rectangle_cluster = d3.cluster()
@@ -467,7 +466,7 @@ function lalala(tree_input)
 
     if (LAYOUT_STATE == LAYOUT_CIRCLE) {
       circle_cluster(root);
-      setRadius(root, root.data.length = 0, the_width / maxLength(root));
+      setRadius(root, root.data.length = 0, (the_width / 2) / maxLength(root));
 
     } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
       rectangle_cluster(root);
@@ -797,11 +796,11 @@ function lalala(tree_input)
 
   function adjust_tree()
   {
-    if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
-      resize_svg_straight_layout("svg-tree", "apple-chart");
-    } else {
-      // TODO adjust circular layout
-    }
+    // if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+    //   resize_svg_straight_layout("svg-tree", "apple-chart");
+    //
+    // }
+    resize_svg_straight_layout("svg-tree", "apple-chart");
   }
 
   function update_and_draw(draw_fn)
@@ -1030,11 +1029,10 @@ function lalala(tree_input)
     return linkStep(d.source[the_x], d.source[the_y], d.target[the_x], d.target[the_y]);
   }
 
-// TODO need an option for labels lined up on the radius or labels at
-// the end of the links.
+// TODO need an option for labels lined up on the radius or labels at the end of the links.
+  // the_width here is actually the diameter, not the radius.
   function linkCircleExtension(d) {
-    // the_y must be radius
-    return linkStep(d.target[the_x], d.target[the_y], d.target[the_x], the_width);
+    return linkStep(d.target[the_x], d.target[the_y], d.target[the_x], the_width / 2);
   }
 
 // Like d3.svg.diagonal.radial, but with square corners.
@@ -1159,7 +1157,9 @@ function resize_svg_straight_layout(svg_id, chart_id)
   var g_chart_rotation;
   var g_chart_translation
   
-  if (LAYOUT_STATE == ROTATED) {
+  if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) {
+    console.log("adjust layout staight rotated");
+
     new_svg_height = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_width  = chart_bbox.height + (2 * chart_bbox_height_padding);
 
@@ -1169,7 +1169,8 @@ function resize_svg_straight_layout(svg_id, chart_id)
       -(new_svg_height + chart_bbox.x - chart_bbox_width_padding) + " " +
       chart_bbox_height_padding + ")";
 
-  } else {
+  } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+    console.log("adjust layout staight not rotated");
     new_svg_width = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_height  = chart_bbox.height + (2 * chart_bbox_height_padding);
     
@@ -1179,8 +1180,39 @@ function resize_svg_straight_layout(svg_id, chart_id)
       // TODO sometimes the bbox x and y values are negative
       (chart_bbox_width_padding - chart_bbox.x) + " " +
       (chart_bbox_height_padding- chart_bbox.y) + ")";
+  } else if (LAYOUT_STATE == LAYOUT_CIRCLE) {
+    console.log("adjust circle");
+
+
+    var radius = chart_bbox.width > chart_bbox.height ? chart_bbox.width / 2: chart_bbox.height / 2;
+
+    var rotation_mod = TREE_ROTATION % 90;
+    var theta_mod = rotation_mod * Math.PI / 180;
+
+    var angle_adjusted_radius = rotation_mod < 45 ? radius / Math.abs(Math.cos(theta_mod)) : radius / Math.abs(Math.sin(theta_mod));
+
+    console.log(radius + " " + rotation_mod + " " + theta_mod + " " + angle_adjusted_radius);
+
+    var diameter = 2 * angle_adjusted_radius;
+
+    // TODO the diameter needs to take into account the bounding box x and y adjustment.
+
+    var max_offset = Math.abs(chart_bbox.x) > Math.abs(chart_bbox.y) ? Math.abs(chart_bbox.x) : Math.abs(chart_bbox.y);
+
+    var new_svg_diameter_no_padding = diameter > (max_offset * 2) ? diameter : (max_offset * 2);
+    var new_svg_diameter_with_padding = new_svg_diameter_no_padding + (new_svg_diameter_no_padding * padding);
+
+    g_chart_rotation = "rotate(" + TREE_ROTATION + " " +
+      (new_svg_diameter_with_padding / 2) + " " + (new_svg_diameter_with_padding / 2) + ")";
+
+    g_chart_translation = "translate(" +
+      (new_svg_diameter_with_padding / 2) + " " +
+      (new_svg_diameter_with_padding / 2) + ")";
+
+    new_svg_width = new_svg_diameter_with_padding;
+    new_svg_height = new_svg_diameter_with_padding;
   }
-  
+
   // Update elements
   the_svg.setAttribute("width", new_svg_width);
   the_svg.setAttribute("height", new_svg_height);
