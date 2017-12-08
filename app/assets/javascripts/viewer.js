@@ -54,7 +54,7 @@ var LAYOUT_STATE, LAYOUT_CIRCLE, LAYOUT_STRAIGHT;
 var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
 var the_x, the_y;
 var SIZE, INNER_SIZE;
-var OUTER_WIDTH, OUTER_HEIGHT, HEIGHT_PADDING, WIDTH_PADDING, INNER_WIDTH, INNER_HEIGHT;
+var width, padding, height;
 var root, svg, chart, data, circles, labels, inner_labels, leaf_labels, linkExtension, link, inner_dots, leaf_dots;
 
 var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
@@ -76,7 +76,7 @@ var align_tip_labels;
 
 var SORT_STATE, SORT_NONE, SORT_ASCENDING, SORT_DESCENDING, sort_function;
 
-var the_inner_width, the_inner_height, the_outer_width, the_outer_height, the_width_padding, the_height_padding;
+var the_width, the_height, the_width, the_height, padding;
 
 
 // To hold temporary DOM elements
@@ -122,11 +122,10 @@ function lalala(tree_input)
 
 
   // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
-  listener("outer-width", "change", draw_tree);
-  listener("width-padding", "change", draw_tree);
+  listener("width", "change", draw_tree);
+  listener("padding", "change", draw_tree);
 
-  listener("outer-height", "change", draw_tree);
-  listener("height-padding", "change", draw_tree);
+  listener("height", "change", draw_tree);
 
   listener("tree-shape", "change", draw_tree);
   listener("tree-branch-style", "change", redraw_tree);
@@ -354,67 +353,53 @@ function lalala(tree_input)
     if (LAYOUT_STATE == LAYOUT_CIRCLE) {
       // Disable the height slider
       elem = null;
-      elem = document.getElementById("outer-height");
+      elem = document.getElementById("height");
       elem.disabled = true;
 
-      elem = null;
-      elem = document.getElementById("height-padding");
-      elem.disabled = true;
+      width = parseInt(document.getElementById("width").value);
+      height = width;
 
-      OUTER_WIDTH = parseInt(document.getElementById("outer-width").value);
-      OUTER_HEIGHT = OUTER_WIDTH;
+      padding = parseFloat(document.getElementById("padding").value);
 
-      WIDTH_PADDING = parseFloat(document.getElementById("width-padding").value);
-      HEIGHT_PADDING = WIDTH_PADDING;
-
-      set_value_of("outer-height", OUTER_WIDTH);
-      set_value_of("height-padding", WIDTH_PADDING);
+      set_value_of("height", width);
     } else {
       elem = null;
-      elem = document.getElementById("outer-height");
+      elem = document.getElementById("height");
       elem.disabled = false;
 
-      elem = null;
-      elem = document.getElementById("height-padding");
-      elem.disabled = false;
+      width = parseInt(document.getElementById("width").value);
+      height = parseInt(document.getElementById("height").value);
 
-      OUTER_WIDTH = parseInt(document.getElementById("outer-width").value);
-      OUTER_HEIGHT = parseInt(document.getElementById("outer-height").value);
-
-      WIDTH_PADDING = parseFloat(document.getElementById("width-padding").value);
-      HEIGHT_PADDING = parseFloat(document.getElementById("height-padding").value);
+      padding = parseFloat(document.getElementById("padding").value);
     }
 
-    // Width padding is the total % of padding.  If it is set to 0.1, then the inner width will be 90% of the svg.
-    INNER_WIDTH = Math.round(OUTER_WIDTH * (1 - WIDTH_PADDING));
-    INNER_HEIGHT = Math.round(OUTER_HEIGHT * (1 - HEIGHT_PADDING));
+    //  padding is the total % of padding.  If it is set to 0.1, then the inner width will be 90% of the svg.
+    width = Math.round(width * (1 - padding));
+    height = Math.round(height * (1 - padding));
 
     if (TREE_ROTATION == ROTATED) {
       // Need to flip height and width
-      the_inner_width = INNER_HEIGHT;
-      the_inner_height = INNER_WIDTH;
+      the_width = height;
+      the_height = width;
 
-      the_outer_width = OUTER_HEIGHT;
-      the_outer_height = OUTER_WIDTH;
-
-      the_width_padding = HEIGHT_PADDING;
-      the_height_padding = WIDTH_PADDING;
+      the_width = height;
+      the_height = width;
 
       // Flip the labels of the selectors
-      $("#outer-width-label").text("Heigth!");
-      $("#outer-height-label").text("Width!");
+      $("#width-label").text("Heigth!");
+      $("#height-label").text("Width!");
 
-      $("#width-padding-label").text("Height padding!");
-      $("#height-padding-label").text("Width padding!");
+      // $("#padding-label").text("Height padding!");
+      // $("#padding-label").text("Width padding!");
 
-      // d3.select("#outer-width-label")
+      // d3.select("#width-label")
       //   .transition().duration(1000)
       //   .style("color", "red")
       //   .transition().duration(1000)
       //   .style("color", "black")
       //   .text("Height!");
       //
-      // d3.select("#outer-height-label")
+      // d3.select("#height-label")
       //   .transition().duration(1000)
       //   .style("color", "red")
       //   .transition().duration(1000)
@@ -422,22 +407,15 @@ function lalala(tree_input)
       //   .text("Width!");
     } else {
 
-      the_inner_width = INNER_WIDTH;
-      the_inner_height = INNER_HEIGHT;
+      the_width = width;
+      the_height = height;
 
-      the_outer_width = OUTER_WIDTH;
-      the_outer_height = OUTER_HEIGHT;
-
-      the_width_padding = WIDTH_PADDING;
-      the_height_padding = HEIGHT_PADDING;
+      the_width = width;
+      the_height = height;
 
       // Flip the labels of the selectors
-      $("#outer-width-label").text("Width!");
-      $("#outer-height-label").text("Height!");
-
-      $("#width-padding-label").text("Width padding!");
-      $("#height-padding-label").text("Height padding!");
-
+      $("#width-label").text("Width!");
+      $("#height-label").text("Height!");
     }
     the_x = "x";
     the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
@@ -446,15 +424,41 @@ function lalala(tree_input)
 
   }
 
+  // function set_up_hierarchy()
+  // {
+  //   // When setting size for circular layout, use width by convention, but they will be the same.
+  //   circle_cluster = d3.cluster()
+  //     .size([360, the_width])
+  //     .separation(function(a, b) { return 1; });
+  //
+  //   rectangle_cluster = d3.cluster()
+  //     .size([the_width * 2, the_height * 2])
+  //     .separation(function(a, b) { return 1; });
+  //
+  //   root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+  //     .sum(function(d) { return d.branchset ? 0 : 1; })
+  //     .sort(sort_function);
+  //
+  //   if (LAYOUT_STATE == LAYOUT_CIRCLE) {
+  //     circle_cluster(root);
+  //     setRadius(root, root.data.length = 0, the_width / maxLength(root));
+  //
+  //   } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+  //     rectangle_cluster(root);
+  //     // TODO should this be width or height
+  //     setRadius(root, root.data.length = 0, (the_height * 2) / maxLength(root));
+  //   }
+  // }
+
   function set_up_hierarchy()
   {
     // When setting size for circular layout, use width by convention, but they will be the same.
     circle_cluster = d3.cluster()
-      .size([360, the_inner_width])
+      .size([360, the_width])
       .separation(function(a, b) { return 1; });
 
     rectangle_cluster = d3.cluster()
-      .size([the_inner_width * 2, the_inner_height * 2])
+      .size([the_width * 1, the_height * 1])
       .separation(function(a, b) { return 1; });
 
     root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
@@ -463,12 +467,12 @@ function lalala(tree_input)
 
     if (LAYOUT_STATE == LAYOUT_CIRCLE) {
       circle_cluster(root);
-      setRadius(root, root.data.length = 0, the_inner_width / maxLength(root));
+      setRadius(root, root.data.length = 0, the_width / maxLength(root));
 
     } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
       rectangle_cluster(root);
       // TODO should this be width or height
-      setRadius(root, root.data.length = 0, (the_inner_height * 2) / maxLength(root));
+      setRadius(root, root.data.length = 0, (the_height * 1) / maxLength(root));
     }
   }
 
@@ -477,15 +481,15 @@ function lalala(tree_input)
     if (document.getElementById("svg-tree")) {
       svg.merge(svg)
         // .transition(TR)
-        .attr("width", the_outer_width * 2)
-        .attr("height", the_outer_height * 2)
+        .attr("width", the_width * 1)
+        .attr("height", the_height * 1)
         .style("background-color", "white"); // TODO make bg color an option
     } else {
       svg = d3.select("#tree-div")
         .append("svg")
         .attr("id", "svg-tree")
-        .attr("width", the_outer_width * 2)
-        .attr("height", the_outer_height * 2)
+        .attr("width", the_width * 1)
+        .attr("height", the_height * 1)
         .style("background-color", "white"); // TODO make bg color an option
     }
   }
@@ -495,17 +499,17 @@ function lalala(tree_input)
     var chart_width, chart_height;
     var chart_transform_width, chart_transform_height;
     if (LAYOUT_STATE == LAYOUT_CIRCLE) {
-      chart_width  = the_outer_width;
-      chart_height = the_outer_height;
+      chart_width  = the_width;
+      chart_height = the_height;
 
-      chart_transform_width  = the_outer_width;
-      chart_transform_height = the_outer_height;
+      chart_transform_width  = the_width;
+      chart_transform_height = the_height;
     } else {
-      chart_width  = the_inner_width * 2;
-      chart_height = the_inner_height * 2;
+      chart_width  = the_width * 1;
+      chart_height = the_height * 1;
 
-      chart_transform_width  = the_outer_width * the_width_padding;
-      chart_transform_height = the_outer_height * the_height_padding;
+      chart_transform_width  = the_width * padding;
+      chart_transform_height = the_height * padding;
     }
 
     if (document.getElementById("apple-chart")) {
@@ -514,7 +518,7 @@ function lalala(tree_input)
         .attr("width", chart_width)
         .attr("height", chart_height)
         .attr("transform",
-          "rotate(" + TREE_ROTATION + " " + the_outer_width + " " + the_outer_height + ") " +
+          "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
           "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
     } else {
       chart = svg.append("g")
@@ -522,7 +526,7 @@ function lalala(tree_input)
         .attr("width", chart_width)
         .attr("height", chart_height)
         .attr("transform",
-          "rotate(" + TREE_ROTATION + " " + the_outer_width + " " + the_outer_height + ") " +
+          "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
           "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
     }
   }
@@ -793,10 +797,10 @@ function lalala(tree_input)
 
   function adjust_tree()
   {
-    if (TREE_ROTATION == ROTATED && LAYOUT_STATE == LAYOUT_STRAIGHT) {
-      foo("svg-tree", "apple-chart");
-    } else if (TREE_ROTATION == NOT_ROTATED && LAYOUT_STATE == LAYOUT_STRAIGHT) {
-      resize_svg("svg-tree", "apple-chart");
+    if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
+      resize_svg_straight_layout("svg-tree", "apple-chart");
+    } else {
+      // TODO adjust circular layout
     }
   }
 
@@ -988,7 +992,7 @@ function lalala(tree_input)
   }
 
   function straight_link(d) {
-    return "M " + (d.source[the_x] - the_inner_width) + " " + d.source[the_y] + " L " + (d.target[the_x] - the_inner_height) + " " + d.target[the_y];
+    return "M " + (d.source[the_x] - the_width) + " " + d.source[the_y] + " L " + (d.target[the_x] - the_height) + " " + d.target[the_y];
   }
 
   function rectangle_link(d, x, y) {
@@ -1001,9 +1005,9 @@ function lalala(tree_input)
     mid_point = d.target[x] + " " + d.source[y];
 
     // if (document.getElementById("up-and-down").selected) {
-    //   mid_point = (d.target[the_x] - (the_inner_width - the_inner_width)) + " " + d.source[the_y];
+    //   mid_point = (d.target[the_x] - (the_width - the_width)) + " " + d.source[the_y];
     // } else {
-    //   mid_point = (d.source[the_x] - (the_inner_width - the_inner_width)) + " " + d.target[the_y];
+    //   mid_point = (d.source[the_x] - (the_width - the_width)) + " " + d.target[the_y];
     // }
 
     return "M " + start_point + " L " + mid_point + " L " + end_point;
@@ -1030,7 +1034,7 @@ function lalala(tree_input)
 // the end of the links.
   function linkCircleExtension(d) {
     // the_y must be radius
-    return linkStep(d.target[the_x], d.target[the_y], d.target[the_x], the_inner_width);
+    return linkStep(d.target[the_x], d.target[the_y], d.target[the_x], the_width);
   }
 
 // Like d3.svg.diagonal.radial, but with square corners.
@@ -1090,84 +1094,93 @@ function save_svg_data()
   );
 }
 
-// TODO it doesn't catch label width.  It gets all the info before the transitions take affect.
-function resize_svg(svg_id, chart_id)
+// NOTES
+//   // The svg is the outer container and it is NOT rotated.  So these flip.
+//   // Height and width of the elem are the same regardless of roatation.
+// In the rotated state, the g elem width (x) and height (y) stay the same, but the SVG must swap them.
+
+// function resize_svg(svg_id, chart_id)
+// {
+//   console.log("adjusting with resize_svg");
+//
+//   var the_chart = document.getElementById(chart_id);
+//   var the_svg = document.getElementById(svg_id);
+//
+//   // For some reason, this does not match the bbox that you get when you select it in the console after adjusting? Is it because the new one reflects the new place in the svg?
+//   var chart_bbox = the_chart.getBBox();
+//
+//   // Set actual width and height of the chart to that of the bounding box so we can center it properly since the translation is based of off the elem width and height and not based on the width and height of the bounding box.
+//   the_chart.setAttribute("width", chart_bbox.width);
+//   the_chart.setAttribute("height", chart_bbox.height);
+//
+//   var new_svg_height, new_svg_width;
+//
+//   var chart_bbox_width_padding = chart_bbox.width * padding;
+//   var chart_bbox_height_padding = chart_bbox.height * padding;
+//
+//   new_svg_width  = chart_bbox.width  + (2 * chart_bbox_width_padding);
+//   new_svg_height = chart_bbox.height + (2 * chart_bbox_height_padding);
+//
+//   var g_chart_translation = "translate(" +
+//     // Need to subtract off the bounding box x and y as that is the true start position of the g chart.
+//     // TODO sometimes the bbox x and y values are negative
+//     (chart_bbox_width_padding - chart_bbox.x) + " " +
+//     (chart_bbox_height_padding- chart_bbox.y) + ")";
+//     // ((new_svg_width * padding / 2) - chart_bbox.x) + " " +
+//     // ((new_svg_height * padding / 2) - chart_bbox.y) + ")";
+//
+//   the_svg.setAttribute("width", new_svg_width);
+//   the_svg.setAttribute("height", new_svg_height);
+//
+//   the_chart.setAttribute("transform", g_chart_translation);
+// }
+
+function resize_svg_circle_layout(svg_id, chart_id)
 {
-  var the_chart = document.getElementById(chart_id);
-  var the_svg = document.getElementById(svg_id);
-
-  // For some reason, this does not match the bbox that you get when you select it in the console after adjusting? Is it because the new one reflects the new place in the svg?
-  var chart_bbox = the_chart.getBBox();
-
-  if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) {
-    // TODO
-  } else {
-    console.log("adjusting!");
-    console.log(chart_bbox);
-
-    // Set actual width and height of the chart to that of the bounding box so we can center it properly since the translation is based of off the elem width and height and not based on the width and height of the bounding box.
-    the_chart.setAttribute("width", chart_bbox.width);
-    the_chart.setAttribute("height", chart_bbox.height);
-
-    var new_svg_height, new_svg_width, new_height_padding, new_width_padding;
-
-    console.log(chart_bbox.width + " " + chart_bbox.height);
-
-    new_svg_width  = chart_bbox.width / (1 - WIDTH_PADDING);
-    new_svg_height = chart_bbox.height / (1 - HEIGHT_PADDING);
-
-    console.log(new_svg_width + " " + new_svg_height);
-
-    var height_padding_px = new_svg_height * HEIGHT_PADDING;
-    var width_padding_px  = new_svg_width * WIDTH_PADDING;
-
-    var g_chart_translation = "translate(" +
-      // Need to subtract off the bounding box x and y as that is the true start position of the g chart.
-        // TODO sometimes the bbox x and y values are negative
-      ((width_padding_px / 2) - chart_bbox.x) + " " +
-      ((height_padding_px / 2) - chart_bbox.y) + ")";
-
-    the_svg.setAttribute("width", new_svg_width);
-    the_svg.setAttribute("height", new_svg_height);
-
-    the_chart.setAttribute("transform", g_chart_translation);
-
-    // d3.select("#svg-tree")
-    //   .transition(TR)
-    //   .attr("width", new_svg_width).attr("height", new_svg_height);
-    // d3.select("#apple-chart")
-    //   .transition(TR)
-    //   .attr("transform", g_chart_translation);
-
-    chart_bbox = the_chart.getBBox();
-    console.log(chart_bbox);
-  }
+  // START HERE
 }
 
-function foo(svg_id, chart_id)
+function resize_svg_straight_layout(svg_id, chart_id)
 {
+  console.log("adjusting with resize_svg_straight_layout");
+  
   var the_chart = document.getElementById(chart_id);
   var the_svg = document.getElementById(svg_id);
 
   var chart_bbox = the_chart.getBBox();
+  the_chart.setAttribute("width", chart_bbox.width);
+  the_chart.setAttribute("height", chart_bbox.height);
 
-  var new_svg_height, new_svg_width, new_height_padding, new_width_padding;
+  var new_svg_height, new_svg_width;
+  
+  var chart_bbox_width_padding = chart_bbox.width * padding;
+  var chart_bbox_height_padding = chart_bbox.height * padding;
 
-  var jq_svg = $("#svg-tree");
+  var g_chart_rotation;
+  var g_chart_translation
+  
+  if (LAYOUT_STATE == ROTATED) {
+    new_svg_height = chart_bbox.width + (2 * chart_bbox_width_padding);
+    new_svg_width  = chart_bbox.height + (2 * chart_bbox_height_padding);
 
-  // Set up the new variables
-  new_svg_height = jq_svg.width();
-  new_svg_width  = jq_svg.height();
+    g_chart_rotation = "rotate(270)";
 
-  new_height_padding = new_svg_height * HEIGHT_PADDING;
-  new_width_padding  = new_svg_width * WIDTH_PADDING;
+    g_chart_translation = "translate("  +
+      -(new_svg_height + chart_bbox.x - chart_bbox_width_padding) + " " +
+      chart_bbox_height_padding + ")";
 
-  var g_chart_rotation = "rotate(270)";
-  var g_chart_translation = "translate(" +
-    ((new_height_padding / 2) - new_svg_height) + " " +
-    // Don't need width padding because it is accounted for by the bounding box.  Also need the bbox height not width as it is now rotated.
-    ((new_svg_width - chart_bbox.height) / 2) + ")";
+  } else {
+    new_svg_width = chart_bbox.width + (2 * chart_bbox_width_padding);
+    new_svg_height  = chart_bbox.height + (2 * chart_bbox_height_padding);
+    
+    g_chart_rotation = "rotate(0)";
 
+    g_chart_translation = "translate(" +
+      // TODO sometimes the bbox x and y values are negative
+      (chart_bbox_width_padding - chart_bbox.x) + " " +
+      (chart_bbox_height_padding- chart_bbox.y) + ")";
+  }
+  
   // Update elements
   the_svg.setAttribute("width", new_svg_width);
   the_svg.setAttribute("height", new_svg_height);
@@ -1180,10 +1193,13 @@ function foo(svg_id, chart_id)
 
 function add_circle(x, y)
 {
-  d3.select("#apple-chart").append("circle").attr("r", 0).transition().style("fill", "green").attr("r", 10).attr("cx", x).attr("cy", y).attr("class", "delete-me");
+  d3.select("#svg-tree").append("circle").attr("r", 0).transition().style("fill", "green").attr("r", 10).attr("cx", x).attr("cy", y).attr("class", "delete-me");
 }
 
 function delete_circles()
 {
   d3.select("circle.delete-me").transition().attr("r", 0).remove();
 }
+
+function rot(p) { return pt(p.y, -p.x); }
+function pt(x, y) { return { "x" : x, "y" : y } }

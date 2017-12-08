@@ -27,26 +27,41 @@
 
     form id="tree-form"
       hr.row
-      h4 Tree size!
-
-      .row
-        .small-6.columns
-          label id="outer-width-label" for="outer-width" Width!
-          input id="outer-width" class="slider" type="range" min="250" max="3000" step="250" value="500"
-        .small-6.columns
-          label id="width-padding-label" for="width-padding" Width padding!
-          input id="width-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.2"
-
-      .row
-        .small-6.columns
-          label id="outer-height-label" for="outer-height" Height!
-          input id="outer-height" class="slider" type="range" min="250" max="3000" step="250" value="500"
-        .small-6.columns
-          label id="height-padding-label" for="height-padding" Height padding!
-          input id="height-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.2"
-
-      hr.row
       h4 Tree options!
+
+      .row
+        .small-4.columns
+          label id="width-label" for="width" Width!
+          input id="width" class="slider" type="range" min="250" max="3000" step="250" value="500"
+        .small-4.columns
+          label id="height-label" for="height" Height!
+          input id="height" class="slider" type="range" min="250" max="3000" step="250" value="500"
+        .small-4.columns
+          label id="padding-label" for="padding" Padding!
+          input id="padding" class="slider" type="range" min="0.00" max="0.25" step="0.05" value="0.0"
+
+      .row
+        .small-12.columns
+          label for="tree-rotation" Tree rotation!
+          input id="tree-rotation" class="slider" type="range" min="0" max="270" step="270" value="0"
+
+      /.row
+      /  .small-6.columns
+      /    label id="outer-width-label" for="outer-width" Width!
+      /    input id="outer-width" class="slider" type="range" min="250" max="3000" step="250" value="500"
+      /  .small-6.columns
+      /    label id="width-padding-label" for="width-padding" Width padding!
+      /    input id="width-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.2"
+      /
+      /.row
+      /  .small-6.columns
+      /    label id="outer-height-label" for="outer-height" Height!
+      /    input id="outer-height" class="slider" type="range" min="250" max="3000" step="250" value="500"
+      /  .small-6.columns
+      /    label id="height-padding-label" for="height-padding" Height padding!
+      /    input id="height-padding" class="slider" type="range" min="0.1" max="0.75" step="0.05" value="0.2"
+
+      /h4 Tree options!
 
       .row
         .small-6.columns
@@ -62,10 +77,6 @@
             option id="normalogram" value="normalogram" selected="" Normal-o-gram!
             option id="cladogram" value="cladogram" Clad-o-gram!
 
-      .row
-        .small-12.columns
-          label for="tree-rotation" Tree rotation!
-          input id="tree-rotation" class="slider" type="range" min="0" max="270" step="270" value="0"
 
       /.row
       /  label for="tree-direction" Which way?!
@@ -81,7 +92,9 @@
             option id="ascending" value="ascending" Reverse sort!
             option id="not-sorted" value="not-sorted" Not sorted!
 
-      hr.row
+      .row
+        hr
+
       h4 Branch options!
 
       /.row
