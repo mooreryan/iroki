@@ -1205,9 +1205,30 @@ function resize_svg_straight_layout(svg_id, chart_id)
     g_chart_rotation = "rotate(" + TREE_ROTATION + " " +
       (new_svg_diameter_with_padding / 2) + " " + (new_svg_diameter_with_padding / 2) + ")";
 
-    g_chart_translation = "translate(" +
-      (new_svg_diameter_with_padding / 2) + " " +
-      (new_svg_diameter_with_padding / 2) + ")";
+    // g_chart_translation = "translate(" +
+    //   (new_svg_diameter_with_padding / 2) + " " +
+    //   (new_svg_diameter_with_padding / 2) + ")";
+
+    // TODO combine these two translations.
+    // g_chart_translation = "translate(" +
+    //   Math.abs(chart_bbox.x) + " " +
+    //   Math.abs(chart_bbox.y) + ")";
+
+    var pad_offset = new_svg_diameter_no_padding * padding / 2;
+    // if (TREE_ROTATION == 45 || TREE_ROTATION == 135 || TREE_ROTATION == 225 || TREE_ROTATION == 315) {
+    //   // TODO
+    // } else {
+      console.log("bob")
+      if (chart_bbox.width > chart_bbox.height) {
+        g_chart_translation = "translate(" +
+          (Math.abs(chart_bbox.x) + pad_offset) + " " +
+          (Math.abs(chart_bbox.y) + ((chart_bbox.width - chart_bbox.height ) / 2) + pad_offset) + ")";
+      } else {
+        g_chart_translation = "translate(" +
+          (Math.abs(chart_bbox.x) + ((chart_bbox.height - chart_bbox.width + (new_svg_diameter_no_padding * padding)) / 2) + pad_offset) + " " +
+          (Math.abs(chart_bbox.y) + pad_offset) + ")";
+      }
+    // }
 
     new_svg_width = new_svg_diameter_with_padding;
     new_svg_height = new_svg_diameter_with_padding;
