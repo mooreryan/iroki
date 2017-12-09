@@ -129,7 +129,9 @@ function lalala(tree_input)
 
   listener("tree-shape", "change", draw_tree);
   listener("tree-branch-style", "change", redraw_tree);
+
   listener("tree-rotation", "change", draw_tree);
+
   listener("tree-sort", "change", draw_tree);
   // listener("tree-sort", "change", function() {
   //   update_form_constants();
@@ -1154,8 +1156,9 @@ function resize_svg_straight_layout(svg_id, chart_id)
   var chart_bbox_width_padding = chart_bbox.width * padding;
   var chart_bbox_height_padding = chart_bbox.height * padding;
 
-  var g_chart_rotation;
-  var g_chart_translation
+  var g_chart_transform;
+  // var g_chart_rotation;
+  // var g_chart_translation
   
   if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) {
     console.log("adjust layout staight rotated");
@@ -1163,9 +1166,7 @@ function resize_svg_straight_layout(svg_id, chart_id)
     new_svg_height = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_width  = chart_bbox.height + (2 * chart_bbox_height_padding);
 
-    g_chart_rotation = "rotate(270)";
-
-    g_chart_translation = "translate("  +
+    g_chart_transform = "rotate(270) translate("  +
       -(new_svg_height + chart_bbox.x - chart_bbox_width_padding) + " " +
       chart_bbox_height_padding + ")";
 
@@ -1173,10 +1174,8 @@ function resize_svg_straight_layout(svg_id, chart_id)
     console.log("adjust layout staight not rotated");
     new_svg_width = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_height  = chart_bbox.height + (2 * chart_bbox_height_padding);
-    
-    g_chart_rotation = "rotate(0)";
 
-    g_chart_translation = "translate(" +
+    g_chart_transform = "rotate(0) translate(" +
       // TODO sometimes the bbox x and y values are negative
       (chart_bbox_width_padding - chart_bbox.x) + " " +
       (chart_bbox_height_padding- chart_bbox.y) + ")";
@@ -1185,25 +1184,30 @@ function resize_svg_straight_layout(svg_id, chart_id)
 
 
     var radius = chart_bbox.width > chart_bbox.height ? chart_bbox.width / 2: chart_bbox.height / 2;
+    var diameter = radius * 2;
+    var padding_px = diameter * padding;
 
-    var rotation_mod = TREE_ROTATION % 90;
-    var theta_mod = rotation_mod * Math.PI / 180;
+    // This is actually the length of the diagonal plus padding.
+    var diameter_with_padding = Math.sqrt(Math.pow(diameter, 2) * 2) + (padding_px * 2);
 
-    var angle_adjusted_radius = rotation_mod < 45 ? radius / Math.abs(Math.cos(theta_mod)) : radius / Math.abs(Math.sin(theta_mod));
-
-    console.log(radius + " " + rotation_mod + " " + theta_mod + " " + angle_adjusted_radius);
-
-    var diameter = 2 * angle_adjusted_radius;
-
-    // TODO the diameter needs to take into account the bounding box x and y adjustment.
-
-    var max_offset = Math.abs(chart_bbox.x) > Math.abs(chart_bbox.y) ? Math.abs(chart_bbox.x) : Math.abs(chart_bbox.y);
-
-    var new_svg_diameter_no_padding = diameter > (max_offset * 2) ? diameter : (max_offset * 2);
-    var new_svg_diameter_with_padding = new_svg_diameter_no_padding + (new_svg_diameter_no_padding * padding);
-
-    g_chart_rotation = "rotate(" + TREE_ROTATION + " " +
-      (new_svg_diameter_with_padding / 2) + " " + (new_svg_diameter_with_padding / 2) + ")";
+    // var rotation_mod = TREE_ROTATION % 90;
+    // var theta_mod = rotation_mod * Math.PI / 180;
+    //
+    // var angle_adjusted_radius = rotation_mod < 45 ? radius / Math.abs(Math.cos(theta_mod)) : radius / Math.abs(Math.sin(theta_mod));
+    //
+    // console.log(radius + " " + rotation_mod + " " + theta_mod + " " + angle_adjusted_radius);
+    //
+    // var diameter = 2 * angle_adjusted_radius;
+    //
+    // // TODO the diameter needs to take into account the bounding box x and y adjustment.
+    //
+    // var max_offset = Math.abs(chart_bbox.x) > Math.abs(chart_bbox.y) ? Math.abs(chart_bbox.x) : Math.abs(chart_bbox.y);
+    //
+    // var new_svg_diameter_no_padding = diameter > (max_offset * 2) ? diameter : (max_offset * 2);
+    // var new_svg_diameter_with_padding = new_svg_diameter_no_padding + (new_svg_diameter_no_padding * padding);
+    //
+    // g_chart_rotation = "rotate(" + TREE_ROTATION + " " +
+    //   (new_svg_diameter_with_padding / 2) + " " + (new_svg_diameter_with_padding / 2) + ")";
 
     // g_chart_translation = "translate(" +
     //   (new_svg_diameter_with_padding / 2) + " " +
@@ -1214,34 +1218,33 @@ function resize_svg_straight_layout(svg_id, chart_id)
     //   Math.abs(chart_bbox.x) + " " +
     //   Math.abs(chart_bbox.y) + ")";
 
-    var pad_offset = new_svg_diameter_no_padding * padding / 2;
-    // if (TREE_ROTATION == 45 || TREE_ROTATION == 135 || TREE_ROTATION == 225 || TREE_ROTATION == 315) {
-    //   // TODO
+    // var pad_offset = new_svg_diameter_no_padding * padding / 2;
+    // console.log("bob")
+    // if (chart_bbox.width > chart_bbox.height) {
+    //   g_chart_translation = "translate(" +
+    //     (Math.abs(chart_bbox.x) + pad_offset) + " " +
+    //     (Math.abs(chart_bbox.y) + ((chart_bbox.width - chart_bbox.height ) / 2) + pad_offset) + ")";
     // } else {
-      console.log("bob")
-      if (chart_bbox.width > chart_bbox.height) {
-        g_chart_translation = "translate(" +
-          (Math.abs(chart_bbox.x) + pad_offset) + " " +
-          (Math.abs(chart_bbox.y) + ((chart_bbox.width - chart_bbox.height ) / 2) + pad_offset) + ")";
-      } else {
-        g_chart_translation = "translate(" +
-          (Math.abs(chart_bbox.x) + ((chart_bbox.height - chart_bbox.width + (new_svg_diameter_no_padding * padding)) / 2) + pad_offset) + " " +
-          (Math.abs(chart_bbox.y) + pad_offset) + ")";
-      }
+    //   g_chart_translation = "translate(" +
+    //     (Math.abs(chart_bbox.x) + ((chart_bbox.height - chart_bbox.width + (new_svg_diameter_no_padding * padding)) / 2) + pad_offset) + " " +
+    //     (Math.abs(chart_bbox.y) + pad_offset) + ")";
     // }
 
-    new_svg_width = new_svg_diameter_with_padding;
-    new_svg_height = new_svg_diameter_with_padding;
+    new_svg_width = diameter_with_padding;
+    new_svg_height = diameter_with_padding;
+
+    g_chart_transform = "translate(" + (new_svg_width / 2) + "," + (new_svg_height / 2) +
+      ") rotate(" + TREE_ROTATION + ")";
+
+    the_chart.setAttribute("width", new_svg_width);
+    the_chart.setAttribute("height", new_svg_height);
   }
 
   // Update elements
   the_svg.setAttribute("width", new_svg_width);
   the_svg.setAttribute("height", new_svg_height);
 
-  the_chart.setAttribute(
-    "transform",
-    g_chart_rotation + " " + g_chart_translation
-  );
+  the_chart.setAttribute("transform", g_chart_transform);
 }
 
 function add_circle(x, y)
