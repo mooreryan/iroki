@@ -87,6 +87,7 @@ var TR;
 // The mega function
 function lalala(tree_input)
 {
+
   // TODO this transition doesn't get picked up by the draw functions when they are called by a listener.
   TR = d3.transition().duration(750).ease(d3.easeExp);
 
@@ -149,6 +150,7 @@ function lalala(tree_input)
     update_form_constants();
     draw_links();
     draw_link_extensions();
+    add_scale_bar();
     adjust_tree();
   });
 
@@ -160,6 +162,7 @@ function lalala(tree_input)
     update_form_constants();
     draw_link_extensions();
     draw_leaf_labels();
+    add_scale_bar();
     adjust_tree();
 
   });
@@ -167,6 +170,7 @@ function lalala(tree_input)
     update_form_constants();
     draw_leaf_labels();
     draw_inner_labels();
+    add_scale_bar();
     adjust_tree();
 
   });
@@ -809,6 +813,7 @@ function lalala(tree_input)
   {
     update_form_constants();
     draw_fn();
+    add_scale_bar();
     adjust_tree();
   }
 
@@ -822,6 +827,8 @@ function lalala(tree_input)
     draw_leaf_labels();
     draw_link_extensions();
     draw_links();
+    add_scale_bar();
+
     adjust_tree();
   }
 
@@ -841,6 +848,8 @@ function lalala(tree_input)
     draw_leaf_labels();
     draw_link_extensions();
     draw_links();
+    add_scale_bar();
+
     adjust_tree();
 
   }
@@ -875,6 +884,8 @@ function lalala(tree_input)
 
     chart.append("g").attr("id", "link-container");
     draw_links();
+
+    add_scale_bar();
 
     // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
     adjust_tree();
@@ -1058,7 +1069,6 @@ function lalala(tree_input)
   function maxLength(d) {
     return d.data.length + (d.children ? d3.max(d.children, maxLength) : 0);
   }
-
 }
 
 
@@ -1245,6 +1255,73 @@ function resize_svg_straight_layout(svg_id, chart_id)
   the_svg.setAttribute("height", new_svg_height);
 
   the_chart.setAttribute("transform", g_chart_transform);
+}
+
+function ary_mean(ary)
+{
+  var num_elems = ary.length;
+  var total = 0;
+  ary.map(function(d) { total += d; });
+
+  return total / num_elems;
+}
+
+function add_scale_bar()
+{
+  d3.select("#scale-bar").remove();
+
+  var lengths;
+  var mean_length;
+
+  var SCALE_BAR_PADDING = 50; // in pixels
+
+  console.log("tree branch style: " + TREE_BRANCH_STYLE);
+
+  var first_link = root.links()[0];
+  var pixels_per_unit_length;
+
+  if (TREE_BRANCH_STYLE == TREE_BRANCH_NORMAL) {
+    console.log("normal");
+    lengths = root.descendants().map(function(d) { return d.data.length });
+    pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.length;
+
+  } else {
+    console.log("clado");
+    // TODO when tree is a cladogram, need to make the branch label reflect the depth rather than the radius (true length).
+    lengths = root.descendants().map(function(d) { return d.height });
+
+    // The source height will be higher than the target height as the leaf nodes have a height of 0 and internal nodes add 1 for each speciation event.
+    pixels_per_unit_length = (first_link.target.y - first_link.source.y) / (first_link.source.height - first_link.target.height);
+
+  }
+
+  mean_length = ary_mean(lengths);
+
+  var scale_bar_pixels = mean_length * pixels_per_unit_length;
+
+  // New where to add it?
+  var chart_bbox = document.getElementById("apple-chart").getBBox();
+
+  // TODO not quite centered, take into account bounding box? Or center on svg?
+
+  var path_d = "M 250 250 L 350 350";
+  if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == NOT_ROTATED) {
+    var start_x = (chart_bbox.width - scale_bar_pixels) / 2;
+
+    path_d = "M " + start_x + " " + (chart_bbox.height + SCALE_BAR_PADDING) +
+      " L " + (start_x + scale_bar_pixels) + " " + (chart_bbox.height + SCALE_BAR_PADDING)
+  } else {
+    var start_y = (chart_bbox.height - scale_bar_pixels) / 2;
+
+    path_d = "M " + (-SCALE_BAR_PADDING) + " " + start_y + " L " + (-SCALE_BAR_PADDING) + " " + (start_y + scale_bar_pixels);
+
+  }
+
+  d3.select("#apple-chart").append("path")
+    .attr("id", "scale-bar")
+    .attr("stroke", "blue")
+    .attr("stroke-width", 5)
+    .attr("d", path_d);
 }
 
 function add_circle(x, y)
