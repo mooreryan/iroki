@@ -59,6 +59,8 @@ var root, svg, chart, data, circles, labels, inner_labels, leaf_labels, linkExte
 
 var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
 
+var SHOW_SCALE_BAR;
+
 var INNER_LABEL_SIZE, LEAF_LABEL_SIZE;
 var BRANCH_WIDTH;
 var SHOW_INNER_DOTS, SHOW_LEAF_DOTS;
@@ -134,6 +136,12 @@ function lalala(tree_input)
   listener("tree-rotation", "change", draw_tree);
 
   listener("tree-sort", "change", draw_tree);
+
+  listener("show-scale-bar", "change", function() {
+    update_form_constants();
+    add_scale_bar();
+    adjust_tree();
+  });
   // listener("tree-sort", "change", function() {
   //   update_form_constants();
   //   set_up_hierarchy(); // The regular redraw skips this step.
@@ -247,6 +255,8 @@ function lalala(tree_input)
     } else {
       sort_function = sort_descending;
     }
+
+    SHOW_SCALE_BAR = document.getElementById("show-scale-bar").checked;
 
     LAYOUT_CIRCLE = "circular-tree";
     LAYOUT_STRAIGHT = "rectangular-tree";
@@ -1268,60 +1278,103 @@ function ary_mean(ary)
 
 function add_scale_bar()
 {
-  d3.select("#scale-bar").remove();
+  d3.select("#scale-bar-container").remove();
 
-  var lengths;
-  var mean_length;
+  if (SHOW_SCALE_BAR) {
+    var lengths;
+    var mean_length;
 
-  var SCALE_BAR_PADDING = 50; // in pixels
+    var SCALE_BAR_PADDING = 50; // in pixels
+    var SCALE_BAR_TEXT_PADDING = 5;
 
-  console.log("tree branch style: " + TREE_BRANCH_STYLE);
+    console.log("tree branch style: " + TREE_BRANCH_STYLE);
 
-  var first_link = root.links()[0];
-  var pixels_per_unit_length;
+    var first_link = root.links()[0];
+    var pixels_per_unit_length;
 
-  if (TREE_BRANCH_STYLE == TREE_BRANCH_NORMAL) {
-    console.log("normal");
-    lengths = root.descendants().map(function(d) { return d.data.length });
-    pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.length;
+    if (TREE_BRANCH_STYLE == TREE_BRANCH_NORMAL) {
+      console.log("normal");
+      lengths = root.descendants().map(function(d) { return d.data.length });
+      pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.length;
 
-  } else {
-    console.log("clado");
-    // TODO when tree is a cladogram, need to make the branch label reflect the depth rather than the radius (true length).
-    lengths = root.descendants().map(function(d) { return d.height });
+    } else {
+      console.log("clado");
+      // TODO when tree is a cladogram, need to make the branch label reflect the depth rather than the radius (true length).
+      lengths = root.descendants().map(function(d) { return d.height });
 
-    // The source height will be higher than the target height as the leaf nodes have a height of 0 and internal nodes add 1 for each speciation event.
-    pixels_per_unit_length = (first_link.target.y - first_link.source.y) / (first_link.source.height - first_link.target.height);
+      // The source height will be higher than the target height as the leaf nodes have a height of 0 and internal nodes add 1 for each speciation event.
+      pixels_per_unit_length = (first_link.target.y - first_link.source.y) / (first_link.source.height - first_link.target.height);
+    }
 
+    var rotated_rectangle = LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
+    mean_length = ary_mean(lengths);
+
+    var scale_bar_pixels = mean_length * pixels_per_unit_length;
+
+    var label_x, label_y;
+
+    // New where to add it?
+    var chart_bbox = document.getElementById("apple-chart").getBBox();
+
+    // TODO not quite centered, take into account bounding box? Or center on svg?
+
+    var path_d = "M 250 250 L 350 350";
+    if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == NOT_ROTATED) {
+      var start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
+
+      path_d = "M " + start_x + " " + (chart_bbox.height + SCALE_BAR_PADDING) +
+        " L " + (start_x + scale_bar_pixels) + " " + (chart_bbox.height + SCALE_BAR_PADDING);
+
+      label_x = start_x + (scale_bar_pixels / 2);
+      label_y = (chart_bbox.height + SCALE_BAR_PADDING) + SCALE_BAR_TEXT_PADDING;
+    } else {
+    //   var start_y = ((chart_bbox.height - scale_bar_pixels) / 2) + chart_bbox.y;
+    //
+    //   path_d = "M " + (-SCALE_BAR_PADDING) + " " + start_y + " L " + (-SCALE_BAR_PADDING) + " " + (start_y + scale_bar_pixels);
+    //
+    //   label_x = -SCALE_BAR_PADDING - SCALE_BAR_TEXT_PADDING;
+    //   label_y = start_y + (scale_bar_pixels / 2);
+      var start_x = chart_bbox.x - SCALE_BAR_PADDING - (scale_bar_pixels / 2);
+
+      path_d = "M " + start_x + " " + (chart_bbox.height / 2) +
+        " L " + (start_x + scale_bar_pixels) + " " + (chart_bbox.height / 2);
+
+      label_x = start_x + (scale_bar_pixels / 2);
+      label_y = (chart_bbox.height / 2) + SCALE_BAR_TEXT_PADDING;
+
+    }
+
+    var container = d3.select("#apple-chart")
+      .append("g")
+      .attr("id", "scale-bar-container");
+
+    container.append("path")
+      .attr("id", "scale-bar")
+      .attr("stroke", "blue")
+      .attr("stroke-width", 5)
+      .attr("d", path_d);
+
+    container.append("text")
+      .attr("id", "scale-bar-text")
+      .attr("alignment-baseline", "hanging")
+      .attr("text-anchor", "middle")
+      .attr("x", label_x)
+      .attr("y", label_y)
+      .text(round_to(mean_length, 100));
+
+    if (rotated_rectangle) {
+      var box = document.getElementById("scale-bar-container").getBBox();
+      var box_center_pt = (box.x + (box.width / 2)) + " " + (box.y + (box.height / 2));
+
+      d3.select("#scale-bar-container")
+        .attr("transform", "rotate(90 " + box_center_pt + ")");
+    }
   }
+}
 
-  mean_length = ary_mean(lengths);
-
-  var scale_bar_pixels = mean_length * pixels_per_unit_length;
-
-  // New where to add it?
-  var chart_bbox = document.getElementById("apple-chart").getBBox();
-
-  // TODO not quite centered, take into account bounding box? Or center on svg?
-
-  var path_d = "M 250 250 L 350 350";
-  if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == NOT_ROTATED) {
-    var start_x = (chart_bbox.width - scale_bar_pixels) / 2;
-
-    path_d = "M " + start_x + " " + (chart_bbox.height + SCALE_BAR_PADDING) +
-      " L " + (start_x + scale_bar_pixels) + " " + (chart_bbox.height + SCALE_BAR_PADDING)
-  } else {
-    var start_y = (chart_bbox.height - scale_bar_pixels) / 2;
-
-    path_d = "M " + (-SCALE_BAR_PADDING) + " " + start_y + " L " + (-SCALE_BAR_PADDING) + " " + (start_y + scale_bar_pixels);
-
-  }
-
-  d3.select("#apple-chart").append("path")
-    .attr("id", "scale-bar")
-    .attr("stroke", "blue")
-    .attr("stroke-width", 5)
-    .attr("d", path_d);
+function round_to(x, place)
+{
+  return Math.round(place * x) / place;
 }
 
 function add_circle(x, y)
