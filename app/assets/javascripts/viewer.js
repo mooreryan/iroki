@@ -22,8 +22,9 @@ function load_dataset(file) {
 }
 
 // handle upload button
-function upload_button(el, callback) {
-  var uploader = document.getElementById(el);
+function upload_button(submit_id, uploader_id, callback) {
+  var uploader = document.getElementById(uploader_id);
+  var submit_button = document.getElementById(submit_id);
   var reader = new FileReader();
 
   reader.onload = function(e) {
@@ -31,11 +32,18 @@ function upload_button(el, callback) {
     callback(contents);
   };
 
-  uploader.addEventListener("change", handleFiles, false);
+  uploader.addEventListener("change", function(){
+    clear_elem("svg-tree");
+    document.getElementById("save-svg").setAttribute("disabled", "");
+    document.getElementById("save-png").setAttribute("disabled", "");
+    submit_button.removeAttribute("disabled");
+  });
+  submit_button.addEventListener("click", handleFiles, false);
 
   function handleFiles() {
+    submit_button.setAttribute("disabled", "");
     d3.select("#table").text("loading...");
-    var file = this.files[0];
+    var file = uploader.files[0];
     reader.readAsText(file);
   }
 }
