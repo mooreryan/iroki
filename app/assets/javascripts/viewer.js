@@ -527,7 +527,7 @@ function lalala(tree_input)
       chart_transform_height = the_height * padding;
     }
 
-    if (document.getElementById("apple-chart")) {
+    if (document.getElementById("chart-container")) {
       chart.merge(chart)
         // .transition(TR)
         .attr("width", chart_width)
@@ -537,7 +537,7 @@ function lalala(tree_input)
           "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
     } else {
       chart = svg.append("g")
-        .attr("id", "apple-chart")
+        .attr("id", "chart-container")
         .attr("width", chart_width)
         .attr("height", chart_height)
         .attr("transform",
@@ -582,21 +582,6 @@ function lalala(tree_input)
         // .style("r", 0)
         .remove();
     }
-
-    // if (SHOW_INNER_DOTS) {
-    //   chart.append("g")
-    //     .selectAll("circle")
-    //     .data(root.descendants().filter(function (d) {
-    //       return is_inner(d);
-    //     }))
-    //     .enter().append("circle")
-    //     .attr("class", "inner")
-    //     .attr("r", INNER_DOT_SIZE)
-    //     .attr("transform", function(d) {
-    //       return pick_transform(d);
-    //     })
-    //     .style("fill", function(d) { return d.color; } );
-    // }
   }
 
   function draw_leaf_dots()
@@ -812,11 +797,7 @@ function lalala(tree_input)
 
   function adjust_tree()
   {
-    // if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
-    //   resize_svg_straight_layout("svg-tree", "apple-chart");
-    //
-    // }
-    resize_svg_straight_layout("svg-tree", "apple-chart");
+    resize_svg_straight_layout("svg-tree", "chart-container");
   }
 
   function update_and_draw(draw_fn)
@@ -875,6 +856,7 @@ function lalala(tree_input)
     set_up_hierarchy();
 
     draw_svg();
+
     draw_chart();
 
     chart.append("g").attr("id", "inner-dots-container");
@@ -1119,47 +1101,6 @@ function save_svg_data()
 //   // Height and width of the elem are the same regardless of roatation.
 // In the rotated state, the g elem width (x) and height (y) stay the same, but the SVG must swap them.
 
-// function resize_svg(svg_id, chart_id)
-// {
-//   console.log("adjusting with resize_svg");
-//
-//   var the_chart = document.getElementById(chart_id);
-//   var the_svg = document.getElementById(svg_id);
-//
-//   // For some reason, this does not match the bbox that you get when you select it in the console after adjusting? Is it because the new one reflects the new place in the svg?
-//   var chart_bbox = the_chart.getBBox();
-//
-//   // Set actual width and height of the chart to that of the bounding box so we can center it properly since the translation is based of off the elem width and height and not based on the width and height of the bounding box.
-//   the_chart.setAttribute("width", chart_bbox.width);
-//   the_chart.setAttribute("height", chart_bbox.height);
-//
-//   var new_svg_height, new_svg_width;
-//
-//   var chart_bbox_width_padding = chart_bbox.width * padding;
-//   var chart_bbox_height_padding = chart_bbox.height * padding;
-//
-//   new_svg_width  = chart_bbox.width  + (2 * chart_bbox_width_padding);
-//   new_svg_height = chart_bbox.height + (2 * chart_bbox_height_padding);
-//
-//   var g_chart_translation = "translate(" +
-//     // Need to subtract off the bounding box x and y as that is the true start position of the g chart.
-//     // TODO sometimes the bbox x and y values are negative
-//     (chart_bbox_width_padding - chart_bbox.x) + " " +
-//     (chart_bbox_height_padding- chart_bbox.y) + ")";
-//     // ((new_svg_width * padding / 2) - chart_bbox.x) + " " +
-//     // ((new_svg_height * padding / 2) - chart_bbox.y) + ")";
-//
-//   the_svg.setAttribute("width", new_svg_width);
-//   the_svg.setAttribute("height", new_svg_height);
-//
-//   the_chart.setAttribute("transform", g_chart_translation);
-// }
-
-function resize_svg_circle_layout(svg_id, chart_id)
-{
-  // START HERE
-}
-
 function resize_svg_straight_layout(svg_id, chart_id)
 {
   console.log("adjusting with resize_svg_straight_layout");
@@ -1209,46 +1150,6 @@ function resize_svg_straight_layout(svg_id, chart_id)
 
     // This is actually the length of the diagonal plus padding.
     var diameter_with_padding = Math.sqrt(Math.pow(diameter, 2) * 2) + (padding_px * 2);
-
-    // var rotation_mod = TREE_ROTATION % 90;
-    // var theta_mod = rotation_mod * Math.PI / 180;
-    //
-    // var angle_adjusted_radius = rotation_mod < 45 ? radius / Math.abs(Math.cos(theta_mod)) : radius / Math.abs(Math.sin(theta_mod));
-    //
-    // console.log(radius + " " + rotation_mod + " " + theta_mod + " " + angle_adjusted_radius);
-    //
-    // var diameter = 2 * angle_adjusted_radius;
-    //
-    // // TODO the diameter needs to take into account the bounding box x and y adjustment.
-    //
-    // var max_offset = Math.abs(chart_bbox.x) > Math.abs(chart_bbox.y) ? Math.abs(chart_bbox.x) : Math.abs(chart_bbox.y);
-    //
-    // var new_svg_diameter_no_padding = diameter > (max_offset * 2) ? diameter : (max_offset * 2);
-    // var new_svg_diameter_with_padding = new_svg_diameter_no_padding + (new_svg_diameter_no_padding * padding);
-    //
-    // g_chart_rotation = "rotate(" + TREE_ROTATION + " " +
-    //   (new_svg_diameter_with_padding / 2) + " " + (new_svg_diameter_with_padding / 2) + ")";
-
-    // g_chart_translation = "translate(" +
-    //   (new_svg_diameter_with_padding / 2) + " " +
-    //   (new_svg_diameter_with_padding / 2) + ")";
-
-    // TODO combine these two translations.
-    // g_chart_translation = "translate(" +
-    //   Math.abs(chart_bbox.x) + " " +
-    //   Math.abs(chart_bbox.y) + ")";
-
-    // var pad_offset = new_svg_diameter_no_padding * padding / 2;
-    // console.log("bob")
-    // if (chart_bbox.width > chart_bbox.height) {
-    //   g_chart_translation = "translate(" +
-    //     (Math.abs(chart_bbox.x) + pad_offset) + " " +
-    //     (Math.abs(chart_bbox.y) + ((chart_bbox.width - chart_bbox.height ) / 2) + pad_offset) + ")";
-    // } else {
-    //   g_chart_translation = "translate(" +
-    //     (Math.abs(chart_bbox.x) + ((chart_bbox.height - chart_bbox.width + (new_svg_diameter_no_padding * padding)) / 2) + pad_offset) + " " +
-    //     (Math.abs(chart_bbox.y) + pad_offset) + ")";
-    // }
 
     new_svg_width = diameter_with_padding;
     new_svg_height = diameter_with_padding;
@@ -1314,7 +1215,7 @@ function add_scale_bar()
     var label_x, label_y;
 
     // New where to add it?
-    var chart_bbox = document.getElementById("apple-chart").getBBox();
+    var chart_bbox = document.getElementById("chart-container").getBBox();
 
     // TODO not quite centered, take into account bounding box? Or center on svg?
 
@@ -1344,7 +1245,7 @@ function add_scale_bar()
 
     }
 
-    var container = d3.select("#apple-chart")
+    var container = d3.select("#chart-container")
       .append("g")
       .attr("id", "scale-bar-container");
 
