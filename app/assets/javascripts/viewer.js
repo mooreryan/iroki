@@ -80,6 +80,8 @@ var SORT_STATE, SORT_NONE, SORT_ASCENDING, SORT_DESCENDING, sort_function;
 
 var the_width, the_height, the_width, the_height, padding;
 
+var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH_WEIGHT;
+
 
 // To hold temporary DOM elements
 var elem;
@@ -138,6 +140,11 @@ function lalala(tree_input)
   listener("tree-sort", "change", draw_tree);
 
   listener("show-scale-bar", "change", function() {
+    update_form_constants();
+    add_scale_bar();
+    adjust_tree();
+  });
+  listener("scale-bar-offset-weight", "change", function() {
     update_form_constants();
     add_scale_bar();
     adjust_tree();
@@ -257,6 +264,10 @@ function lalala(tree_input)
     }
 
     SHOW_SCALE_BAR = document.getElementById("show-scale-bar").checked;
+    SCALE_BAR_OFFSET_WEIGHT = parseFloat(document.getElementById("scale-bar-offset-weight").value);
+    SCALE_BAR_LENGTH_WEIGHT = parseFloat(document.getElementById("scale-bar-length-weight").value);
+
+
 
     LAYOUT_CIRCLE = "circular-tree";
     LAYOUT_STRAIGHT = "rectangular-tree";
@@ -1224,7 +1235,7 @@ function add_scale_bar()
       min_scale_bar_size = 100;
     }
 
-    if (scale_bar_pixels < min_scale_bar_size) { 
+    if (scale_bar_pixels < min_scale_bar_size) {
       scale_bar_pixels = min_scale_bar_size;
       scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, 10);
     }
@@ -1239,30 +1250,33 @@ function add_scale_bar()
 
     // TODO not quite centered, take into account bounding box? Or center on svg?
 
-    var path_d = "M 250 250 L 350 350";
+    var path_d;
+    var start_y, start_x;
     if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == NOT_ROTATED) {
-      var start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
+      start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
+      start_y = (chart_bbox.height + SCALE_BAR_PADDING) * SCALE_BAR_OFFSET_WEIGHT;
 
-      path_d = "M " + start_x + " " + (chart_bbox.height + SCALE_BAR_PADDING) +
-        " L " + (start_x + scale_bar_pixels) + " " + (chart_bbox.height + SCALE_BAR_PADDING);
+      path_d = "M " + start_x + " " + start_y +
+        " L " + (start_x + scale_bar_pixels) + " " + start_y;
 
       label_x = start_x + (scale_bar_pixels / 2);
-      label_y = (chart_bbox.height + SCALE_BAR_PADDING) + SCALE_BAR_TEXT_PADDING;
+      label_y = start_y + SCALE_BAR_TEXT_PADDING;
     } else if (rotated_rectangle) {
-      var start_x = chart_bbox.x - SCALE_BAR_PADDING - (scale_bar_pixels / 2);
+      start_x = (chart_bbox.x - SCALE_BAR_PADDING - (scale_bar_pixels / 2)) * SCALE_BAR_OFFSET_WEIGHT;
+      start_y = (chart_bbox.height / 2);
 
-      path_d = "M " + start_x + " " + (chart_bbox.height / 2) +
-        " L " + (start_x + scale_bar_pixels) + " " + (chart_bbox.height / 2);
+      path_d = "M " + start_x + " " + start_y +
+        " L " + (start_x + scale_bar_pixels) + " " + start_y;
 
       label_x = start_x + (scale_bar_pixels / 2);
-      label_y = (chart_bbox.height / 2) + SCALE_BAR_TEXT_PADDING;
+      label_y = start_y + SCALE_BAR_TEXT_PADDING;
 
     } else { // circular
       console.log("hi");
       start_x = -(scale_bar_pixels / 2);
 
       // The chart bounding box height is the same as the width and it is centered, so the branches only extend half of that out.
-      var start_y = (chart_bbox.height / 2) + SCALE_BAR_PADDING;
+      start_y = ((chart_bbox.height / 2) + SCALE_BAR_PADDING) * SCALE_BAR_OFFSET_WEIGHT;
 
       label_x = start_x + (scale_bar_pixels / 2);
       label_y = start_y + SCALE_BAR_TEXT_PADDING;

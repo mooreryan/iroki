@@ -67,10 +67,19 @@
             option id="ascending" value="ascending" Reverse sort!
             option id="not-sorted" value="not-sorted" Not sorted!
 
+      hr.row
+      h4 Scale bar options!
       .row
         .small-12.columns
-          label for="show-scale-bar" Scale bar?!
+          label for="show-scale-bar" Show scale bar?!
           input id="show-scale-bar" type="checkbox" checked=""
+      .row
+        .small-6.columns
+          label for="scale-bar-offset-weight" Offset!
+          input id="scale-bar-offset-weight" type="range" min="1" max="3" value="1" step="0.1"
+        .small-6.columns
+          label for="scale-bar-length-weight" Length!
+          input id="scale-bar-length-weight" type="range" min="0.5" max="2" value="1" step="0.5"
 
       hr.row
       h4 Branch options!
