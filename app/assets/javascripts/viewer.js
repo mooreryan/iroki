@@ -149,6 +149,12 @@ function lalala(tree_input)
     add_scale_bar();
     adjust_tree();
   });
+  listener("scale-bar-length-weight", "change", function() {
+    update_form_constants();
+    add_scale_bar();
+    adjust_tree();
+  });
+
   // listener("tree-sort", "change", function() {
   //   update_form_constants();
   //   set_up_hierarchy(); // The regular redraw skips this step.
@@ -1235,10 +1241,15 @@ function add_scale_bar()
       min_scale_bar_size = 100;
     }
 
+    // If the original scale bar is smaller than the min size, bump up the size.
     if (scale_bar_pixels < min_scale_bar_size) {
       scale_bar_pixels = min_scale_bar_size;
       scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, 10);
     }
+
+    // Now that we have a minimum scale bar size, weight it by the slider value.
+    scale_bar_pixels *= SCALE_BAR_LENGTH_WEIGHT;
+    scale_bar_label_text = round_to(scale_bar_pixels / pixels_per_unit_length, 10);
 
     console.log("scale bar pixels: " + scale_bar_pixels);
 
@@ -1252,9 +1263,12 @@ function add_scale_bar()
 
     var path_d;
     var start_y, start_x;
+
+    // For the straight layouts adjust the scale bar offset weight to half as much weighting.
+
     if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == NOT_ROTATED) {
       start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
-      start_y = (chart_bbox.height + SCALE_BAR_PADDING) * SCALE_BAR_OFFSET_WEIGHT;
+      start_y = (chart_bbox.height + SCALE_BAR_PADDING) * (1 + ((SCALE_BAR_OFFSET_WEIGHT - 1) / 4)); // Reduce the weighting power by a lot.
 
       path_d = "M " + start_x + " " + start_y +
         " L " + (start_x + scale_bar_pixels) + " " + start_y;
@@ -1262,7 +1276,7 @@ function add_scale_bar()
       label_x = start_x + (scale_bar_pixels / 2);
       label_y = start_y + SCALE_BAR_TEXT_PADDING;
     } else if (rotated_rectangle) {
-      start_x = (chart_bbox.x - SCALE_BAR_PADDING - (scale_bar_pixels / 2)) * SCALE_BAR_OFFSET_WEIGHT;
+      start_x = (chart_bbox.x - SCALE_BAR_PADDING - (scale_bar_pixels / 2)) * (1 + ((SCALE_BAR_OFFSET_WEIGHT - 1) / 1.2)); // Reduce the weighting power by a bit.
       start_y = (chart_bbox.height / 2);
 
       path_d = "M " + start_x + " " + start_y +
