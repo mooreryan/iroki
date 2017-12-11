@@ -314,7 +314,7 @@ function lalala(tree_input)
       TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
       elem.setAttribute("min", "0");
       elem.setAttribute("max", "360");
-      elem.setAttribute("step", "45")
+      elem.setAttribute("step", "1")
     }
 
     if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
@@ -1207,15 +1207,35 @@ function add_scale_bar()
       pixels_per_unit_length = (first_link.target.y - first_link.source.y) / (first_link.source.height - first_link.target.height);
     }
 
+    console.log("pixels per unit length: " + pixels_per_unit_length);
+
     var rotated_rectangle = LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
-    mean_length = ary_mean(lengths);
+    mean_length = round_to(ary_mean(lengths), 10);
+
+    console.log("mean length: " + mean_length);
+    var scale_bar_label_text = mean_length;
 
     var scale_bar_pixels = mean_length * pixels_per_unit_length;
+
+    var min_scale_bar_size;
+    if (LAYOUT_STATE == LAYOUT_CIRCLE) {
+      min_scale_bar_size = 50; // circles look a bit smaller so make this half.
+    } else {
+      min_scale_bar_size = 100;
+    }
+
+    if (scale_bar_pixels < min_scale_bar_size) { 
+      scale_bar_pixels = min_scale_bar_size;
+      scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, 10);
+    }
+
+    console.log("scale bar pixels: " + scale_bar_pixels);
 
     var label_x, label_y;
 
     // New where to add it?
     var chart_bbox = document.getElementById("chart-container").getBBox();
+    var scale_bar_transform;
 
     // TODO not quite centered, take into account bounding box? Or center on svg?
 
@@ -1228,13 +1248,7 @@ function add_scale_bar()
 
       label_x = start_x + (scale_bar_pixels / 2);
       label_y = (chart_bbox.height + SCALE_BAR_PADDING) + SCALE_BAR_TEXT_PADDING;
-    } else {
-    //   var start_y = ((chart_bbox.height - scale_bar_pixels) / 2) + chart_bbox.y;
-    //
-    //   path_d = "M " + (-SCALE_BAR_PADDING) + " " + start_y + " L " + (-SCALE_BAR_PADDING) + " " + (start_y + scale_bar_pixels);
-    //
-    //   label_x = -SCALE_BAR_PADDING - SCALE_BAR_TEXT_PADDING;
-    //   label_y = start_y + (scale_bar_pixels / 2);
+    } else if (rotated_rectangle) {
       var start_x = chart_bbox.x - SCALE_BAR_PADDING - (scale_bar_pixels / 2);
 
       path_d = "M " + start_x + " " + (chart_bbox.height / 2) +
@@ -1243,6 +1257,17 @@ function add_scale_bar()
       label_x = start_x + (scale_bar_pixels / 2);
       label_y = (chart_bbox.height / 2) + SCALE_BAR_TEXT_PADDING;
 
+    } else { // circular
+      console.log("hi");
+      start_x = -(scale_bar_pixels / 2);
+
+      // The chart bounding box height is the same as the width and it is centered, so the branches only extend half of that out.
+      var start_y = (chart_bbox.height / 2) + SCALE_BAR_PADDING;
+
+      label_x = start_x + (scale_bar_pixels / 2);
+      label_y = start_y + SCALE_BAR_TEXT_PADDING;
+      path_d = "M " + start_x + " " + start_y + " L " + (start_x + scale_bar_pixels) + " " + start_y;
+      scale_bar_transform = "rotate(" + (-TREE_ROTATION) + ")";
     }
 
     var container = d3.select("#chart-container")
@@ -1251,9 +1276,10 @@ function add_scale_bar()
 
     container.append("path")
       .attr("id", "scale-bar")
-      .attr("stroke", "blue")
-      .attr("stroke-width", 5)
-      .attr("d", path_d);
+      .attr("stroke", "black")
+      .attr("stroke-width", BRANCH_WIDTH)
+      .attr("d", path_d)
+      .attr("transform", scale_bar_transform);
 
     container.append("text")
       .attr("id", "scale-bar-text")
@@ -1261,7 +1287,9 @@ function add_scale_bar()
       .attr("text-anchor", "middle")
       .attr("x", label_x)
       .attr("y", label_y)
-      .text(round_to(mean_length, 100));
+      .text(scale_bar_label_text)
+      .attr("transform", scale_bar_transform);
+
 
     if (rotated_rectangle) {
       var box = document.getElementById("scale-bar-container").getBBox();
