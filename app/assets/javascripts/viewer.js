@@ -185,12 +185,20 @@ function lalala(tree_input)
 
   listener("show-inner-labels", "change", function() { update_and_draw(draw_inner_labels); });
   listener("inner-label-size", "change", function() { update_and_draw(draw_inner_labels); });
-  listener("show-leaf-labels", "change", function() { update_and_draw(draw_leaf_labels); });
+  listener("show-leaf-labels", "change", function() {
+    update_form_constants();
+    draw_link_extensions(); // may need to be removed.
+    draw_leaf_labels();
+    draw_leaf_dots();
+    add_scale_bar();
+    adjust_tree();
+  });
   listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels); });
   listener("align-tip-labels", "change", function() {
     update_form_constants();
     draw_link_extensions();
     draw_leaf_labels();
+    draw_leaf_dots();
     add_scale_bar();
     adjust_tree();
 
@@ -206,7 +214,14 @@ function lalala(tree_input)
 
   listener("show-inner-dots", "change", function() { update_and_draw(draw_inner_dots); });
   listener("inner-dots-size", "change", function() { update_and_draw(draw_inner_dots); });
-  listener("show-leaf-dots", "change", function() { update_and_draw(draw_leaf_dots); });
+  listener("show-leaf-dots", "change", function() {
+    update_form_constants();
+    draw_link_extensions(); // may need to be removed.
+    draw_leaf_labels();
+    draw_leaf_dots();
+    add_scale_bar();
+    adjust_tree();
+  });
   listener("leaf-dots-size", "change", function() { update_and_draw(draw_leaf_dots); });
 
   listener("viewer-size-fixed", "change", update_viewer_size_fixed);
@@ -352,7 +367,7 @@ function lalala(tree_input)
 
 
     // Show or hide align tip labels
-    if (!SHOW_LEAF_LABELS || TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
+    if ((!SHOW_LEAF_LABELS && !SHOW_LEAF_DOTS) || TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
       document.getElementById("align-tip-labels").setAttribute("disabled", "");
       document.getElementById("align-tip-labels").removeAttribute("checked");
       align_tip_labels = false;
