@@ -9,140 +9,140 @@
   .row.tabs-panel.is-active
 
     hr.row
-    h4 Upload tree!
+    h4 Upload tree
 
     .row
       .small-12.columns
-        label for="uploader" Upload your tree!
+        label for="uploader" Upload your tree
         input id="uploader" type="file" name="newick"
     .row
       .small-6.columns
-        label for="save-svg" Save!?
-        input id="save-svg" type="button" value="Save as SVG!" disabled=""
+        label for="save-svg" Save?
+        input id="save-svg" type="button" value="Save as SVG" disabled=""
       .small-6.columns
-        label for="save-png" Save!?
-        input id="save-png" type="button" value="Save as PNG!" disabled=""
+        label for="save-png" Save?
+        input id="save-png" type="button" value="Save as PNG" disabled=""
 
     hr.row
 
     form id="tree-form"
       hr.row
-      h4 Tree options!
+      h4 Tree options
 
       .row
         .small-4.columns
-          label id="width-label" for="width" Width!
+          label id="width-label" for="width" Width
           input id="width" class="slider" type="range" min="250" max="5000" step="250" value="500"
         .small-4.columns
-          label id="height-label" for="height" Height!
+          label id="height-label" for="height" Height
           input id="height" class="slider" type="range" min="250" max="5000" step="250" value="500"
         .small-4.columns
-          label id="padding-label" for="padding" Padding!
+          label id="padding-label" for="padding" Padding
           input id="padding" class="slider" type="range" min="0.0" max="0.75" step="0.05" value="0.05"
 
       .row
         .small-12.columns
-          label for="tree-rotation" Tree rotation!
+          label for="tree-rotation" Tree rotation
           input id="tree-rotation" class="slider" type="range" min="0" max="270" step="270" value="0"
 
       .row
         .small-6.columns
-          label for="tree-shape" The shape of your dreams!?
+          label for="tree-shape" Layout shape
           select id="tree-shape"
-            option id="rectangular-tree" value="rectangular-tree" selected="" Rectangle-ish!
-            option id="circular-tree" value="circular-tree" Circle-ish!
-            /option id="radial-tree" value="radial-tree" Radial-ish!
+            option id="rectangular-tree" value="rectangular-tree" selected="" Rectangular
+            option id="circular-tree" value="circular-tree" Circular
+            /option id="radial-tree" value="radial-tree" Radial-ish
 
         .small-6.columns
-          label for="tree-branch-style" What's your style?!
+          label for="tree-branch-style" Branch style?
           select id="tree-branch-style"
-            option id="normalogram" value="normalogram" selected="" Normal-o-gram!
-            option id="cladogram" value="cladogram" Clad-o-gram!
+            option id="normalogram" value="normalogram" selected="" True length
+            option id="cladogram" value="cladogram" Cladogram
 
       .row
         .small-12.columns
-          label for="tree-sort" Sort?!
+          label for="tree-sort" Sort?
           select id="tree-sort"
-            option id="descending" value="descending" selected="" Sort!
-            option id="ascending" value="ascending" Reverse sort!
-            option id="not-sorted" value="not-sorted" Not sorted!
+            option id="descending" value="descending" selected="" Sort
+            option id="ascending" value="ascending" Reverse sort
+            option id="not-sorted" value="not-sorted" Not sorted
 
       hr.row
-      h4 Scale bar options!
+      h4 Scale bar options
       .row
         .small-12.columns
-          label for="show-scale-bar" Show scale bar?!
+          label for="show-scale-bar" Show scale bar?
           input id="show-scale-bar" type="checkbox" checked=""
       .row
         .small-6.columns
-          label for="scale-bar-offset-weight" Offset!
+          label for="scale-bar-offset-weight" Offset
           input id="scale-bar-offset-weight" type="range" min="1" max="2.5" value="1" step="0.1"
         .small-6.columns
-          label for="scale-bar-length-weight" Length!
+          label for="scale-bar-length-weight" Length
           input id="scale-bar-length-weight" type="range" min="0.25" max="2" value="1" step="0.25"
 
       hr.row
-      h4 Branch options!
+      h4 Branch options
 
       /.row
-      /  label for="branch-shape" Shape?!
+      /  label for="branch-shape" Shape?
       /  select id="branch-shape" disabled=""
-      /    option id="rectangle-type" value="rectangle-type" selected="" Rectangles!
-      /    option id="straight-type" value="straight-type" Straight lines!
+      /    option id="rectangle-type" value="rectangle-type" selected="" Rectangles
+      /    option id="straight-type" value="straight-type" Straight lines
 
       .row
-        label for="branch-width" Width!
+        label for="branch-width" Width
         input id="branch-width" type="range" min="1" max="10" value="2" class="slider"
 
       hr.row
-      h4 Label options!
+      h4 Label options
 
       .row
         .small-6.columns
-          label for="show-inner-labels" Show inner labels?!
+          label for="show-inner-labels" Show inner labels?
           input id="show-inner-labels" type="checkbox" name="label-show"
         .small-6.columns
-          label for="inner-label-size" Inner label size!
+          label for="inner-label-size" Inner label size
           input id="inner-label-size" type="range" min="8" max="24" value="16" class="slider"
 
       .row
         .small-6.columns
-          label for="show-leaf-labels" Show leaf labels?!
+          label for="show-leaf-labels" Show leaf labels?
           input id="show-leaf-labels" type="checkbox" name="label-show" checked=""
         .small-6.columns
-          label for="leaf-label-size" Leaf label size!
+          label for="leaf-label-size" Leaf label size
           input id="leaf-label-size" type="range" min="8" max="24" value="16" class="slider"
 
       .row
         .small-6.columns
-          label for="align-tip-labels" Align leaf labels?!
+          label for="align-tip-labels" Align leaf labels?
           input id="align-tip-labels" type="checkbox"
         .small-6.columns
-          label for="label-rotation" Label rotation!
+          label for="label-rotation" Label rotation
           input id="label-rotation" type="range" min="-90" max="90" value="0" step="45" class="slider"
 
       hr.row
-      h4 Strange dot options!
+      h4 Dot
 
       .row
         .small-6.columns
-          label for="show-inner-dots" Show inner dots?!
+          label for="show-inner-dots" Show inner dots?
           input id="show-inner-dots" type="checkbox"
         .small-6.columns
-          label for="inner-dots-size" Inner dot size!
+          label for="inner-dots-size" Inner dot size
           input id="inner-dots-size" type="range" min="2" max="8" value="5" class="slider"
       .row
         .small-6.columns
-          label for="show-leaf-dots" Show leaf dots?!
+          label for="show-leaf-dots" Show leaf dots?
           input id="show-leaf-dots" type="checkbox"
         .small-6.columns
-          label for="leaf-dots-size" Leaf dot size!
+          label for="leaf-dots-size" Leaf dot size
           input id="leaf-dots-size" type="range" min="2" max="8" value="5" class="slider"
 
       hr.row
-      h4 Viewer size!
+      h4 Viewer size
 
       .row
         .small-12.columns
-          label for="viewer-size-fixed" Fixed viewer width?!
+          label for="viewer-size-fixed" Fixed viewer width?
           input id="viewer-size-fixed" type="checkbox" checked=""
