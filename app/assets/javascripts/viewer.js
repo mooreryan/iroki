@@ -58,6 +58,9 @@ function upload_button(submit_id, uploader_id, callback) {
 // TODO get this from the CSS
 var FORM_HEIGHT = 650;
 
+// Round to 100ths place.
+var ROUNDING_PLACE = 100;
+
 var LAYOUT_STATE, LAYOUT_CIRCLE, LAYOUT_STRAIGHT;
 var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
 var the_x, the_y;
@@ -1250,7 +1253,7 @@ function add_scale_bar()
     console.log("pixels per unit length: " + pixels_per_unit_length);
 
     var rotated_rectangle = LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
-    mean_length = round_to(ary_mean(lengths), 10);
+    mean_length = round_to(ary_mean(lengths), ROUNDING_PLACE);
 
     console.log("mean length: " + mean_length);
     var scale_bar_label_text = mean_length;
@@ -1267,12 +1270,12 @@ function add_scale_bar()
     // If the original scale bar is smaller than the min size, bump up the size.
     if (scale_bar_pixels < min_scale_bar_size) {
       scale_bar_pixels = min_scale_bar_size;
-      scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, 10);
+      scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PLACE);
     }
 
     // Now that we have a minimum scale bar size, weight it by the slider value.
     scale_bar_pixels *= SCALE_BAR_LENGTH_WEIGHT;
-    scale_bar_label_text = round_to(scale_bar_pixels / pixels_per_unit_length, 10);
+    scale_bar_label_text = round_to(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PLACE);
 
     console.log("scale bar pixels: " + scale_bar_pixels);
 
