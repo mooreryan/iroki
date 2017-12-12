@@ -1337,7 +1337,7 @@ function add_scale_bar()
 
     container.append("text")
       .attr("id", "scale-bar-text")
-      .attr("alignment-baseline", "hanging")
+      .attr("dominant-baseline", "hanging")
       .attr("text-anchor", "middle")
       .attr("x", label_x)
       .attr("y", label_y)
