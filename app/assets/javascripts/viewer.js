@@ -196,7 +196,7 @@ function lalala(tree_input)
     add_scale_bar();
     adjust_tree();
   });
-  listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels); });
+  listener("leaf-label-size", "change", function() { console.log("leaf label size changed!"); update_and_draw(draw_leaf_labels); });
   listener("align-tip-labels", "change", function() {
     update_form_constants();
     draw_link_extensions();
@@ -280,7 +280,6 @@ function lalala(tree_input)
 
   function update_form_constants()
   {
-    console.log("updating form constants");
     // Get sorting options
     SORT_NONE = "not-sorted";
     SORT_ASCENDING = "ascending";
@@ -677,7 +676,7 @@ function lalala(tree_input)
       inner_labels
         .enter().append("text")
         .attr("class", "inner")
-        .attr("font-size", 0)
+        // .attr("font-size", 0)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
         .attr("text-anchor", function(d) {
@@ -693,7 +692,6 @@ function lalala(tree_input)
       inner_labels
         .merge(inner_labels)
         // .transition(TR)
-        .style("font-size", INNER_LABEL_SIZE)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
         .attr("text-anchor", function(d) {
@@ -701,7 +699,8 @@ function lalala(tree_input)
         })
         .attr("transform", function(d) {
           return pick_transform(d);
-        });
+        })
+        .style("font-size", INNER_LABEL_SIZE);
 
     } else {
       inner_labels
@@ -714,6 +713,8 @@ function lalala(tree_input)
   function draw_leaf_labels()
   {
 
+    console.log("leaf label size: " + LEAF_LABEL_SIZE);
+
     labels = d3.select("#leaf-label-container")
       .selectAll("text")
       .data(root.descendants().filter(is_leaf));
@@ -725,7 +726,7 @@ function lalala(tree_input)
       labels
         .enter().append("text")
         .attr("class", "leaf")
-        .attr("font-size", 0)
+        // .attr("font-size", 0)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
         .attr("text-anchor", function(d) {
@@ -743,7 +744,6 @@ function lalala(tree_input)
         .merge(labels)
         // .transition(TR)
         // Same things that may change
-        .style("font-size", LEAF_LABEL_SIZE)
         .attr("dy", text_y_offset)
         .attr("dx", text_x_offset)
         .attr("text-anchor", function(d) {
@@ -752,6 +752,7 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
+        .style("font-size", LEAF_LABEL_SIZE);
     } else {
       labels
         // .transition(TR)
@@ -892,7 +893,6 @@ function lalala(tree_input)
   function draw_tree()
   {
     clear_elem("svg-tree");
-    console.log("drawing");
 
     update_form_constants();
 
@@ -1146,8 +1146,7 @@ function save_svg_data()
 
 function resize_svg_straight_layout(svg_id, chart_id)
 {
-  console.log("adjusting with resize_svg_straight_layout");
-  
+
   var the_chart = document.getElementById(chart_id);
   var the_svg = document.getElementById(svg_id);
 
@@ -1165,7 +1164,6 @@ function resize_svg_straight_layout(svg_id, chart_id)
   // var g_chart_translation
   
   if (LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) {
-    console.log("adjust layout staight rotated");
 
     new_svg_height = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_width  = chart_bbox.height + (2 * chart_bbox_height_padding);
@@ -1175,7 +1173,6 @@ function resize_svg_straight_layout(svg_id, chart_id)
       chart_bbox_height_padding + ")";
 
   } else if (LAYOUT_STATE == LAYOUT_STRAIGHT) {
-    console.log("adjust layout staight not rotated");
     new_svg_width = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_height  = chart_bbox.height + (2 * chart_bbox_height_padding);
 
@@ -1184,7 +1181,6 @@ function resize_svg_straight_layout(svg_id, chart_id)
       (chart_bbox_width_padding - chart_bbox.x) + " " +
       (chart_bbox_height_padding- chart_bbox.y) + ")";
   } else if (LAYOUT_STATE == LAYOUT_CIRCLE) {
-    console.log("adjust circle");
 
 
     var radius = chart_bbox.width > chart_bbox.height ? chart_bbox.width / 2: chart_bbox.height / 2;
@@ -1231,18 +1227,15 @@ function add_scale_bar()
     var SCALE_BAR_PADDING = 50; // in pixels
     var SCALE_BAR_TEXT_PADDING = 5;
 
-    console.log("tree branch style: " + TREE_BRANCH_STYLE);
 
     var first_link = root.links()[0];
     var pixels_per_unit_length;
 
     if (TREE_BRANCH_STYLE == TREE_BRANCH_NORMAL) {
-      console.log("normal");
       lengths = root.descendants().map(function(d) { return d.data.length });
       pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.length;
 
     } else {
-      console.log("clado");
       // TODO when tree is a cladogram, need to make the branch label reflect the depth rather than the radius (true length).
       lengths = root.descendants().map(function(d) { return d.height });
 
@@ -1250,12 +1243,10 @@ function add_scale_bar()
       pixels_per_unit_length = (first_link.target.y - first_link.source.y) / (first_link.source.height - first_link.target.height);
     }
 
-    console.log("pixels per unit length: " + pixels_per_unit_length);
 
     var rotated_rectangle = LAYOUT_STATE == LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
     mean_length = round_to(ary_mean(lengths), ROUNDING_PLACE);
 
-    console.log("mean length: " + mean_length);
     var scale_bar_label_text = mean_length;
 
     var scale_bar_pixels = mean_length * pixels_per_unit_length;
@@ -1277,7 +1268,6 @@ function add_scale_bar()
     scale_bar_pixels *= SCALE_BAR_LENGTH_WEIGHT;
     scale_bar_label_text = round_to(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PLACE);
 
-    console.log("scale bar pixels: " + scale_bar_pixels);
 
     var label_x, label_y;
 
@@ -1312,7 +1302,6 @@ function add_scale_bar()
       label_y = start_y + SCALE_BAR_TEXT_PADDING;
 
     } else { // circular
-      console.log("hi");
       start_x = -(scale_bar_pixels / 2);
 
       // The chart bounding box height is the same as the width and it is centered, so the branches only extend half of that out.
