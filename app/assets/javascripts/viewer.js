@@ -451,16 +451,16 @@ function lalala(tree_input)
 
       // d3.select("#width-label")
       //   .transition().duration(1000)
-      //   .style("color", "red")
+      //   .attr("color", "red")
       //   .transition().duration(1000)
-      //   .style("color", "black")
+      //   .attr("color", "black")
       //   .text("Height!");
       //
       // d3.select("#height-label")
       //   .transition().duration(1000)
-      //   .style("color", "red")
+      //   .attr("color", "red")
       //   .transition().duration(1000)
-      //   .style("color", "black")
+      //   .attr("color", "black")
       //   .text("Width!");
     } else {
 
@@ -598,17 +598,11 @@ function lalala(tree_input)
       inner_dots
         .enter().append("circle")
         .attr("class", "inner")
-        // .attr("r", 0)
-        // .attr("transform", function(d) {
-        //   return pick_transform(d);
-        // })
-        // .style("fill", function(d) { return d.color; } )
-        // .transition(TR)
         .attr("r", INNER_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .style("fill", function(d) { return d.color; } );
+        .attr("fill", function(d) { return d.color; } );
 
       inner_dots.merge(inner_dots)
         // .transition(TR)
@@ -616,12 +610,11 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .style("fill", function(d) { return d.color; } );
+        .attr("fill", function(d) { return d.color; } );
 
     } else {
       inner_dots
         // .transition(TR)
-        // .style("r", 0)
         .remove();
     }
   }
@@ -636,17 +629,11 @@ function lalala(tree_input)
       leaf_dots
         .enter().append("circle")
         .attr("class", "leaf")
-        // .attr("r", 0)
-        // .attr("transform", function(d) {
-        //   return pick_transform(d);
-        // })
-        // .style("fill", function(d) { return d.color; } )
-        // .transition(TR)
         .attr("r", LEAF_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .style("fill", function(d) { return d.color; } );
+        .attr("fill", function(d) { return d.color; } );
 
       leaf_dots.merge(leaf_dots)
         // .transition(TR)
@@ -654,11 +641,9 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .style("fill", function(d) { return d.color; } );
+        .attr("fill", function(d) { return d.color; } );
     } else {
       leaf_dots
-        // .transition(TR)
-        // .style("r", 0)
         .remove();
     }
   }
@@ -687,7 +672,7 @@ function lalala(tree_input)
         })
         .text(function(d) { return d.data.name; })
         // .transition(TR)
-        .style("font-size", INNER_LABEL_SIZE);
+        .attr("font-size", INNER_LABEL_SIZE);
 
       inner_labels
         .merge(inner_labels)
@@ -700,12 +685,12 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .style("font-size", INNER_LABEL_SIZE);
+        .attr("font-size", INNER_LABEL_SIZE);
 
     } else {
       inner_labels
         // .transition(TR)
-        // .style("font-size", 0)
+        // .attr("font-size", 0)
         .remove();
     }
   }
@@ -737,7 +722,7 @@ function lalala(tree_input)
         })
         .text(function(d) { return d.data.name; })
         // .transition(TR) // This transistion prevents the bounding box calculation.  TODO need to wait on it.
-        .style("font-size", LEAF_LABEL_SIZE)
+        .attr("font-size", LEAF_LABEL_SIZE)
 
       labels
       // What to do for merging
@@ -752,11 +737,11 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .style("font-size", LEAF_LABEL_SIZE);
+        .attr("font-size", LEAF_LABEL_SIZE);
     } else {
       labels
         // .transition(TR)
-        // .style("font-size", 0)
+        // .attr("font-size", 0)
         .remove();
     }
   }
@@ -787,9 +772,9 @@ function lalala(tree_input)
       //     return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
       //   })
       //   .transition(TR)
-        .style("fill", "none")
-        .style("stroke", "#000")
-        .style("stroke-opacity", "0.35")
+        .attr("fill", "none")
+        .attr("stroke", "#000")
+        .attr("stroke-opacity", "0.35")
         .attr("stroke-width", BRANCH_WIDTH)
         .attr("stroke-dasharray", "1, 5")
         .attr("class", "dotted-links")
@@ -818,25 +803,25 @@ function lalala(tree_input)
       .data(root.links());
 
     link.enter().append("path")
-      .style("fill", "none")
-      .style("stroke", "#000")
+      .attr("fill", "none")
+      .attr("stroke", "#000")
       .attr("stroke-width", BRANCH_WIDTH)
       .each(function(d) { d.target.linkNode = this; })
       .attr("d", function(d) {
         return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
-      })
-      .attr("stroke", function(d) { return d.target.color; });
+      });
+      // .attr("stroke", function(d) { return d.target.color; });
 
     link.merge(link)
       // .transition(TR)
-      .style("fill", "none")
-      .style("stroke", "#000")
+      .attr("fill", "none")
+      .attr("stroke", "#000")
       .attr("stroke-width", BRANCH_WIDTH)
       .each(function(d) { d.target.linkNode = this; })
       .attr("d", function(d) {
         return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
-      })
-      .attr("stroke", function(d) { return d.target.color; });
+      });
+      // .attr("stroke", function(d) { return d.target.color; });
   }
 
   function adjust_tree()
@@ -1351,7 +1336,7 @@ function round_to(x, place)
 
 function add_circle(x, y)
 {
-  d3.select("#svg-tree").append("circle").attr("r", 0).transition().style("fill", "green").attr("r", 10).attr("cx", x).attr("cy", y).attr("class", "delete-me");
+  d3.select("#svg-tree").append("circle").attr("r", 0).transition().attr("fill", "green").attr("r", 10).attr("cx", x).attr("cy", y).attr("class", "delete-me");
 }
 
 function delete_circles()
