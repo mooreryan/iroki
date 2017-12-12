@@ -33,30 +33,28 @@
       h4 Tree options
 
       .row
-        .small-4.columns
-          label id="width-label" for="width" Width
-          input id="width" class="slider" type="range" min="250" max="5000" step="250" value="500"
-        .small-4.columns
-          label id="height-label" for="height" Height
-          input id="height" class="slider" type="range" min="250" max="5000" step="250" value="500"
-        .small-4.columns
+        .small-12.medium-12.large-6.columns
+          label id="width-label" for="width" Separation
+          input id="width" class="slider width-100" type="range" min="250" max="5000" step="250" value="500"
+        .small-12.medium-12.large-6.columns
+          label id="height-label" for="height" Length
+          input id="height" class="slider width-100" type="range" min="250" max="5000" step="250" value="500"
+      .row
+        .small-12.medium-12.large-6.columns
           label id="padding-label" for="padding" Padding
-          input id="padding" class="slider" type="range" min="0.0" max="0.75" step="0.05" value="0.05"
-
-      .row
-        .small-12.columns
+          input id="padding" class="slider width-100" type="range" min="0.0" max="0.75" step="0.05" value="0.05"
+        .small-12.medium-12.large-6.columns
           label for="tree-rotation" Tree rotation
-          input id="tree-rotation" class="slider" type="range" min="0" max="270" step="270" value="0"
+          input id="tree-rotation" class="slider width-100" type="range" min="0" max="270" step="270" value="0"
 
       .row
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="tree-shape" Layout shape
           select id="tree-shape"
             option id="rectangular-tree" value="rectangular-tree" selected="" Rectangular
             option id="circular-tree" value="circular-tree" Circular
             /option id="radial-tree" value="radial-tree" Radial-ish
-
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="tree-branch-style" Branch style?
           select id="tree-branch-style"
             option id="normalogram" value="normalogram" selected="" True length
@@ -77,70 +75,65 @@
           label for="show-scale-bar" Show scale bar?
           input id="show-scale-bar" type="checkbox" checked=""
       .row
-        .small-6.columns
-          label for="scale-bar-offset-weight" Offset
-          input id="scale-bar-offset-weight" type="range" min="1" max="2.5" value="1" step="0.1"
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="scale-bar-length-weight" Length
-          input id="scale-bar-length-weight" type="range" min="0.25" max="2" value="1" step="0.25"
+          input id="scale-bar-length-weight" class="slider width-100" type="range" min="0.25" max="2" value="1" step="0.25"
+        .small-12.medium-12.large-6.columns
+          label for="scale-bar-offset-weight" Offset
+          input id="scale-bar-offset-weight" class="slider width-100" type="range" min="1" max="2.5" value="1" step="0.1"
 
       hr.row
       h4 Branch options
 
-      /.row
-      /  label for="branch-shape" Shape?
-      /  select id="branch-shape" disabled=""
-      /    option id="rectangle-type" value="rectangle-type" selected="" Rectangles
-      /    option id="straight-type" value="straight-type" Straight lines
-
       .row
-        label for="branch-width" Width
-        input id="branch-width" type="range" min="1" max="10" value="2" class="slider"
+        .small-12.columns
+          label for="branch-width" Width
+          input id="branch-width" type="range" min="1" max="10" value="2" class="slider width-100"
 
       hr.row
       h4 Label options
 
       .row
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="show-inner-labels" Show inner labels?
           input id="show-inner-labels" type="checkbox" name="label-show"
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="inner-label-size" Inner label size
-          input id="inner-label-size" type="range" min="8" max="24" value="16" class="slider"
+          input id="inner-label-size" type="range" min="8" max="24" value="16" class="slider width-100"
 
       .row
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="show-leaf-labels" Show leaf labels?
           input id="show-leaf-labels" type="checkbox" name="label-show" checked=""
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="leaf-label-size" Leaf label size
-          input id="leaf-label-size" type="range" min="8" max="24" value="16" class="slider"
+          input id="leaf-label-size" type="range" min="8" max="24" value="16" class="slider width-100"
 
       .row
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="align-tip-labels" Align leaf labels?
           input id="align-tip-labels" type="checkbox"
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="label-rotation" Label rotation
-          input id="label-rotation" type="range" min="-90" max="90" value="0" step="45" class="slider"
+          input id="label-rotation" type="range" min="-90" max="90" value="0" step="45" class="slider width-100"
 
       hr.row
       h4 Dot
 
       .row
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="show-inner-dots" Show inner dots?
           input id="show-inner-dots" type="checkbox"
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="inner-dots-size" Inner dot size
-          input id="inner-dots-size" type="range" min="2" max="8" value="5" class="slider"
+          input id="inner-dots-size" type="range" min="2" max="8" value="5" class="slider width-100"
       .row
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="show-leaf-dots" Show leaf dots?
           input id="show-leaf-dots" type="checkbox"
-        .small-6.columns
+        .small-12.medium-12.large-6.columns
           label for="leaf-dots-size" Leaf dot size
-          input id="leaf-dots-size" type="range" min="2" max="8" value="5" class="slider"
+          input id="leaf-dots-size" type="range" min="2" max="8" value="5" class="slider width-100"
 
       hr.row
       h4 Viewer size
