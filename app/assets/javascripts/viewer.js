@@ -15,39 +15,6 @@ function clear_elem(id) {
 }
 
 
-// // load dataset
-// function load_dataset(file) {
-//   clear_elem("svg-tree");
-//   lalala(file);
-// }
-//
-// // handle upload button
-// function upload_button(submit_id, uploader_id, callback) {
-//   var uploader = document.getElementById(uploader_id);
-//   var submit_button = document.getElementById(submit_id);
-//   var reader = new FileReader();
-//
-//   reader.onload = function(e) {
-//     var contents = e.target.result;
-//     callback(contents);
-//   };
-//
-//   uploader.addEventListener("change", function(){
-//     clear_elem("svg-tree");
-//     document.getElementById("save-svg").setAttribute("disabled", "");
-//     document.getElementById("save-png").setAttribute("disabled", "");
-//     submit_button.removeAttribute("disabled");
-//   });
-//   submit_button.addEventListener("click", handleFiles, false);
-//
-//   function handleFiles() {
-//     submit_button.setAttribute("disabled", "");
-//     d3.select("#table").text("loading...");
-//     var file = uploader.files[0];
-//     reader.readAsText(file);
-//   }
-// }
-
 // load dataset
 function load_dataset(tree_file, mapping_file) {
   clear_elem("svg-tree");
@@ -84,12 +51,27 @@ function upload_button(submit_id, uploader_id, callback) {
     document.getElementById("save-png").setAttribute("disabled", "");
     submit_button.removeAttribute("disabled");
   });
-  submit_button.addEventListener("click", handleFiles, false);
+  mapping_uploader.addEventListener("change", function() {
+    submit_button.removeAttribute("disabled");
+  });
+  submit_button.addEventListener("click", function() {
+    $("#reset").attr("disabled", false);
+    handleFiles();
+  }, false);
+  document.getElementById("reset").addEventListener("click", function() {
+    clear_elem("svg-tree");
+    submit_button.removeAttribute("disabled");
+    $("#reset").attr("disabled", true);
+  });
 
   function handleFiles() {
     submit_button.setAttribute("disabled", "");
     var file = uploader.files[0];
-    tree_reader.readAsText(file);
+    if (file) {
+      tree_reader.readAsText(file);
+    } else {
+      alert("Don't forget a tree file!");
+    }
   }
 }
 
@@ -149,7 +131,7 @@ var the_width, the_height, the_width, the_height, padding;
 
 var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH_WEIGHT;
 
-var name2md;
+var name2md, category_names = [];
 
 
 // To hold temporary DOM elements
@@ -157,9 +139,44 @@ var elem;
 
 var TR;
 
+var valid_metadata_category_names = [
+  "leaf_label_color",
+  "leaf_label_font",
+  "leaf_label_size",
+  "leaf_dot_color",
+  "leaf_dot_size"
+
+];
+
+var md_cat_name2id = {
+  "leaf_label_color": null,
+  "leaf_label_font": null,
+  "leaf_label_size": "leaf-label-size",
+  "leaf_dot_color": null,
+  "leaf_dot_size": "leaf-dot-size"
+};
+
+var leaf_dot_options = [
+  "leaf_dot_color",
+  "leaf_dot_size"
+];
+
+var leaf_label_options = [
+  "leaf_label_color",
+  "leaf_label_font",
+  "leaf_label_size"
+];
+
+
 // The mega function
 function lalala(tree_input, mapping_input)
 {
+
+  if (mapping_input) {
+    name2md = parse_metadata_string(mapping_input);
+  } else {
+    name2md = null;
+  }
 
   // TODO this transition doesn't get picked up by the draw functions when they are called by a listener.
   TR = d3.transition().duration(750).ease(d3.easeExp);
@@ -209,16 +226,19 @@ function lalala(tree_input, mapping_input)
   listener("tree-sort", "change", draw_tree);
 
   listener("show-scale-bar", "change", function() {
+    set_options_by_metadata();
     update_form_constants();
     add_scale_bar();
     adjust_tree();
   });
   listener("scale-bar-offset-weight", "change", function() {
+    set_options_by_metadata();
     update_form_constants();
     add_scale_bar();
     adjust_tree();
   });
   listener("scale-bar-length-weight", "change", function() {
+    set_options_by_metadata();
     update_form_constants();
     add_scale_bar();
     adjust_tree();
@@ -237,6 +257,7 @@ function lalala(tree_input, mapping_input)
   // });
 
   listener("branch-width", "change", function() {
+    set_options_by_metadata();
     update_form_constants();
     draw_links();
     draw_link_extensions();
@@ -247,6 +268,7 @@ function lalala(tree_input, mapping_input)
   listener("show-inner-labels", "change", function() { update_and_draw(draw_inner_labels); });
   listener("inner-label-size", "change", function() { update_and_draw(draw_inner_labels); });
   listener("show-leaf-labels", "change", function() {
+    set_options_by_metadata();
     update_form_constants();
     draw_link_extensions(); // may need to be removed.
     draw_leaf_dots();
@@ -256,6 +278,7 @@ function lalala(tree_input, mapping_input)
   });
   listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels); });
   listener("align-tip-labels", "change", function() {
+    set_options_by_metadata();
     update_form_constants();
     draw_link_extensions();
     draw_leaf_dots();
@@ -265,6 +288,7 @@ function lalala(tree_input, mapping_input)
 
   });
   listener("label-rotation", "change", function() {
+    set_options_by_metadata();
     update_form_constants();
     draw_inner_labels();
     draw_leaf_labels();
@@ -274,8 +298,9 @@ function lalala(tree_input, mapping_input)
   });
 
   listener("show-inner-dots", "change", function() { update_and_draw(draw_inner_dots); });
-  listener("inner-dots-size", "change", function() { update_and_draw(draw_inner_dots); });
+  listener("inner-dot-size", "change", function() { update_and_draw(draw_inner_dots); });
   listener("show-leaf-dots", "change", function() {
+    set_options_by_metadata();
     update_form_constants();
     draw_link_extensions(); // may need to be removed.
     draw_leaf_dots();
@@ -283,11 +308,16 @@ function lalala(tree_input, mapping_input)
     add_scale_bar();
     adjust_tree();
   });
-  listener("leaf-dots-size", "change", function() { update_and_draw(draw_leaf_dots); });
+  listener("leaf-dot-size", "change", function() { update_and_draw(draw_leaf_dots); });
 
   listener("viewer-size-fixed", "change", update_viewer_size_fixed);
 
   draw_tree();
+
+  // d3.selectAll("text.leaf").on("click", function(d) {
+  //   console.log(d.x + " " + d.y);
+  // });
+  //
 
   var circle_cluster, rectangle_cluster;
 
@@ -370,17 +400,17 @@ function lalala(tree_input, mapping_input)
     // Dots
     SHOW_INNER_DOTS = document.getElementById("show-inner-dots").checked;
     SHOW_LEAF_DOTS = document.getElementById("show-leaf-dots").checked;
-    INNER_DOT_SIZE = parseInt(document.getElementById("inner-dots-size").value);
-    LEAF_DOT_SIZE = parseInt(document.getElementById("leaf-dots-size").value);
+    INNER_DOT_SIZE = parseInt(document.getElementById("inner-dot-size").value);
+    LEAF_DOT_SIZE = parseInt(document.getElementById("leaf-dot-size").value);
     if (SHOW_INNER_DOTS) {
-      document.getElementById("inner-dots-size").removeAttribute("disabled");
+      document.getElementById("inner-dot-size").removeAttribute("disabled");
     } else {
-      document.getElementById("inner-dots-size").setAttribute("disabled", "");
+      document.getElementById("inner-dot-size").setAttribute("disabled", "");
     }
     if (SHOW_LEAF_DOTS) {
-      document.getElementById("leaf-dots-size").removeAttribute("disabled");
+      document.getElementById("leaf-dot-size").removeAttribute("disabled");
     } else {
-      document.getElementById("leaf-dots-size").setAttribute("disabled", "");
+      document.getElementById("leaf-dot-size").setAttribute("disabled", "");
     }
 
 
@@ -535,6 +565,19 @@ function lalala(tree_input, mapping_input)
     the_x = "x";
     the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
 
+    // Finally make sure to re-disable any thing that is already accounted for in the mapping file.
+    category_names.forEach(function(cat_name) {
+      var id = md_cat_name2id[cat_name];
+      if (id) {
+        var elem = document.getElementById(id);
+
+        if (elem) {
+          elem.setAttribute("disabled", "");
+        }
+      }
+    });
+
+
     update_viewer_size_fixed();
 
   }
@@ -582,8 +625,9 @@ function lalala(tree_input, mapping_input)
 
     // Add metadata if it is available.
     if (mapping_input) {
-      name2md = parse_metadata_string(mapping_input);
       add_metadata(root, name2md);
+    } else {
+      add_blank_metadata(root);
     }
 
     if (LAYOUT_STATE == LAYOUT_CIRCLE) {
@@ -654,7 +698,7 @@ function lalala(tree_input, mapping_input)
 
   function draw_inner_dots()
   {
-    inner_dots = d3.select("#inner-dots-container")
+    inner_dots = d3.select("#inner-dot-container")
       .selectAll("circle")
       .data(root.descendants().filter(is_inner));
 
@@ -685,7 +729,7 @@ function lalala(tree_input, mapping_input)
 
   function draw_leaf_dots()
   {
-    leaf_dots = d3.select("#leaf-dots-container")
+    leaf_dots = d3.select("#leaf-dot-container")
       .selectAll("circle")
       .data(root.descendants().filter(is_leaf));
 
@@ -928,6 +972,7 @@ function lalala(tree_input, mapping_input)
 
   function update_and_draw(draw_fn)
   {
+    set_options_by_metadata();
     update_form_constants();
     draw_fn();
     add_scale_bar();
@@ -937,6 +982,7 @@ function lalala(tree_input, mapping_input)
   // Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
   function redraw_tree()
   {
+    set_options_by_metadata();
     update_form_constants();
 
     draw_links();
@@ -956,6 +1002,7 @@ function lalala(tree_input, mapping_input)
   // For redrawing tree even when you need to recalculate hierarchy and merge svg and g chart.
   function set_up_and_redraw()
   {
+    set_options_by_metadata();
     update_form_constants();
 
     set_up_hierarchy();
@@ -983,6 +1030,7 @@ function lalala(tree_input, mapping_input)
   {
     clear_elem("svg-tree");
 
+    set_options_by_metadata();
     update_form_constants();
 
     set_up_hierarchy();
@@ -997,19 +1045,20 @@ function lalala(tree_input, mapping_input)
     chart.append("g").attr("id", "link-extension-container");
     draw_link_extensions();
 
-    chart.append("g").attr("id", "inner-dots-container");
+    chart.append("g").attr("id", "inner-dot-container");
     draw_inner_dots();
 
     chart.append("g").attr("id", "inner-label-container");
     draw_inner_labels();
 
-    chart.append("g").attr("id", "leaf-dots-container");
+    chart.append("g").attr("id", "leaf-dot-container");
     draw_leaf_dots();
 
     chart.append("g").attr("id", "leaf-label-container");
     draw_leaf_labels();
 
     add_scale_bar();
+
 
     // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
     adjust_tree();
@@ -1484,17 +1533,85 @@ function add_metadata(root, name2md)
   root.leaves().forEach(function(d) { return d.metadata = name2md[d.data.name]; })
 }
 
-// TODO need to disable all sliders that have metadata associated with them as they will not work with the metadata.
-function disable_options_by_metadata(name2md)
+function add_blank_metadata(root)
 {
-
+  root.leaves().forEach(function(d) { return d.metadata = {}; })
 }
 
-var valid_metadata_category_names = [
-  "leaf_label_color",
-  "leaf_label_font",
-  "leaf_label_size",
-  "leaf_dot_color",
-  "leaf_dot_size",
 
-];
+// TODO need to disable all sliders that have metadata associated with them as they will not work with the metadata.  Also this will enable certain things that aren't enabled by default if they are in the metadata.
+function set_options_by_metadata()
+{
+  if (name2md) {
+
+    json_each(name2md, function(seq_name, metadata) {
+      json_each(metadata, function(category_name, value) {
+        ary_push_unless_present(category_names, category_name);
+      });
+    });
+    
+    var
+      leaf_dot_options_present = false, 
+      leaf_label_options_present = false;
+    
+    category_names.forEach(function(cat_name) {
+      if (leaf_dot_options.includes(cat_name)) {
+        leaf_dot_options_present = true;
+      }
+      
+      if (leaf_label_options.includes(cat_name)) {
+        leaf_label_options_present = true;
+      }
+    });
+
+    // Show leaf dots if leaf dot options are present
+    if (leaf_dot_options_present) {
+      var elem = $("#show-leaf-dots");
+      elem.attr("checked", true);
+      elem.attr("disabled", true);
+    }
+
+    // Show leaf labels if leaf label options are present.
+    if (leaf_label_options_present) {
+      var elem = $("#show-leaf-labels");
+      elem.attr("checked", true);
+      elem.attr("disabled", true);
+    }
+
+    // TODO Sometimes these values can be re-enabled in the update_form_constants function.
+    category_names.forEach(function(cat_name) {
+      var id = md_cat_name2id[cat_name];
+
+      if (id) {
+        var elem = document.getElementById(id);
+
+        if (elem) {
+          elem.setAttribute("disabled", "");
+        }
+      }
+    });
+
+    return category_names;
+  } else {
+    return null;
+  }
+}
+
+function ary_push_unless_present(ary, item)
+{
+  if (!ary.includes(item)) {
+    ary.push(item);
+  }
+}
+
+// fn is a function that takes two arguments: 1. the json key, and 2. the json value for that key.
+function json_each(json, fn)
+{
+  for (var key in json) {
+    if (json.hasOwnProperty(key)) {
+      fn(key, json[key]);
+    }
+  }
+}
+
+

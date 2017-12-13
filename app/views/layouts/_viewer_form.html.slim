@@ -20,9 +20,12 @@
         label for="mapping-file-uploader" Mapping file
         input id="mapping-file-uploader" type="file"
     .row
-      .small-12.columns
+      .small-6.columns
         label for="submit" Submit your files
         input id="submit" type="button" value="Submit!" disabled=""
+      .small-6.columns
+        label for="reset" Reset the viewer
+        input id="reset" type="button" value="Reset!" disabled=""
     .row
       .small-6.columns
         label for="save-svg" Save?
@@ -130,15 +133,15 @@
           label for="show-inner-dots" Show inner dots?
           input id="show-inner-dots" type="checkbox"
         .small-12.medium-12.large-6.columns
-          label for="inner-dots-size" Inner dot size
-          input id="inner-dots-size" type="range" min="2" max="8" value="5" class="slider width-100"
+          label for="inner-dot-size" Inner dot size
+          input id="inner-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
       .row
         .small-12.medium-12.large-6.columns
           label for="show-leaf-dots" Show leaf dots?
           input id="show-leaf-dots" type="checkbox"
         .small-12.medium-12.large-6.columns
-          label for="leaf-dots-size" Leaf dot size
-          input id="leaf-dots-size" type="range" min="2" max="8" value="5" class="slider width-100"
+          label for="leaf-dot-size" Leaf dot size
+          input id="leaf-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
 
       hr.row
       h4 Viewer size
