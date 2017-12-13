@@ -249,8 +249,8 @@ function lalala(tree_input, mapping_input)
   listener("show-leaf-labels", "change", function() {
     update_form_constants();
     draw_link_extensions(); // may need to be removed.
-    draw_leaf_labels();
     draw_leaf_dots();
+    draw_leaf_labels();
     add_scale_bar();
     adjust_tree();
   });
@@ -258,16 +258,16 @@ function lalala(tree_input, mapping_input)
   listener("align-tip-labels", "change", function() {
     update_form_constants();
     draw_link_extensions();
-    draw_leaf_labels();
     draw_leaf_dots();
+    draw_leaf_labels();
     add_scale_bar();
     adjust_tree();
 
   });
   listener("label-rotation", "change", function() {
     update_form_constants();
-    draw_leaf_labels();
     draw_inner_labels();
+    draw_leaf_labels();
     add_scale_bar();
     adjust_tree();
 
@@ -278,8 +278,8 @@ function lalala(tree_input, mapping_input)
   listener("show-leaf-dots", "change", function() {
     update_form_constants();
     draw_link_extensions(); // may need to be removed.
-    draw_leaf_labels();
     draw_leaf_dots();
+    draw_leaf_labels();
     add_scale_bar();
     adjust_tree();
   });
@@ -693,19 +693,31 @@ function lalala(tree_input, mapping_input)
       leaf_dots
         .enter().append("circle")
         .attr("class", "leaf")
-        .attr("r", LEAF_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .attr("fill", function(d) { return d.color; } );
+        .attr("r", function(d) {
+          var val = d.metadata.leaf_dot_size;
+          return val ? val : LEAF_DOT_SIZE;
+        })
+        .attr("fill", function(d) {
+          var val = d.metadata.leaf_dot_color;
+          return val ? val : "black";
+        });
 
       leaf_dots.merge(leaf_dots)
         // .transition(TR)
-        .attr("r", LEAF_DOT_SIZE)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .attr("fill", function(d) { return d.color; } );
+        .attr("r", function(d) {
+          var val = d.metadata.leaf_dot_size;
+          return val ? val : LEAF_DOT_SIZE;
+        })
+        .attr("fill", function(d) {
+          var val = d.metadata.leaf_dot_color;
+          return val ? val : "black";
+        } );
     } else {
       leaf_dots
         .remove();
@@ -761,7 +773,7 @@ function lalala(tree_input, mapping_input)
 
   function draw_leaf_labels()
   {
-    
+
     labels = d3.select("#leaf-label-container")
       .selectAll("text")
       .data(root.descendants().filter(is_leaf));
@@ -926,12 +938,16 @@ function lalala(tree_input, mapping_input)
   function redraw_tree()
   {
     update_form_constants();
-    draw_inner_dots();
-    draw_leaf_dots();
-    draw_inner_labels();
-    draw_leaf_labels();
-    draw_link_extensions();
+
     draw_links();
+    draw_link_extensions();
+
+    draw_inner_dots();
+    draw_inner_labels();
+
+    draw_leaf_dots();
+    draw_leaf_labels();
+
     add_scale_bar();
 
     adjust_tree();
@@ -947,12 +963,15 @@ function lalala(tree_input, mapping_input)
     draw_svg();
     draw_chart();
 
-    draw_inner_dots();
-    draw_leaf_dots();
-    draw_inner_labels();
-    draw_leaf_labels();
-    draw_link_extensions();
     draw_links();
+    draw_link_extensions();
+
+    draw_inner_dots();
+    draw_inner_labels();
+
+    draw_leaf_dots();
+    draw_leaf_labels();
+
     add_scale_bar();
 
     adjust_tree();
@@ -972,23 +991,23 @@ function lalala(tree_input, mapping_input)
 
     draw_chart();
 
-    chart.append("g").attr("id", "inner-dots-container");
-    draw_inner_dots();
-
-    chart.append("g").attr("id", "leaf-dots-container");
-    draw_leaf_dots();
-
-    chart.append("g").attr("id", "inner-label-container");
-    draw_inner_labels();
-
-    chart.append("g").attr("id", "leaf-label-container");
-    draw_leaf_labels();
+    chart.append("g").attr("id", "link-container");
+    draw_links();
 
     chart.append("g").attr("id", "link-extension-container");
     draw_link_extensions();
 
-    chart.append("g").attr("id", "link-container");
-    draw_links();
+    chart.append("g").attr("id", "inner-dots-container");
+    draw_inner_dots();
+
+    chart.append("g").attr("id", "inner-label-container");
+    draw_inner_labels();
+
+    chart.append("g").attr("id", "leaf-dots-container");
+    draw_leaf_dots();
+
+    chart.append("g").attr("id", "leaf-label-container");
+    draw_leaf_labels();
 
     add_scale_bar();
 
@@ -1457,8 +1476,6 @@ function parse_metadata_string(str)
   md_cat_names.shift(); // pop off the first thing (will be "name")
   md_cat_names = md_cat_names.map(function(s) { return s.replace(/ /g, "_") });
 
-  var num_md_cats = md_cat_names.length;
-
   return get_metadata(dat, md_cat_names);
 }
 
@@ -1467,8 +1484,17 @@ function add_metadata(root, name2md)
   root.leaves().forEach(function(d) { return d.metadata = name2md[d.data.name]; })
 }
 
+// TODO need to disable all sliders that have metadata associated with them as they will not work with the metadata.
+function disable_options_by_metadata(name2md)
+{
+
+}
+
 var valid_metadata_category_names = [
   "leaf_label_color",
   "leaf_label_font",
-  "leaf_label_size"
+  "leaf_label_size",
+  "leaf_dot_color",
+  "leaf_dot_size",
+
 ];
