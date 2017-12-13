@@ -557,8 +557,8 @@ function lalala(tree_input, mapping_input)
       the_height = width;
 
       // Flip the labels of the selectors
-      $("#width-label").text("Heigth!");
-      $("#height-label").text("Width!");
+      // $("#width-label").text("Heigth!");
+      // $("#height-label").text("Width!");
 
       // $("#padding-label").text("Height padding!");
       // $("#padding-label").text("Width padding!");
@@ -585,8 +585,8 @@ function lalala(tree_input, mapping_input)
       the_height = height;
 
       // Flip the labels of the selectors
-      $("#width-label").text("Width!");
-      $("#height-label").text("Height!");
+      // $("#width-label").text("Width!");
+      // $("#height-label").text("Height!");
     }
     the_x = "x";
     the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
