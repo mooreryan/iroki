@@ -1,6 +1,6 @@
-name	leaf label color	branch width	leaf label font	leaf label size	leaf dot color	leaf dot size	new name
-eggplant	red		Helvetica	6	orange	8	EGGPLANT
-banana	blue	4	Times	10		6
-geode		6		14	green	4	GEODE
-clock	purple	8	Times		blue	2
-tire	orange	10	Helvetica	22	red	5
+name	leaf label color	leaf label font	leaf label size	leaf dot color	leaf dot size	new name	branch width	branch color
+eggplant	red	Helvetica	6	orange	8		6	blue
+banana	blue	Times	10		6		1	blue
+geode			14	green	4	GEODE	10	green
+clock	purple	Times		blue	2		15	orange
+tire	orange	Helvetica	22	red	5	TIRE	1	orange

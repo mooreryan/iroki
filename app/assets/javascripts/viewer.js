@@ -41,7 +41,6 @@ function upload_button(submit_id, uploader_id, callback) {
 
     mapping_reader.onload = function(mapping_event) {
       var mapping_str = mapping_event.target.result;
-      console.log(mapping_str);
 
       callback(tree_str, mapping_str)
     };
@@ -144,21 +143,15 @@ var elem;
 
 var TR;
 
-var valid_metadata_category_names = [
-  "leaf_label_color",
-  "leaf_label_font",
-  "leaf_label_size",
-  "leaf_dot_color",
-  "leaf_dot_size"
-
-];
-
 var md_cat_name2id = {
   "leaf_label_color": null,
   "leaf_label_font": null,
   "leaf_label_size": "leaf-label-size",
   "leaf_dot_color": null,
-  "leaf_dot_size": "leaf-dot-size"
+  "leaf_dot_size": "leaf-dot-size",
+  "new_name": null,
+  "branch_width": "branch-width",
+  "branch_color": null
 };
 
 var leaf_dot_options = [
@@ -169,9 +162,14 @@ var leaf_dot_options = [
 var leaf_label_options = [
   "leaf_label_color",
   "leaf_label_font",
-  "leaf_label_size"
+  "leaf_label_size",
+  "new_name"
 ];
 
+var branch_options = [
+  "branch_width",
+  "branch_color"
+];
 
 // The mega function
 function lalala(tree_input, mapping_input)
@@ -326,15 +324,6 @@ function lalala(tree_input, mapping_input)
 
   var circle_cluster, rectangle_cluster;
 
-  function is_leaf(d)
-  {
-    return d.value == 1;
-  }
-
-  function is_inner(d)
-  {
-    return !is_leaf(d);
-  }
 
   function set_value_of(id, val)
   {
@@ -376,7 +365,6 @@ function lalala(tree_input, mapping_input)
 
     // If there were category names from the mapping file that were disabled, but now the mapping file is gone and they need to be re-enabled.
     if (previous_category_names) {
-      console.log("previous category names present: " + previous_category_names);
       previous_category_names.forEach(function(cat_name) {
         var id = md_cat_name2id[cat_name];
 
@@ -864,7 +852,11 @@ function lalala(tree_input, mapping_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .text(function(d) { return d.data.name; })
+        .text(function(d) {
+          var new_name = d.metadata.new_name;
+
+          return new_name ? new_name : d.data.name;
+        })
         // .transition(TR) // This transistion prevents the bounding box calculation.  TODO need to wait on it.
         .attr("font-size", function(d) {
           var size = d.metadata.leaf_label_size;
@@ -891,6 +883,11 @@ function lalala(tree_input, mapping_input)
         })
         .attr("transform", function(d) {
           return pick_transform(d);
+        })
+        .text(function(d) {
+          var new_name = d.metadata.new_name;
+
+          return new_name ? new_name : d.data.name;
         })
         .attr("font-size", function(d) {
           var size = d.metadata.leaf_label_size;
@@ -972,23 +969,35 @@ function lalala(tree_input, mapping_input)
     link.enter().append("path")
       .attr("fill", "none")
       .attr("stroke", "#000")
-      .attr("stroke-width", BRANCH_WIDTH)
       .each(function(d) { d.target.linkNode = this; })
       .attr("d", function(d) {
         return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
+      })
+      .attr("stroke", function(d) {
+        return get_branch_md_val(d.target, "branch_color", "black");
+      })
+      .attr("stroke-width", function (d) {
+        return get_branch_md_val(d.target, "branch_width", BRANCH_WIDTH);
       });
-      // .attr("stroke", function(d) { return d.target.color; });
+
+    // .attr("stroke", function(d) { return d.target.color; });
 
     link.merge(link)
       // .transition(TR)
       .attr("fill", "none")
       .attr("stroke", "#000")
-      .attr("stroke-width", BRANCH_WIDTH)
       .each(function(d) { d.target.linkNode = this; })
       .attr("d", function(d) {
         return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
+      })
+      .attr("stroke", function(d) {
+        return get_branch_md_val(d.target, "branch_color", "black");
+      })
+      .attr("stroke-width", function (d) {
+        return get_branch_md_val(d.target, "branch_width", BRANCH_WIDTH);
       });
-      // .attr("stroke", function(d) { return d.target.color; });
+
+    // .attr("stroke", function(d) { return d.target.color; });
   }
 
   function adjust_tree()
@@ -1564,6 +1573,42 @@ function add_blank_metadata(root)
   root.leaves().forEach(function(d) { return d.metadata = {}; })
 }
 
+// function is_target_md_pure_for(root, branch_option, defualt_value)
+// {
+//   var targets = root.links().map(function(d) { return d.target });
+//
+//   targets.forEach(function(target){
+//     var leaves = get_leaves(target);
+//
+//     // TODO does this assume that all leaves are in the mapping file?
+//     var md_vals = [];
+//     leaves.forEach(function(leaf) {
+//       // Assumes that metadata has already been added.
+//       var val = d.metadata[branch_option];
+//       push_unless_present(md_vals, val);
+//     });
+//   });
+//
+//   return md_vals.length == 1 ? md_vals[0] : default_value;
+// }
+
+
+// The branch option needs to be the underscore version.
+function get_branch_md_val(node, branch_option, default_value)
+{
+  var leaves = get_leaves(node);
+  var md_vals = [];
+
+  leaves.forEach(function(leaf){
+    // Assumes that metadata has already been added.
+    var val = leaf.metadata[branch_option];
+    if (val) {
+      push_unless_present(md_vals, val);
+    }
+  });
+
+  return md_vals.length == 1 ? md_vals[0] : default_value;
+}
 
 // TODO need to disable all sliders that have metadata associated with them as they will not work with the metadata.  Also this will enable certain things that aren't enabled by default if they are in the metadata.
 function set_options_by_metadata()
@@ -1573,7 +1618,7 @@ function set_options_by_metadata()
 
     json_each(name2md, function(seq_name, metadata) {
       json_each(metadata, function(category_name, value) {
-        ary_push_unless_present(category_names, category_name);
+        push_unless_present(category_names, category_name);
       });
     });
     
@@ -1593,7 +1638,6 @@ function set_options_by_metadata()
 
     // Show leaf dots if leaf dot options are present
     if (leaf_dot_options_present) {
-      console.log("leaf dot options present");
       var elem = $("#show-leaf-dots");
       elem.attr("checked", true);
       // elem.attr("disabled", true);
@@ -1624,7 +1668,7 @@ function set_options_by_metadata()
   }
 }
 
-function ary_push_unless_present(ary, item)
+function push_unless_present(ary, item)
 {
   if (!ary.includes(item)) {
     ary.push(item);
@@ -1641,4 +1685,53 @@ function json_each(json, fn)
   }
 }
 
+
+function is_leaf(d)
+{
+  return d.value == 1;
+}
+
+function is_inner(d)
+{
+  return !is_leaf(d);
+}
+
+function get_leaves(target)
+{
+  function get_leaves_iter(target)
+  {
+    if (is_leaf(target)) {
+      leaves.push(target);
+    } else {
+      target.children.map(function (d) {
+        leaves.push(get_leaves(d));
+      });
+    }
+  }
+
+  var leaves = [];
+  get_leaves_iter(target);
+
+  return flatten(leaves);
+}
+
+function flatten(ary)
+{
+  function flatten_iter(ary)
+  {
+    for (var i = 0; i < ary.length; ++i) {
+      var val = ary[i];
+      if (Array.isArray(val)) {
+        flatten_iter(val);
+      } else {
+        flat_ary.push(val);
+      }
+    }
+  }
+
+  var flat_ary = [];
+  flatten_iter(ary);
+
+  return flat_ary;
+}
 
