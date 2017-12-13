@@ -41,6 +41,8 @@ function upload_button(submit_id, uploader_id, callback) {
 
     mapping_reader.onload = function(mapping_event) {
       var mapping_str = mapping_event.target.result;
+      console.log(mapping_str);
+
       callback(tree_str, mapping_str)
     };
   };
@@ -62,6 +64,9 @@ function upload_button(submit_id, uploader_id, callback) {
     clear_elem("svg-tree");
     submit_button.removeAttribute("disabled");
     $("#reset").attr("disabled", true);
+    document.getElementById("save-svg").setAttribute("disabled", "");
+    document.getElementById("save-png").setAttribute("disabled", "");
+    document.getElementById("file-upload-form").reset();
   });
 
   function handleFiles() {
@@ -131,7 +136,7 @@ var the_width, the_height, the_width, the_height, padding;
 
 var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH_WEIGHT;
 
-var name2md, category_names = [];
+var name2md, category_names = [], previous_category_names = null;
 
 
 // To hold temporary DOM elements
@@ -368,6 +373,27 @@ function lalala(tree_input, mapping_input)
 
   function update_form_constants()
   {
+
+    // If there were category names from the mapping file that were disabled, but now the mapping file is gone and they need to be re-enabled.
+    if (previous_category_names) {
+      console.log("previous category names present: " + previous_category_names);
+      previous_category_names.forEach(function(cat_name) {
+        var id = md_cat_name2id[cat_name];
+
+        if (id) {
+          var elem = document.getElementById(id);
+
+          if (elem) {
+            elem.removeAttribute("disabled");
+          }
+        }
+      });
+    }
+
+    // // Also a couple of checkboxes may have been disabled by set_options_by_metadata().  Re-enable them here.  If they actually need to be disabled later in this function, they will be later.
+    // $("#show-leaf-dots").attr("disabled", false);
+    // $("#show-leaf-labels").attr("disabled", false);
+
     // Get sorting options
     SORT_NONE = "not-sorted";
     SORT_ASCENDING = "ascending";
@@ -1543,6 +1569,7 @@ function add_blank_metadata(root)
 function set_options_by_metadata()
 {
   if (name2md) {
+    previous_category_names = null;
 
     json_each(name2md, function(seq_name, metadata) {
       json_each(metadata, function(category_name, value) {
@@ -1566,19 +1593,20 @@ function set_options_by_metadata()
 
     // Show leaf dots if leaf dot options are present
     if (leaf_dot_options_present) {
+      console.log("leaf dot options present");
       var elem = $("#show-leaf-dots");
       elem.attr("checked", true);
-      elem.attr("disabled", true);
+      // elem.attr("disabled", true);
     }
 
     // Show leaf labels if leaf label options are present.
     if (leaf_label_options_present) {
       var elem = $("#show-leaf-labels");
       elem.attr("checked", true);
-      elem.attr("disabled", true);
+      // elem.attr("disabled", true);
     }
 
-    // TODO Sometimes these values can be re-enabled in the update_form_constants function.
+    // At the beginning of update form constants, these will be un-disabled if necessary.
     category_names.forEach(function(cat_name) {
       var id = md_cat_name2id[cat_name];
 
@@ -1590,10 +1618,9 @@ function set_options_by_metadata()
         }
       }
     });
-
-    return category_names;
   } else {
-    return null;
+    previous_category_names = category_names;
+    category_names = [];
   }
 }
 

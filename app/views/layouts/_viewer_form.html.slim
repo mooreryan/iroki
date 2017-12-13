@@ -13,12 +13,13 @@
     h4 Upload tree
 
     .row
-      .small-6.columns
-        label for="uploader" Newick tree
-        input id="uploader" type="file" name="newick"
-      .small-6.columns
-        label for="mapping-file-uploader" Mapping file
-        input id="mapping-file-uploader" type="file"
+      form id="file-upload-form"
+        .small-6.columns
+          label for="uploader" Newick tree
+          input id="uploader" type="file" name="newick"
+        .small-6.columns
+          label for="mapping-file-uploader" Mapping file
+          input id="mapping-file-uploader" type="file"
     .row
       .small-6.columns
         label for="submit" Submit your files
