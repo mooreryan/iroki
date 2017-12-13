@@ -1,0 +1,6 @@
+name	leaf label color	branch width	leaf label font	leaf label size
+eggplant	red	2	Helvetica	6
+banana	blue	4	Times	10
+geode	green	6	Helvetica	14
+clock	purple	8	Times	18
+tire	orange	10	Helvetica	22

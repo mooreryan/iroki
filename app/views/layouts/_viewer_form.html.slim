@@ -9,14 +9,19 @@
   .row.tabs-panel.is-active
 
     hr.row
+
     h4 Upload tree
 
     .row
       .small-6.columns
-        label for="uploader" Upload your tree
+        label for="uploader" Newick tree
         input id="uploader" type="file" name="newick"
       .small-6.columns
-        label for="submit" Submit your tree
+        label for="mapping-file-uploader" Mapping file
+        input id="mapping-file-uploader" type="file"
+    .row
+      .small-12.columns
+        label for="submit" Submit your files
         input id="submit" type="button" value="Submit!" disabled=""
     .row
       .small-6.columns

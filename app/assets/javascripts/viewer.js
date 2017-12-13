@@ -15,21 +15,67 @@ function clear_elem(id) {
 }
 
 
-// load dataset 
-function load_dataset(file) {
+// // load dataset
+// function load_dataset(file) {
+//   clear_elem("svg-tree");
+//   lalala(file);
+// }
+//
+// // handle upload button
+// function upload_button(submit_id, uploader_id, callback) {
+//   var uploader = document.getElementById(uploader_id);
+//   var submit_button = document.getElementById(submit_id);
+//   var reader = new FileReader();
+//
+//   reader.onload = function(e) {
+//     var contents = e.target.result;
+//     callback(contents);
+//   };
+//
+//   uploader.addEventListener("change", function(){
+//     clear_elem("svg-tree");
+//     document.getElementById("save-svg").setAttribute("disabled", "");
+//     document.getElementById("save-png").setAttribute("disabled", "");
+//     submit_button.removeAttribute("disabled");
+//   });
+//   submit_button.addEventListener("click", handleFiles, false);
+//
+//   function handleFiles() {
+//     submit_button.setAttribute("disabled", "");
+//     d3.select("#table").text("loading...");
+//     var file = uploader.files[0];
+//     reader.readAsText(file);
+//   }
+// }
+
+// load dataset
+function load_dataset(tree_file, mapping_file) {
   clear_elem("svg-tree");
-  lalala(file);
+  lalala(tree_file, mapping_file);
 }
 
 // handle upload button
 function upload_button(submit_id, uploader_id, callback) {
   var uploader = document.getElementById(uploader_id);
-  var submit_button = document.getElementById(submit_id);
-  var reader = new FileReader();
+  var mapping_uploader = document.getElementById("mapping-file-uploader");
 
-  reader.onload = function(e) {
-    var contents = e.target.result;
-    callback(contents);
+  var submit_button = document.getElementById(submit_id);
+  var tree_reader = new FileReader();
+  var mapping_reader = new FileReader();
+
+  tree_reader.onload = function(tree_event) {
+    var tree_str = tree_event.target.result;
+    var mapping_file = mapping_uploader.files[0];
+    if (mapping_file) {
+      mapping_reader.readAsText(mapping_file);
+    } else {
+      callback(tree_str, null);
+    }
+
+    mapping_reader.onload = function(mapping_event) {
+      var mapping_str = mapping_event.target.result;
+      callback(tree_str, mapping_str)
+    };
   };
 
   uploader.addEventListener("change", function(){
@@ -42,12 +88,22 @@ function upload_button(submit_id, uploader_id, callback) {
 
   function handleFiles() {
     submit_button.setAttribute("disabled", "");
-    d3.select("#table").text("loading...");
     var file = uploader.files[0];
-    reader.readAsText(file);
+    tree_reader.readAsText(file);
   }
 }
 
+// function watch_for_uploads()
+// {
+//   var tree_uploader = document.getElementById("uploader");
+//   var mapping_uploader = document.getElementById("mapping-file-uploader");
+//   var reader = new FileReader();
+//
+//   reader.onload = function(event) {
+//     var contents = event.target.result;
+//
+//   }
+// }
 
 //
 // Stuff from the old viewer stops here
@@ -93,6 +149,8 @@ var the_width, the_height, the_width, the_height, padding;
 
 var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH_WEIGHT;
 
+var name2md;
+
 
 // To hold temporary DOM elements
 var elem;
@@ -100,7 +158,7 @@ var elem;
 var TR;
 
 // The mega function
-function lalala(tree_input)
+function lalala(tree_input, mapping_input)
 {
 
   // TODO this transition doesn't get picked up by the draw functions when they are called by a listener.
@@ -196,7 +254,7 @@ function lalala(tree_input)
     add_scale_bar();
     adjust_tree();
   });
-  listener("leaf-label-size", "change", function() { console.log("leaf label size changed!"); update_and_draw(draw_leaf_labels); });
+  listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels); });
   listener("align-tip-labels", "change", function() {
     update_form_constants();
     draw_link_extensions();
@@ -522,6 +580,12 @@ function lalala(tree_input)
       .sum(function(d) { return d.branchset ? 0 : 1; })
       .sort(sort_function);
 
+    // Add metadata if it is available.
+    if (mapping_input) {
+      name2md = parse_metadata_string(mapping_input);
+      add_metadata(root, name2md);
+    }
+
     if (LAYOUT_STATE == LAYOUT_CIRCLE) {
       circle_cluster(root);
       setRadius(root, root.data.length = 0, (the_width / 2) / maxLength(root));
@@ -697,9 +761,7 @@ function lalala(tree_input)
 
   function draw_leaf_labels()
   {
-
-    console.log("leaf label size: " + LEAF_LABEL_SIZE);
-
+    
     labels = d3.select("#leaf-label-container")
       .selectAll("text")
       .data(root.descendants().filter(is_leaf));
@@ -722,7 +784,18 @@ function lalala(tree_input)
         })
         .text(function(d) { return d.data.name; })
         // .transition(TR) // This transistion prevents the bounding box calculation.  TODO need to wait on it.
-        .attr("font-size", LEAF_LABEL_SIZE)
+        .attr("font-size", function(d) {
+          var size = d.metadata.leaf_label_size;
+          return size ? size : LEAF_LABEL_SIZE;
+        })
+        .attr("font-family", function(d) {
+          var font = d.metadata.leaf_label_font;
+          return font ? font : "Arial";
+        })
+        .attr("fill", function(d) {
+          var color = d.metadata.leaf_label_color;
+          return color ? color : "black";
+        });
 
       labels
       // What to do for merging
@@ -737,7 +810,19 @@ function lalala(tree_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .attr("font-size", LEAF_LABEL_SIZE);
+        .attr("font-size", function(d) {
+          var size = d.metadata.leaf_label_size;
+          return size ? size : LEAF_LABEL_SIZE;
+        })
+        .attr("font-family", function(d) {
+          var font = d.metadata.leaf_label_font;
+          return font ? font : "Arial";
+        })
+        .attr("fill", function(d) {
+          var color = d.metadata.leaf_label_color;
+          return color ? color : "black";
+        });
+
     } else {
       labels
         // .transition(TR)
@@ -1346,3 +1431,44 @@ function delete_circles()
 
 function rot(p) { return pt(p.y, -p.x); }
 function pt(x, y) { return { "x" : x, "y" : y } }
+
+
+
+function get_metadata(dat, md_cat_names)
+{
+
+  var name2md = {}
+  var i = 0;
+  for (i = 0; i < dat.length; ++i) {
+    name2md[dat[i][0]] = {};
+    var j = 0;
+    for (j = 0; j < md_cat_names.length; ++j) {
+      name2md[dat[i][0]][md_cat_names[j]] = dat[i][j+1];
+    }
+  }
+
+  return name2md;
+}
+
+function parse_metadata_string(str)
+{
+  var dat = str.split(/\r?\n/).filter(function(s) { return s; }).map(function(s) { return s.split("\t"); });
+  var md_cat_names = dat.shift();
+  md_cat_names.shift(); // pop off the first thing (will be "name")
+  md_cat_names = md_cat_names.map(function(s) { return s.replace(/ /g, "_") });
+
+  var num_md_cats = md_cat_names.length;
+
+  return get_metadata(dat, md_cat_names);
+}
+
+function add_metadata(root, name2md)
+{
+  root.leaves().forEach(function(d) { return d.metadata = name2md[d.data.name]; })
+}
+
+var valid_metadata_category_names = [
+  "leaf_label_color",
+  "leaf_label_font",
+  "leaf_label_size"
+];
