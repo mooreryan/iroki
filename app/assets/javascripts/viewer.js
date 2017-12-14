@@ -143,7 +143,7 @@ var elem;
 
 var TR;
 
-var RADIAL_LAYOUT_WEIGHT = 20;
+var RADIAL_LAYOUT_WEIGHT = 1;
 
 var md_cat_name2id = {
   "leaf_label_color": null,
@@ -223,7 +223,26 @@ function lalala(tree_input, mapping_input)
 
   listener("height", "change", draw_tree);
 
-  listener("tree-shape", "change", draw_tree);
+  listener("tree-shape", "change", function() {
+    // First adjust the slider.
+    var width_elem = document.getElementById("width");
+    if (document.getElementById("rectangular-tree").selected) {
+      width_elem.setAttribute("min", "250");
+      width_elem.setAttribute("max", "25000");
+      width_elem.setAttribute("step", "250");
+    } else if (document.getElementById("circular-tree").selected) {
+      width_elem.setAttribute("min", "250");
+      width_elem.setAttribute("max", "25000");
+      width_elem.setAttribute("step", "250");
+    } else { // radial
+      width_elem.setAttribute("min", "10");
+      width_elem.setAttribute("max", "1000");
+      width_elem.setAttribute("step", "10");
+      width_elem.setAttribute("value", "50");
+    }
+
+    draw_tree();
+  });
   listener("tree-branch-style", "change", redraw_tree);
 
   listener("tree-rotation", "change", draw_tree);
@@ -233,19 +252,19 @@ function lalala(tree_input, mapping_input)
   listener("show-scale-bar", "change", function() {
     set_options_by_metadata();
     update_form_constants();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
   });
   listener("scale-bar-offset-weight", "change", function() {
     set_options_by_metadata();
     update_form_constants();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
   });
   listener("scale-bar-length-weight", "change", function() {
     set_options_by_metadata();
     update_form_constants();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
   });
 
@@ -266,7 +285,7 @@ function lalala(tree_input, mapping_input)
     update_form_constants();
     draw_links();
     draw_link_extensions();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
   });
 
@@ -278,7 +297,7 @@ function lalala(tree_input, mapping_input)
     draw_link_extensions(); // may need to be removed.
     draw_leaf_dots();
     draw_leaf_labels();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
   });
   listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels); });
@@ -288,7 +307,7 @@ function lalala(tree_input, mapping_input)
     draw_link_extensions();
     draw_leaf_dots();
     draw_leaf_labels();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
 
   });
@@ -297,7 +316,7 @@ function lalala(tree_input, mapping_input)
     update_form_constants();
     draw_inner_labels();
     draw_leaf_labels();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
 
   });
@@ -310,7 +329,7 @@ function lalala(tree_input, mapping_input)
     draw_link_extensions(); // may need to be removed.
     draw_leaf_dots();
     draw_leaf_labels();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
   });
   listener("leaf-dot-size", "change", function() { update_and_draw(draw_leaf_dots); });
@@ -512,7 +531,7 @@ function lalala(tree_input, mapping_input)
 
 
     // Set the height to match the width
-    if (LAYOUT_CIRCLE) {
+    if (LAYOUT_CIRCLE || LAYOUT_RADIAL) {
       // Disable the height slider
       elem = document.getElementById("height");
       elem.disabled = true;
@@ -523,6 +542,7 @@ function lalala(tree_input, mapping_input)
       padding = parseFloat(document.getElementById("padding").value);
 
       set_value_of("height", width);
+
     } else {
       elem = document.getElementById("height");
       elem.disabled = false;
@@ -532,6 +552,21 @@ function lalala(tree_input, mapping_input)
 
       padding = parseFloat(document.getElementById("padding").value);
     }
+
+    elem = document.getElementById("width");
+    RADIAL_LAYOUT_WEIGHT = parseInt(elem.value);
+    // if (LAYOUT_RADIAL) {
+    //   RADIAL_LAYOUT_WEIGHT =
+    //   elem.setAttribute("min", "10");
+    //   elem.setAttribute("max", "1000");
+    //   elem.setAttribute("step", "10");
+    // } else {
+    //   RADIAL_LAYOUT_WEIGHT = null;
+    //   elem.setAttribute("min", "250");
+    //   elem.setAttribute("max", "25000");
+    //   elem.setAttribute("step", "250");
+    // }
+
 
     //  padding is the total % of padding.  If it is set to 0.1, then the inner width will be 90% of the svg.
     width = Math.round(width * (1 - padding));
@@ -955,7 +990,7 @@ function lalala(tree_input, mapping_input)
     set_options_by_metadata();
     update_form_constants();
     draw_fn();
-    add_scale_bar();
+    draw_scale_bar();
     adjust_tree();
   }
 
@@ -974,7 +1009,7 @@ function lalala(tree_input, mapping_input)
     draw_leaf_dots();
     draw_leaf_labels();
 
-    add_scale_bar();
+    draw_scale_bar();
 
     adjust_tree();
   }
@@ -999,7 +1034,7 @@ function lalala(tree_input, mapping_input)
     draw_leaf_dots();
     draw_leaf_labels();
 
-    add_scale_bar();
+    draw_scale_bar();
 
     adjust_tree();
 
@@ -1037,7 +1072,7 @@ function lalala(tree_input, mapping_input)
     chart.append("g").attr("id", "leaf-label-container");
     draw_leaf_labels();
 
-    add_scale_bar();
+    draw_scale_bar();
 
 
     // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
@@ -1347,8 +1382,6 @@ function resize_svg_straight_layout(svg_id, chart_id)
       (chart_bbox_width_padding - chart_bbox.x) + " " +
       (chart_bbox_height_padding- chart_bbox.y) + ")";
   } else if (LAYOUT_CIRCLE) {
-
-
     var radius = chart_bbox.width > chart_bbox.height ? chart_bbox.width / 2: chart_bbox.height / 2;
     var diameter = radius * 2;
     var padding_px = diameter * padding;
@@ -1382,7 +1415,7 @@ function ary_mean(ary)
   return total / num_elems;
 }
 
-function add_scale_bar()
+function draw_scale_bar()
 {
   d3.select("#scale-bar-container").remove();
 
@@ -1447,8 +1480,9 @@ function add_scale_bar()
     var label_x, label_y;
 
     // New where to add it?
-    var chart_bbox = document.getElementById("chart-container").getBBox();
-    var scale_bar_transform;
+    var chart_container = document.getElementById("chart-container");
+    var chart_bbox = chart_container.getBBox();
+    var scale_bar_transform = "";
 
     // TODO not quite centered, take into account bounding box? Or center on svg?
 
@@ -1460,6 +1494,15 @@ function add_scale_bar()
     if (LAYOUT_STRAIGHT && TREE_ROTATION == NOT_ROTATED) {
       start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
       start_y = (chart_bbox.height + SCALE_BAR_PADDING) * (1 + ((SCALE_BAR_OFFSET_WEIGHT - 1) / 4)); // Reduce the weighting power by a lot.
+
+      path_d = "M " + start_x + " " + start_y +
+        " L " + (start_x + scale_bar_pixels) + " " + start_y;
+
+      label_x = start_x + (scale_bar_pixels / 2);
+      label_y = start_y + SCALE_BAR_TEXT_PADDING;
+    } else if (LAYOUT_RADIAL) {
+        start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
+      start_y = (chart_bbox.height + SCALE_BAR_PADDING + chart_bbox.y) * (1 + ((SCALE_BAR_OFFSET_WEIGHT - 1) / 4)); // Reduce the weighting power by a lot.
 
       path_d = "M " + start_x + " " + start_y +
         " L " + (start_x + scale_bar_pixels) + " " + start_y;
@@ -1487,6 +1530,8 @@ function add_scale_bar()
       path_d = "M " + start_x + " " + start_y + " L " + (start_x + scale_bar_pixels) + " " + start_y;
       scale_bar_transform = "rotate(" + (-TREE_ROTATION) + ")";
     }
+
+    console.log("start_x: " + start_x + " start_y: " + start_y);
 
     var container = d3.select("#chart-container")
       .append("g")
@@ -1743,15 +1788,11 @@ function radial_cluster(root)
   // Helpers
   function postorder_traversal(vertex)
   {
-    console.log("call postorder on " + vertex.data.name);
     if (is_leaf(vertex)) { // if deg(vertex) == 1
-      console.log("vertex is a leaf! " + vertex.data.name);
       vertex.radial_layout_info.num_leaves_in_subtree = 1;
     } else {
       vertex.children.forEach(function(child){
-        console.log("child (" + child.data.name + ") of (" + vertex.data.name + ")");
         postorder_traversal(child);
-        console.log("just returned and now child (" + child.data.name + ") has " + child.radial_layout_info.num_leaves_in_subtree + " leaves in subtree");
         vertex.radial_layout_info.num_leaves_in_subtree += child.radial_layout_info.num_leaves_in_subtree;
       });
     }
@@ -1816,4 +1857,14 @@ function radial_cluster(root)
 function deg_to_rad(deg)
 {
   return deg / 180 * Math.PI;
+}
+
+function get_translation(transform_str)
+{
+  var match = transform_str.match(/translate\((\d+\.?\d*) (\d+\.?\d*)\)/);
+  if (match) {
+    return { "x" : parseFloat(match[1]), "y" : parseFloat(match[2]) };
+  } else {
+    return { "x" : 0, "y" : 0 };
+  }
 }
