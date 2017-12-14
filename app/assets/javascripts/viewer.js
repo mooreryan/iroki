@@ -973,6 +973,7 @@ function lalala(tree_input, mapping_input)
       .attr("d", function(d) {
         return LAYOUT_STATE == LAYOUT_CIRCLE ? linkCircle(d) : rectangle_link(d, the_x, the_y);
       })
+      // TODO this is very slow for the tree of life.
       .attr("stroke", function(d) {
         return get_branch_md_val(d.target, "branch_color", "black");
       })
@@ -1594,6 +1595,7 @@ function add_blank_metadata(root)
 
 
 // The branch option needs to be the underscore version.
+// TODO this is the slow function.  Just do this once at the beginning and mark all targets with the appropriate metadata.
 function get_branch_md_val(node, branch_option, default_value)
 {
   var leaves = get_leaves(node);
@@ -1735,3 +1737,151 @@ function flatten(ary)
   return flat_ary;
 }
 
+function radial_layout(root)
+{
+  function default_radial_layout_info()
+  {
+    return {
+      "coordinates" : { "x" : null, "y" : null},
+      "num_leaves_in_subtree" : null,
+      "wedge_size" : null,
+      "wedge_border" : null
+    };
+  }
+  var coordinates = [];
+  var wedge_sizes = [];
+  var wedge_borders = []; // angle of right wedge border
+
+  // Set defaults
+  root.descendants().map(function(vertex) {
+    if (vertex == root) {
+      root.radial_layout_info = {
+        "name" : root.data.name,
+        "x" : 0,
+        "y" : 0,
+        "num_leaves_in_subtree" : 0,
+        "wedge_size" : 2 * Math.PI,
+        "wedge_border" : deg_to_rad(TREE_ROTATION)
+      };
+    } else {
+      vertex.radial_layout_info = {
+        "name" : vertex.data.name,
+        "x" : 0,
+        "y" : 0,
+        "num_leaves_in_subtree" : 0,
+        "wedge_size" : 0,
+        "wedge_border" : 0,
+      };
+    }
+  });
+
+  postorder_traversal(root);
+  preorder_traversal(root);
+}
+
+// Helpers
+function postorder_traversal(vertex)
+{
+  console.log("call postorder on " + vertex.data.name);
+  if (is_leaf(vertex)) { // if deg(vertex) == 1
+    console.log("vertex is a leaf! " + vertex.data.name);
+    vertex.radial_layout_info.num_leaves_in_subtree = 1;
+  } else {
+    vertex.children.forEach(function(child){
+      console.log("child (" + child.data.name + ") of (" + vertex.data.name + ")");
+      postorder_traversal(child);
+      console.log("just returned and now child (" + child.data.name + ") has " + child.radial_layout_info.num_leaves_in_subtree + " leaves in subtree");
+      vertex.radial_layout_info.num_leaves_in_subtree += child.radial_layout_info.num_leaves_in_subtree;
+    });
+  }
+}
+
+function preorder_traversal(vertex)
+{
+  if (vertex != root) {
+    var parent = vertex.parent;
+
+    var distance_to_parent = vertex.data.length;
+
+    var x = parent.radial_layout_info.x + distance_to_parent * Math.cos(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));
+    var y = parent.radial_layout_info.y + distance_to_parent * Math.sin(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));;
+
+    vertex.radial_layout_info.x = x;
+    vertex.radial_layout_info.y = y;
+    vertex.radial_layout_info.parent_x = parent.radial_layout_info.x;
+    vertex.radial_layout_info.parent_y = parent.radial_layout_info.y;
+
+  }
+
+  var current_vertex_wedge_border = vertex.radial_layout_info.wedge_border;
+
+  if (is_inner(vertex)) { // leaves don't have a children attr
+    vertex.children.forEach(function(child) {
+      child.radial_layout_info.wedge_size = (child.radial_layout_info.num_leaves_in_subtree / root.radial_layout_info.num_leaves_in_subtree) * 2 * Math.PI;
+      child.radial_layout_info.wedge_border = current_vertex_wedge_border;
+      current_vertex_wedge_border += child.radial_layout_info.wedge_size;
+      preorder_traversal(child);
+    });
+  }
+}
+
+function ryan(weight) {
+  d3.selectAll("text").remove();
+  d3.selectAll("circle").remove();
+  d3.selectAll("path").remove();
+  d3.select("#radial").remove();
+  var _svg = d3.select("svg");
+  var g_radial = _svg.append("g")
+    .attr("id", "radial");
+
+  root.descendants()
+    .map(function(d) { return d.radial_layout_info })
+    .forEach(function(d) {
+      g_radial
+        .append("circle")
+        .attr("r", 5)
+        .attr("fill", "black")
+        .attr("cx", weight * d.x)
+        .attr("cy", weight * d.y);
+
+      g_radial
+        .append("text")
+        .attr("fill", "black")
+        .attr("x", weight * d.x)
+        .attr("y", weight * d.y)
+        .text(d.name);
+
+      if (d != root.radial_layout_info) {
+        g_radial
+          .append("path")
+          .attr("stroke", "black")
+          .attr("stroke-width", BRANCH_WIDTH)
+          .attr("d", "M " + weight * d.parent_x + " " + weight * d.parent_y + " L " + weight * d.x + " " + weight * d.y);
+      }
+    });
+
+
+  var svg_width = $("#svg-tree").width();
+  var svg_height = $("#svg-tree").height();
+  var radial_tree_bbox = document.getElementById("radial").getBBox();
+
+
+  var translate_x =
+    (((svg_width / 2) - (radial_tree_bbox.width / 2)) - radial_tree_bbox.x);
+  var translate_y =
+    (((svg_height / 2) - (radial_tree_bbox.height / 2)) - radial_tree_bbox.y);
+  var str = "translate(" + translate_x + " " + translate_y + ")";
+
+  document.getElementById("radial").setAttribute("transform", str);
+
+}
+
+function deg_to_rad(deg)
+{
+  return deg / 180 * Math.PI;
+}
+
+function do_radial(rotation, scale)
+{
+  TREE_ROTATION = rotation; radial_layout(root); ryan(scale);
+}
