@@ -144,6 +144,7 @@ var elem;
 var TR;
 
 var RADIAL_LAYOUT_WEIGHT = 1;
+var DEFAULT_FONT = "Helvetica";
 
 var md_cat_name2id = {
   "leaf_label_color": null,
@@ -202,7 +203,17 @@ function lalala(tree_input, mapping_input)
     } else if (LAYOUT_STRAIGHT) {
       return rectangle_transform(d, the_x, the_y);
     } else {
-      return "rotate(0) translate(" + (d.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT) + ")"; // TODO labels will need rotation for radial layouts
+      var rotate_by = rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
+
+      if (-90 < rotate_by && rotate_by < 90) {
+        // Don't change rotate by
+      } else if (rotate_by >= 90) { // TODO which should have the equal part
+        rotate_by += 180; // TODO also flip the text-anchor to end
+      } else if (rotate_by <= -90) {
+        rotate_by -= 180; // TODO also flip the text anchor to end
+      }
+
+      return "rotate(0) translate(" + (d.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT) + ") rotate(" + rotate_by + ")"; // TODO labels will need rotation for radial layouts
     }
   }
 
@@ -480,7 +491,7 @@ function lalala(tree_input, mapping_input)
       TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
       elem.setAttribute("min", "0");
       elem.setAttribute("max", "360");
-      elem.setAttribute("step", "1")
+      elem.setAttribute("step", "1");
     }
 
     if (LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
@@ -795,7 +806,8 @@ function lalala(tree_input, mapping_input)
         })
         .text(function(d) { return d.data.name; })
         // .transition(TR)
-        .attr("font-size", INNER_LABEL_SIZE);
+        .attr("font-size", INNER_LABEL_SIZE)
+        .attr("font-family", DEFAULT_FONT);
 
       inner_labels
         .merge(inner_labels)
@@ -806,7 +818,8 @@ function lalala(tree_input, mapping_input)
         .attr("transform", function(d) {
           return pick_transform(d);
         })
-        .attr("font-size", INNER_LABEL_SIZE);
+        .attr("font-size", INNER_LABEL_SIZE)
+        .attr("font-family", DEFAULT_FONT);
 
     } else {
       inner_labels
@@ -849,7 +862,7 @@ function lalala(tree_input, mapping_input)
         })
         .attr("font-family", function(d) {
           var font = d.metadata.leaf_label_font;
-          return font ? font : "Arial";
+          return font ? font : DEFAULT_FONT;
         })
         .attr("fill", function(d) {
           var color = d.metadata.leaf_label_color;
@@ -878,7 +891,7 @@ function lalala(tree_input, mapping_input)
         })
         .attr("font-family", function(d) {
           var font = d.metadata.leaf_label_font;
-          return font ? font : "Arial";
+          return font ? font : DEFAULT_FONT;
         })
         .attr("fill", function(d) {
           var color = d.metadata.leaf_label_color;
@@ -1087,7 +1100,25 @@ function lalala(tree_input, mapping_input)
     if (LAYOUT_CIRCLE) { // circular
       return circular_label_flipping_test(d[the_x]) ? "0.6em" : "-0.6em";
     } else if (LAYOUT_RADIAL) {
-      return "0.0em"; // TODO radial layout placeholder
+      // Positive moves text anchor start labels away from branch tip, but moves text anchor end labels closer to the branch tip.
+      var rotate_by = rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
+
+      if (-90 < rotate_by && rotate_by < 90) {
+        // Don't change rotate by
+        // return "start";
+        return "0.6em"
+      } else if (rotate_by >= 90) { // TODO which should have the equal part
+        // rotate_by += 180; // TODO also flip the text-anchor to end
+        // return "end";
+        return "-0.6em";
+      } else if (rotate_by <= -90) {
+        // rotate_by -= 180; // TODO also flip the text anchor to end
+        // return "end";
+        return "-0.6em";
+
+      }
+
+      return "1.0em"; // TODO radial layout placeholder
     } else {
       if (LABEL_ROTATION == 90) {
         return "0.6em"; // They're going up and down so move away from branch
@@ -1104,7 +1135,7 @@ function lalala(tree_input, mapping_input)
     if (LAYOUT_CIRCLE) { // circular
       return "0.2em"  // center the label on the branch;
     } else if (LAYOUT_RADIAL) {
-      return "0.0em"; // TODO radial layout placeholder
+      return "0.3em";
     } else {
       if (TREE_ROTATION == 0) {
         if (LABEL_ROTATION == 90 || LABEL_ROTATION == -90) {
@@ -1183,7 +1214,18 @@ function lalala(tree_input, mapping_input)
   // TODO this is just a placeholder
   function radial_text_anchor(d)
   {
-    return "start";
+    var rotate_by = rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
+
+    if (-90 < rotate_by && rotate_by < 90) {
+      // Don't change rotate by
+      return "start";
+    } else if (rotate_by >= 90) { // TODO which should have the equal part
+      // rotate_by += 180; // TODO also flip the text-anchor to end
+      return "end";
+    } else if (rotate_by <= -90) {
+      // rotate_by -= 180; // TODO also flip the text anchor to end
+      return "end";
+    }
   }
 
   function text_anchor(d)
@@ -1551,7 +1593,8 @@ function draw_scale_bar()
       .attr("x", label_x)
       .attr("y", label_y)
       .text(scale_bar_label_text)
-      .attr("transform", scale_bar_transform);
+      .attr("transform", scale_bar_transform)
+      .attr("font-family", DEFAULT_FONT);
 
 
     if (rotated_rectangle) {
@@ -1857,6 +1900,11 @@ function radial_cluster(root)
 function deg_to_rad(deg)
 {
   return deg / 180 * Math.PI;
+}
+
+function rad_to_deg(rad)
+{
+  return rad * 180 / Math.PI;
 }
 
 function get_translation(transform_str)
