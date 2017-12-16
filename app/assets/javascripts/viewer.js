@@ -137,6 +137,8 @@ var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH_WEIGHT;
 
 var name2md, category_names = [], previous_category_names = null;
 
+var MATCHING_TYPE;
+
 
 // To hold temporary DOM elements
 var elem;
@@ -251,6 +253,9 @@ function lalala(tree_input, mapping_input)
 
 
   // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
+
+  listener("matching-type", "change", draw_tree);
+
   listener("width", "change", draw_tree);
   listener("padding", "change", draw_tree);
 
@@ -426,6 +431,8 @@ function lalala(tree_input, mapping_input)
         }
       });
     }
+
+    MATCHING_TYPE = document.getElementById("matching-type").value;
 
     // // Also a couple of checkboxes may have been disabled by set_options_by_metadata().  Re-enable them here.  If they actually need to be disabled later in this function, they will be later.
     // $("#show-leaf-dots").attr("disabled", false);
@@ -653,7 +660,7 @@ function lalala(tree_input, mapping_input)
 
     // Add metadata if it is available.
     if (name2md) {
-      add_metadata(root, name2md, "exact");
+      add_metadata(root, name2md, MATCHING_TYPE);
     } else {
       add_blank_metadata(root);
     }
@@ -1670,29 +1677,31 @@ function pt(x, y) { return { "x" : x, "y" : y } }
 
 function add_metadata(root, name2md, match_style)
 {
-  if (match_style === "exact") {
-    root.leaves().forEach(function(d) { return d.metadata = name2md[d.data.name]; })
-  } else if (match_style === "partial") {
-    // TODO
-    var names_with_md = json_keys(name2md);
-    root.leaves().forEach(function(leaf) {
-      var this_leaf_name = leaf.data.name;
-      var already_matched = false;
-      var leaf_names_with_multiple_matches = [];
+  // We assume the name2md will not have any erros if it is not null as errors are caught early
+  if (name2md === null) {
+    // Something went wrong so give default md.
+    add_blank_metadata(root);
+  } else {
+    if (match_style === "exact") {
+      root.leaves().forEach(function (d) {
+        d.metadata = name2md[d.data.name];
+      })
+    } else if (match_style === "partial") {
+      json_each(name2md, function(name, metadata) {
+        root.leaves().some(function(d) {
+          if (d.data.name.indexOf(name) !== -1) { // match
+            d.metadata = metadata;
 
-      names_with_md.forEach(function(name_with_md) {
-        if (this_leaf_name.indexOf(name_with_md) !== -1) {
-          // There was a match
-          if (already_matched) {
-            leaf_names_with_multiple_matches.push([this_leaf_name, name_with_md]);
+            return true; // break the loop
           }
-        }
+        });
       });
-    });
-  } else { // regular expressions
-    // TODO
+    } else {
+      // TODO regex
+    }
   }
 }
+
 
 function add_blank_metadata(root)
 {

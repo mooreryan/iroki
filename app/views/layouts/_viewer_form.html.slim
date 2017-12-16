@@ -42,6 +42,14 @@
       h4 Tree options
 
       .row
+        .small-12.columns
+          label for="matching-type" Mapping file label matching
+          select id="matching-type"
+            option id="exact" value="exact" selected="" Exact
+            option id="partial" value="partial" Partial
+            /option id="regex" value="regex" Regular expressions
+
+      .row
         .small-12.medium-12.large-6.columns
           label id="width-label" for="width" Horizontal
           input id="width" class="slider width-100" type="range" min="250" max="25000" step="250" value="500"
