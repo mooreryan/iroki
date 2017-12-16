@@ -157,29 +157,51 @@ var md_cat_name2id = {
   "branch_color": null
 };
 
-var leaf_dot_options = [
+var PAPA_CONFIG = {
+  delimiter: "\t",
+  header: true,
+  dynamicTyping: true,
+  // worker: true,
+  skipEmptyLines: true
+};
+
+var LEAF_DOT_OPTIONS = [
   "leaf_dot_color",
   "leaf_dot_size"
 ];
 
-var leaf_label_options = [
+var LEAF_LABEL_OPTIONS = [
   "leaf_label_color",
   "leaf_label_font",
   "leaf_label_size",
   "new_name"
 ];
 
-var branch_options = [
+var BRANCH_OPTIONS = [
   "branch_width",
   "branch_color"
 ];
+
+// Add one to account for the name column.
+var MAX_NUM_COLS = LEAF_DOT_OPTIONS.length + LEAF_LABEL_OPTIONS.length + BRANCH_OPTIONS.length + 1;
 
 // The mega function
 function lalala(tree_input, mapping_input)
 {
 
   if (mapping_input) {
-    name2md = parse_metadata_string(mapping_input);
+    // Note that name2md will be null if there were any errors parsing the mapping file.  So it will be skipped if this is so.
+    name2md = parse_mapping_file(mapping_input);
+
+    // Need to set up a temporary root so that we can check for non specific matching in the mapping file.  TODO rewrite check function to use the parse newick to avoid the heirarchy call.
+    var tmp_root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+      .sum(function(d) { return d.branchset ? 0 : 1; })
+      .sort(sort_function);
+
+    if (has_non_specific_matching(tmp_root, name2md)) {
+      // Reset name2md to null so we skip the mapping stuff and disabling certain features.
+      name2md = null;
+    }
   } else {
     name2md = null;
   }
@@ -348,11 +370,6 @@ function lalala(tree_input, mapping_input)
   listener("viewer-size-fixed", "change", update_viewer_size_fixed);
 
   draw_tree();
-
-  // d3.selectAll("text.leaf").on("click", function(d) {
-  //   console.log(d.x + " " + d.y);
-  // });
-  //
 
   var circle_cluster, rectangle_cluster;
 
@@ -635,8 +652,8 @@ function lalala(tree_input, mapping_input)
       .sort(sort_function);
 
     // Add metadata if it is available.
-    if (mapping_input) {
-      add_metadata(root, name2md);
+    if (name2md) {
+      add_metadata(root, name2md, "exact");
     } else {
       add_blank_metadata(root);
     }
@@ -1573,8 +1590,6 @@ function draw_scale_bar()
       scale_bar_transform = "rotate(" + (-TREE_ROTATION) + ")";
     }
 
-    console.log("start_x: " + start_x + " start_y: " + start_y);
-
     var container = d3.select("#chart-container")
       .append("g")
       .attr("id", "scale-bar-container");
@@ -1627,35 +1642,56 @@ function pt(x, y) { return { "x" : x, "y" : y } }
 
 
 
-function get_metadata(dat, md_cat_names)
-{
+// function get_metadata(dat, md_cat_names)
+// {
+//
+//   var name2md = {}
+//   var i = 0;
+//   for (i = 0; i < dat.length; ++i) {
+//     name2md[dat[i][0]] = {};
+//     var j = 0;
+//     for (j = 0; j < md_cat_names.length; ++j) {
+//       name2md[dat[i][0]][md_cat_names[j]] = dat[i][j+1];
+//     }
+//   }
+//
+//   return name2md;
+// }
+//
+// function parse_metadata_string(str)
+// {
+//   var dat = str.split(/\r?\n/).filter(function(s) { return s; }).map(function(s) { return s.split("\t"); });
+//   var md_cat_names = dat.shift();
+//   md_cat_names.shift(); // pop off the first thing (will be "name")
+//   md_cat_names = md_cat_names.map(function(s) { return s.replace(/ /g, "_") });
+//
+//   return get_metadata(dat, md_cat_names);
+// }
 
-  var name2md = {}
-  var i = 0;
-  for (i = 0; i < dat.length; ++i) {
-    name2md[dat[i][0]] = {};
-    var j = 0;
-    for (j = 0; j < md_cat_names.length; ++j) {
-      name2md[dat[i][0]][md_cat_names[j]] = dat[i][j+1];
-    }
+function add_metadata(root, name2md, match_style)
+{
+  if (match_style === "exact") {
+    root.leaves().forEach(function(d) { return d.metadata = name2md[d.data.name]; })
+  } else if (match_style === "partial") {
+    // TODO
+    var names_with_md = json_keys(name2md);
+    root.leaves().forEach(function(leaf) {
+      var this_leaf_name = leaf.data.name;
+      var already_matched = false;
+      var leaf_names_with_multiple_matches = [];
+
+      names_with_md.forEach(function(name_with_md) {
+        if (this_leaf_name.indexOf(name_with_md) !== -1) {
+          // There was a match
+          if (already_matched) {
+            leaf_names_with_multiple_matches.push([this_leaf_name, name_with_md]);
+          }
+        }
+      });
+    });
+  } else { // regular expressions
+    // TODO
   }
-
-  return name2md;
-}
-
-function parse_metadata_string(str)
-{
-  var dat = str.split(/\r?\n/).filter(function(s) { return s; }).map(function(s) { return s.split("\t"); });
-  var md_cat_names = dat.shift();
-  md_cat_names.shift(); // pop off the first thing (will be "name")
-  md_cat_names = md_cat_names.map(function(s) { return s.replace(/ /g, "_") });
-
-  return get_metadata(dat, md_cat_names);
-}
-
-function add_metadata(root, name2md)
-{
-  root.leaves().forEach(function(d) { return d.metadata = name2md[d.data.name]; })
 }
 
 function add_blank_metadata(root)
@@ -1718,11 +1754,11 @@ function set_options_by_metadata()
       leaf_label_options_present = false;
     
     category_names.forEach(function(cat_name) {
-      if (leaf_dot_options.includes(cat_name)) {
+      if (LEAF_DOT_OPTIONS.includes(cat_name)) {
         leaf_dot_options_present = true;
       }
       
-      if (leaf_label_options.includes(cat_name)) {
+      if (LEAF_LABEL_OPTIONS.includes(cat_name)) {
         leaf_label_options_present = true;
       }
     });
@@ -1756,23 +1792,6 @@ function set_options_by_metadata()
   } else {
     previous_category_names = category_names;
     category_names = [];
-  }
-}
-
-function push_unless_present(ary, item)
-{
-  if (!ary.includes(item)) {
-    ary.push(item);
-  }
-}
-
-// fn is a function that takes two arguments: 1. the json key, and 2. the json value for that key.
-function json_each(json, fn)
-{
-  for (var key in json) {
-    if (json.hasOwnProperty(key)) {
-      fn(key, json[key]);
-    }
   }
 }
 
@@ -1914,5 +1933,186 @@ function get_translation(transform_str)
     return { "x" : parseFloat(match[1]), "y" : parseFloat(match[2]) };
   } else {
     return { "x" : 0, "y" : 0 };
+  }
+}
+
+
+
+
+
+
+
+// From tested parse functions
+function push_unless_present(ary, item)
+{
+  if (ary.indexOf(item) === -1) {
+    ary.push(item);
+  }
+}
+function has_duplicates(ary)
+{
+  var tmp = [];
+  ary.forEach(function(item) {
+    push_unless_present(tmp, item);
+  });
+
+  return tmp.length !== ary.length;
+}
+
+function chomp(str)
+{
+  return str.replace(/\r?\n?$/, '');
+}
+
+// fn is a function that takes two arguments: 1. the json key, and 2. the json value for that key.
+function json_each(json, fn)
+{
+  for (var key in json) {
+    if (json.hasOwnProperty(key)) {
+      fn(key, json[key]);
+    }
+  }
+}
+
+function json_keys(json)
+{
+  var keys = [];
+  for (var key in json) {
+    if (json.hasOwnProperty(key)) {
+      keys.push(key);
+    }
+  }
+
+  return keys;
+}
+
+function includes(ary, elem)
+{
+  return ary.indexOf(elem) !== -1;
+}
+
+function is_bad_col_header(str)
+{
+  return str !== "name" &&
+    !(includes(LEAF_DOT_OPTIONS, str) ||
+      includes(LEAF_LABEL_OPTIONS, str) ||
+      includes(BRANCH_OPTIONS, str))
+}
+
+
+function parse_mapping_file(str)
+{
+  // Parse mapping string.
+  var mapping_csv = Papa.parse(chomp(str), PAPA_CONFIG);
+
+  // Check for erros
+  if (has_papa_errors(mapping_csv)) {
+    return null;
+  }
+
+  if (mapping_csv.meta.fields.indexOf("name") === -1) {
+    alert("ERROR -- Missing the 'name' column header in the mapping file.");
+    return null;
+  }
+
+  var bad_headers = mapping_csv.meta.fields.filter(function(header) {
+    return is_bad_col_header(header);
+  });
+
+  if (bad_headers.length > 0) {
+    alert("ERROR -- bad headers in mapping file: " + bad_headers.join(", "));
+    return null;
+  }
+
+  var num_fields = mapping_csv.meta.fields.length;
+  if (num_fields <= 1) {
+    alert("ERROR -- Too few fields in mapping file!");
+    return null;
+  }
+
+  if (num_fields > MAX_NUM_COLS) {
+    alert("ERROR -- Too many fields in mapping file!");
+    return null;
+  }
+
+  if (has_duplicates(mapping_csv.meta.fields)) {
+    alert("ERROR -- One of the column headers is duplicated in the mapping file.");
+    return null;
+  }
+
+  // Convert to name2md.
+  var mapping = {};
+  var mapping_duplicates = [];
+
+  // Check for duplicated keys in the mapping file.
+  mapping_csv.data.forEach(function(info) {
+    if (mapping[info.name]) {
+      alert("ERROR -- " + info.name + " is duplicated in the mapping file");
+
+      mapping_duplicates.push(info.name);
+    } else {
+      mapping[info.name] = {};
+    }
+  });
+
+  if (mapping_duplicates.length > 0) { // there were duplicated keys in the mapping file
+    // TODO raise error?
+    return null;
+  }
+
+  mapping_csv.data.forEach(function(info) {
+    json_each(info, function(md_cat, val) {
+
+      if (md_cat !== "name") {
+        mapping[info.name][md_cat] = val;
+      }
+    });
+  });
+
+  return mapping;
+}
+
+// This should only be able to happen when it is not exact matching.
+function has_non_specific_matching(root, name2md)
+{
+  var names_with_md = json_keys(name2md);
+  var leaf_matches = {};
+  root.leaves().forEach(function(leaf) {
+    var leaf_name = leaf.data.name;
+
+    names_with_md.forEach(function(name_with_md) {
+      if (leaf_name.indexOf(name_with_md) !== -1) { //match!
+        if (leaf_matches[leaf_name]) {
+          leaf_matches[leaf_name].push(name_with_md);
+        } else {
+          leaf_matches[leaf_name] = [name_with_md];
+        }
+      }
+    });
+  });
+
+  var non_specific_matches = false
+  json_each(leaf_matches, function(name, matches) {
+    if (matches.length > 1) { // non specific matching
+      alert("ERROR -- '" + name + "' had multiple matches in the mapping file: '" + matches.join(', ') + "'.");
+      non_specific_matches = true;
+    }
+  });
+
+  return non_specific_matches;
+
+}
+
+function has_papa_errors(name2md)
+{
+  if (name2md.errors.length > 0) {
+    name2md.errors.forEach(function(error) {
+      // TODO better alert
+      alert("ERROR -- Parsing error on line " + (error.row + 2) + "!  Type -- " + error.type + ".  Code -- " + error.code + ".  Message -- " + error.message + ".");
+    });
+
+    return true;
+  } else {
+    return false;
   }
 }

@@ -1,4 +1,4 @@
-name	leaf label color	leaf label font	leaf label size	leaf dot color	leaf dot size	new name	branch width	branch color
+name	leaf_label_color	leaf_label_font	leaf_label_size	leaf_dot_color	leaf_dot_size	new_name	branch_width	branch_color
 eggplant	red	Helvetica	6	orange	8		6	blue
 banana	blue	Times	10		6		1	blue
 geode			14	green	4	GEODE	10	green
