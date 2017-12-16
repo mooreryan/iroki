@@ -2,3 +2,4 @@ name	leaf_label_color	leaf_label_font	leaf_label_size	leaf_dot_color	leaf_dot_si
 geode			14	green	4	GEODE	10	green
 clock	purple	Times		blue	2		15	orange
 an	orange	Helvetica	22	red	5	TIRE	1	orange
+arsotein	pink							

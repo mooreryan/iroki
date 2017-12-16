@@ -1677,27 +1677,44 @@ function pt(x, y) { return { "x" : x, "y" : y } }
 
 function add_metadata(root, name2md, match_style)
 {
+  // Everything starts with black metadata.  Later functions should handle defualts with blank metadata later.
+  add_blank_metadata(root);
+
   // We assume the name2md will not have any erros if it is not null as errors are caught early
-  if (name2md === null) {
-    // Something went wrong so give default md.
-    add_blank_metadata(root);
-  } else {
+  if (name2md !== null) {
+    var names_with_matches_in_tree = [];
+
     if (match_style === "exact") {
       root.leaves().forEach(function (d) {
-        d.metadata = name2md[d.data.name];
-      })
+        var md = name2md[d.data.name];
+        if (md) {
+          push_unless_present(names_with_matches_in_tree, d.data.name);
+          // If something has no metadata leave it as default.
+          d.metadata = md;
+        }
+      });
     } else if (match_style === "partial") {
       json_each(name2md, function(name, metadata) {
-        root.leaves().some(function(d) {
+        root.leaves().forEach(function(d) {
+          // Since it's partial mapping, all leaves could match a single name.
           if (d.data.name.indexOf(name) !== -1) { // match
+            push_unless_present(names_with_matches_in_tree, name);
             d.metadata = metadata;
-
-            return true; // break the loop
           }
         });
       });
     } else {
       // TODO regex
+    }
+
+    if (names_with_matches_in_tree.length < json_keys(name2md).length) {
+      var unused_names = [];
+      json_keys(name2md).forEach(function(name){
+        if (names_with_matches_in_tree.indexOf(name) === -1) { // no match
+          push_unless_present(unused_names, name);
+        }
+      });
+      alert("WARNING -- These names were in the mapping file but not present in the tree: " + unused_names.join(", "));
     }
   }
 }
@@ -1740,10 +1757,12 @@ function get_branch_md_val(node, branch_option, default_value)
     var val = leaf.metadata[branch_option];
     if (val) {
       push_unless_present(md_vals, val);
+    } else { // got undefined, push defualt value
+      push_unless_present(md_vals, default_value);
     }
   });
 
-  return md_vals.length == 1 ? md_vals[0] : default_value;
+  return md_vals.length === 1 ? md_vals[0] : default_value;
 }
 
 // TODO need to disable all sliders that have metadata associated with them as they will not work with the metadata.  Also this will enable certain things that aren't enabled by default if they are in the metadata.
