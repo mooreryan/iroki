@@ -1,0 +1,4 @@
+name	leaf_label_color
+eggplant	blue
+geode	arstoien
+tire	#be0032

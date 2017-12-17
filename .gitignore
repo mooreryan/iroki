@@ -25,3 +25,8 @@ gemfilelock.backup
 
 app/assets/javascripts/viewer.js.backup
 app/assets/javascripts/viewer_old.js
+
+# This stuff is for Jest
+node_modules
+package.json
+papaparse.min.js

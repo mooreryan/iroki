@@ -1,9 +1,7 @@
 // Copyright 2011 Jason Davies https://github.com/jasondavies/newick.js
 function parseNewick(a){for(var e=[],r={},s=a.split(/\s*(;|\(|\)|,|:)\s*/),t=0;t<s.length;t++){var n=s[t];switch(n){case"(":var c={};r.branchset=[c],e.push(r),r=c;break;case",":var c={};e[e.length-1].branchset.push(c),r=c;break;case")":r=e.pop();break;case":":break;default:var h=s[t-1];")"==h||"("==h||","==h?r.name=n:":"==h&&(r.length=parseFloat(n))}}return r}
 
-//
-// Stuff from the old viewer goes here
-//
+
 
 function clear_elem(id) {
   chart_elem = document.getElementById(id);
@@ -159,33 +157,6 @@ var md_cat_name2id = {
   "branch_color": null
 };
 
-var PAPA_CONFIG = {
-  delimiter: "\t",
-  header: true,
-  dynamicTyping: true,
-  // worker: true,
-  skipEmptyLines: true
-};
-
-var LEAF_DOT_OPTIONS = [
-  "leaf_dot_color",
-  "leaf_dot_size"
-];
-
-var LEAF_LABEL_OPTIONS = [
-  "leaf_label_color",
-  "leaf_label_font",
-  "leaf_label_size",
-  "new_name"
-];
-
-var BRANCH_OPTIONS = [
-  "branch_width",
-  "branch_color"
-];
-
-// Add one to account for the name column.
-var MAX_NUM_COLS = LEAF_DOT_OPTIONS.length + LEAF_LABEL_OPTIONS.length + BRANCH_OPTIONS.length + 1;
 
 // The mega function
 function lalala(tree_input, mapping_input)
@@ -1714,7 +1685,7 @@ function add_metadata(root, name2md, match_style)
           push_unless_present(unused_names, name);
         }
       });
-      alert("WARNING -- These names were in the mapping file but not present in the tree: " + unused_names.join(", "));
+      alert("WARNING -- There were names in the mapping file that were not present in the tree (check your option for label matching (exact or partial)): " + unused_names.join(", "));
     }
   }
 }
@@ -1961,186 +1932,5 @@ function get_translation(transform_str)
     return { "x" : parseFloat(match[1]), "y" : parseFloat(match[2]) };
   } else {
     return { "x" : 0, "y" : 0 };
-  }
-}
-
-
-
-
-
-
-
-// From tested parse functions
-function push_unless_present(ary, item)
-{
-  if (ary.indexOf(item) === -1) {
-    ary.push(item);
-  }
-}
-function has_duplicates(ary)
-{
-  var tmp = [];
-  ary.forEach(function(item) {
-    push_unless_present(tmp, item);
-  });
-
-  return tmp.length !== ary.length;
-}
-
-function chomp(str)
-{
-  return str.replace(/\r?\n?$/, '');
-}
-
-// fn is a function that takes two arguments: 1. the json key, and 2. the json value for that key.
-function json_each(json, fn)
-{
-  for (var key in json) {
-    if (json.hasOwnProperty(key)) {
-      fn(key, json[key]);
-    }
-  }
-}
-
-function json_keys(json)
-{
-  var keys = [];
-  for (var key in json) {
-    if (json.hasOwnProperty(key)) {
-      keys.push(key);
-    }
-  }
-
-  return keys;
-}
-
-function includes(ary, elem)
-{
-  return ary.indexOf(elem) !== -1;
-}
-
-function is_bad_col_header(str)
-{
-  return str !== "name" &&
-    !(includes(LEAF_DOT_OPTIONS, str) ||
-      includes(LEAF_LABEL_OPTIONS, str) ||
-      includes(BRANCH_OPTIONS, str))
-}
-
-
-function parse_mapping_file(str)
-{
-  // Parse mapping string.
-  var mapping_csv = Papa.parse(chomp(str), PAPA_CONFIG);
-
-  // Check for erros
-  if (has_papa_errors(mapping_csv)) {
-    return null;
-  }
-
-  if (mapping_csv.meta.fields.indexOf("name") === -1) {
-    alert("ERROR -- Missing the 'name' column header in the mapping file.");
-    return null;
-  }
-
-  var bad_headers = mapping_csv.meta.fields.filter(function(header) {
-    return is_bad_col_header(header);
-  });
-
-  if (bad_headers.length > 0) {
-    alert("ERROR -- bad headers in mapping file: " + bad_headers.join(", "));
-    return null;
-  }
-
-  var num_fields = mapping_csv.meta.fields.length;
-  if (num_fields <= 1) {
-    alert("ERROR -- Too few fields in mapping file!");
-    return null;
-  }
-
-  if (num_fields > MAX_NUM_COLS) {
-    alert("ERROR -- Too many fields in mapping file!");
-    return null;
-  }
-
-  if (has_duplicates(mapping_csv.meta.fields)) {
-    alert("ERROR -- One of the column headers is duplicated in the mapping file.");
-    return null;
-  }
-
-  // Convert to name2md.
-  var mapping = {};
-  var mapping_duplicates = [];
-
-  // Check for duplicated keys in the mapping file.
-  mapping_csv.data.forEach(function(info) {
-    if (mapping[info.name]) {
-      alert("ERROR -- " + info.name + " is duplicated in the mapping file");
-
-      mapping_duplicates.push(info.name);
-    } else {
-      mapping[info.name] = {};
-    }
-  });
-
-  if (mapping_duplicates.length > 0) { // there were duplicated keys in the mapping file
-    // TODO raise error?
-    return null;
-  }
-
-  mapping_csv.data.forEach(function(info) {
-    json_each(info, function(md_cat, val) {
-
-      if (md_cat !== "name") {
-        mapping[info.name][md_cat] = val;
-      }
-    });
-  });
-
-  return mapping;
-}
-
-// This should only be able to happen when it is not exact matching.
-function has_non_specific_matching(root, name2md)
-{
-  var names_with_md = json_keys(name2md);
-  var leaf_matches = {};
-  root.leaves().forEach(function(leaf) {
-    var leaf_name = leaf.data.name;
-
-    names_with_md.forEach(function(name_with_md) {
-      if (leaf_name.indexOf(name_with_md) !== -1) { //match!
-        if (leaf_matches[leaf_name]) {
-          leaf_matches[leaf_name].push(name_with_md);
-        } else {
-          leaf_matches[leaf_name] = [name_with_md];
-        }
-      }
-    });
-  });
-
-  var non_specific_matches = false
-  json_each(leaf_matches, function(name, matches) {
-    if (matches.length > 1) { // non specific matching
-      alert("ERROR -- '" + name + "' had multiple matches in the mapping file: '" + matches.join(', ') + "'.");
-      non_specific_matches = true;
-    }
-  });
-
-  return non_specific_matches;
-
-}
-
-function has_papa_errors(name2md)
-{
-  if (name2md.errors.length > 0) {
-    name2md.errors.forEach(function(error) {
-      // TODO better alert
-      alert("ERROR -- Parsing error on line " + (error.row + 2) + "!  Type -- " + error.type + ".  Code -- " + error.code + ".  Message -- " + error.message + ".");
-    });
-
-    return true;
-  } else {
-    return false;
   }
 }
