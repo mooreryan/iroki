@@ -380,3 +380,14 @@ function has_papa_errors(name2md)
   }
 }
 
+function min_non_zero_len_in_tree(root)
+{
+  var min_length = undefined;
+  root.descendants().map(function(d) {
+    if ((min_length === undefined || d.data.length < min_length) && d.data.length !== 0) {
+      min_length = d.data.length;
+    }
+  });
+
+  return min_length;
+}

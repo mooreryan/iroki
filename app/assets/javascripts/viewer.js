@@ -45,15 +45,16 @@ function upload_button(submit_id, uploader_id, callback) {
   };
 
   uploader.addEventListener("change", function(){
-    clear_elem("svg-tree");
-    document.getElementById("save-svg").setAttribute("disabled", "");
-    document.getElementById("save-png").setAttribute("disabled", "");
+    // clear_elem("svg-tree");
+    // document.getElementById("save-svg").setAttribute("disabled", "");
+    // document.getElementById("save-png").setAttribute("disabled", "");
     submit_button.removeAttribute("disabled");
   });
   mapping_uploader.addEventListener("change", function() {
     submit_button.removeAttribute("disabled");
   });
   submit_button.addEventListener("click", function() {
+    reset_all_to_defaults();
     $("#reset").attr("disabled", false);
     handleFiles();
   }, false);
@@ -64,6 +65,9 @@ function upload_button(submit_id, uploader_id, callback) {
     document.getElementById("save-svg").setAttribute("disabled", "");
     document.getElementById("save-png").setAttribute("disabled", "");
     document.getElementById("file-upload-form").reset();
+
+    // Reset all sliders and options to default.
+    reset_all_to_defaults();
   });
 
   function handleFiles() {
@@ -137,6 +141,11 @@ var name2md, category_names = [], previous_category_names = null;
 
 var MATCHING_TYPE;
 
+var EXTRA_NAME_WARNINGS = false;
+var MIN_LENGTH_IN_TREE;
+var MIN_DEFUALT_BRANCH_LENGTH = 1e-10;
+var NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES;
+
 
 // To hold temporary DOM elements
 var elem;
@@ -144,7 +153,17 @@ var elem;
 var TR;
 
 var RADIAL_LAYOUT_WEIGHT = 1;
-var DEFAULT_FONT = "Helvetica";
+
+var defaults = {
+  "leaf_label_color": "#000000",
+  "leaf_label_font": "Helvetica",
+  "leaf_label_size": 16,
+  "leaf_dot_color": "#000000",
+  "leaf_dot_size": 2,
+  "new_name": null,
+  "branch_width": 2,
+  "branch_color": "#000000"
+};
 
 var md_cat_name2id = {
   "leaf_label_color": null,
@@ -162,14 +181,38 @@ var md_cat_name2id = {
 function lalala(tree_input, mapping_input)
 {
 
+  var tmp_root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+    .sum(function(d) { return d.branchset ? 0 : 1; })
+    .sort(sort_function);
+
+  MIN_LENGTH_IN_TREE = min_non_zero_len_in_tree(tmp_root);
+  console.log(MIN_LENGTH_IN_TREE);
+
+  var desc = tmp_root.descendants();
+  console.log(desc);
+  for (var i = 0; i < desc.length; ++i) {
+    console.log(desc[i]);
+    if (desc[i].data.length === 0) {
+      alert("WARNING -- the tree has zero length branches. In the radial layout, they will be changed to " + MIN_DEFUALT_BRANCH_LENGTH + " or (0.5 * min branch length in tree), whichever is lower.");
+
+      break;
+    }
+  }
+
+  // Set the min tree length to bump up zero length branches to.
+  if ((MIN_LENGTH_IN_TREE / 2) < MIN_DEFUALT_BRANCH_LENGTH) {
+    NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES = (MIN_LENGTH_IN_TREE / 2);
+  } else {
+    NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES = MIN_DEFUALT_BRANCH_LENGTH;
+  }
+
   if (mapping_input) {
     // Note that name2md will be null if there were any errors parsing the mapping file.  So it will be skipped if this is so.
     name2md = parse_mapping_file(mapping_input);
 
     // Need to set up a temporary root so that we can check for non specific matching in the mapping file.  TODO rewrite check function to use the parse newick to avoid the heirarchy call.
-    var tmp_root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
-      .sum(function(d) { return d.branchset ? 0 : 1; })
-      .sort(sort_function);
+
+    // Also this will pop up a warning if there are any branches of length zero. and set the minbranch length.
 
     if (has_non_specific_matching(tmp_root, name2md)) {
       // Reset name2md to null so we skip the mapping stuff and disabling certain features.
@@ -245,7 +288,7 @@ function lalala(tree_input, mapping_input)
       width_elem.setAttribute("step", "250");
     } else { // radial
       width_elem.setAttribute("min", "10");
-      width_elem.setAttribute("max", "1000");
+      width_elem.setAttribute("max", "10000");
       width_elem.setAttribute("step", "10");
       width_elem.setAttribute("value", "50");
     }
@@ -802,7 +845,7 @@ function lalala(tree_input, mapping_input)
         .text(function(d) { return d.data.name; })
         // .transition(TR)
         .attr("font-size", INNER_LABEL_SIZE)
-        .attr("font-family", DEFAULT_FONT);
+        .attr("font-family", defaults.leaf_label_font);
 
       inner_labels
         .merge(inner_labels)
@@ -814,7 +857,7 @@ function lalala(tree_input, mapping_input)
           return pick_transform(d);
         })
         .attr("font-size", INNER_LABEL_SIZE)
-        .attr("font-family", DEFAULT_FONT);
+        .attr("font-family", defaults.leaf_label_font);
 
     } else {
       inner_labels
@@ -857,7 +900,7 @@ function lalala(tree_input, mapping_input)
         })
         .attr("font-family", function(d) {
           var font = d.metadata.leaf_label_font;
-          return font ? font : DEFAULT_FONT;
+          return font ? font : defaults.leaf_label_font;
         })
         .attr("fill", function(d) {
           var color = d.metadata.leaf_label_color;
@@ -886,7 +929,7 @@ function lalala(tree_input, mapping_input)
         })
         .attr("font-family", function(d) {
           var font = d.metadata.leaf_label_font;
-          return font ? font : DEFAULT_FONT;
+          return font ? font : defaults.leaf_label_font;
         })
         .attr("fill", function(d) {
           var color = d.metadata.leaf_label_color;
@@ -1206,7 +1249,6 @@ function lalala(tree_input, mapping_input)
     }
   }
 
-  // TODO this is just a placeholder
   function radial_text_anchor(d)
   {
     var rotate_by = rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
@@ -1587,7 +1629,7 @@ function draw_scale_bar()
       .attr("y", label_y)
       .text(scale_bar_label_text)
       .attr("transform", scale_bar_transform)
-      .attr("font-family", DEFAULT_FONT);
+      .attr("font-family", defaults.leaf_label_font);
 
 
     if (rotated_rectangle) {
@@ -1685,7 +1727,12 @@ function add_metadata(root, name2md, match_style)
           push_unless_present(unused_names, name);
         }
       });
-      alert("WARNING -- There were names in the mapping file that were not present in the tree (check your option for label matching (exact or partial)): " + unused_names.join(", "));
+
+      if (!EXTRA_NAME_WARNINGS) {
+        alert("WARNING -- There were names in the mapping file that were not present in the tree (check your option for label matching (exact or partial)): " + unused_names.join(", "));
+
+        EXTRA_NAME_WARNINGS = true;
+      }
     }
   }
 }
@@ -1864,7 +1911,8 @@ function radial_cluster(root)
     if (vertex != root) {
       var parent = vertex.parent;
 
-      var distance_to_parent = vertex.data.length;
+
+      var distance_to_parent = vertex.data.length === 0 ? NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES : vertex.data.length;
 
       var x = parent.radial_layout_info.x + distance_to_parent * Math.cos(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));
       var y = parent.radial_layout_info.y + distance_to_parent * Math.sin(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));;
@@ -1933,4 +1981,77 @@ function get_translation(transform_str)
   } else {
     return { "x" : 0, "y" : 0 };
   }
+}
+
+function select(id)
+{
+  $("#" + id).attr("selected", true);
+}
+function deselect(id)
+{
+  $("#" + id).attr("selected", false);
+}
+
+function check(id)
+{
+  $("#" + id).attr("checked", true);
+}
+function uncheck(id)
+{
+  $("#" + id).attr("checked", false);
+}
+
+
+
+function reset_all_to_defaults()
+{
+  EXTRA_NAME_WARNINGS = false;
+
+  // Tree options
+  deselect("partial");
+  select("exact");
+
+  $("#width").attr("min", 10).attr("max", 10000).attr("step", 10).val(100);
+  $("#height").attr("disabled", true).val(500);
+  $("#padding").val(0.05);
+  $("#tree-rotation").val(0);
+
+  deselect("rectangular-tree");
+  deselect("circular-tree");
+  select("radial-tree");
+
+  deselect("cladogram");
+  select("normalogram");
+
+  deselect("ascending");
+  deselect("not-sorted");
+  select("descending");
+
+  // Scale bar options
+  check("show-scale-bar");
+  $("#scale-bar-length-weight").val(1);
+  $("#scale-bar-offset-weight").val(1);
+
+  // Branch options
+  $("#branch-width").val(2);
+
+  // Label options
+  uncheck("show-inner-labels");
+  $("#inner-label-size").val(12);
+
+  check("show-leaf-labels");
+  $("#leaf-label-size").val(16);
+
+  uncheck("align-tip-labels");
+  $("#label-rotation").val(0);
+
+  // Dot options
+  uncheck("show-inner-dots");
+  $("#inner-dot-size").val(5);
+
+  uncheck("show-leaf-dots");
+  $("#leaf-dot-size").val(5);
+
+  // Viewer options
+  check("viewer-size-fixed");
 }

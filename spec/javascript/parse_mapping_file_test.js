@@ -4,7 +4,7 @@ function parseNewick(a){for(var e=[],r={},s=a.split(/\s*(;|\(|\)|,|:)\s*/),t=0;t
 var d3 = require("d3");
 var Papa = require('./papaparse.min.js');
 
-var tree_str = "((geode:1, (clock:0.5, tire:5.3)Personmade:2)Round:6, (banana:1.7, eggplant:1.5)Fruit:3)ALL;\n";
+var tree_str = "((geode:1, (clock:0.0, tire:5.3)Personmade:0.05)Round:6, (banana:1.7, eggplant:1.5)Fruit:3)ALL;\n";
 
 function sort_descending(a, b)
 {
@@ -132,4 +132,8 @@ test('push_unless_present() doesnt push an item if it is already there', functio
   var ary = [1,2];
   push_unless_present(ary, 1);
   expect(ary).toEqual([1,2]);
+});
+
+test('min_non_zero_len_in_tree() returns the length of the smallest branch in the tree', function(){
+  expect(min_non_zero_len_in_tree(root)).toEqual(0.05);
 });
