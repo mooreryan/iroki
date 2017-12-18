@@ -731,6 +731,8 @@ function lalala(tree_input, mapping_input)
 
         set_value_of("height", width);
 
+        $("#width-label").html("Size");
+
       } else {
         elem = document.getElementById("height");
         elem.disabled = false;
@@ -739,6 +741,8 @@ function lalala(tree_input, mapping_input)
         height = size_transform(parseInt(document.getElementById("height").value));
 
         padding = parseFloat(document.getElementById("padding").value);
+
+        $("#width-label").html("Horizontal");
       }
 
       elem = document.getElementById("width");
