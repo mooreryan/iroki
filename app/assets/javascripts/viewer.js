@@ -1,17 +1,15 @@
 // Copyright 2011 Jason Davies https://github.com/jasondavies/newick.js
-var RYAN;
 function parseNewick(tree_string)
 {
-  var DEFAULT_LENGTH = 1;
   var subtree;
-  console.log(tree_string.split(/\s*(;|\(|\)|,|:)\s*/));
   try {
-    for(var ary=[], current_tree={  }, tokens=tree_string.split(/\s*(;|\(|\)|,|:)\s*/), idx=0; idx < tokens.length; idx++) {
+    // Setting the branch length to 1 to handle the cases where a tree has no lengths.
+    for(var ary=[], current_tree={ branch_length: 1 }, tokens=tree_string.split(/\s*(;|\(|\)|,|:)\s*/), idx=0; idx < tokens.length; idx++) {
       var token = tokens[idx];
       console.log("token: " + token);
       switch(token) {
         case "(" : // start of a new (sub)tree
-          subtree = {  };
+          subtree = { branch_length: 1 };
 
           current_tree.branchset = [subtree];
 
@@ -22,7 +20,7 @@ function parseNewick(tree_string)
           break;
 
         case ",":
-          subtree = {  };
+          subtree = { branch_length: 1 };
           var last_branchset = ary[ary.length - 1];
           last_branchset.branchset.push(subtree);
 
@@ -43,7 +41,8 @@ function parseNewick(tree_string)
           if (last_token === ")" || last_token === "(" || last_token === ",") {
             current_tree.name = token;
           } else if (last_token === ":") {
-            current_tree.length = parseFloat(token);
+            if (parseFloat(token) === 0) { console.log("hi!"); }
+            current_tree.branch_length = parseFloat(token);
           }
       }
     }
@@ -58,7 +57,6 @@ function parseNewick(tree_string)
 
     return null;
   } else {
-    RYAN = current_tree;
     return current_tree;
   }
 }
@@ -243,17 +241,39 @@ function lalala(tree_input, mapping_input)
 {
 
   console.log("just starting lalala()");
+
+  // Check if there is more than one semicolon.  TODO this will give a false positive if there are semicolons within quoted names.
+
+  if (tree_input.indexOf(";") !== tree_input.lastIndexOf(";")) {
+    // There is more than one semicolon.
+    alert("WARNING -- found more than one semicolon.  You may have multiple trees in your Newick file.  If so, only the last tree in the file will be shown.  Note: if you have quoted names with semicolons, you may not have multiple trees.  If some of the node names look weird (e.g., '\"E. co' when it should be 'E. coli'), you probably have semicolons within node names.");
+  }
+
   var parsed_newick = parseNewick(tree_input);
   if (parsed_newick) {
     var tmp_root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
       .sum(function(d) { return d.branchset ? 0 : 1; })
       .sort(sort_function);
 
+    // Check if there is as many branchlengths as there are number of nodes.
+    var num_semicolons;
+    var semicolon_match = tree_input.match(/:/g)
+    if (semicolon_match) {
+      num_semicolons = semicolon_match.length;
+    } else {
+      num_semicolons = 0;
+    }
+    // Subtract off one to account for the root, which doesn't need to have a branch length in the newick file.
+    var num_nodes = tmp_root.descendants().length - 1;
+    if (num_nodes > num_semicolons) {
+      alert("WARNING -- found more non-root nodes than semicolons.  This may indicate not every non-root node in the tree has a branch length.  Any nodes other than the root node that are missing the branch length will be assigned a branch length of 1.")
+    }
+
     MIN_LENGTH_IN_TREE = min_non_zero_len_in_tree(tmp_root);
 
     var desc = tmp_root.descendants();
     for (var i = 0; i < desc.length; ++i) {
-      if (desc[i].data.length === 0) {
+      if (desc[i].data.branch_length === 0) {
         alert("WARNING -- the tree has zero length branches. In the radial layout, they will be changed to " + MIN_DEFUALT_BRANCH_LENGTH + " or (0.5 * min branch length in tree), whichever is lower.");
 
         break;
@@ -266,6 +286,7 @@ function lalala(tree_input, mapping_input)
     } else {
       NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES = MIN_DEFUALT_BRANCH_LENGTH;
     }
+
 
     if (mapping_input) {
       // Note that name2md will be null if there were any errors parsing the mapping file.  So it will be skipped if this is so.
@@ -463,12 +484,12 @@ function lalala(tree_input, mapping_input)
     // Choose sorting function
     function sort_descending(a, b)
     {
-      return (a.value - b.value) || d3.ascending(a.data.length, b.data.length);
+      return (a.value - b.value) || d3.ascending(a.data.branch_length, b.data.branch_length);
     }
 
     function sort_ascending(a, b)
     {
-      return (b.value - a.value) || d3.descending(a.data.length, b.data.length);
+      return (b.value - a.value) || d3.descending(a.data.branch_length, b.data.branch_length);
     }
 
     function sort_none(a, b)
@@ -741,18 +762,19 @@ function lalala(tree_input, mapping_input)
         add_blank_metadata(root);
       }
 
+      // Set the root branch length to zero each time.
       if (LAYOUT_CIRCLE) {
         circle_cluster(root);
-        setRadius(root, root.data.length = 0, (the_width / 2) / maxLength(root));
+        setRadius(root, root.data.branch_length = 0, (the_width / 2) / maxLength(root));
 
       } else if (LAYOUT_STRAIGHT) {
         rectangle_cluster(root);
         // TODO should this be width or height
-        setRadius(root, root.data.length = 0, (the_height * 1) / maxLength(root));
+        setRadius(root, root.data.branch_length = 0, (the_height * 1) / maxLength(root));
       } else { // LAYOUT_RADIAL
         radial_cluster(root);
         // TODO should this actually be the same as for straight layout?
-        setRadius(root, root.data.length = 0, (the_height * 1) / maxLength(root));
+        setRadius(root, root.data.branch_length = 0, (the_height * 1) / maxLength(root));
 
       }
     }
@@ -1438,13 +1460,13 @@ function lalala(tree_input, mapping_input)
 
 // Set the radius of each node by recursively summing and scaling the distance from the root.
     function setRadius(d, y0, k) {
-      d.radius = (y0 += d.data.length) * k;
+      d.radius = (y0 += d.data.branch_length) * k;
       if (d.children) d.children.forEach(function(d) { setRadius(d, y0, k); });
     }
 
 // Compute the maximum cumulative length of any node in the tree.
     function maxLength(d) {
-      return d.data.length + (d.children ? d3.max(d.children, maxLength) : 0);
+      return d.data.branch_length + (d.children ? d3.max(d.children, maxLength) : 0);
     }
   }
 }
@@ -1572,14 +1594,14 @@ function draw_scale_bar()
     var pixels_per_unit_length;
 
     if (LAYOUT_RADIAL) {
-      lengths = root.descendants().map(function(d) { return d.data.length });
+      lengths = root.descendants().map(function(d) { return d.data.branch_length });
 
-      pixels_per_unit_length = RADIAL_LAYOUT_WEIGHT * Math.sqrt(Math.pow(first_link.target.radial_layout_info.x - first_link.source.radial_layout_info.x, 2) + Math.pow(first_link.target.radial_layout_info.y - first_link.source.radial_layout_info.y, 2)) / first_link.target.data.length;
+      pixels_per_unit_length = RADIAL_LAYOUT_WEIGHT * Math.sqrt(Math.pow(first_link.target.radial_layout_info.x - first_link.source.radial_layout_info.x, 2) + Math.pow(first_link.target.radial_layout_info.y - first_link.source.radial_layout_info.y, 2)) / first_link.target.data.branch_length;
 
     } else {
       if (TREE_BRANCH_STYLE == TREE_BRANCH_NORMAL) {
-        lengths = root.descendants().map(function(d) { return d.data.length });
-        pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.length;
+        lengths = root.descendants().map(function(d) { return d.data.branch_length });
+        pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.branch_length;
 
       } else {
         // TODO when tree is a cladogram, need to make the branch label reflect the depth rather than the radius (true length).
@@ -1974,7 +1996,7 @@ function radial_cluster(root)
       var parent = vertex.parent;
 
 
-      var distance_to_parent = vertex.data.length === 0 ? NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES : vertex.data.length;
+      var distance_to_parent = vertex.data.branch_length === 0 ? NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES : vertex.data.branch_length;
 
       var x = parent.radial_layout_info.x + distance_to_parent * Math.cos(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));
       var y = parent.radial_layout_info.y + distance_to_parent * Math.sin(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));;
