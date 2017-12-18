@@ -113,8 +113,6 @@ function upload_button(submit_id, uploader_id, callback) {
   uploader.addEventListener("change", function(){
     // clear_elem("svg-tree");
     TREE_CHANGED = true;
-    // document.getElementById("save-svg").setAttribute("disabled", "");
-    // document.getElementById("save-png").setAttribute("disabled", "");
     submit_button.removeAttribute("disabled");
   });
   mapping_uploader.addEventListener("change", function() {
@@ -138,7 +136,6 @@ function upload_button(submit_id, uploader_id, callback) {
 
     clear_elem("tree-form");
     clear_elem("svg-tree");
-    // submit_button.removeAttribute("disabled");
     $("#reset").attr("disabled", true);
     document.getElementById("save-svg").setAttribute("disabled", "");
     document.getElementById("save-png").setAttribute("disabled", "");
@@ -193,7 +190,6 @@ var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
 var SHOW_SCALE_BAR;
 
 var INNER_LABEL_SIZE, LEAF_LABEL_SIZE;
-var BRANCH_WIDTH;
 var SHOW_INNER_DOTS, SHOW_LEAF_DOTS;
 
 var LABEL_ROTATION;
@@ -224,7 +220,7 @@ var NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES;
 
 var LARGE_TREE_CUTOFF = 1000; // in number of nodes.  TODO tune this...phage proteomic tree is 5200, slow; tree of life 381, fast.
 
-var DEFAULT_LABEL_COLOR, DEFUALT_LABEL_FONT;
+var DEFAULT_LABEL_COLOR, DEFAULT_LABEL_FONT;
 var DEFAULT_BRANCH_COLOR, DEFAULT_BRANCH_WIDTH;
 
 // To hold temporary DOM elements
@@ -594,24 +590,26 @@ function lalala(tree_input, mapping_input)
     {
 
       // If there were category names from the mapping file that were disabled, but now the mapping file is gone and they need to be re-enabled.
-      if (previous_category_names) {
-        previous_category_names.forEach(function(cat_name) {
-          var id = md_cat_name2id[cat_name];
-
-          if (id) {
-            var elem = document.getElementById(id);
-
-            if (elem) {
-              elem.removeAttribute("disabled");
-            }
-          }
-        });
-      }
+      // if (previous_category_names) {
+      //   previous_category_names.forEach(function(cat_name) {
+      //     var id = md_cat_name2id[cat_name];
+      //
+      //     if (id) {
+      //       var elem = document.getElementById(id);
+      //
+      //       if (elem) {
+      //         elem.removeAttribute("disabled");
+      //       }
+      //     }
+      //   });
+      // }
 
       DEFAULT_LABEL_COLOR = document.getElementById("leaf-label-color").value;
-      DEFUALT_LABEL_FONT = document.getElementById("leaf-label-font").value;
+      DEFAULT_LABEL_FONT = document.getElementById("leaf-label-font").value;
 
       DEFAULT_BRANCH_COLOR = document.getElementById("branch-color").value;
+      DEFAULT_BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
+
 
 
       MATCHING_TYPE = document.getElementById("matching-type").value;
@@ -666,7 +664,6 @@ function lalala(tree_input, mapping_input)
       }
 
 
-      BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
 
       INNER_LABEL_SIZE = parseInt(document.getElementById("inner-label-size").value);
       LEAF_LABEL_SIZE = parseInt(document.getElementById("leaf-label-size").value);
@@ -807,16 +804,16 @@ function lalala(tree_input, mapping_input)
       the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
 
       // Finally make sure to re-disable any thing that is already accounted for in the mapping file.
-      category_names.forEach(function(cat_name) {
-        var id = md_cat_name2id[cat_name];
-        if (id) {
-          var elem = document.getElementById(id);
-
-          if (elem) {
-            elem.setAttribute("disabled", "");
-          }
-        }
-      });
+      // category_names.forEach(function(cat_name) {
+      //   var id = md_cat_name2id[cat_name];
+      //   if (id) {
+      //     var elem = document.getElementById(id);
+      //
+      //     if (elem) {
+      //       elem.setAttribute("disabled", "");
+      //     }
+      //   }
+      // });
 
 
       update_viewer_size_fixed();
@@ -1013,7 +1010,7 @@ function lalala(tree_input, mapping_input)
           // .transition(TR)
           .attr("fill", DEFAULT_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
-          .attr("font-family", DEFUALT_LABEL_FONT);
+          .attr("font-family", DEFAULT_LABEL_FONT);
 
         inner_labels
           .merge(inner_labels)
@@ -1026,7 +1023,7 @@ function lalala(tree_input, mapping_input)
           })
           .attr("fill", DEFAULT_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
-          .attr("font-family", DEFUALT_LABEL_FONT);
+          .attr("font-family", DEFAULT_LABEL_FONT);
 
       } else {
         inner_labels
@@ -1069,7 +1066,7 @@ function lalala(tree_input, mapping_input)
           })
           .attr("font-family", function(d) {
             var font = d.metadata.leaf_label_font;
-            return font ? font : DEFUALT_LABEL_FONT;
+            return font ? font : DEFAULT_LABEL_FONT;
           })
           .attr("fill", function(d) {
             var color = d.metadata.leaf_label_color;
@@ -1098,7 +1095,7 @@ function lalala(tree_input, mapping_input)
           })
           .attr("font-family", function(d) {
             var font = d.metadata.leaf_label_font;
-            return font ? font : DEFUALT_LABEL_FONT;
+            return font ? font : DEFAULT_LABEL_FONT;
           })
           .attr("fill", function(d) {
             var color = d.metadata.leaf_label_color;
@@ -1144,7 +1141,7 @@ function lalala(tree_input, mapping_input)
             .attr("fill", "none")
             .attr("stroke", "#000")
             .attr("stroke-opacity", "0.35")
-            .attr("stroke-width", BRANCH_WIDTH > 2 ? 2 : BRANCH_WIDTH)
+            .attr("stroke-width", DEFAULT_BRANCH_WIDTH > 2 ? 2 : DEFAULT_BRANCH_WIDTH)
             .attr("stroke-dasharray", "1, 5")
             .attr("class", "dotted-links")
             .each(function (d)
@@ -1179,7 +1176,7 @@ function lalala(tree_input, mapping_input)
           return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
         })
         .attr("stroke-width", function (d) {
-          return get_branch_md_val(d.target, "branch_width", BRANCH_WIDTH);
+          return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
         });
 
       // .attr("stroke", function(d) { return d.target.color; });
@@ -1194,7 +1191,7 @@ function lalala(tree_input, mapping_input)
           return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
         })
         .attr("stroke-width", function (d) {
-          return get_branch_md_val(d.target, "branch_width", BRANCH_WIDTH);
+          return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
         });
 
       // .attr("stroke", function(d) { return d.target.color; });
@@ -1786,7 +1783,7 @@ function draw_scale_bar()
     container.append("path")
       .attr("id", "scale-bar")
       .attr("stroke", "black")
-      .attr("stroke-width", BRANCH_WIDTH > 2 ? 2 : BRANCH_WIDTH)
+      .attr("stroke-width", DEFAULT_BRANCH_WIDTH > 2 ? 2 : DEFAULT_BRANCH_WIDTH)
       .attr("d", path_d)
       .attr("transform", scale_bar_transform);
 
@@ -1951,7 +1948,6 @@ function get_branch_md_val(node, branch_option, default_value)
   return md_vals.length === 1 ? md_vals[0] : default_value;
 }
 
-// TODO need to disable all sliders that have metadata associated with them as they will not work with the metadata.  Also this will enable certain things that aren't enabled by default if they are in the metadata.
 function set_options_by_metadata()
 {
   if (name2md) {
@@ -1992,17 +1988,17 @@ function set_options_by_metadata()
     }
 
     // At the beginning of update form constants, these will be un-disabled if necessary.
-    category_names.forEach(function(cat_name) {
-      var id = md_cat_name2id[cat_name];
-
-      if (id) {
-        var elem = document.getElementById(id);
-
-        if (elem) {
-          elem.setAttribute("disabled", "");
-        }
-      }
-    });
+    // category_names.forEach(function(cat_name) {
+    //   var id = md_cat_name2id[cat_name];
+    //
+    //   if (id) {
+    //     var elem = document.getElementById(id);
+    //
+    //     if (elem) {
+    //       elem.setAttribute("disabled", "");
+    //     }
+    //   }
+    // });
   } else {
     previous_category_names = category_names;
     category_names = [];
