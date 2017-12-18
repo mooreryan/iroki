@@ -69,6 +69,7 @@ function clear_elem(id) {
   }
 }
 
+var MAPPING_CHANGED, TREE_CHANGED;
 
 // load dataset
 function load_dataset(tree_file, mapping_file) {
@@ -108,16 +109,24 @@ function upload_button(submit_id, uploader_id, callback) {
 
   uploader.addEventListener("change", function(){
     clear_elem("svg-tree");
+    TREE_CHANGED = true;
     // document.getElementById("save-svg").setAttribute("disabled", "");
     // document.getElementById("save-png").setAttribute("disabled", "");
     submit_button.removeAttribute("disabled");
   });
   mapping_uploader.addEventListener("change", function() {
+    MAPPING_CHANGED = true;
     submit_button.removeAttribute("disabled");
   });
   submit_button.addEventListener("click", function() {
-    reset_all_to_defaults();
+    if (MAPPING_CHANGED && !TREE_CHANGED) {
+      // Don't reset
+    } else {
+      reset_all_to_defaults();
+    }
     $("#reset").attr("disabled", false);
+    MAPPING_CHANGED = false;
+    TREE_CHANGED = false;
     handleFiles();
   }, false);
   document.getElementById("reset").addEventListener("click", function() {
