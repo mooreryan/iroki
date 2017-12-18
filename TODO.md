@@ -31,8 +31,6 @@ Don't forget to cite these in the manuscript.
 
 #### Important
 
-- Let user set default values for the mapping file.
-
 #### Less important
 
 - Error when a tree file doesn’t look like a valid newick
