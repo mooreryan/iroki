@@ -130,6 +130,17 @@
           label for="label-rotation" Label rotation
           input id="label-rotation" type="range" min="-90" max="90" value="0" step="45" class="slider width-100"
 
+      .row
+        .small-12.medium-12.large-6.columns
+          span data-tooltip="" aria-haspopup="true" class="has-tip tip-top" title="Will not overide label colors in the mapping file."
+            label for="leaf-label-color" Default label color
+            input id="leaf-label-color" type="color" value="#000000"
+        .small-12.medium-12.large-6.columns
+          label for="leaf-label-font" Default label font
+          select id="leaf-label-font"
+            option id="helvetica" value="Helvetica" selected="" Helvetica
+            option id="times" value="Times" Times
+
       hr.row
       h4 Dot
 

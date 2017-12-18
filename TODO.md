@@ -41,9 +41,6 @@ Don't forget to cite these in the manuscript.
 
 #### Important
 
-- Add Kelly colors to the valid colors hash
-- Add R colors to the valid colors hash
-
 #### Less important
 
 - On circular trees, if the branch width is large enough, you will see little gaps in the center branches.
