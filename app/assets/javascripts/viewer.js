@@ -219,6 +219,8 @@ var MIN_LENGTH_IN_TREE;
 var MIN_DEFUALT_BRANCH_LENGTH = 1e-10;
 var NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES;
 
+var LARGE_TREE_CUTOFF = 1000; // in number of nodes.  TODO tune this...phage proteomic tree is 5200, slow; tree of life 381, fast.
+
 
 // To hold temporary DOM elements
 var elem;
@@ -248,7 +250,6 @@ var md_cat_name2id = {
   "branch_width": "branch-width",
   "branch_color": null
 };
-
 
 // The mega function
 function lalala(tree_input, mapping_input)
@@ -537,6 +538,18 @@ function lalala(tree_input, mapping_input)
 
     function update_viewer_size_fixed()
     {
+      tmp_root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
+        .sum(function(d) { return d.branchset ? 0 : 1; })
+        .sort(sort_function);
+
+      if (tmp_root.descendants().length > LARGE_TREE_CUTOFF) {
+        uncheck("viewer-size-fixed");
+      } else {
+        if (!document.getElementById("viewer-size-fixed").checked) {
+          $("#viewer-size-fixed").click();
+        }
+      }
+
       VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
       if (VIEWER_SIZE_FIXED) {
         // Base the viewer size on the viewport size
