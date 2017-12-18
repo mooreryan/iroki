@@ -1,0 +1,4 @@
+name	leaf_label_color
+clock	k_purple
+tire	1
+geode	r_chocolate4

@@ -1,11 +1,5 @@
 #!/bin/bash
 
-tmp=/Users/moorer/projects/iroki_web/jest.tmp.test.js
+when-changed /Users/moorer/projects/iroki_web/app/assets/javascripts/* /Users/moorer/projects/iroki_web/spec/javascript/* -c /Users/moorer/projects/iroki_web/bin/cat_js.sh &
 
-cat /Users/moorer/projects/iroki_web/app/assets/javascripts/parse_mapping_file.js \
-    /Users/moorer/projects/iroki_web/spec/javascript/parse_mapping_file_test.js \
-    > $tmp
-
-jest --runTestsByPath --notify $tmp
-
-rm $tmp
+jest --runTestsByPath --watchAll lalala.test.js
