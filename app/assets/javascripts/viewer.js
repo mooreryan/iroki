@@ -6,7 +6,6 @@ function parseNewick(tree_string)
     // Setting the branch length to 1 to handle the cases where a tree has no lengths.
     for(var ary=[], current_tree={ branch_length: 1 }, tokens=tree_string.split(/\s*(;|\(|\)|,|:)\s*/), idx=0; idx < tokens.length; idx++) {
       var token = tokens[idx];
-      console.log("token: " + token);
       switch(token) {
         case "(" : // start of a new (sub)tree
           subtree = { branch_length: 1 };
@@ -41,7 +40,6 @@ function parseNewick(tree_string)
           if (last_token === ")" || last_token === "(" || last_token === ",") {
             current_tree.name = token;
           } else if (last_token === ":") {
-            if (parseFloat(token) === 0) { console.log("hi!"); }
             current_tree.branch_length = parseFloat(token);
           }
       }
@@ -240,8 +238,6 @@ var md_cat_name2id = {
 function lalala(tree_input, mapping_input)
 {
 
-  console.log("just starting lalala()");
-
   // Check if there is more than one semicolon.  TODO this will give a false positive if there are semicolons within quoted names.
 
   if (tree_input.indexOf(";") !== tree_input.lastIndexOf(";")) {
@@ -266,7 +262,7 @@ function lalala(tree_input, mapping_input)
     // Subtract off one to account for the root, which doesn't need to have a branch length in the newick file.
     var num_nodes = tmp_root.descendants().length - 1;
     if (num_nodes > num_semicolons) {
-      alert("WARNING -- found more non-root nodes than semicolons.  This may indicate not every non-root node in the tree has a branch length.  Any nodes other than the root node that are missing the branch length will be assigned a branch length of 1.")
+      alert("WARNING -- found more non-root nodes than colons.  This may indicate not every non-root node in the tree has a branch length.  Any nodes other than the root node that are missing the branch length will be assigned a branch length of 1.")
     }
 
     MIN_LENGTH_IN_TREE = min_non_zero_len_in_tree(tmp_root);
@@ -750,7 +746,6 @@ function lalala(tree_input, mapping_input)
         .size([the_width * 1, the_height * 1])
         .separation(function(a, b) { return 1; });
 
-      console.log("in set_up_hierarchy()");
       root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
         .sum(function(d) { return d.branchset ? 0 : 1; })
         .sort(sort_function);
