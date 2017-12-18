@@ -355,20 +355,46 @@ function lalala(tree_input, mapping_input)
 
     listener("tree-shape", "change", function() {
       // First adjust the slider.
-      var width_elem = document.getElementById("width");
+      var width_elem = $("#width");
+      var height_elem = $("#height");
+
       if (document.getElementById("rectangular-tree").selected) {
-        width_elem.setAttribute("min", "250");
-        width_elem.setAttribute("max", "25000");
-        width_elem.setAttribute("step", "250");
+        width_elem
+          .attr("min", 15)
+          .attr("max", 150)
+          .attr("step", 1)
+          .val(22);
+
+        height_elem
+          .attr("min", 15)
+          .attr("max", 150)
+          .attr("step", 1)
+          .val(22);
       } else if (document.getElementById("circular-tree").selected) {
-        width_elem.setAttribute("min", "250");
-        width_elem.setAttribute("max", "25000");
-        width_elem.setAttribute("step", "250");
+        width_elem
+          .attr("min", 15)
+          .attr("max", 150)
+          .attr("step", 1)
+          .val(22);
+
+        height_elem
+          .attr("min", 15)
+          .attr("max", 150)
+          .attr("step", 1)
+          .val(22);
       } else { // radial
-        width_elem.setAttribute("min", "10");
-        width_elem.setAttribute("max", "10000");
-        width_elem.setAttribute("step", "10");
-        width_elem.setAttribute("value", "50");
+        // The values look weird since they are polynomial transformed later.
+        width_elem
+          .attr("min", 5)
+          .attr("max", 125)
+          .attr("step", 1)
+          .val(7);
+
+        width_elem
+          .attr("min", 5)
+          .attr("max", 125)
+          .attr("step", 1)
+          .val(7);
       }
 
       draw_tree();
@@ -663,7 +689,7 @@ function lalala(tree_input, mapping_input)
         elem = document.getElementById("height");
         elem.disabled = true;
 
-        width = parseInt(document.getElementById("width").value);
+        width = size_transform(parseInt(document.getElementById("width").value));
         height = width;
 
         padding = parseFloat(document.getElementById("padding").value);
@@ -674,26 +700,14 @@ function lalala(tree_input, mapping_input)
         elem = document.getElementById("height");
         elem.disabled = false;
 
-        width = parseInt(document.getElementById("width").value);
-        height = parseInt(document.getElementById("height").value);
+        width = size_transform(parseInt(document.getElementById("width").value));
+        height = size_transform(parseInt(document.getElementById("height").value));
 
         padding = parseFloat(document.getElementById("padding").value);
       }
 
       elem = document.getElementById("width");
-      RADIAL_LAYOUT_WEIGHT = parseInt(elem.value);
-      // if (LAYOUT_RADIAL) {
-      //   RADIAL_LAYOUT_WEIGHT =
-      //   elem.setAttribute("min", "10");
-      //   elem.setAttribute("max", "1000");
-      //   elem.setAttribute("step", "10");
-      // } else {
-      //   RADIAL_LAYOUT_WEIGHT = null;
-      //   elem.setAttribute("min", "250");
-      //   elem.setAttribute("max", "25000");
-      //   elem.setAttribute("step", "250");
-      // }
-
+      RADIAL_LAYOUT_WEIGHT = size_transform(elem.value);
 
       //  padding is the total % of padding.  If it is set to 0.1, then the inner width will be 90% of the svg.
       width = Math.round(width * (1 - padding));
@@ -2082,6 +2096,7 @@ function uncheck(id)
 
 
 
+// Currently, these are all the defaults for the radial tree.
 function reset_all_to_defaults()
 {
   EXTRA_NAME_WARNINGS = false;
@@ -2090,8 +2105,9 @@ function reset_all_to_defaults()
   deselect("partial");
   select("exact");
 
-  $("#width").attr("min", 10).attr("max", 10000).attr("step", 10).val(100);
-  $("#height").attr("disabled", true).val(500);
+  // $("#width").attr("min", 10).attr("max", 10000).attr("step", 10).val(100);
+  $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
+  $("#height").attr("disabled", true).val(7);
   $("#padding").val(0.05);
   $("#tree-rotation").val(0);
 
@@ -2133,4 +2149,9 @@ function reset_all_to_defaults()
 
   // Viewer options
   check("viewer-size-fixed");
+}
+
+function size_transform(val)
+{
+  return Math.pow(val, 2);
 }
