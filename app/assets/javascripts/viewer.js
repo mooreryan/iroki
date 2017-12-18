@@ -638,7 +638,13 @@ function lalala(tree_input, mapping_input)
 
       TREE_BRANCH_CLADOGRAM = "cladogram";
       TREE_BRANCH_NORMAL = "normalogram";
-      TREE_BRANCH_STYLE = document.getElementById("tree-branch-style").value;
+      if (LAYOUT_RADIAL) {
+        TREE_BRANCH_STYLE = "normalogram"
+        $("#tree-branch-style").attr("disabled", true);
+      } else {
+        $("#tree-branch-style").attr("disabled", false);
+        TREE_BRANCH_STYLE = document.getElementById("tree-branch-style").value;
+      }
 
       if (LAYOUT_STRAIGHT) {
         // It could be coming from the circle which has a different slider behavior
