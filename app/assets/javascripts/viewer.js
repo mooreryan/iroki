@@ -74,8 +74,6 @@ var MAPPING_CHANGED, TREE_CHANGED;
 // load dataset
 function load_dataset(tree_file, mapping_file) {
   clear_elem("svg-tree");
-  document.getElementById("form-div")
-    .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
   document.getElementById("form-div").appendChild(TREE_FORM);
   lalala(tree_file, mapping_file);
 }
@@ -84,6 +82,9 @@ var TREE_FORM;
 
 // handle upload button
 function upload_button(submit_id, uploader_id, callback) {
+  document.getElementById("form-div")
+    .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.7) + "px;");
+
   TREE_FORM = document.getElementById("tree-form");
   clear_elem("tree-form");
   var uploader = document.getElementById(uploader_id);
