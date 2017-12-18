@@ -230,6 +230,13 @@ var TR;
 
 var RADIAL_LAYOUT_WEIGHT = 1;
 
+// These vars hold elem IDs
+var ID_MATCHING_TYPE = "matching-type";
+var ID_LAYOUT = "tree-shape",
+  ID_LAYOUT_RECTANGULAR = "rectangular-tree",
+  ID_LAYOUT_CIRCULAR = "circular-tree",
+  ID_LAYOUT_RADIAL = "radial-tree";
+
 var defaults = {
   "leaf_label_color": "#000000",
   "leaf_label_font": "Helvetica",
@@ -364,14 +371,14 @@ function lalala(tree_input, mapping_input)
 
     // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
 
-    listener("matching-type", "change", draw_tree);
+    listener(ID_MATCHING_TYPE, "change", draw_tree);
 
     listener("width", "change", draw_tree);
     listener("padding", "change", draw_tree);
 
     listener("height", "change", draw_tree);
 
-    listener("tree-shape", "change", function() {
+    listener(ID_LAYOUT, "change", function() {
       // First adjust the slider.
       var width_elem = $("#width");
       var height_elem = $("#height");
@@ -612,7 +619,7 @@ function lalala(tree_input, mapping_input)
 
 
 
-      MATCHING_TYPE = document.getElementById("matching-type").value;
+      MATCHING_TYPE = document.getElementById(ID_MATCHING_TYPE).value;
 
       // // Also a couple of checkboxes may have been disabled by set_options_by_metadata().  Re-enable them here.  If they actually need to be disabled later in this function, they will be later.
       // $("#show-leaf-dots").attr("disabled", false);
@@ -2165,6 +2172,10 @@ function uncheck(id)
   $("#" + id).attr("checked", false);
 }
 
+function jq(id)
+{
+  return $("#" + id);
+}
 
 
 // Currently, these are all the defaults for the radial tree.
@@ -2173,19 +2184,14 @@ function reset_all_to_defaults()
   EXTRA_NAME_WARNINGS = false;
 
   // Tree options
-  // $("#matching-type").val("");
-  deselect("partial");
-  select("exact");
+  jq(ID_MATCHING_TYPE).val("partial");
 
-  // $("#width").attr("min", 10).attr("max", 10000).attr("step", 10).val(100);
   $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
   $("#height").attr("disabled", true).val(7);
   $("#padding").val(0.05);
   $("#tree-rotation").val(0);
 
-  deselect("rectangular-tree");
-  deselect("circular-tree");
-  select("radial-tree");
+  jq(ID_LAYOUT).val(ID_LAYOUT_RADIAL);
 
   deselect("cladogram");
   select("normalogram");
