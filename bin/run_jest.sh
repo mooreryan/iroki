@@ -6,6 +6,6 @@ cat /Users/moorer/projects/iroki_web/app/assets/javascripts/parse_mapping_file.j
     /Users/moorer/projects/iroki_web/spec/javascript/parse_mapping_file_test.js \
     > $tmp
 
-jest --runTestsByPath $tmp
+jest --runTestsByPath --notify $tmp
 
 rm $tmp

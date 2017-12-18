@@ -1,5 +1,33 @@
 // Copyright 2011 Jason Davies https://github.com/jasondavies/newick.js
-function parseNewick(a){for(var e=[],r={},s=a.split(/\s*(;|\(|\)|,|:)\s*/),t=0;t<s.length;t++){var n=s[t];switch(n){case"(":var c={};r.branchset=[c],e.push(r),r=c;break;case",":var c={};e[e.length-1].branchset.push(c),r=c;break;case")":r=e.pop();break;case":":break;default:var h=s[t-1];")"==h||"("==h||","==h?r.name=n:":"==h&&(r.length=parseFloat(n))}}return r}
+function parseNewick(a)
+{
+  for(var e=[], r={}, s=a.split(/\s*(;|\(|\)|,|:)\s*/), t=0; t < s.length; t++) {
+    var n = s[t];
+    switch(n) {
+      case "(" :
+        var c = {};
+        r.branchset = [c], e.push(r), r = c;
+        break;
+
+      case ",":
+        var c = {};
+        e[e.length-1].branchset.push(c), r = c;
+        break;
+
+      case ")": r = e.pop();
+        break;
+
+      case ":":
+        break;
+
+      default:
+        var h = s[t-1];
+
+        ")" == h || "(" == h || "," == h ? r.name = n : ":" == h && (r.length = parseFloat(n));
+    }
+  }
+  return r
+}
 
 var d3 = require("d3");
 var Papa = require('./papaparse.min.js');
@@ -33,18 +61,22 @@ var too_many_cols_str = "name\tleaf_label_color\tleaf_label_color\tleaf_label_co
 var too_few_cols_str = "name\napple\npie\n";
 var duplicate_col_headers_str = "name\tleaf_label_color\tleaf_label_color\napple\tblue\tpurple\npie\tgreen\tpink\n";
 
-var bad_color_str = "name\tleaf_label_color\ngeode\tarstoien";
+var bad_color_str = "name\tleaf_label_color\ngeode\tarstoien\n";
+
+var multi_tree_str = "(apple:1,(pie:1,tasty:1):1);\n(seanie:1,(amelia:1,ryan:1):1);\n"
+
+var tree_with_semicolos = "('sea;nie':1,(amelia:1,\"ry;an\":1):1);";
 
 
 //// TESTS
 
-test('chomp() removes lf from end', () => {
+test('chomp() removes lf from end', function() {
   expect(chomp("apple\npie\n")).toBe("apple\npie");
 });
-test('chomp() removes cr from end', () => {
+test('chomp() removes cr from end', function() {
   expect(chomp("apple\rpie\r")).toBe("apple\rpie");
 });
-test('chomp() removes cr lf from end', () => {
+test('chomp() removes cr lf from end', function() {
   expect(chomp("apple\r\npie\r\n")).toBe("apple\r\npie");
 });
 
@@ -136,4 +168,12 @@ test('push_unless_present() doesnt push an item if it is already there', functio
 
 test('min_non_zero_len_in_tree() returns the length of the smallest branch in the tree', function(){
   expect(min_non_zero_len_in_tree(root)).toEqual(0.05);
+});
+
+
+test('has_multiple_trees() returns true if the neweck file looks like it has multiple trees', function () {
+  expect(has_multiple_trees(multi_tree_str)).toEqual(true);
+});
+test('has_multiple_trees() returns false if the neweck file looks like it has a single tree', function () {
+  expect(has_multiple_trees(tree_with_semicolos)).toEqual(false);
 });

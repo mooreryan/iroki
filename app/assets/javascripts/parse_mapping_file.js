@@ -380,6 +380,8 @@ function has_papa_errors(name2md)
   }
 }
 
+
+// TODO move to a ultils.js script.
 function min_non_zero_len_in_tree(root)
 {
   var min_length = undefined;
@@ -390,4 +392,12 @@ function min_non_zero_len_in_tree(root)
   });
 
   return min_length;
+}
+
+// The tree file ends in a ';' so if you split on it and get more than one thing, you may have more than one tree.
+function has_multiple_trees(tree_str)
+{
+  var splits = chomp(tree_str).split(";").filter(function(s) { return s; });
+
+  return splits.length > 1;
 }
