@@ -224,7 +224,8 @@ var NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES;
 
 var LARGE_TREE_CUTOFF = 1000; // in number of nodes.  TODO tune this...phage proteomic tree is 5200, slow; tree of life 381, fast.
 
-var DEFUALT_LABEL_COLOR, DEFUALT_LABEL_FONT;
+var DEFAULT_LABEL_COLOR, DEFUALT_LABEL_FONT;
+var DEFAULT_BRANCH_COLOR, DEFAULT_BRANCH_WIDTH;
 
 // To hold temporary DOM elements
 var elem;
@@ -457,15 +458,6 @@ function lalala(tree_input, mapping_input)
     //   adjust_tree();
     // });
 
-    listener("branch-width", "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_links();
-      draw_link_extensions();
-      draw_scale_bar();
-      adjust_tree();
-    });
-
     listener("show-inner-labels", "change", function() { update_and_draw(draw_inner_labels); });
     listener("inner-label-size", "change", function() { update_and_draw(draw_inner_labels); });
     listener("show-leaf-labels", "change", function() {
@@ -525,6 +517,24 @@ function lalala(tree_input, mapping_input)
       adjust_tree();
     });
     listener("leaf-dot-size", "change", function() { update_and_draw(draw_leaf_dots); });
+
+    listener("branch-color", "change", function() {
+      set_options_by_metadata();
+      update_form_constants();
+      draw_links();
+      draw_link_extensions();
+      draw_scale_bar();
+      adjust_tree();
+    });
+    listener("branch-width", "change", function() {
+      set_options_by_metadata();
+      update_form_constants();
+      draw_links();
+      draw_link_extensions();
+      draw_scale_bar();
+      adjust_tree();
+    });
+
 
     listener("viewer-size-fixed", "change", update_viewer_size_fixed);
 
@@ -598,8 +608,10 @@ function lalala(tree_input, mapping_input)
         });
       }
 
-      DEFUALT_LABEL_COLOR = document.getElementById("leaf-label-color").value;
+      DEFAULT_LABEL_COLOR = document.getElementById("leaf-label-color").value;
       DEFUALT_LABEL_FONT = document.getElementById("leaf-label-font").value;
+
+      DEFAULT_BRANCH_COLOR = document.getElementById("branch-color").value;
 
 
       MATCHING_TYPE = document.getElementById("matching-type").value;
@@ -999,7 +1011,7 @@ function lalala(tree_input, mapping_input)
           })
           .text(function(d) { return d.data.name; })
           // .transition(TR)
-          .attr("fill", DEFUALT_LABEL_COLOR)
+          .attr("fill", DEFAULT_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
           .attr("font-family", DEFUALT_LABEL_FONT);
 
@@ -1012,7 +1024,7 @@ function lalala(tree_input, mapping_input)
           .attr("transform", function(d) {
             return pick_transform(d);
           })
-          .attr("fill", DEFUALT_LABEL_COLOR)
+          .attr("fill", DEFAULT_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
           .attr("font-family", DEFUALT_LABEL_FONT);
 
@@ -1061,7 +1073,7 @@ function lalala(tree_input, mapping_input)
           })
           .attr("fill", function(d) {
             var color = d.metadata.leaf_label_color;
-            return color ? color : DEFUALT_LABEL_COLOR;
+            return color ? color : DEFAULT_LABEL_COLOR;
           });
 
         labels
@@ -1090,7 +1102,7 @@ function lalala(tree_input, mapping_input)
           })
           .attr("fill", function(d) {
             var color = d.metadata.leaf_label_color;
-            return color ? color : DEFUALT_LABEL_COLOR;
+            return color ? color : DEFAULT_LABEL_COLOR;
           });
 
       } else {
@@ -1164,7 +1176,7 @@ function lalala(tree_input, mapping_input)
         .attr("d", link_path)
         // TODO this is very slow for the tree of life.
         .attr("stroke", function(d) {
-          return get_branch_md_val(d.target, "branch_color", "black");
+          return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
         })
         .attr("stroke-width", function (d) {
           return get_branch_md_val(d.target, "branch_width", BRANCH_WIDTH);
@@ -1179,7 +1191,7 @@ function lalala(tree_input, mapping_input)
         .each(function(d) { d.target.linkNode = this; })
         .attr("d", link_path)
         .attr("stroke", function(d) {
-          return get_branch_md_val(d.target, "branch_color", "black");
+          return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
         })
         .attr("stroke-width", function (d) {
           return get_branch_md_val(d.target, "branch_width", BRANCH_WIDTH);
@@ -2190,9 +2202,6 @@ function reset_all_to_defaults()
   $("#scale-bar-length-weight").val(1);
   $("#scale-bar-offset-weight").val(1);
 
-  // Branch options
-  $("#branch-width").val(2);
-
   // Label options
   uncheck("show-inner-labels");
   $("#inner-label-size").val(12);
@@ -2212,6 +2221,10 @@ function reset_all_to_defaults()
 
   uncheck("show-leaf-dots");
   $("#leaf-dot-size").val(5);
+
+  // Branch options
+  $("#branch-color").val("#000000");
+  $("#branch-width").val(2);
 
   // Viewer options
   check("viewer-size-fixed");

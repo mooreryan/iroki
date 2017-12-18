@@ -1015,7 +1015,7 @@ function parse_mapping_file(str)
         var color_val;
         color_val = md[option];
 
-        // Since Kelly colors can be numbers 1-19, need to convert them to strings first.
+        // Since Kelly colors can be numbers 1-19, need to convert them.
         if ((typeof color_val) === "string") {
           color_val = color_val.toLowerCase();
         } else {
