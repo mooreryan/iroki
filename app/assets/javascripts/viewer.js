@@ -1751,7 +1751,7 @@ function draw_scale_bar()
     container.append("path")
       .attr("id", "scale-bar")
       .attr("stroke", "black")
-      .attr("stroke-width", BRANCH_WIDTH)
+      .attr("stroke-width", BRANCH_WIDTH > 2 ? 2 : BRANCH_WIDTH)
       .attr("d", path_d)
       .attr("transform", scale_bar_transform);
 
