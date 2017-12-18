@@ -128,6 +128,13 @@ function upload_button(submit_id, uploader_id, callback) {
     $("#reset").attr("disabled", false);
     MAPPING_CHANGED = false;
     TREE_CHANGED = false;
+
+    // Add a loading tree message.
+    d3.select("#tree-div")
+      .append("p")
+      .attr("id", "loading-message")
+      .html("Loading tree! Please wait....");
+
     handleFiles();
   }, false);
   document.getElementById("reset").addEventListener("click", function() {
@@ -236,6 +243,14 @@ var ID_LAYOUT = "tree-shape",
   ID_LAYOUT_RECTANGULAR = "rectangular-tree",
   ID_LAYOUT_CIRCULAR = "circular-tree",
   ID_LAYOUT_RADIAL = "radial-tree";
+var ID_TREE_BRANCH_STYLE = "tree-branch-style",
+  ID_TREE_BRANCH_STYLE_NORMAL = "normalogram",
+  ID_TREE_BRANCH_STYLE_CLADOGRAM = "cladogram";
+var ID_SORT = "tree-sort",
+  ID_SORT_FORWARD = "descending",
+  ID_SORT_REVERSE = "ascending",
+  ID_SORT_UNSORTED = "not-sorted";
+
 
 var defaults = {
   "leaf_label_color": "#000000",
@@ -875,6 +890,10 @@ function lalala(tree_input, mapping_input)
           .attr("height", the_height * 1)
           .style("background-color", "white"); // TODO make bg color an option
       } else {
+        // First remove loading message if there is one.
+        d3.select("#loading-message").remove();
+
+        // And add the svg.
         svg = d3.select("#tree-div")
           .append("svg")
           .attr("id", "svg-tree")
@@ -2193,12 +2212,9 @@ function reset_all_to_defaults()
 
   jq(ID_LAYOUT).val(ID_LAYOUT_RADIAL);
 
-  deselect("cladogram");
-  select("normalogram");
+  jq(ID_TREE_BRANCH_STYLE).val(ID_TREE_BRANCH_STYLE_NORMAL);
 
-  deselect("ascending");
-  deselect("not-sorted");
-  select("descending");
+  jq(ID_SORT).val(ID_SORT_FORWARD);
 
   // Scale bar options
   check("show-scale-bar");
