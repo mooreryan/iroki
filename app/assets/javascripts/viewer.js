@@ -74,6 +74,8 @@ var MAPPING_CHANGED, TREE_CHANGED;
 // load dataset
 function load_dataset(tree_file, mapping_file) {
   clear_elem("svg-tree");
+  document.getElementById("form-div")
+    .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
   document.getElementById("form-div").appendChild(TREE_FORM);
   lalala(tree_file, mapping_file);
 }

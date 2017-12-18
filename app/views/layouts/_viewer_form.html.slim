@@ -21,6 +21,12 @@
           label for="mapping-file-uploader" Mapping file
           input id="mapping-file-uploader" type="file"
     .row
+      .small-12.columns
+        label for="matching-type" Mapping file label matching
+        select id="matching-type"
+          option id="exact" value="exact" selected="" Exact
+          option id="partial" value="partial" Partial
+    .row
       .small-6.columns
         label for="submit" Submit your files
         input id="submit" type="button" value="Submit!" disabled=""
@@ -36,18 +42,16 @@
         input id="save-png" type="button" value="Save as PNG" disabled=""
 
     hr.row
+    .row
+      h4 Viewer size
+      .small-12.columns
+        label for="viewer-size-fixed" Fixed viewer width?
+        input id="viewer-size-fixed" type="checkbox" checked=""
+
+    hr.row
 
     form id="tree-form"
-      hr.row
       h4 Tree options
-
-      .row
-        .small-12.columns
-          label for="matching-type" Mapping file label matching
-          select id="matching-type"
-            option id="exact" value="exact" selected="" Exact
-            option id="partial" value="partial" Partial
-            /option id="regex" value="regex" Regular expressions
 
       .row
         .small-12.medium-12.large-6.columns
@@ -100,14 +104,6 @@
           input id="scale-bar-offset-weight" class="slider width-100" type="range" min="1" max="2.5" value="1" step="0.1"
 
       hr.row
-      h4 Branch options
-
-      .row
-        .small-12.columns
-          label for="branch-width" Width
-          input id="branch-width" type="range" min="1" max="10" value="2" class="slider width-100"
-
-      hr.row
       h4 Label options
 
       .row
@@ -153,9 +149,10 @@
           input id="leaf-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
 
       hr.row
-      h4 Viewer size
+      h4 Branch options
 
       .row
         .small-12.columns
-          label for="viewer-size-fixed" Fixed viewer width?
-          input id="viewer-size-fixed" type="checkbox" checked=""
+          label for="branch-width" Width
+          input id="branch-width" type="range" min="1" max="10" value="2" class="slider width-100"
+
