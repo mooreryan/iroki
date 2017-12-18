@@ -73,11 +73,16 @@ function clear_elem(id) {
 // load dataset
 function load_dataset(tree_file, mapping_file) {
   clear_elem("svg-tree");
+  document.getElementById("form-div").appendChild(TREE_FORM);
   lalala(tree_file, mapping_file);
 }
 
+var TREE_FORM;
+
 // handle upload button
 function upload_button(submit_id, uploader_id, callback) {
+  TREE_FORM = document.getElementById("tree-form");
+  clear_elem("tree-form");
   var uploader = document.getElementById(uploader_id);
   var mapping_uploader = document.getElementById("mapping-file-uploader");
 
@@ -102,7 +107,7 @@ function upload_button(submit_id, uploader_id, callback) {
   };
 
   uploader.addEventListener("change", function(){
-    // clear_elem("svg-tree");
+    clear_elem("svg-tree");
     // document.getElementById("save-svg").setAttribute("disabled", "");
     // document.getElementById("save-png").setAttribute("disabled", "");
     submit_button.removeAttribute("disabled");
@@ -116,15 +121,17 @@ function upload_button(submit_id, uploader_id, callback) {
     handleFiles();
   }, false);
   document.getElementById("reset").addEventListener("click", function() {
+    // Reset all sliders and options to default.
+    reset_all_to_defaults();
+
+    clear_elem("tree-form");
     clear_elem("svg-tree");
-    submit_button.removeAttribute("disabled");
+    // submit_button.removeAttribute("disabled");
     $("#reset").attr("disabled", true);
     document.getElementById("save-svg").setAttribute("disabled", "");
     document.getElementById("save-png").setAttribute("disabled", "");
     document.getElementById("file-upload-form").reset();
 
-    // Reset all sliders and options to default.
-    reset_all_to_defaults();
   });
 
   function handleFiles() {
