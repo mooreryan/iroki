@@ -108,7 +108,7 @@ function upload_button(submit_id, uploader_id, callback) {
   };
 
   uploader.addEventListener("change", function(){
-    clear_elem("svg-tree");
+    // clear_elem("svg-tree");
     TREE_CHANGED = true;
     // document.getElementById("save-svg").setAttribute("disabled", "");
     // document.getElementById("save-png").setAttribute("disabled", "");
