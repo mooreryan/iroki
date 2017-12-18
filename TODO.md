@@ -55,6 +55,7 @@ Don't forget to cite these in the manuscript.
 #### Important
 
 - On rectangle trees, the tree rotation slider people think it doesn’t do anything.
+- More vertical space between reset and save buttons.
 
 #### Less important
 

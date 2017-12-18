@@ -51,22 +51,7 @@
     hr.row
 
     form id="tree-form"
-      h4 Tree options
-
-      .row
-        .small-12.medium-12.large-6.columns
-          label id="width-label" for="width" Horizontal
-          input id="width" class="slider width-100" type="range" min="5" max="125" step="1" value="7"
-        .small-12.medium-12.large-6.columns
-          label id="height-label" for="height" Vertical
-          input id="height" class="slider width-100" type="range" min="5" max="125" step="1" value="7"
-      .row
-        .small-12.medium-12.large-6.columns
-          label id="padding-label" for="padding" Padding
-          input id="padding" class="slider width-100" type="range" min="0.0" max="0.75" step="0.05" value="0.05"
-        .small-12.medium-12.large-6.columns
-          label for="tree-rotation" Tree rotation
-          input id="tree-rotation" class="slider width-100" type="range" min="0" max="270" step="270" value="0"
+      h4 Tree format options
 
       .row
         .small-12.medium-12.large-6.columns
@@ -80,7 +65,6 @@
           select id="tree-branch-style"
             option id="normalogram" value="normalogram" selected="" True length
             option id="cladogram" value="cladogram" Cladogram
-
       .row
         .small-12.columns
           label for="tree-sort" Sort?
@@ -88,6 +72,23 @@
             option id="descending" value="descending" selected="" Sort
             option id="ascending" value="ascending" Reverse sort
             option id="not-sorted" value="not-sorted" Not sorted
+      .row
+        .small-12.columns
+          label for="tree-rotation" Tree rotation
+          input id="tree-rotation" class="slider width-100" type="range" min="0" max="270" step="270" value="0"
+
+      h4 Tree size options
+      .row
+        .small-12.medium-12.large-6.columns
+          label id="width-label" for="width" Horizontal
+          input id="width" class="slider width-100" type="range" min="5" max="125" step="1" value="7"
+        .small-12.medium-12.large-6.columns
+          label id="height-label" for="height" Vertical
+          input id="height" class="slider width-100" type="range" min="5" max="125" step="1" value="7"
+      .row
+        .small-12.columns
+          label id="padding-label" for="padding" Padding
+          input id="padding" class="slider width-100" type="range" min="0.0" max="0.75" step="0.05" value="0.05"
 
       hr.row
       h4 Scale bar options

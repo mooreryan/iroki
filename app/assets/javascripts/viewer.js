@@ -2173,6 +2173,7 @@ function reset_all_to_defaults()
   EXTRA_NAME_WARNINGS = false;
 
   // Tree options
+  // $("#matching-type").val("");
   deselect("partial");
   select("exact");
 
