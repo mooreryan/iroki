@@ -52,13 +52,14 @@ Don't forget to cite these in the manuscript.
 #### Important
 
 - On rectangle trees, the tree rotation slider people think it doesn’t do anything.
-- More vertical space between reset and save buttons.
 
 #### Less important
 
+- More vertical space between reset and save buttons.
 - Regex name matching
 
 ### Questions and things to check on 
+
 - Make sure everything that can be resized has a .merge() call.
 
 ## Feature requests

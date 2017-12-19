@@ -2292,3 +2292,84 @@ function size_transform(val)
 {
   return Math.pow(val, 2);
 }
+
+
+// function ary_min_max(ary)
+// {
+//   var min = null;
+//   var max = null;
+//   ary.forEach(function(val){
+//     if (!max || val > max) {
+//       max = val;
+//     }
+//
+//     if (!min || val < min) {
+//       min = val;
+//     }
+//   });
+//
+//   return { min: min, max: max };
+// }
+//
+// // Space hsl looks nice for an even mix of counts.  lch looks pretty good for typical power law count data.
+// function color_test(space)
+// {
+//   // var counts = [1, 2, 4, 8, 16, 32, 64, 128];
+//   var counts = [1,10,20,30,40,50,60];
+//   // counts = counts.map(function(count){
+//   //   return Math.round(Math.log(count));
+//   // });
+//   var min_max = ary_min_max(counts);
+//
+//   console.log(counts);
+//   console.log(min_max);
+//
+//   d3.selectAll("circle").remove();
+//
+//   // var rainbow = new Rainbow();
+//   // rainbow.setSpectrum("#0000ff", "#00ff00");
+//   // rainbow.setNumberRange(min_max.min, min_max.max);
+//
+//   var colors = chroma.scale(['#00ff00', '#0000ff']).mode(space).colors(min_max.max - min_max.min + 1);
+//
+//   counts.forEach(function (count, idx) {
+//     console.log(colors[count - min_max.min]);
+//     d3.select("#svg-tree").append("circle")
+//       .attr("r", 10)
+//       .attr("cx", 100)
+//       .attr("cy", idx * 100)
+//       .attr("fill", colors[count - min_max.min]);
+//   });
+// }
+//
+// // Also can make it two colors.
+// function ryan(start, mid, stop, num_colors, transform)
+// {
+//   d3.selectAll("circle").remove();
+//
+//   var counts = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
+//   var color;
+//
+//   var colors = chroma.scale([start, mid, stop]).mode("hsl").colors(num_colors);
+//   var limits = chroma.limits(counts, transform, num_colors);
+//   limits.shift();
+//
+//   for (var i = 0; i < counts.length; ++i) {
+//     var count = counts[i];
+//
+//     for (var j = 0; j < limits.length; ++j) {
+//       if (count <= limits[j]) {
+//         color = colors[j];
+//         break;
+//       }
+//     }
+//
+//     d3.select("#svg-tree").append("circle")
+//       .attr("r", 10)
+//       .attr("cx", 100)
+//       .attr("cy", count * 40)
+//       .attr("fill", color);
+//   }
+//
+//   console.log(limits);
+// }
