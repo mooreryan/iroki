@@ -73,7 +73,6 @@ var MAPPING_CHANGED, TREE_CHANGED;
 
 // load dataset
 function load_dataset(tree_file, mapping_file) {
-  clear_elem("svg-tree");
   document.getElementById("form-div").appendChild(TREE_FORM);
   lalala(tree_file, mapping_file);
 }
@@ -111,7 +110,6 @@ function upload_button(submit_id, uploader_id, callback) {
   };
 
   uploader.addEventListener("change", function(){
-    // clear_elem("svg-tree");
     TREE_CHANGED = true;
     submit_button.removeAttribute("disabled");
   });
@@ -123,11 +121,10 @@ function upload_button(submit_id, uploader_id, callback) {
     if (MAPPING_CHANGED && !TREE_CHANGED) {
       // Don't reset
     } else {
+      clear_elem("svg-tree");
       reset_all_to_defaults();
     }
-    $("#reset").attr("disabled", false);
-    MAPPING_CHANGED = false;
-    TREE_CHANGED = false;
+    $("#reset").prop("disabled", false);
 
     // Add a loading tree message.
     d3.select("#tree-div")
@@ -135,15 +132,21 @@ function upload_button(submit_id, uploader_id, callback) {
       .attr("id", "loading-message")
       .html("Loading tree! Please wait....");
 
+    MAPPING_CHANGED = false;
+    TREE_CHANGED = false;
+
     handleFiles();
   }, false);
   document.getElementById("reset").addEventListener("click", function() {
+    MAPPING_CHANGED = false;
+    TREE_CHANGED = false;
+
     // Reset all sliders and options to default.
     reset_all_to_defaults();
 
     clear_elem("tree-form");
     clear_elem("svg-tree");
-    $("#reset").attr("disabled", true);
+    $("#reset").prop("disabled", true);
     document.getElementById("save-svg").setAttribute("disabled", "");
     document.getElementById("save-png").setAttribute("disabled", "");
     document.getElementById("file-upload-form").reset();
@@ -254,6 +257,9 @@ var ID_SCALE_BAR_SHOW = "show-scale-bar",
   ID_SCALE_BAR_OFFSET_WEIGHT = "scale-bar-offset-weight",
   ID_SCALE_BAR_AUTOSIZE = "scale-bar-auto-size",
   ID_SCALE_BAR_LENGTH = "scale-bar-length";
+var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
+
+var tmp_root;
 
 
 var defaults = {
@@ -291,9 +297,14 @@ function lalala(tree_input, mapping_input)
 
   var parsed_newick = parseNewick(tree_input);
   if (parsed_newick) {
-    var tmp_root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
+    tmp_root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
       .sum(function(d) { return d.branchset ? 0 : 1; })
       .sort(sort_function);
+
+    // If it is a big tree, uncheck the viewer size fixed button.  It goes way faster.
+    if (tmp_root.descendants().length > LARGE_TREE_CUTOFF) {
+      uncheck(ID_VIEWER_SIZE_FIXED);
+    }
 
     // Check if there is as many branchlengths as there are number of nodes.
     var num_semicolons;
@@ -463,9 +474,9 @@ function lalala(tree_input, mapping_input)
     });
     listener(ID_SCALE_BAR_AUTOSIZE, "change", function(){
       if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
-        jq(ID_SCALE_BAR_LENGTH).attr("disabled", true);
+        jq(ID_SCALE_BAR_LENGTH).prop("disabled", true);
       } else {
-        jq(ID_SCALE_BAR_LENGTH).attr("disabled", false);
+        jq(ID_SCALE_BAR_LENGTH).prop("disabled", false);
       }
 
       set_options_by_metadata();
@@ -576,7 +587,7 @@ function lalala(tree_input, mapping_input)
     });
 
 
-    listener("viewer-size-fixed", "change", update_viewer_size_fixed);
+    listener(ID_VIEWER_SIZE_FIXED, "change", update_viewer_size_fixed);
 
     draw_tree();
 
@@ -605,28 +616,14 @@ function lalala(tree_input, mapping_input)
       return 0;
     }
 
+    // Start here.  TODO this function is wonky.
     function update_viewer_size_fixed()
     {
-      tmp_root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
-        .sum(function(d) { return d.branchset ? 0 : 1; })
-        .sort(sort_function);
-
-      if (tmp_root.descendants().length > LARGE_TREE_CUTOFF) {
-        uncheck("viewer-size-fixed");
+      var is_checked = jq(ID_VIEWER_SIZE_FIXED).prop("checked");
+      if (is_checked) {
+        jq("tree-div").attr("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
       } else {
-        if (!document.getElementById("viewer-size-fixed").checked) {
-          $("#viewer-size-fixed").click();
-        }
-      }
-
-      VIEWER_SIZE_FIXED = document.getElementById("viewer-size-fixed").checked;
-      if (VIEWER_SIZE_FIXED) {
-        // Base the viewer size on the viewport size
-        document.getElementById("tree-div")
-          .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
-
-      } else {
-        document.getElementById("tree-div").removeAttribute("style");
+        jq("tree-div").attr("style", null);
       }
     }
 
@@ -657,10 +654,6 @@ function lalala(tree_input, mapping_input)
 
 
       MATCHING_TYPE = document.getElementById(ID_MATCHING_TYPE).value;
-
-      // // Also a couple of checkboxes may have been disabled by set_options_by_metadata().  Re-enable them here.  If they actually need to be disabled later in this function, they will be later.
-      // $("#show-leaf-dots").attr("disabled", false);
-      // $("#show-leaf-labels").attr("disabled", false);
 
       // Get sorting options
       SORT_NONE = "not-sorted";
@@ -716,9 +709,9 @@ function lalala(tree_input, mapping_input)
       TREE_BRANCH_NORMAL = "normalogram";
       if (LAYOUT_RADIAL) {
         TREE_BRANCH_STYLE = "normalogram"
-        $("#tree-branch-style").attr("disabled", true);
+        $("#tree-branch-style").prop("disabled", true);
       } else {
-        $("#tree-branch-style").attr("disabled", false);
+        $("#tree-branch-style").prop("disabled", false);
         TREE_BRANCH_STYLE = document.getElementById("tree-branch-style").value;
       }
 
@@ -860,7 +853,7 @@ function lalala(tree_input, mapping_input)
       // });
 
 
-      update_viewer_size_fixed();
+      // update_viewer_size_fixed();
 
     }
 
@@ -2037,14 +2030,14 @@ function set_options_by_metadata()
     if (leaf_dot_options_present) {
       var elem = $("#show-leaf-dots");
       elem.attr("checked", true);
-      // elem.attr("disabled", true);
+      // elem.prop("disabled", true);
     }
 
     // Show leaf labels if leaf label options are present.
     if (leaf_label_options_present) {
       var elem = $("#show-leaf-labels");
       elem.attr("checked", true);
-      // elem.attr("disabled", true);
+      // elem.prop("disabled", true);
     }
 
     // At the beginning of update form constants, these will be un-disabled if necessary.
@@ -2207,22 +2200,22 @@ function get_translation(transform_str)
   }
 }
 
-function select(id)
-{
-  $("#" + id).attr("selected", true);
-}
-function deselect(id)
-{
-  $("#" + id).attr("selected", false);
-}
+// function select(id)
+// {
+//   $("#" + id).prop("selected", true);
+// }
+// function deselect(id)
+// {
+//   $("#" + id).prop("selected", false);
+// }
 
 function check(id)
 {
-  $("#" + id).attr("checked", true);
+  $("#" + id).prop("checked", true);
 }
 function uncheck(id)
 {
-  $("#" + id).attr("checked", false);
+  $("#" + id).prop("checked", false);
 }
 
 function jq(id)
@@ -2240,7 +2233,7 @@ function reset_all_to_defaults()
   jq(ID_MATCHING_TYPE).val("partial");
 
   $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
-  $("#height").attr("disabled", true).val(7);
+  $("#height").prop("disabled", true).val(7);
   $("#padding").val(0.05);
   $("#tree-rotation").val(0);
 
@@ -2253,7 +2246,7 @@ function reset_all_to_defaults()
   // Scale bar options
   check(ID_SCALE_BAR_SHOW);
   check(ID_SCALE_BAR_AUTOSIZE);
-  jq(ID_SCALE_BAR_LENGTH).val(1).attr("disabled", true);
+  jq(ID_SCALE_BAR_LENGTH).val(1).prop("disabled", true);
   $("#scale-bar-offset-weight").val(1);
 
   // Label options
@@ -2281,8 +2274,9 @@ function reset_all_to_defaults()
   $("#branch-width").val(2);
 
   // Viewer options
-  check("viewer-size-fixed");
+  check(ID_VIEWER_SIZE_FIXED);
 }
+
 
 function size_transform(val)
 {
