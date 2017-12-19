@@ -214,7 +214,7 @@ var SORT_STATE, SORT_NONE, SORT_ASCENDING, SORT_DESCENDING, sort_function;
 
 var the_width, the_height, the_width, the_height, padding;
 
-var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH_WEIGHT;
+var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH;
 
 var name2md, category_names = [], previous_category_names = null;
 
@@ -457,7 +457,25 @@ function lalala(tree_input, mapping_input)
       draw_scale_bar();
       adjust_tree();
     });
-    listener("scale-bar-length-weight", "change", function() {
+    listener("scale-bar-auto-size", "change", function(){
+      if (document.getElementById("scale-bar-auto-size").checked) {
+        jq("scale-bar-length").attr("disabled", true);
+      } else {
+        jq("scale-bar-length").attr("disabled", false);
+      }
+
+      set_options_by_metadata();
+      update_form_constants();
+      draw_scale_bar();
+      adjust_tree();
+    });
+    listener("scale-bar-length", "change", function() {
+      var val = $("#scale-bar-length").val();
+      if (val <= 0) {
+        // TODO set back to the default instead of 1.
+        $("#scale-bar-length").val(1);
+      }
+      
       set_options_by_metadata();
       update_form_constants();
       draw_scale_bar();
@@ -656,7 +674,7 @@ function lalala(tree_input, mapping_input)
 
       SHOW_SCALE_BAR = document.getElementById("show-scale-bar").checked;
       SCALE_BAR_OFFSET_WEIGHT = parseFloat(document.getElementById("scale-bar-offset-weight").value);
-      SCALE_BAR_LENGTH_WEIGHT = parseFloat(document.getElementById("scale-bar-length-weight").value);
+      SCALE_BAR_LENGTH = parseFloat(document.getElementById("scale-bar-length").value);
 
 
 
@@ -1712,7 +1730,6 @@ function draw_scale_bar()
         pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.branch_length;
 
       } else {
-        // TODO when tree is a cladogram, need to make the branch label reflect the depth rather than the radius (true length).
         lengths = root.descendants().map(function(d) { return d.height });
 
         // The source height will be higher than the target height as the leaf nodes have a height of 0 and internal nodes add 1 for each speciation event.
@@ -1724,10 +1741,6 @@ function draw_scale_bar()
     var rotated_rectangle = LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
     mean_length = round_to(ary_mean(lengths), ROUNDING_PLACE);
 
-    var scale_bar_label_text = mean_length;
-
-    var scale_bar_pixels = mean_length * pixels_per_unit_length;
-
     var min_scale_bar_size;
     if (LAYOUT_CIRCLE) {
       min_scale_bar_size = 50; // circles look a bit smaller so make this half.
@@ -1737,14 +1750,25 @@ function draw_scale_bar()
       min_scale_bar_size = 25;
     }
 
+    var scale_bar_pixels;
+    if (document.getElementById("scale-bar-auto-size").checked) {
+      scale_bar_pixels = mean_length * pixels_per_unit_length;
+      jq("scale-bar-length").val(mean_length);
+    } else {
+      scale_bar_pixels = jq("scale-bar-length").val() * pixels_per_unit_length;
+    }
+
+
+
     // If the original scale bar is smaller than the min size, bump up the size.
     if (scale_bar_pixels < min_scale_bar_size) {
       scale_bar_pixels = min_scale_bar_size;
-      scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PLACE);
+      jq("scale-bar-length").val(min_scale_bar_size);
+      // scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PLACE);
     }
 
-    // Now that we have a minimum scale bar size, weight it by the slider value.
-    scale_bar_pixels *= SCALE_BAR_LENGTH_WEIGHT;
+    // // Now that we have a minimum scale bar size, weight it by the slider value.
+    // scale_bar_pixels *= SCALE_BAR_LENGTH;
     scale_bar_label_text = round_to(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PLACE);
 
 
@@ -2218,7 +2242,8 @@ function reset_all_to_defaults()
 
   // Scale bar options
   check("show-scale-bar");
-  $("#scale-bar-length-weight").val(1);
+  check("scale-bar-auto-size");
+  jq("scale-bar-length").val(1).attr("disabled", true);
   $("#scale-bar-offset-weight").val(1);
 
   // Label options

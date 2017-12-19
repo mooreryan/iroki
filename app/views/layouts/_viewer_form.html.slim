@@ -50,7 +50,7 @@
 
     hr.row
 
-    form id="tree-form"
+    #tree-form
       h4 Tree format options
 
       .row
@@ -93,16 +93,20 @@
       hr.row
       h4 Scale bar options
       .row
-        .small-12.columns
+        .small-12.medium-12.large-6.columns
           label for="show-scale-bar" Show scale bar?
           input id="show-scale-bar" type="checkbox" checked=""
-      .row
-        .small-12.medium-12.large-6.columns
-          label for="scale-bar-length-weight" Length
-          input id="scale-bar-length-weight" class="slider width-100" type="range" min="0.25" max="2" value="1" step="0.25"
         .small-12.medium-12.large-6.columns
           label for="scale-bar-offset-weight" Offset
           input id="scale-bar-offset-weight" class="slider width-100" type="range" min="1" max="2.5" value="1" step="0.1"
+      .row
+        .small-12.medium-12.large-6.columns
+          label for="scale-bar-auto-size" Auto size
+          input id="scale-bar-auto-size" type="checkbox" checked=""
+        .small-12.medium-12.large-6.columns
+          label for="scale-bar-length" Length
+          input id="scale-bar-length" disabled=""
+          /input id="scale-bar-length-weight" class="slider width-100" type="range" min="0.25" max="2" value="1" step="0.25"
 
       hr.row
       h4 Label options
