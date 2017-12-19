@@ -250,6 +250,10 @@ var ID_SORT = "tree-sort",
   ID_SORT_FORWARD = "descending",
   ID_SORT_REVERSE = "ascending",
   ID_SORT_UNSORTED = "not-sorted";
+var ID_SCALE_BAR_SHOW = "show-scale-bar",
+  ID_SCALE_BAR_OFFSET_WEIGHT = "scale-bar-offset-weight",
+  ID_SCALE_BAR_AUTOSIZE = "scale-bar-auto-size",
+  ID_SCALE_BAR_LENGTH = "scale-bar-length";
 
 
 var defaults = {
@@ -445,23 +449,23 @@ function lalala(tree_input, mapping_input)
 
     listener("tree-sort", "change", draw_tree);
 
-    listener("show-scale-bar", "change", function() {
+    listener(ID_SCALE_BAR_SHOW, "change", function() {
       set_options_by_metadata();
       update_form_constants();
       draw_scale_bar();
       adjust_tree();
     });
-    listener("scale-bar-offset-weight", "change", function() {
+    listener(ID_SCALE_BAR_OFFSET_WEIGHT, "change", function() {
       set_options_by_metadata();
       update_form_constants();
       draw_scale_bar();
       adjust_tree();
     });
-    listener("scale-bar-auto-size", "change", function(){
-      if (document.getElementById("scale-bar-auto-size").checked) {
-        jq("scale-bar-length").attr("disabled", true);
+    listener(ID_SCALE_BAR_AUTOSIZE, "change", function(){
+      if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
+        jq(ID_SCALE_BAR_LENGTH).attr("disabled", true);
       } else {
-        jq("scale-bar-length").attr("disabled", false);
+        jq(ID_SCALE_BAR_LENGTH).attr("disabled", false);
       }
 
       set_options_by_metadata();
@@ -469,12 +473,12 @@ function lalala(tree_input, mapping_input)
       draw_scale_bar();
       adjust_tree();
     });
-    listener("scale-bar-length", "change", function() {
-      var val = $("#scale-bar-length").val();
-      if (val <= 0) {
-        // TODO set back to the default instead of 1.
-        $("#scale-bar-length").val(1);
-      }
+    listener(ID_SCALE_BAR_LENGTH, "change", function() {
+      // var val = $("#scale-bar-length").val();
+      // if (val <= 0) {
+      //   // TODO set back to the default instead of 1.
+      //   $("#scale-bar-length").val(1);
+      // }
       
       set_options_by_metadata();
       update_form_constants();
@@ -672,9 +676,9 @@ function lalala(tree_input, mapping_input)
         sort_function = sort_descending;
       }
 
-      SHOW_SCALE_BAR = document.getElementById("show-scale-bar").checked;
-      SCALE_BAR_OFFSET_WEIGHT = parseFloat(document.getElementById("scale-bar-offset-weight").value);
-      SCALE_BAR_LENGTH = parseFloat(document.getElementById("scale-bar-length").value);
+      SHOW_SCALE_BAR = document.getElementById(ID_SCALE_BAR_SHOW).checked;
+      SCALE_BAR_OFFSET_WEIGHT = parseFloat(document.getElementById(ID_SCALE_BAR_OFFSET_WEIGHT).value);
+      SCALE_BAR_LENGTH = parseFloat(document.getElementById(ID_SCALE_BAR_LENGTH).value);
 
 
 
@@ -1751,11 +1755,16 @@ function draw_scale_bar()
     }
 
     var scale_bar_pixels;
-    if (document.getElementById("scale-bar-auto-size").checked) {
+    if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
       scale_bar_pixels = mean_length * pixels_per_unit_length;
-      jq("scale-bar-length").val(mean_length);
+      jq(ID_SCALE_BAR_LENGTH).val(mean_length);
     } else {
-      scale_bar_pixels = jq("scale-bar-length").val() * pixels_per_unit_length;
+      scale_bar_pixels = jq(ID_SCALE_BAR_LENGTH).val() * pixels_per_unit_length;
+
+      if (isNaN(scale_bar_pixels)) {
+        scale_bar_pixels = mean_length * pixels_per_unit_length;
+        jq(ID_SCALE_BAR_LENGTH).val(mean_length);
+      }
     }
 
 
@@ -1763,13 +1772,14 @@ function draw_scale_bar()
     // If the original scale bar is smaller than the min size, bump up the size.
     if (scale_bar_pixels < min_scale_bar_size) {
       scale_bar_pixels = min_scale_bar_size;
-      jq("scale-bar-length").val(min_scale_bar_size);
       // scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PLACE);
     }
 
     // // Now that we have a minimum scale bar size, weight it by the slider value.
     // scale_bar_pixels *= SCALE_BAR_LENGTH;
-    scale_bar_label_text = round_to(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PLACE);
+    var scale_bar_label_text = round_to(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PLACE);
+    jq(ID_SCALE_BAR_LENGTH).val(scale_bar_label_text);
+
 
 
     var label_x, label_y;
@@ -2241,9 +2251,9 @@ function reset_all_to_defaults()
   jq(ID_SORT).val(ID_SORT_FORWARD);
 
   // Scale bar options
-  check("show-scale-bar");
-  check("scale-bar-auto-size");
-  jq("scale-bar-length").val(1).attr("disabled", true);
+  check(ID_SCALE_BAR_SHOW);
+  check(ID_SCALE_BAR_AUTOSIZE);
+  jq(ID_SCALE_BAR_LENGTH).val(1).attr("disabled", true);
   $("#scale-bar-offset-weight").val(1);
 
   // Label options
