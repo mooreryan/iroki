@@ -853,8 +853,7 @@ function lalala(tree_input, mapping_input)
       // });
 
 
-      // update_viewer_size_fixed();
-
+      update_viewer_size_fixed();
     }
 
     function set_up_hierarchy()
