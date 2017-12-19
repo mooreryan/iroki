@@ -65,6 +65,9 @@ var bad_color_str = "name\tleaf_label_color\ngeode\tarstoien\n";
 
 var multi_tree_str = "(apple:1,(pie:1,tasty:1):1);\n(seanie:1,(amelia:1,ryan:1):1);\n"
 
+var fake_newick_str = "not a tree";
+var good_newick = "(a,(b,c)thing)apple;";
+
 var tree_with_semicolos = "('sea;nie':1,(amelia:1,\"ry;an\":1):1);";
 
 var kelly_and_r_colors_str = "name\tleaf_label_color\nclock\tk_purple\ntire\t1\ngeode\tr_chocolate4";
@@ -157,7 +160,6 @@ test('parse_mapping_file() sets bad colors to black instead', function(){
   expect(parse_mapping_file(bad_color_str)).toEqual(obj);
 });
 test('parse_mapping_file() can nadle R colors and Kelly colors', function(){
-  console.log("testing the r and kelly colors");
   var r_chocolate4 = "#8B4513";
   var k_purple = "#875692";
   var obj = {
@@ -191,3 +193,11 @@ test('has_multiple_trees() returns true if the neweck file looks like it has mul
 // test('has_multiple_trees() returns false if the neweck file looks like it has a single tree', function () {
 //   expect(has_multiple_trees(tree_with_semicolos)).toEqual(false);
 // });
+
+test('is_bad_newick() returns true if the str probably isnt a newick tree', function(){
+  expect(is_bad_newick(fake_newick_str)).toBe(true);
+});
+test('is_bad_newick() returns false if the str might be a newick tree', function(){
+  expect(is_bad_newick(good_newick)).toBe(false);
+});
+

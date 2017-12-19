@@ -1111,3 +1111,13 @@ function has_multiple_trees(tree_str)
 
   return splits.length > 1;
 }
+
+function is_bad_newick(tree_str)
+{
+  var str_len = chomp(tree_str).length;
+
+  var first_char = tree_str[0];
+  var last_char = tree_str[str_len - 1];
+
+  return !(first_char === "(" && last_char === ";");
+}

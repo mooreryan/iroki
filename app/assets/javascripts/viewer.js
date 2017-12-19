@@ -74,7 +74,14 @@ var MAPPING_CHANGED, TREE_CHANGED;
 // load dataset
 function load_dataset(tree_file, mapping_file) {
   document.getElementById("form-div").appendChild(TREE_FORM);
-  lalala(tree_file, mapping_file);
+  var bad = is_bad_newick(tree_file);
+  if (bad) {
+    alert("ERROR -- check your Newick file.  The format looks wrong.");
+    d3.select("#loading-message").remove();
+    clear_elem("tree-form");
+  } else {
+    lalala(tree_file, mapping_file);
+  }
 }
 
 var TREE_FORM;

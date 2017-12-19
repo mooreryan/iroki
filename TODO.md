@@ -20,12 +20,11 @@ Don't forget to cite these in the manuscript.
 
 #### Important 
 
-- Circular trees you can adjust the scale bar right out of the svg
-
 #### Less important
 
 - Scale bar label should get pushed down more if the branch length is larger
 - The scale bar placement offset behaves a bit differently depending on tree rotation and circle/rectangle-ness
+- Circular trees you can adjust the scale bar right out of the svg
 
 ### User input
 
