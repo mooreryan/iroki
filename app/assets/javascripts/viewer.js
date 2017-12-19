@@ -384,6 +384,10 @@ function lalala(tree_input, mapping_input)
           rotate_by -= 180; // TODO also flip the text anchor to end
         }
 
+        if (isNaN(rotate_by)) {
+          rotate_by = 0;
+        }
+
         return "rotate(0) translate(" + (d.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT) + ") rotate(" + rotate_by + ")"; // TODO labels will need rotation for radial layouts
       }
     }
