@@ -189,6 +189,7 @@ function upload_button(submit_id, uploader_id, callback) {
     if (file) {
       tree_reader.readAsText(file);
     } else {
+      d3.select("#loading-message").remove();
       alert("Don't forget a tree file!");
     }
   }

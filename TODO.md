@@ -55,7 +55,6 @@ Don't forget to cite these in the manuscript.
 
 #### Less important
 
-- More vertical space between reset and save buttons.
 - Regex name matching
 
 ### Questions and things to check on 
@@ -76,9 +75,7 @@ Don't forget to cite these in the manuscript.
 - Manual styling of labels
 - Manual styling of branches
 - Rotate inner labels separate from leaf labels
-- Saving PNG should keep background color
 - Rotate specific clades 
-- Option for default branch color
 
 ### Features that would be nice
 
