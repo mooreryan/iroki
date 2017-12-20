@@ -2264,7 +2264,7 @@ function reset_all_to_defaults()
   EXTRA_NAME_WARNINGS = false;
 
   // Tree options
-  jq(ID_MATCHING_TYPE).val("partial");
+  // jq(ID_MATCHING_TYPE).val("partial");
 
   $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
   $("#height").prop("disabled", true).val(7);
