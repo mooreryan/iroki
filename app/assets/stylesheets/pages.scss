@@ -61,11 +61,23 @@
 
 //$height: 650px;
 
-#tree-form {
-  //height: $height;
-  overflow-y: scroll;
-  //border: 1px solid gray;
-}
+//#tree-form {
+//  //height: $height;
+//  overflow-y: scroll;
+//  //border: 1px solid gray;
+//}
+//
+//#upload-panel {
+//  overflow-y: scroll;
+//}
+//
+//#options-panel {
+//  overflow-y: scroll;
+//}
+
+//#form-div  {
+//  overflow-y: scroll;
+//}
 
 //#tree-div {
 //  height: $height;
@@ -83,3 +95,29 @@ svg {
 .accordion-title {
   font-size: 0.875rem;
 }
+
+//.upload-form .tabs-title a {
+//  border-top-width: 3px;
+//  border-right-width: 3px;
+//  border-bottom-width: 3px;
+//  border-left-width: 3px;
+//}
+
+#upload-tab-button {
+  border-right-width: 1.5px;
+}
+
+#options-tab-button {
+  border-left-width: 1.5px;
+}
+
+// See https://gist.github.com/corilam/5c935e6fb6bdef40b78b4c66e4b78dc9
+.tabs-title {
+  float:none !important;
+  display:inline-block;
+}
+
+.tabs {
+  text-align:center;
+}
+

@@ -1,193 +1,191 @@
-.row
-  .row
-    ul.tabs#option-tabs data-tabs=""
-      .small-5.columns.center-it
-        li.tabs-title.is-active.center-it
-          a href="" Upload!
+.row#everything
 
-.row.tabs-content data-tabs-content="option-tabs"
-  .row.tabs-panel.is-active#form-div
+  ul#example-tabs.tabs data-tabs=""
+      li.tabs-title.is-active
+        a#upload-tab-button aria-selected="true" href="#upload-panel" Upload
+      li.tabs-title
+        a#options-tab-button href="#options-panel" Options
 
-    hr.row
-
-    h4 Upload tree
-
-    .row
-      form id="file-upload-form"
-        .small-6.columns
-          label for="uploader" Newick tree
-          input id="uploader" type="file" name="newick"
-        .small-6.columns
-          label for="mapping-file-uploader" Mapping file
-          input id="mapping-file-uploader" type="file"
-    .row
-      .small-12.columns
-        label for="matching-type" Mapping file label matching
-        select id="matching-type"
-          option id="exact" value="exact" selected="" Exact
-          option id="partial" value="partial" Partial
-    .row
-      .small-6.columns
-        label for="submit" Submit your files
-        input id="submit" type="button" value="Submit!" disabled=""
-      .small-6.columns
-        label for="reset" Reset the viewer
-        input id="reset" type="button" value="Reset!" disabled=""
-    .row
-      .small-12.columns
-        label for="viewer-size-fixed" Fixed viewer width?
-        input id="viewer-size-fixed" type="checkbox" checked=""
-    .row
-      .small-6.columns
-        label for="save-svg" Save?
-        input id="save-svg" type="button" value="Save as SVG" disabled=""
-      .small-6.columns
-        label for="save-png" Save?
-        input id="save-png" type="button" value="Save as PNG" disabled=""
-
-    hr.row
-
-    /.row
-    /  ul class="accordion" data-accordion="" data-allow-all-closed="true"
-    /    li class="accordion-item is-active" data-accordion-item=""
-    /      a href="#" class="accordion-title"
-    /        h4 Viewer size
-    /      .accordion-content data-tab-content=""
-    /        .row
-    /          .small-12.columns
-    /            label for="viewer-size-fixed" Fixed viewer width?
-    /            input id="viewer-size-fixed" type="checkbox" checked=""
-    /
-    #tree-form
+  #form-div.tabs-content data-tabs-content="example-tabs"
+    #upload-panel.tabs-panel.is-active
+      hr.row
       .row
-        h4 Options
-
+        h5 Upload tree
+        form id="file-upload-form"
+          .small-12.columns
+            label for="uploader" Newick tree
+            input id="uploader" type="file" name="newick"
+      hr.row
       .row
-        ul id="options-panel" class="accordion" data-accordion="" data-allow-all-closed="true"
-          li class="accordion-item is-active" data-accordion-item=""
-            a href="#" class="accordion-title" Tree format options
-            .accordion-content data-tab-content=""
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="tree-shape" Layout shape
-                  select id="tree-shape"
-                    option id="rectangular-tree" value="rectangular-tree" Rectangular
-                    option id="circular-tree" value="circular-tree" Circular
-                    option id="radial-tree" value="radial-tree" selected="" Radial
-                .small-12.medium-12.large-6.columns
-                  label for="tree-branch-style" Branch style?
-                  select id="tree-branch-style"
-                    option id="normalogram" value="normalogram" selected="" True length
-                    option id="cladogram" value="cladogram" Cladogram
-              .row
-                .small-12.columns
-                  label for="tree-sort" Sort?
-                  select id="tree-sort"
-                    option id="descending" value="descending" selected="" Sort
-                    option id="ascending" value="ascending" Reverse sort
-                    option id="not-sorted" value="not-sorted" Not sorted
-              .row
-                .small-12.columns
-                  label for="tree-rotation" Tree rotation
-                  input id="tree-rotation" class="slider width-100" type="range" min="0" max="270" step="270" value="0"
+        h5 Upload mapping file
+        .row
+          .small-12.columns
+            label for="mapping-file-uploader" Mapping file
+            input id="mapping-file-uploader" type="file"
+        .row
+          .small-12.columns
+            label for="matching-type" Mapping file label matching
+            select id="matching-type"
+              option id="exact" value="exact" selected="" Exact
+              option id="partial" value="partial" Partial
+      hr.row
+      .row
+        h5 Submit
+        .small-6.columns
+          label for="submit" Submit your files
+          input id="submit" type="button" value="Submit!" disabled=""
+        .small-6.columns
+          label for="reset" Reset the viewer
+          input id="reset" type="button" value="Reset!" disabled=""
+      hr.row
+      .row
+        h5 Save tree
+        .small-6.columns
+          label for="save-svg" Save?
+          input id="save-svg" type="button" value="Save as SVG" disabled=""
+        .small-6.columns
+          label for="save-png" Save?
+          input id="save-png" type="button" value="Save as PNG" disabled=""
+      hr.row
+      .row
+        h5 Viewer size
+        .small-12.columns
+          label for="viewer-size-fixed" Fixed viewer width?
+          input id="viewer-size-fixed" type="checkbox" checked=""
 
-          li class="accordion-item" data-accordion-item=""
-            a href="#" class="accordion-title" Tree size options
-            .accordion-content data-tab-content=""
-              .row
-                .small-12.medium-12.large-6.columns
-                  label id="width-label" for="width" Horizontal
-                  input id="width" class="slider width-100" type="range" min="5" max="125" step="1" value="7"
-                .small-12.medium-12.large-6.columns
-                  label id="height-label" for="height" Vertical
-                  input id="height" class="slider width-100" type="range" min="5" max="125" step="1" value="7"
-              .row
-                .small-12.columns
-                  label id="padding-label" for="padding" Padding
-                  input id="padding" class="slider width-100" type="range" min="0.0" max="0.75" step="0.05" value="0.05"
+      hr.row
 
-          li class="accordion-item" data-accordion-item=""
-            a href="#" class="accordion-title" Scale bar options
-            .accordion-content data-tab-content=""
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="show-scale-bar" Show scale bar?
-                  input id="show-scale-bar" type="checkbox" checked=""
-                .small-12.medium-12.large-6.columns
-                  label for="scale-bar-offset-weight" Offset
-                  input id="scale-bar-offset-weight" class="slider width-100" type="range" min="1" max="2.5" value="1" step="0.1"
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="scale-bar-auto-size" Auto size
-                  input id="scale-bar-auto-size" type="checkbox" checked=""
-                .small-12.medium-12.large-6.columns
-                  label for="scale-bar-length" Length
-                  input id="scale-bar-length" disabled=""
-                  /input id="scale-bar-length-weight" class="slider width-100" type="range" min="0.25" max="2" value="1" step="0.25"
+    #options-panel.tabs-panel
+      #options-div
+        .row
+          h4 Options
 
-          li class="accordion-item" data-accordion-item=""
-            a href="#" class="accordion-title" Label options
-            .accordion-content data-tab-content=""
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="show-inner-labels" Show inner labels?
-                  input id="show-inner-labels" type="checkbox" name="label-show"
-                .small-12.medium-12.large-6.columns
-                  label for="inner-label-size" Inner label size
-                  input id="inner-label-size" type="range" min="1" max="48" value="12" class="slider width-100"
+        .row
+          ul id="options-accordion" class="accordion" data-accordion="" data-allow-all-closed="true"
+            li class="accordion-item is-active" data-accordion-item=""
+              a href="#" class="accordion-title" Tree format options
+              .accordion-content data-tab-content=""
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="tree-shape" Layout shape
+                    select id="tree-shape"
+                      option id="rectangular-tree" value="rectangular-tree" Rectangular
+                      option id="circular-tree" value="circular-tree" Circular
+                      option id="radial-tree" value="radial-tree" selected="" Radial
+                  .small-12.medium-12.large-6.columns
+                    label for="tree-branch-style" Branch style?
+                    select id="tree-branch-style"
+                      option id="normalogram" value="normalogram" selected="" True length
+                      option id="cladogram" value="cladogram" Cladogram
+                .row
+                  .small-12.columns
+                    label for="tree-sort" Sort?
+                    select id="tree-sort"
+                      option id="descending" value="descending" selected="" Sort
+                      option id="ascending" value="ascending" Reverse sort
+                      option id="not-sorted" value="not-sorted" Not sorted
+                .row
+                  .small-12.columns
+                    label for="tree-rotation" Tree rotation
+                    input id="tree-rotation" class="slider width-100" type="range" min="0" max="270" step="270" value="0"
 
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="show-leaf-labels" Show leaf labels?
-                  input id="show-leaf-labels" type="checkbox" name="label-show" checked=""
-                .small-12.medium-12.large-6.columns
-                  label for="leaf-label-size" Leaf label size
-                  input id="leaf-label-size" type="range" min="1" max="48" value="16" class="slider width-100"
+            li class="accordion-item" data-accordion-item=""
+              a href="#" class="accordion-title" Tree size options
+              .accordion-content data-tab-content=""
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label id="width-label" for="width" Horizontal
+                    input id="width" class="slider width-100" type="range" min="5" max="125" step="1" value="7"
+                  .small-12.medium-12.large-6.columns
+                    label id="height-label" for="height" Vertical
+                    input id="height" class="slider width-100" type="range" min="5" max="125" step="1" value="7"
+                .row
+                  .small-12.columns
+                    label id="padding-label" for="padding" Padding
+                    input id="padding" class="slider width-100" type="range" min="0.0" max="0.75" step="0.05" value="0.05"
 
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="align-tip-labels" Align leaf labels?
-                  input id="align-tip-labels" type="checkbox"
-                .small-12.medium-12.large-6.columns
-                  label for="label-rotation" Label rotation
-                  input id="label-rotation" type="range" min="-90" max="90" value="0" step="45" class="slider width-100"
+            li class="accordion-item" data-accordion-item=""
+              a href="#" class="accordion-title" Scale bar options
+              .accordion-content data-tab-content=""
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="show-scale-bar" Show scale bar?
+                    input id="show-scale-bar" type="checkbox" checked=""
+                  .small-12.medium-12.large-6.columns
+                    label for="scale-bar-offset-weight" Offset
+                    input id="scale-bar-offset-weight" class="slider width-100" type="range" min="1" max="2.5" value="1" step="0.1"
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="scale-bar-auto-size" Auto size
+                    input id="scale-bar-auto-size" type="checkbox" checked=""
+                  .small-12.medium-12.large-6.columns
+                    label for="scale-bar-length" Length
+                    input id="scale-bar-length" disabled=""
+            /input id="scale-bar-length-weight" class="slider width-100" type="range" min="0.25" max="2" value="1" step="0.25"
 
-              .row
-                .small-12.medium-12.large-6.columns
-                  span data-tooltip="" aria-haspopup="true" class="has-tip tip-top" title="Will not overide label colors in the mapping file."
-                    label for="leaf-label-color" Label color
-                    input id="leaf-label-color" type="color" value="#000000"
-                .small-12.medium-12.large-6.columns
-                  label for="leaf-label-font" Label font
-                  select id="leaf-label-font"
-                    option id="helvetica" value="Helvetica" selected="" Helvetica
-                    option id="times" value="Times" Times
+            li class="accordion-item" data-accordion-item=""
+              a href="#" class="accordion-title" Label options
+              .accordion-content data-tab-content=""
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="show-inner-labels" Show inner labels?
+                    input id="show-inner-labels" type="checkbox" name="label-show"
+                  .small-12.medium-12.large-6.columns
+                    label for="inner-label-size" Inner label size
+                    input id="inner-label-size" type="range" min="1" max="48" value="12" class="slider width-100"
 
-          li class="accordion-item" data-accordion-item=""
-            a href="#" class="accordion-title" Dot options
-            .accordion-content data-tab-content=""
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="show-inner-dots" Show inner dots?
-                  input id="show-inner-dots" type="checkbox"
-                .small-12.medium-12.large-6.columns
-                  label for="inner-dot-size" Inner dot size
-                  input id="inner-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="show-leaf-dots" Show leaf dots?
-                  input id="show-leaf-dots" type="checkbox"
-                .small-12.medium-12.large-6.columns
-                  label for="leaf-dot-size" Leaf dot size
-                  input id="leaf-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="show-leaf-labels" Show leaf labels?
+                    input id="show-leaf-labels" type="checkbox" name="label-show" checked=""
+                  .small-12.medium-12.large-6.columns
+                    label for="leaf-label-size" Leaf label size
+                    input id="leaf-label-size" type="range" min="1" max="48" value="16" class="slider width-100"
 
-          li class="accordion-item" data-accordion-item=""
-            a href="#" class="accordion-title" Branch options
-            .accordion-content data-tab-content=""
-              .row
-                .small-12.medium-12.large-6.columns
-                  label for="branch-color" Color
-                  input id="branch-color" type="color" value="#000000"
-                .small-12.medium-12.large-6.columns
-                  label for="branch-width" Width
-                  input id="branch-width" type="range" min="1" max="10" value="2" class="slider width-100"
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="align-tip-labels" Align leaf labels?
+                    input id="align-tip-labels" type="checkbox"
+                  .small-12.medium-12.large-6.columns
+                    label for="label-rotation" Label rotation
+                    input id="label-rotation" type="range" min="-90" max="90" value="0" step="45" class="slider width-100"
+
+                .row
+                  .small-12.medium-12.large-6.columns
+                    span data-tooltip="" aria-haspopup="true" class="has-tip tip-top" title="Will not overide label colors in the mapping file."
+                      label for="leaf-label-color" Label color
+                      input id="leaf-label-color" type="color" value="#000000"
+                  .small-12.medium-12.large-6.columns
+                    label for="leaf-label-font" Label font
+                    select id="leaf-label-font"
+                      option id="helvetica" value="Helvetica" selected="" Helvetica
+                      option id="times" value="Times" Times
+
+            li class="accordion-item" data-accordion-item=""
+              a href="#" class="accordion-title" Dot options
+              .accordion-content data-tab-content=""
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="show-inner-dots" Show inner dots?
+                    input id="show-inner-dots" type="checkbox"
+                  .small-12.medium-12.large-6.columns
+                    label for="inner-dot-size" Inner dot size
+                    input id="inner-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="show-leaf-dots" Show leaf dots?
+                    input id="show-leaf-dots" type="checkbox"
+                  .small-12.medium-12.large-6.columns
+                    label for="leaf-dot-size" Leaf dot size
+                    input id="leaf-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
+
+            li class="accordion-item" data-accordion-item=""
+              a href="#" class="accordion-title" Branch options
+              .accordion-content data-tab-content=""
+                .row
+                  .small-12.medium-12.large-6.columns
+                    label for="branch-color" Color
+                    input id="branch-color" type="color" value="#000000"
+                  .small-12.medium-12.large-6.columns
+                    label for="branch-width" Width
+                    input id="branch-width" type="range" min="1" max="10" value="2" class="slider width-100"

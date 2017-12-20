@@ -532,7 +532,7 @@ $show-header-for-stacked: false;
 // --------
 
 $tab-margin: 0;
-$tab-background: $light-gray;
+$tab-background: map-get($foundation-palette, secondary);// $light-gray;
 /* $tab-background-active: $light-gray; */
 $tab-background-active: $white;
 $tab-item-font-size: rem-calc(12);

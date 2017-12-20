@@ -73,30 +73,47 @@ var MAPPING_CHANGED, TREE_CHANGED;
 
 // load dataset
 function load_dataset(tree_file, mapping_file) {
-  document.getElementById("form-div").appendChild(TREE_FORM);
+  d3.select("#load-tree-first-message").remove();
+  document.getElementById("options-panel").appendChild(OPTIONS_DIV);
 
   // Set the accordion to on
-  new Foundation.Accordion(jq(ID_OPTIONS_PANEL), {});
+  new Foundation.Accordion(jq(ID_OPTIONS_ACCORDION), {});
 
   var bad = is_bad_newick(tree_file);
   if (bad) {
     alert("ERROR -- check your Newick file.  The format looks wrong.");
     d3.select("#loading-message").remove();
-    clear_elem("tree-form");
+    clear_elem("options-div");
+    upload_tree_first();
+
   } else {
     lalala(tree_file, mapping_file);
   }
 }
 
-var TREE_FORM;
+var OPTIONS_DIV;
+
+function upload_tree_first()
+{
+  d3.select("#options-panel")
+    .append("div")
+    .attr("class", "row")
+    .append("p")
+    .attr("id", "load-tree-first-message")
+    .html("Upload a tree first!");
+}
 
 // handle upload button
 function upload_button(submit_id, uploader_id, callback) {
-  document.getElementById("form-div")
-    .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
+  // document.getElementById("everything")
+  //   .setAttribute("style", "display: block; height: " + (verge.viewportH() * 0.8) + "px;");
+  // document.getElementById("form-div")
+  //   .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
 
-  TREE_FORM = document.getElementById("tree-form");
-  clear_elem("tree-form");
+  OPTIONS_DIV = document.getElementById("options-div");
+  clear_elem("options-div");
+  upload_tree_first();
+
   var uploader = document.getElementById(uploader_id);
   var mapping_uploader = document.getElementById("mapping-file-uploader");
 
@@ -155,7 +172,9 @@ function upload_button(submit_id, uploader_id, callback) {
     // Reset all sliders and options to default.
     reset_all_to_defaults();
 
-    clear_elem("tree-form");
+    clear_elem("options-div");
+    upload_tree_first();
+
     clear_elem("svg-tree");
     $("#reset").prop("disabled", true);
     document.getElementById("save-svg").setAttribute("disabled", "");
@@ -269,7 +288,7 @@ var ID_SCALE_BAR_SHOW = "show-scale-bar",
   ID_SCALE_BAR_AUTOSIZE = "scale-bar-auto-size",
   ID_SCALE_BAR_LENGTH = "scale-bar-length";
 var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
-var ID_OPTIONS_PANEL = "options-panel";
+var ID_OPTIONS_ACCORDION = "options-accordion";
 
 var tmp_root;
 
