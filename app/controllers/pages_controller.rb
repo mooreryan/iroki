@@ -195,8 +195,8 @@ class PagesController < ApplicationController
 
   end
 
-  def viewer
-  end
+  # def viewer
+  # end
 
   def jobs
     @jobs_in_queue = Delayed::Job.all.count

@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   post 'submit' => 'pages#submit', as: :submit
   post 'jobs'   => 'pages#jobs'
 
-  get 'snazzy_lala'   => 'pages#viewer',          as: :viewer # gives you viewer_path
+  # get 'snazzy_lala'   => 'pages#viewer',          as: :viewer # gives you viewer_path
 
   get 'about'    => 'pages#about',           as: :about # gives you about_path
   get 'contact'  => 'pages#contact',         as: :contact # gives you contact_path
