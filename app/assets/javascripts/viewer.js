@@ -164,7 +164,7 @@ function upload_button(submit_id, uploader_id, callback) {
       clear_elem("svg-tree");
       reset_all_to_defaults();
     }
-    $("#reset").prop("disabled", false);
+    // $("#reset").prop("disabled", false);
 
     // Add a loading tree message.
     set_status_msg_to_rendering();
@@ -191,7 +191,7 @@ function upload_button(submit_id, uploader_id, callback) {
     upload_tree_first();
 
     clear_elem("svg-tree");
-    $("#reset").prop("disabled", true);
+    // $("#reset").prop("disabled", true);
     document.getElementById("save-svg").setAttribute("disabled", "");
     document.getElementById("save-png").setAttribute("disabled", "");
     document.getElementById("file-upload-form").reset();
@@ -468,11 +468,22 @@ function lalala(tree_input, mapping_input)
     }
 
     var TIMEOUT = 10;
-    // TODO doesn't change the message?
     listener(ID_MATCHING_TYPE, "change", function(){
       set_status_msg_to_rendering();
 
       setTimeout(function() {
+        if (mapping_input) {
+          name2md = parse_mapping_file(mapping_input);
+
+          if ($("#matching-type").val() === "partial") {
+            // Reshow the warning.
+            if (has_non_specific_matching(tmp_root, name2md)) {
+              name2md = null
+            }
+          }
+        } else {
+          name2md = null;
+        }
         draw_tree();
         set_status_msg_to_done();
       }, TIMEOUT);
@@ -545,13 +556,12 @@ function lalala(tree_input, mapping_input)
 
     listener("tree-rotation", "change", set_msg_and_draw);
 
-    // TODO needs longer timer to actually work.
-    // TODO redraw tree does not work.
-    listener("tree-sort", "change", function(){
+    // TODO needs longer timer to actually work.  Not sure why.
+    listener("tree-sort", "change", function() {
       set_status_msg_to_rendering();
 
       setTimeout(function(){
-        redraw_tree();
+        draw_tree();
         set_status_msg_to_done();
       }, TIMEOUT * 2);
     });
