@@ -195,6 +195,8 @@ function upload_button(submit_id, uploader_id, callback) {
     document.getElementById("save-svg").setAttribute("disabled", "");
     document.getElementById("save-png").setAttribute("disabled", "");
     document.getElementById("file-upload-form").reset();
+    document.getElementById("mapping-upload-form").reset();
+
 
   });
 

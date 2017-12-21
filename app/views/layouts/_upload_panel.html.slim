@@ -11,16 +11,17 @@ hr.row
 
 .row
   h4 Upload mapping file
-  .row
-    .small-12.columns
-      label for="mapping-file-uploader" Mapping file
-      input id="mapping-file-uploader" type="file"
-  .row
-    .small-12.columns
-      label for="matching-type" Mapping file label matching
-      select id="matching-type"
-        option id="exact" value="exact" selected="" Exact
-        option id="partial" value="partial" Partial
+  form id="mapping-upload-form"
+    .row
+      .small-12.columns
+        label for="mapping-file-uploader" Mapping file
+        input id="mapping-file-uploader" type="file"
+    .row
+      .small-12.columns
+        label for="matching-type" Mapping file label matching
+        select id="matching-type"
+          option id="exact" value="exact" selected="" Exact
+          option id="partial" value="partial" Partial
 
 hr.row
 
