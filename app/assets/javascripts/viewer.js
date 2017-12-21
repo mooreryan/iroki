@@ -97,6 +97,8 @@ var OPTIONS_DIV;
 
 function upload_tree_first()
 {
+  d3.select("#load-tree-first-message").remove();
+  
   d3.select("#options-panel")
     .append("div")
     .attr("class", "row")
