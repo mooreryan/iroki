@@ -2263,16 +2263,12 @@ function set_options_by_metadata()
 
     // Show leaf dots if leaf dot options are present
     if (leaf_dot_options_present) {
-      var elem = $("#show-leaf-dots");
-      elem.attr("checked", true);
-      // elem.prop("disabled", true);
+      check("show-leaf-dots");
     }
 
     // Show leaf labels if leaf label options are present.
     if (leaf_label_options_present) {
-      var elem = $("#show-leaf-labels");
-      elem.attr("checked", true);
-      // elem.prop("disabled", true);
+      check("show-leaf-labels");
     }
 
     // At the beginning of update form constants, these will be un-disabled if necessary.
