@@ -33,3 +33,4 @@ papaparse.min.js
 
 jest.tmp.test.js
 lalala.test.js
+app/views/pages/old_home.html.slim

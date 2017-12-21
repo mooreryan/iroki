@@ -379,9 +379,11 @@ function lalala(tree_input, mapping_input)
 
       // Also this will pop up a warning if there are any branches of length zero. and set the minbranch length.
 
-      if (has_non_specific_matching(tmp_root, name2md)) {
-        // Reset name2md to null so we skip the mapping stuff and disabling certain features.
-        name2md = null;
+      if ($("#matching-type").val() === "partial") {
+        if (has_non_specific_matching(tmp_root, name2md)) {
+          // Reset name2md to null so we skip the mapping stuff and disabling certain features.
+          name2md = null;
+        }
       }
     } else {
       name2md = null;

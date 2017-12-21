@@ -1066,12 +1066,18 @@ function has_non_specific_matching(root, name2md)
   });
 
   var non_specific_matches = false;
+  var error_string = "ERROR -- there were non-specific matches in the mapping fle.  ";
   json_each(leaf_matches, function(name, matches) {
     if (matches.length > 1) { // non specific matching
-      alert("ERROR -- '" + name + "' had multiple matches in the mapping file: '" + matches.join(', ') + "'.");
+      error_string += name + " matched with: " + matches.join(', ') + ".  \n";
+      // alert("ERROR -- '" + name + "' had multiple matches in the mapping file: '" + matches.join(', ') + "'.");
       non_specific_matches = true;
     }
   });
+  
+  if (non_specific_matches) {
+    alert(error_string);
+  }
 
   return non_specific_matches;
 }

@@ -50,6 +50,8 @@ $global-width: rem-calc(1200);
 $global-lineheight: 1.5;
 $foundation-palette: (
         primary: #FFEBD0,
+        primarydark: #DBBE97,
+        primarydarker: #B89363,
         secondary: #A1CAF1,
   /* primary: #2199e8, */
         /*primary: #00bcd4, the iroki web blue */
@@ -702,6 +704,26 @@ $topbar-unstack-breakpoint: medium;
 .move-down {
   position: relative;
   top: 75%;
+}
+
+.color-block {
+  background-color: map-get($foundation-palette, secondary);
+  width: 100%;
+  height: 5rem;
+}
+
+.ryan {
+  background-color: map-get($foundation-palette, primarydark);
+  border-bottom: solid 2px map-get($foundation-palette, primarydarker);
+  border-top: solid 2px map-get($foundation-palette, primarydarker);
+
+  //padding-left: 10rem;
+  //padding-right: 10rem;
+  //display: inline-block;
+
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 0.5rem;
+  }
 }
 
 /* .center-it { */
