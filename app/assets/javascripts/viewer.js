@@ -82,7 +82,9 @@ function load_dataset(tree_file, mapping_file) {
   var bad = is_bad_newick(tree_file);
   if (bad) {
     alert("ERROR -- check your Newick file.  The format looks wrong.");
-    d3.select("#loading-message").remove();
+
+    set_status_msg_to_done();
+    // d3.select("#loading-message").remove();
     clear_elem("options-div");
     upload_tree_first();
 
@@ -101,6 +103,16 @@ function upload_tree_first()
     .append("p")
     .attr("id", "load-tree-first-message")
     .html("Upload a tree first!");
+}
+
+function set_status_msg_to_rendering()
+{
+  jq("status-msg").html("Rendering tree!  Please wait....");
+}
+
+function set_status_msg_to_done()
+{
+  jq("status-msg").html("Here is your tree!");
 }
 
 // handle upload button
@@ -155,10 +167,11 @@ function upload_button(submit_id, uploader_id, callback) {
     $("#reset").prop("disabled", false);
 
     // Add a loading tree message.
-    d3.select("#tree-div")
-      .append("p")
-      .attr("id", "loading-message")
-      .html("Loading tree! Please wait....");
+    set_status_msg_to_rendering();
+    // d3.select("#tree-div")
+    //   .append("p")
+    //   .attr("id", "loading-message")
+    //   .html("Loading tree! Please wait....");
 
     MAPPING_CHANGED = false;
     TREE_CHANGED = false;
@@ -168,6 +181,8 @@ function upload_button(submit_id, uploader_id, callback) {
   document.getElementById("reset").addEventListener("click", function() {
     MAPPING_CHANGED = false;
     TREE_CHANGED = false;
+
+    d3.select("#status-msg").html("I'm still in beta.  Please report any bugs on the contact page.");
 
     // Reset all sliders and options to default.
     reset_all_to_defaults();
@@ -189,7 +204,8 @@ function upload_button(submit_id, uploader_id, callback) {
     if (file) {
       tree_reader.readAsText(file);
     } else {
-      d3.select("#loading-message").remove();
+      // d3.select("#loading-message").remove();
+      set_status_msg_to_done();
       alert("Don't forget a tree file!");
     }
   }
@@ -439,100 +455,154 @@ function lalala(tree_input, mapping_input)
 
     // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
 
-    listener(ID_MATCHING_TYPE, "change", draw_tree);
+    function set_msg_and_draw()
+    {
+      set_status_msg_to_rendering();
 
-    listener("width", "change", draw_tree);
-    listener("padding", "change", draw_tree);
+      setTimeout(function() {
+        draw_tree();
+        set_status_msg_to_done();
+      });
+    }
 
-    listener("height", "change", draw_tree);
+    var TIMEOUT = 10;
+    // TODO doesn't change the message?
+    listener(ID_MATCHING_TYPE, "change", function(){
+      set_status_msg_to_rendering();
 
-    listener(ID_LAYOUT, "change", function() {
-      // First adjust the slider.
-      var width_elem = $("#width");
-      var height_elem = $("#height");
-
-      if (document.getElementById("rectangular-tree").selected) {
-        width_elem
-          .attr("min", 15)
-          .attr("max", 150)
-          .attr("step", 1)
-          .val(22);
-
-        height_elem
-          .attr("min", 15)
-          .attr("max", 150)
-          .attr("step", 1)
-          .val(22);
-      } else if (document.getElementById("circular-tree").selected) {
-        width_elem
-          .attr("min", 15)
-          .attr("max", 150)
-          .attr("step", 1)
-          .val(22);
-
-        height_elem
-          .attr("min", 15)
-          .attr("max", 150)
-          .attr("step", 1)
-          .val(22);
-      } else { // radial
-        // The values look weird since they are polynomial transformed later.
-        width_elem
-          .attr("min", 5)
-          .attr("max", 125)
-          .attr("step", 1)
-          .val(7);
-
-        width_elem
-          .attr("min", 5)
-          .attr("max", 125)
-          .attr("step", 1)
-          .val(7);
-      }
-
-      draw_tree();
+      setTimeout(function() {
+        draw_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
-    listener("tree-branch-style", "change", redraw_tree);
 
-    listener("tree-rotation", "change", draw_tree);
+    listener("width", "change", set_msg_and_draw);
+    listener("padding", "change", set_msg_and_draw);
+    listener("height", "change", set_msg_and_draw);
 
-    listener("tree-sort", "change", draw_tree);
+    // TODO no status-msg
+    listener(ID_LAYOUT, "change", function() {
+      set_status_msg_to_rendering();
+      setTimeout(function(){
+
+        // First adjust the slider.
+        var width_elem = $("#width");
+        var height_elem = $("#height");
+
+        if (document.getElementById("rectangular-tree").selected) {
+          width_elem
+            .attr("min", 15)
+            .attr("max", 150)
+            .attr("step", 1)
+            .val(22);
+
+          height_elem
+            .attr("min", 15)
+            .attr("max", 150)
+            .attr("step", 1)
+            .val(22);
+        } else if (document.getElementById("circular-tree").selected) {
+          width_elem
+            .attr("min", 15)
+            .attr("max", 150)
+            .attr("step", 1)
+            .val(22);
+
+          height_elem
+            .attr("min", 15)
+            .attr("max", 150)
+            .attr("step", 1)
+            .val(22);
+        } else { // radial
+          // The values look weird since they are polynomial transformed later.
+          width_elem
+            .attr("min", 5)
+            .attr("max", 125)
+            .attr("step", 1)
+            .val(7);
+
+          width_elem
+            .attr("min", 5)
+            .attr("max", 125)
+            .attr("step", 1)
+            .val(7);
+        }
+
+        draw_tree();
+        set_status_msg_to_done();
+      }, 10);
+    });
+    listener("tree-branch-style", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        redraw_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+
+    listener("tree-rotation", "change", set_msg_and_draw);
+
+    // TODO needs longer timer to actually work.
+    // TODO redraw tree does not work.
+    listener("tree-sort", "change", function(){
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        redraw_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT * 2);
+    });
 
     listener(ID_SCALE_BAR_SHOW, "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_scale_bar();
-      adjust_tree();
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
     listener(ID_SCALE_BAR_OFFSET_WEIGHT, "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_scale_bar();
-      adjust_tree();
+      set_status_msg_to_rendering();
+
+      setTimeout(function() {
+        set_options_by_metadata();
+        update_form_constants();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
     listener(ID_SCALE_BAR_AUTOSIZE, "change", function(){
-      if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
-        jq(ID_SCALE_BAR_LENGTH).prop("disabled", true);
-      } else {
-        jq(ID_SCALE_BAR_LENGTH).prop("disabled", false);
-      }
+      set_status_msg_to_rendering();
 
-      set_options_by_metadata();
-      update_form_constants();
-      draw_scale_bar();
-      adjust_tree();
+      setTimeout(function(){
+        if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
+          jq(ID_SCALE_BAR_LENGTH).prop("disabled", true);
+        } else {
+          jq(ID_SCALE_BAR_LENGTH).prop("disabled", false);
+        }
+
+        set_options_by_metadata();
+        update_form_constants();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
     listener(ID_SCALE_BAR_LENGTH, "change", function() {
-      // var val = $("#scale-bar-length").val();
-      // if (val <= 0) {
-      //   // TODO set back to the default instead of 1.
-      //   $("#scale-bar-length").val(1);
-      // }
-      
-      set_options_by_metadata();
-      update_form_constants();
-      draw_scale_bar();
-      adjust_tree();
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
 
     // listener("tree-sort", "change", function() {
@@ -547,87 +617,174 @@ function lalala(tree_input, mapping_input)
     //   adjust_tree();
     // });
 
-    listener("show-inner-labels", "change", function() { update_and_draw(draw_inner_labels); });
-    listener("inner-label-size", "change", function() { update_and_draw(draw_inner_labels); });
-    listener("show-leaf-labels", "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_link_extensions(); // may need to be removed.
-      draw_leaf_dots();
-      draw_leaf_labels();
-      draw_scale_bar();
-      adjust_tree();
-    });
-    listener("leaf-label-size", "change", function() { update_and_draw(draw_leaf_labels); });
-    listener("align-tip-labels", "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_link_extensions();
-      draw_leaf_dots();
-      draw_leaf_labels();
-      draw_scale_bar();
-      adjust_tree();
+    listener("show-inner-labels", "change", function() {
+      set_status_msg_to_rendering();
 
+      setTimeout(function(){
+        update_and_draw(draw_inner_labels);
+        set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener("inner-label-size", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        update_and_draw(draw_inner_labels);
+        set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener("show-leaf-labels", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_link_extensions();
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener("leaf-label-size", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        update_and_draw(draw_leaf_labels);
+        set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener("align-tip-labels", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_link_extensions();
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
     listener("label-rotation", "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_inner_labels();
-      draw_leaf_labels();
-      draw_scale_bar();
-      adjust_tree();
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_inner_labels();
+        draw_leaf_labels();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
     listener("leaf-label-color", "change", function(){
-      set_options_by_metadata();
-      update_form_constants();
-      draw_inner_labels();
-      draw_leaf_labels();
-      draw_scale_bar();
-      adjust_tree();
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_inner_labels();
+        draw_leaf_labels();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
     listener("leaf-label-font", "change", function(){
-      set_options_by_metadata();
-      update_form_constants();
-      draw_inner_labels();
-      draw_leaf_labels();
-      draw_scale_bar();
-      adjust_tree();
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_inner_labels();
+        draw_leaf_labels();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
 
-    listener("show-inner-dots", "change", function() { update_and_draw(draw_inner_dots); });
-    listener("inner-dot-size", "change", function() { update_and_draw(draw_inner_dots); });
-    listener("show-leaf-dots", "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_link_extensions(); // may need to be removed.
-      draw_leaf_dots();
-      draw_leaf_labels();
-      draw_scale_bar();
-      adjust_tree();
+    listener("show-inner-dots", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        update_and_draw(draw_inner_dots);
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
-    listener("leaf-dot-size", "change", function() { update_and_draw(draw_leaf_dots); });
+    listener("inner-dot-size", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        update_and_draw(draw_inner_dots);
+        set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener("show-leaf-dots", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener("leaf-dot-size", "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        update_and_draw(draw_leaf_dots);
+        set_status_msg_to_done();
+      }, TIMEOUT);
+    });
 
     listener("branch-color", "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_links();
-      draw_link_extensions();
-      draw_scale_bar();
-      adjust_tree();
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_links();
+        draw_link_extensions();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
     listener("branch-width", "change", function() {
-      set_options_by_metadata();
-      update_form_constants();
-      draw_links();
-      draw_link_extensions();
-      draw_scale_bar();
-      adjust_tree();
+      set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_links();
+        draw_link_extensions();
+        draw_scale_bar();
+        adjust_tree();
+        set_status_msg_to_done();
+      }, TIMEOUT);
     });
 
 
-    listener(ID_VIEWER_SIZE_FIXED, "change", update_viewer_size_fixed);
+    listener(ID_VIEWER_SIZE_FIXED, "change", function() {
+      // set_status_msg_to_rendering();
+      update_viewer_size_fixed();
+      // set_status_msg_to_done();
+    });
 
+    set_status_msg_to_rendering();
     draw_tree();
+    set_status_msg_to_done();
 
     var circle_cluster, rectangle_cluster;
 
@@ -943,7 +1100,8 @@ function lalala(tree_input, mapping_input)
           .style("background-color", "white"); // TODO make bg color an option
       } else {
         // First remove loading message if there is one.
-        d3.select("#loading-message").remove();
+        // set_status_msg_to_done();
+        // d3.select("#loading-message").remove();
 
         // And add the svg.
         svg = d3.select("#tree-div")
@@ -1338,6 +1496,8 @@ function lalala(tree_input, mapping_input)
     // A magical function
     function draw_tree()
     {
+      // jq("status-msg").html("apple");
+      console.log("at top of draw_tree()");
       clear_elem("svg-tree");
 
       set_options_by_metadata();
@@ -1372,6 +1532,9 @@ function lalala(tree_input, mapping_input)
 
       // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
       adjust_tree();
+
+      // jq("status-msg").html("seanie");
+      console.log("at bottom of draw_tree()");
     }
 
     function text_x_offset(d)
