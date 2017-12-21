@@ -1,0 +1,6 @@
+name	leaf_label_color	leaf_label_font	leaf_label_size	leaf_dot_color	leaf_dot_size	new_name	branch_width	branch_color
+eggplant	red	Helvetica	16	orange	3	Egg(plant)	6	blue
+banana	#0000ff	Times	10		4		1	blue
+clock	k_purple	Times		r_firebrick			4	orange
+tire	2	Helvetica	22	r_firebrick	2	TIRE	4	orange
+geode	r_dodgerblue2			r_firebrick			4	orange
