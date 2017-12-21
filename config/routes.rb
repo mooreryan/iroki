@@ -13,6 +13,9 @@ Rails.application.routes.draw do
   get 'download' => 'pages#download_result', as: :download
   get 'error' => 'pages#error', as: :error
   # get 'jobs'     => 'pages#jobs',     as: :jobs
+  #
+
+  get 'docs' => 'pages#docs', as: :docs
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

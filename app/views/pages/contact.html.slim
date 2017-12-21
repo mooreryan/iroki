@@ -3,10 +3,5 @@
 .row
   h1 Contact
 
-  p If you have any problems running Iroki, please see the following GitHub pages
 
-  p
-    a href="https://github.com/mooreryan/iroki" Iroki
-  p
-    a href="https://github.com/mooreryan/iroki_web" IrokiWeb
-
+  p If you have any problems running Iroki, please #{mail_to "admin@iroki.net", "send us an email", cc: "IrokiHelp@gmail.com", subject: "Iroki help", target: "blank"} and checkout following GitHub pages: #{link_to "Iroki", "https://github.com/mooreryan/iroki"} and #{link_to "IrokiWeb", "https://github.com/mooreryan/iroki_web"}.

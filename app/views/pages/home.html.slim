@@ -1,4 +1,4 @@
-- provide :title, ''
+- provide :title, 'Customize and view phylogenetic trees'
 
 = javascript_include_tag "https://d3js.org/d3.v4.min.js", "data-turbolinks-track" => false
 = javascript_include_tag "viewer", "data-turbolinks-track" => false
@@ -14,10 +14,28 @@
 = javascript_include_tag "http://canvg.github.io/canvg/StackBlur.js", "data-turbolinks-track" => false
 = javascript_include_tag "http://canvg.github.io/canvg/canvg.js", "data-turbolinks-track" => false
 
+/.row.expanded.thick-border
+/  h1 style="text-align: center;" Iroki
+/.row
+/  p style="text-align: center;" Automatically customize and view phylogenetic trees.
+
 .row.expanded.thick-border
   .small-12.medium-6.large-4.columns#outer-container
     .row.upload-form
       = render "layouts/viewer_form"
+    .row
+      h3 About
+      p Iroki is an online tree viewer that provides automatic customization of phylogenetic and other trees.
+    .row
+      h3 Citation
+      = render "layouts/citation"
+    .row
+      h3 Documentation
+      p To see usage examples and learn about how to customize your trees, check out the #{link_to "documentation", docs_path}.
+    .row
+      h3 Getting help
+      p If you have any problems running Iroki, please #{mail_to "admin@iroki.net", "send us an email", cc: "IrokiHelp@gmail.com", subject: "Iroki help", target: "blank"}.
+
   .small-12.medium-6.large-8.columns
     #status-msg-container
       h3#status-msg I'm still in beta.  Please report any bugs on the contact page.

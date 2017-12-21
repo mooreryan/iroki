@@ -191,6 +191,10 @@ class PagesController < ApplicationController
   def citation
   end
 
+  def docs
+
+  end
+
   def viewer
   end
 
