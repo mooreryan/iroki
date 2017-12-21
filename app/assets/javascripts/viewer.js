@@ -310,6 +310,8 @@ var ID_SCALE_BAR_SHOW = "show-scale-bar",
   ID_SCALE_BAR_LENGTH = "scale-bar-length";
 var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
 var ID_OPTIONS_ACCORDION = "options-accordion";
+var ID_DOT_COLOR = "dot-color",
+  DEFAULT_DOT_COLOR;
 
 var tmp_root;
 
@@ -761,6 +763,24 @@ function lalala(tree_input, mapping_input)
         set_status_msg_to_done();
       }, TIMEOUT);
     });
+    listener(ID_DOT_COLOR, "change", function() {
+      set_status_msg_to_rendering();
+
+      setTimeout(function() {
+        set_options_by_metadata();
+        update_form_constants();
+
+        draw_inner_dots();
+        draw_leaf_dots();
+
+        // Draw the labels too to keep them on top
+        draw_inner_labels();
+        draw_leaf_labels();
+
+        draw_scale_bar();
+        adjust_tree();
+      });
+    });
 
     listener("branch-color", "change", function() {
       set_status_msg_to_rendering();
@@ -860,6 +880,7 @@ function lalala(tree_input, mapping_input)
       DEFAULT_BRANCH_COLOR = document.getElementById("branch-color").value;
       DEFAULT_BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
 
+      DEFAULT_DOT_COLOR = document.getElementById(ID_DOT_COLOR).value;
 
 
       MATCHING_TYPE = document.getElementById(ID_MATCHING_TYPE).value;
@@ -1178,7 +1199,7 @@ function lalala(tree_input, mapping_input)
           .attr("transform", function(d) {
             return pick_transform(d);
           })
-          .attr("fill", function(d) { return d.color; } );
+          .attr("fill", DEFAULT_DOT_COLOR);
 
         inner_dots.merge(inner_dots)
         // .transition(TR)
@@ -1186,7 +1207,7 @@ function lalala(tree_input, mapping_input)
           .attr("transform", function(d) {
             return pick_transform(d);
           })
-          .attr("fill", function(d) { return d.color; } );
+          .attr("fill", DEFAULT_DOT_COLOR);
 
       } else {
         inner_dots
@@ -1214,7 +1235,7 @@ function lalala(tree_input, mapping_input)
           })
           .attr("fill", function(d) {
             var val = d.metadata.leaf_dot_color;
-            return val ? val : "black";
+            return val ? val : DEFAULT_DOT_COLOR;
           });
 
         leaf_dots.merge(leaf_dots)
@@ -1228,7 +1249,7 @@ function lalala(tree_input, mapping_input)
           })
           .attr("fill", function(d) {
             var val = d.metadata.leaf_dot_color;
-            return val ? val : "black";
+            return val ? val : DEFAULT_DOT_COLOR;
           } );
       } else {
         leaf_dots
@@ -2482,6 +2503,8 @@ function reset_all_to_defaults()
 
   uncheck("show-leaf-dots");
   $("#leaf-dot-size").val(5);
+
+  $(ID_DOT_COLOR).val("black");
 
   // Branch options
   $("#branch-color").val("#000000");
