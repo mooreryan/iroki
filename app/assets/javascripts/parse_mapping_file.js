@@ -1054,16 +1054,21 @@ function has_non_specific_matching(root, name2md)
   root.leaves().forEach(function(leaf) {
     var leaf_name = leaf.data.name;
 
+    // This assumes that the leaf names are unique.
     names_with_md.forEach(function(name_with_md) {
       if (leaf_name.indexOf(name_with_md) !== -1) { //match!
         if (leaf_matches[leaf_name]) {
-          leaf_matches[leaf_name].push(name_with_md);
+          // Sometimes, if you have duplicate leaf names, you will match the exact same name_with_md multiple times and trigger a false positive on the error below.
+          if (leaf_matches[leaf_name].indexOf(name_with_md) === -1) {
+            leaf_matches[leaf_name].push(name_with_md);
+          }
         } else {
           leaf_matches[leaf_name] = [name_with_md];
         }
       }
     });
   });
+
 
   var non_specific_matches = false;
   var error_string = "ERROR -- there were non-specific matches in the mapping fle.  ";
@@ -1126,4 +1131,52 @@ function is_bad_newick(tree_str)
   var last_char = tree_str[str_len - 1];
 
   return !(first_char === "(" && last_char === ";");
+}
+
+
+
+// TODO move this to a utils file.
+function leaf_names(tree)
+{
+  var names = [];
+  function get_names(branchset)
+  {
+    branchset.forEach(function (set) {
+      if (set.branchset) {
+        // Not at a leaf yet, recurse
+        get_names(set.branchset);
+      } else {
+        // it's a leaf, get the name
+        names.push(set.name);
+      }
+    });
+  }
+
+  var branchset = tree.branchset;
+  get_names(branchset);
+
+  return names;
+}
+
+// Takes array of strings, returns false if no duplicates, array of duplicates otherwise.
+function has_duplicate_strings(ary)
+{
+  var obj = {};
+  var duplicates = {}; // track them for the error message.
+  ary.forEach(function(str) {
+    if (obj[str]) {
+      if (duplicates[str]) {
+        duplicates[str] += 1;
+      } else {
+        duplicates[str] = 2; // the second time we've seen it
+      }
+    }
+    obj[str] = true;
+  });
+
+  if (json_keys(obj).length === ary.length) {
+    return false
+  } else {
+    return duplicates;
+  }
 }

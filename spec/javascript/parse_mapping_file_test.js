@@ -34,6 +34,7 @@ var Papa = require('./papaparse.min.js');
 
 var tree_str = "((geode:1, (clock:0.0, tire:5.3)Personmade:0.05)Round:6, (banana:1.7, eggplant:1.5)Fruit:3)ALL;\n";
 
+
 function sort_descending(a, b)
 {
   return (a.value - b.value) || d3.ascending(a.data.length, b.data.length);
@@ -74,6 +75,7 @@ var kelly_and_r_colors_str = "name\tleaf_label_color\nclock\tk_purple\ntire\t1\n
 
 
 //// TESTS
+
 
 test('chomp() removes lf from end', function() {
   expect(chomp("apple\npie\n")).toBe("apple\npie");
@@ -201,3 +203,49 @@ test('is_bad_newick() returns false if the str might be a newick tree', function
   expect(is_bad_newick(good_newick)).toBe(false);
 });
 
+
+
+
+
+
+// Testing duplicate leaf names in the tree.
+var tree_dup_leaf_names_str = "((Ryan:3,Ryan:40)ryan_clade:2.3,(Amelia:1,(Amelia:2,Amelia:1.5)small_amelia_clade:1.2)amelia_clade:3);\n";
+var dup_leaf_names_mapping_str = "name\tbranch_color\nRyan\t#008800\nAmelia\t#000088\n";
+test('trees with duplicate leaf names are fine', function() {
+  var color_map = {
+    "Ryan" : { "branch_color" : "#008800" },
+    "Amelia" : { "branch_color" : "#000088" }
+  };
+
+  var newick = parseNewick(tree_dup_leaf_names_str);
+  var tree = d3.hierarchy(parseNewick(tree_dup_leaf_names_str), function(d) {
+    return d.branchset;
+  }).sum(function(d) { return d.branchset ? 0 : 1; })
+    .sort(sort_descending);
+
+  // console.log("tree is " + JSON.stringify(newick));
+
+  expect(parse_mapping_file(dup_leaf_names_mapping_str)).toEqual(color_map);
+});
+
+// Get names from parsed newick file.
+test('leaf_names() returns all leaf names in a tree', function() {
+  var names = ["Ryan", "Ryan", "Amelia", "Amelia", "Amelia"];
+
+  console.log(parse_mapping_file(dup_leaf_names_mapping_str));
+
+  expect(leaf_names(parseNewick(tree_dup_leaf_names_str))).toEqual(names);
+});
+
+// Check for duplicate strings
+test('has_duplicate_strings() returns duplicated strings', function(){
+  var ary = ['a', 'b', 'a', 'b', 'c', 'a'];
+  var duplicates = { 'a': 3, 'b': 2 };
+
+  expect(has_duplicate_strings(ary)).toEqual(duplicates);
+});
+test('has_duplicate_strings() returns false if there are no duplicate strs', function(){
+  var ary = ['a', 'b'];
+
+  expect(has_duplicate_strings(ary)).toBe(false);
+});

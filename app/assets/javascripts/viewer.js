@@ -350,6 +350,21 @@ function lalala(tree_input, mapping_input)
   }
 
   var parsed_newick = parseNewick(tree_input);
+  var duplicated_strings = has_duplicate_strings(leaf_names(parsed_newick));
+  if (duplicated_strings) {
+    var err_str = "WARNING -- Your tree had some duplicated leaf names: ";
+    var reps = [];
+    json_each(duplicated_strings, function(name, count) {
+      str = name + " (" + count + " times)"
+      reps.push(str);
+    });
+
+    alert(err_str + reps.join(", "));
+  }
+
+  // debug
+  ryan = parsed_newick;
+
   if (parsed_newick) {
     tmp_root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
       .sum(function(d) { return d.branchset ? 0 : 1; })
@@ -2627,3 +2642,26 @@ function ryan(start, mid, stop, num_colors, transform)
 //
 //   console.log(limits);
 // }
+
+var ryan;
+function leaf_names(tree)
+{
+  var names = [];
+  function get_names(branchset)
+  {
+    branchset.forEach(function (set) {
+      if (set.branchset) {
+        // Not at a leaf yet, recurse
+        get_names(set.branchset);
+      } else {
+        // it's a leaf, get the name
+        names.push(set.name);
+      }
+    });
+  }
+
+  var branchset = tree.branchset;
+  get_names(branchset);
+
+  return names;
+}
