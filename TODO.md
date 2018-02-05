@@ -2,60 +2,26 @@
 
 ## To Dos & Bugs
 
+### Need test cases
+
+- Also, if you have multiple exact same leaf names and you use partial mapping, then the leaves don’t get colored even if they have a partial map. You get an error like this: ERROR -- there were non-specific matches in the mapping fle.  Ryan matched with: Ryan, Ryan.  Amelia matched with: Amelia, Amelia, Amelia.  
+- If there are colons in the name of a leaf in a tree file, everything after the first colon gets chopped off.  (Needs a test case.)
+
+This tree
+((Ryan:3,Ryan:moore:40):2.3,(Amelia:1,(Amelia:2,Amelia:1.5):1.2):3);
+
+With this mapping file
+name	branch_color
+Ryan	green
+Amelia	blue
+
+
 ### Misc
 
-#### Important
-
-- Update old Iroki docs
-
-Don't forget to cite these in the manuscript.
-
-- For the radial layout: http://algo.uni-konstanz.de/publications/bbs-dpt-05.pdf
-
-#### Less important
 
 - Should the g element get made only if things are going in it?
-
-### Scale bar
-
-#### Important 
-
-#### Less important
-
-- Scale bar label should get pushed down more if the branch length is larger
-- The scale bar placement offset behaves a bit differently depending on tree rotation and circle/rectangle-ness
-- Circular trees you can adjust the scale bar right out of the svg
-
-### User input
-
-#### Important
-
-#### Less important
-
-### Tree styling
-
-#### Important
-
-#### Less important
-
-- On circular trees, if the branch width is large enough, you will see little gaps in the center branches.
-- When leaf dots are too big, they run into the labels
-- The length of the leaves in the cladogram should match the length of the longest branch in the normalogram in rectangle mode.
-- When switching branch style from cladogram to true length the labels switch back to unaligned (even if they were previously aligned.
-- Padding on circular trees is much larger in comparison to padding on the rectangle trees.
-- Small fonts with big dots (e.g., from the mapping file) the dot will run into the font.
-- Padding should be in number of pixels not as a %. (Also requires checking to make sure padding does not exceed width or height sliders.
-- Move labels back along the spine rather than in the node
-
-### Usability 
-
-#### Important
-
-- On rectangle trees, the tree rotation slider people think it doesn’t do anything.
-
-#### Less important
-
-- Regex name matching
+- Ensure that all ids and vals match up in the form.
+- Catch errors when external javascripts don’t load
 
 ### Questions and things to check on 
 
@@ -79,6 +45,9 @@ Don't forget to cite these in the manuscript.
 
 ### Features that would be nice
 
+- [ ] Regex name matching
+
+
 - On circular layout, the size of the svg should expand and contract as you rotate rather than be based on the diagonal all the time….you will often get a lot of whitespace on the circular trees.
 - Automatically round the scale bar of cladograms to whole numbers?
 - Separate inner and leaf rotation
@@ -91,6 +60,7 @@ Don't forget to cite these in the manuscript.
 
 ### Possible features
 
+- If you have a clade all with the same leaf dot property, transfer that property to the inner node labels as well?
 - Output as PhyloXML
 - Export custom name/color labeling from viewer.  I.e., export an iroki mapping file for import to the next iroki session.
 
