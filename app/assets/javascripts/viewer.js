@@ -2,10 +2,12 @@
 function parseNewick(tree_string)
 {
   var subtree;
+  var errors = [];
   try {
     // Setting the branch length to 1 to handle the cases where a tree has no lengths.
     for(var ary=[], current_tree={ branch_length: 1 }, tokens=tree_string.split(/\s*(;|\(|\)|,|:)\s*/), idx=0; idx < tokens.length; idx++) {
       var token = tokens[idx];
+
       switch(token) {
         case "(" : // start of a new (sub)tree
           subtree = { branch_length: 1 };
@@ -40,13 +42,24 @@ function parseNewick(tree_string)
           if (last_token === ")" || last_token === "(" || last_token === ",") {
             current_tree.name = token;
           } else if (last_token === ":") {
-            current_tree.branch_length = parseFloat(token);
+            // The newick spec says branch length must follow the ':'.  So if you parseFloat(token) after a ':' and get NaN, either it's bad formatting of the input file, or they've got a colon in the name of a leaf node.
+            var len = parseFloat(token);
+            if (isNaN(len)) {
+              current_tree.name += (":" + token);
+              errors.push("WARNING -- Between token '" + tokens[idx-2] + "' and token '" + token + "' (the current token), there was a colon.  This is not allowed in the Newick spec.  The current name will be: '" + tokens[idx-2] + ":" + tokens[idx] + "'. If the current token looks like a distance, your Newick tree may be formatted incorrectly.  If the current name looks like a name from your tree's leaf nodes, you should be okay.");
+            } else {
+              current_tree.branch_length = parseFloat(token);
+            }
           }
       }
     }
   }
   catch (err) {
     alert("ERROR -- there was a tree parsing error: " + err.message + ".  Check the format of the tree file.");
+  }
+
+  if (errors.length > 0) {
+    alert(errors.join("\n"));
   }
 
   // TODO catch other weird output errors.
@@ -376,16 +389,16 @@ function lalala(tree_input, mapping_input)
     }
 
     // Check if there is as many branchlengths as there are number of nodes.
-    var num_semicolons;
+    var num_colons;
     var semicolon_match = tree_input.match(/:/g)
     if (semicolon_match) {
-      num_semicolons = semicolon_match.length;
+      num_colons = semicolon_match.length;
     } else {
-      num_semicolons = 0;
+      num_colons = 0;
     }
     // Subtract off one to account for the root, which doesn't need to have a branch length in the newick file.
     var num_nodes = tmp_root.descendants().length - 1;
-    if (num_nodes > num_semicolons) {
+    if (num_nodes > num_colons) {
       alert("WARNING -- found more non-root nodes than colons.  This may indicate not every non-root node in the tree has a branch length.  Any nodes other than the root node that are missing the branch length will be assigned a branch length of 1.")
     }
 
@@ -1112,7 +1125,7 @@ function lalala(tree_input, mapping_input)
         .size([the_width * 1, the_height * 1])
         .separation(function(a, b) { return 1; });
 
-      root = d3.hierarchy(parseNewick(tree_input), function(d) { return d.branchset; })
+      root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
         .sum(function(d) { return d.branchset ? 0 : 1; })
         .sort(sort_function);
 
