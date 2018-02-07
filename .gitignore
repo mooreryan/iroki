@@ -36,3 +36,5 @@ lalala.test.js
 app/views/pages/old_home.html.slim
 
 jquery-3.3.1.slim.min.js
+
+ignore
