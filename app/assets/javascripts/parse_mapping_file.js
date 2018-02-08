@@ -939,6 +939,9 @@ function is_bad_col_header(str)
 
 function parse_mapping_file(str)
 {
+  // To hold messages about bad colors in the mapping file.
+  var bad_color_errors = [];
+
   // Parse mapping string.
   var mapping_csv = Papa.parse(chomp(str), PAPA_CONFIG);
 
@@ -1028,7 +1031,7 @@ function parse_mapping_file(str)
             // Replace it with the hexcode. TODO if the casing is wrong in user input will the browser care?
             md[option] = valid_colors[color_val];
           } else {
-            alert("WARNING -- there was an invalid color name in the mapping file: '" + color_val + "'.  The default color will be used instead.");
+            bad_color_errors.push("WARNING -- there was an invalid color name in the mapping file: '" + color_val + "'.  The default color will be used instead.")
 
             // Set the color to the default color.
             md[option] = valid_colors["black"];
@@ -1037,6 +1040,10 @@ function parse_mapping_file(str)
       }
     });
   });
+
+  if (bad_color_errors.length > 0) {
+    alert(bad_color_errors.join("\n"));
+  }
 
   return mapping;
 }

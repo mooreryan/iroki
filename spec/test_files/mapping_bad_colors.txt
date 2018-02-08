@@ -1,4 +1,4 @@
 name	leaf_label_color
-eggplant	blue
+eggplant	ameliaface
 geode	arstoien
 tire	#be0032
