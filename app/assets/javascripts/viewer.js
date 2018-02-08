@@ -1,59 +1,8 @@
-function clear_elem(id) {
-  chart_elem = document.getElementById(id);
-
-  // Clear the elem if it is there
-  if (chart_elem) {
-    chart_elem.parentNode.removeChild(chart_elem);
-  }
-}
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
-// load dataset
-function load_dataset(tree_file, mapping_file) {
-  d3.select("#load-tree-first-message").remove();
-  document.getElementById("options-panel").appendChild(OPTIONS_DIV);
-
-  // Set the accordion to on
-  new Foundation.Accordion(jq(ID_OPTIONS_ACCORDION), {});
-
-  var bad = is_bad_newick(tree_file);
-  if (bad) {
-    alert("ERROR -- check your Newick file.  The format looks wrong.");
-
-    set_status_msg_to_done();
-    // d3.select("#loading-message").remove();
-    clear_elem("options-div");
-    upload_tree_first();
-
-  } else {
-    lalala(tree_file, mapping_file);
-  }
-}
 
 var OPTIONS_DIV;
-
-function upload_tree_first()
-{
-  d3.select("#load-tree-first-message").remove();
-
-  d3.select("#options-panel")
-    .append("div")
-    .attr("class", "row")
-    .append("p")
-    .attr("id", "load-tree-first-message")
-    .html("Upload a tree first!");
-}
-
-function set_status_msg_to_rendering()
-{
-  jq("status-msg").html("Rendering tree!  Please wait....");
-}
-
-function set_status_msg_to_done()
-{
-  jq("status-msg").html("Here is your tree!");
-}
 
 // handle upload button
 function upload_button(submit_id, uploader_id, callback) {
@@ -63,8 +12,8 @@ function upload_button(submit_id, uploader_id, callback) {
   //   .setAttribute("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
 
   OPTIONS_DIV = document.getElementById("options-div");
-  clear_elem("options-div");
-  upload_tree_first();
+  utils__clear_elem("options-div");
+  utils__upload_tree_first();
 
   var uploader = document.getElementById(uploader_id);
   var mapping_uploader = document.getElementById("mapping-file-uploader");
@@ -101,13 +50,13 @@ function upload_button(submit_id, uploader_id, callback) {
     if (MAPPING_CHANGED && !TREE_CHANGED) {
       // Don't reset
     } else {
-      clear_elem("svg-tree");
+      utils__clear_elem("svg-tree");
       reset_all_to_defaults();
     }
     // $("#reset").prop("disabled", false);
 
     // Add a loading tree message.
-    set_status_msg_to_rendering();
+    utils__set_status_msg_to_rendering();
     // d3.select("#tree-div")
     //   .append("p")
     //   .attr("id", "loading-message")
@@ -127,10 +76,10 @@ function upload_button(submit_id, uploader_id, callback) {
     // Reset all sliders and options to default.
     reset_all_to_defaults();
 
-    clear_elem("options-div");
-    upload_tree_first();
+    utils__clear_elem("options-div");
+    utils__upload_tree_first();
 
-    clear_elem("svg-tree");
+    utils__clear_elem("svg-tree");
     // $("#reset").prop("disabled", true);
     document.getElementById("save-svg").setAttribute("disabled", "");
     document.getElementById("save-png").setAttribute("disabled", "");
@@ -147,27 +96,12 @@ function upload_button(submit_id, uploader_id, callback) {
       tree_reader.readAsText(file);
     } else {
       // d3.select("#loading-message").remove();
-      set_status_msg_to_done();
+      utils__set_status_msg_to_done();
       alert("Don't forget a tree file!");
     }
   }
 }
 
-// function watch_for_uploads()
-// {
-//   var tree_uploader = document.getElementById("uploader");
-//   var mapping_uploader = document.getElementById("mapping-file-uploader");
-//   var reader = new FileReader();
-//
-//   reader.onload = function(event) {
-//     var contents = event.target.result;
-//
-//   }
-// }
-
-//
-// Stuff from the old viewer stops here
-//
 
 
 
@@ -287,13 +221,13 @@ function lalala(tree_input, mapping_input)
     alert("WARNING -- found more than one semicolon.  You may have multiple trees in your Newick file.  If so, only the last tree in the file will be shown.  Note: if you have quoted names with semicolons, you may not have multiple trees.  If some of the node names look weird (e.g., '\"E. co' when it should be 'E. coli'), you probably have semicolons within node names.");
   }
 
-  var parsed_newick = parseNewick(tree_input);
+  var parsed_newick = newick__parse(tree_input);
   var duplicated_strings = has_duplicate_strings(leaf_names(parsed_newick));
   if (duplicated_strings) {
     var err_str = "WARNING -- Your tree had some duplicated leaf names: ";
     var reps = [];
     json_each(duplicated_strings, function(name, count) {
-      str = name + " (" + count + " times)"
+      str = name + " (" + count + " times)";
       reps.push(str);
     });
 
@@ -416,17 +350,17 @@ function lalala(tree_input, mapping_input)
 
     function set_msg_and_draw()
     {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function() {
         draw_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       });
     }
 
     var TIMEOUT = 10;
     listener(ID_MATCHING_TYPE, "change", function(){
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function() {
         if (mapping_input) {
@@ -442,7 +376,7 @@ function lalala(tree_input, mapping_input)
           name2md = null;
         }
         draw_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
 
@@ -452,7 +386,7 @@ function lalala(tree_input, mapping_input)
 
     // TODO no status-msg
     listener(ID_LAYOUT, "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
       setTimeout(function(){
 
         // First adjust the slider.
@@ -499,15 +433,15 @@ function lalala(tree_input, mapping_input)
         }
 
         draw_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, 10);
     });
     listener("tree-branch-style", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         redraw_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
 
@@ -515,38 +449,38 @@ function lalala(tree_input, mapping_input)
 
     // TODO needs longer timer to actually work.  Not sure why.
     listener("tree-sort", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         draw_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT * 2);
     });
 
     listener(ID_SCALE_BAR_SHOW, "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
         update_form_constants();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener(ID_SCALE_BAR_OFFSET_WEIGHT, "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function() {
         set_options_by_metadata();
         update_form_constants();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener(ID_SCALE_BAR_AUTOSIZE, "change", function(){
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
@@ -559,18 +493,18 @@ function lalala(tree_input, mapping_input)
         update_form_constants();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener(ID_SCALE_BAR_LENGTH, "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
         update_form_constants();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
 
@@ -587,23 +521,23 @@ function lalala(tree_input, mapping_input)
     // });
 
     listener("show-inner-labels", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         update_and_draw(draw_inner_labels);
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("inner-label-size", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         update_and_draw(draw_inner_labels);
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("show-leaf-labels", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
@@ -613,19 +547,19 @@ function lalala(tree_input, mapping_input)
         draw_leaf_labels();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("leaf-label-size", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         update_and_draw(draw_leaf_labels);
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("align-tip-labels", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
@@ -635,11 +569,11 @@ function lalala(tree_input, mapping_input)
         draw_leaf_labels();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("label-rotation", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
@@ -648,11 +582,11 @@ function lalala(tree_input, mapping_input)
         draw_leaf_labels();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("leaf-label-color", "change", function(){
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
@@ -661,11 +595,11 @@ function lalala(tree_input, mapping_input)
         draw_leaf_labels();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("leaf-label-font", "change", function(){
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
@@ -674,28 +608,28 @@ function lalala(tree_input, mapping_input)
         draw_leaf_labels();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
 
     listener("show-inner-dots", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         update_and_draw(draw_inner_dots);
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("inner-dot-size", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         update_and_draw(draw_inner_dots);
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("show-leaf-dots", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
@@ -705,19 +639,19 @@ function lalala(tree_input, mapping_input)
         draw_leaf_labels();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("leaf-dot-size", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         update_and_draw(draw_leaf_dots);
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener(ID_DOT_COLOR, "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function() {
         set_options_by_metadata();
@@ -736,7 +670,7 @@ function lalala(tree_input, mapping_input)
     });
 
     listener("branch-color", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
@@ -745,11 +679,11 @@ function lalala(tree_input, mapping_input)
         draw_link_extensions();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
     listener("branch-width", "change", function() {
-      set_status_msg_to_rendering();
+      utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
         set_options_by_metadata();
@@ -758,20 +692,20 @@ function lalala(tree_input, mapping_input)
         draw_link_extensions();
         draw_scale_bar();
         adjust_tree();
-        set_status_msg_to_done();
+        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
 
 
     listener(ID_VIEWER_SIZE_FIXED, "change", function() {
-      // set_status_msg_to_rendering();
+      // utils__set_status_msg_to_rendering();
       update_viewer_size_fixed();
-      // set_status_msg_to_done();
+      // utils__set_status_msg_to_done();
     });
 
-    set_status_msg_to_rendering();
+    utils__set_status_msg_to_rendering();
     draw_tree();
-    set_status_msg_to_done();
+    utils__set_status_msg_to_done();
 
     var circle_cluster, rectangle_cluster;
 
@@ -1088,7 +1022,7 @@ function lalala(tree_input, mapping_input)
           .style("background-color", "white"); // TODO make bg color an option
       } else {
         // First remove loading message if there is one.
-        // set_status_msg_to_done();
+        // utils__set_status_msg_to_done();
         // d3.select("#loading-message").remove();
 
         // And add the svg.
@@ -1485,7 +1419,7 @@ function lalala(tree_input, mapping_input)
     function draw_tree()
     {
       // jq("status-msg").html("apple");
-      clear_elem("svg-tree");
+      utils__clear_elem("svg-tree");
 
       set_options_by_metadata();
       update_form_constants();

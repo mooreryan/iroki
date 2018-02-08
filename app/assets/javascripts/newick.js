@@ -1,6 +1,6 @@
 // This is a modified version of newick.js from https://github.com/jasondavies/newick.js
 // Copyright 2011 Jason Davies
-function parseNewick(tree_string)
+function newick__parse(tree_string)
 {
   var subtree;
   var errors = [];
