@@ -146,8 +146,6 @@ var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH;
 // The name2md var will be set to null if there is no metadata mapping data.
 var name2md = null;
 
-var category_names = [], previous_category_names = null;
-
 var MATCHING_TYPE;
 
 var EXTRA_NAME_WARNINGS = false;
@@ -761,21 +759,6 @@ function lalala(tree_input_param, mapping_input_param)
     function update_form_constants()
     {
 
-      // If there were category names from the mapping file that were disabled, but now the mapping file is gone and they need to be re-enabled.
-      // if (previous_category_names) {
-      //   previous_category_names.forEach(function(cat_name) {
-      //     var id = md_cat_name2id[cat_name];
-      //
-      //     if (id) {
-      //       var elem = document.getElementById(id);
-      //
-      //       if (elem) {
-      //         elem.removeAttribute("disabled");
-      //       }
-      //     }
-      //   });
-      // }
-
       DEFAULT_LABEL_COLOR = document.getElementById("leaf-label-color").value;
       DEFAULT_LABEL_FONT = document.getElementById("leaf-label-font").value;
 
@@ -971,19 +954,6 @@ function lalala(tree_input_param, mapping_input_param)
       }
       the_x = "x";
       the_y = TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM ? "y" : "radius";
-
-      // Finally make sure to re-disable any thing that is already accounted for in the mapping file.
-      // category_names.forEach(function(cat_name) {
-      //   var id = md_cat_name2id[cat_name];
-      //   if (id) {
-      //     var elem = document.getElementById(id);
-      //
-      //     if (elem) {
-      //       elem.setAttribute("disabled", "");
-      //     }
-      //   }
-      // });
-
 
       update_viewer_size_fixed();
     }
@@ -2138,8 +2108,9 @@ function get_branch_md_val(node, branch_option, default_value)
 
 function set_options_by_metadata()
 {
+  var category_names = [];
+
   if (name2md) {
-    previous_category_names = null;
 
     json_each(name2md, function(seq_name, metadata) {
       json_each(metadata, function(category_name, value) {
@@ -2170,29 +2141,13 @@ function set_options_by_metadata()
     if (leaf_label_options_present) {
       check("show-leaf-labels");
     }
-
-    // At the beginning of update form constants, these will be un-disabled if necessary.
-    // category_names.forEach(function(cat_name) {
-    //   var id = md_cat_name2id[cat_name];
-    //
-    //   if (id) {
-    //     var elem = document.getElementById(id);
-    //
-    //     if (elem) {
-    //       elem.setAttribute("disabled", "");
-    //     }
-    //   }
-    // });
-  } else {
-    previous_category_names = category_names;
-    category_names = [];
   }
 }
 
 
 function is_leaf(d)
 {
-  return d.value == 1;
+  return d.value === 1;
 }
 
 function is_inner(d)
@@ -2359,6 +2314,8 @@ function jq(id)
 function reset_all_to_defaults()
 {
   EXTRA_NAME_WARNINGS = false;
+
+  // The set_options_by_metadata function will change the value of the *_options_present vars, but if you change the mapping file to a new one, these don't appear to get changed back.
 
   // Set these to null as this function is called when clicking the submit or reset buttons.  Either of which will re-set these anyway.  But doing this avoids some weird bugs where the mapping file is still hanging around after hitting reset.  See https://github.com/mooreryan/iroki_web/issues/32.
   tree_input = null;

@@ -1,0 +1,3 @@
+name	leaf_dot_size
+eggplant	20
+banana	15
