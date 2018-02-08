@@ -68,7 +68,7 @@ function upload_button(submit_id, uploader_id, callback) {
 
     handleFiles();
   }, false);
-  document.getElementById("reset").addEventListener("click", function() {
+  document.getElementById(ID_RESET_BUTTON).addEventListener("click", function() {
     MAPPING_CHANGED = false;
     TREE_CHANGED = false;
 
@@ -188,6 +188,8 @@ var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
 var ID_OPTIONS_ACCORDION = "options-accordion";
 var ID_DOT_COLOR = "dot-color",
   DEFAULT_DOT_COLOR;
+
+var ID_RESET_BUTTON = "reset";
 
 var tmp_root;
 
@@ -370,24 +372,27 @@ function lalala(tree_input_param, mapping_input_param)
 
     var TIMEOUT = 10;
     listener(ID_MATCHING_TYPE, "change", function(){
-      utils__set_status_msg_to_rendering();
+      // First check that you actually have a tree and mapping file.
+      if (tree_input && mapping_input) {
+        utils__set_status_msg_to_rendering();
 
-      setTimeout(function() {
-        if (mapping_input) {
-          name2md = parse_mapping_file(mapping_input);
+        setTimeout(function() {
+          if (mapping_input) {
+            name2md = parse_mapping_file(mapping_input);
 
-          if (jq(ID_MATCHING_TYPE).val() === "partial") {
-            // Reshow the warning.
-            if (has_non_specific_matching(tmp_root, name2md)) {
-              name2md = null
+            if (jq(ID_MATCHING_TYPE).val() === "partial") {
+              // Reshow the warning.
+              if (has_non_specific_matching(tmp_root, name2md)) {
+                name2md = null
+              }
             }
+          } else {
+            name2md = null;
           }
-        } else {
-          name2md = null;
-        }
-        draw_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
+          draw_tree();
+          utils__set_status_msg_to_done();
+        }, TIMEOUT);
+      }
     });
 
     listener("width", "change", set_msg_and_draw);
