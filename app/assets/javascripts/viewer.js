@@ -231,22 +231,24 @@ function lalala(tree_input_param, mapping_input_param)
   }
 
   var parsed_newick = newick__parse(tree_input);
-  var duplicated_strings = has_duplicate_strings(leaf_names(parsed_newick));
-  if (duplicated_strings) {
-    var err_str = "WARNING -- Your tree had some duplicated leaf names: ";
-    var reps = [];
-    json_each(duplicated_strings, function(name, count) {
-      str = name + " (" + count + " times)";
-      reps.push(str);
-    });
-
-    alert(err_str + reps.join(", "));
-  }
 
   // debug
-  ryan = parsed_newick;
+  amelia = parsed_newick;
 
   if (parsed_newick) {
+    // Check for duplicated names.
+    var duplicated_strings = has_duplicate_strings(leaf_names(parsed_newick));
+    if (duplicated_strings) {
+      var err_str = "WARNING -- Your tree had some duplicated leaf names: ";
+      var reps = [];
+      json_each(duplicated_strings, function(name, count) {
+        str = name + " (" + count + " times)";
+        reps.push(str);
+      });
+
+      alert(err_str + reps.join(", "));
+    }
+
     tmp_root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
       .sum(function(d) { return d.branchset ? 0 : 1; })
       .sort(sort_function);
@@ -258,9 +260,9 @@ function lalala(tree_input_param, mapping_input_param)
 
     // Check if there is as many branchlengths as there are number of nodes.
     var num_colons;
-    var semicolon_match = tree_input.match(/:/g)
-    if (semicolon_match) {
-      num_colons = semicolon_match.length;
+    var colon_match = tree_input.match(/:/g)
+    if (colon_match) {
+      num_colons = colon_match.length;
     } else {
       num_colons = 0;
     }
@@ -1697,6 +1699,9 @@ function lalala(tree_input_param, mapping_input_param)
       return d.data.branch_length + (d.children ? d3.max(d.children, maxLength) : 0);
     }
   }
+  else {
+    utils__set_status_msg_to_error();
+  }
 }
 
 
@@ -2490,7 +2495,7 @@ function ryan(start, mid, stop, num_colors, transform)
 //   console.log(limits);
 // }
 
-var ryan;
+var amelia;
 function leaf_names(tree)
 {
   var names = [];

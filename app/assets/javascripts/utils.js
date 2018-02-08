@@ -28,6 +28,11 @@ function utils__set_status_msg_to_done()
   jq("status-msg").html("Here is your tree!");
 }
 
+function utils__set_status_msg_to_error()
+{
+  jq("status-msg").html("There was an error parsing your tree!");
+}
+
 // load dataset.  This function is called right on the viewer.html.slim page.
 function utils__load_dataset(tree_file, mapping_file) {
   d3.select("#load-tree-first-message").remove();
