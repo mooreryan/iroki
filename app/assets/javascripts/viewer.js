@@ -155,7 +155,6 @@ var NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES;
 
 var LARGE_TREE_CUTOFF = 1000; // in number of nodes.  TODO tune this...phage proteomic tree is 5200, slow; tree of life 381, fast.
 
-var DEFAULT_LABEL_COLOR, DEFAULT_LABEL_FONT;
 var DEFAULT_BRANCH_COLOR, DEFAULT_BRANCH_WIDTH;
 
 // To hold temporary DOM elements
@@ -186,8 +185,16 @@ var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
 var ID_OPTIONS_ACCORDION = "options-accordion";
 var ID_LEAF_DOT_COLOR = "leaf-dot-color",
   ID_INNER_DOT_COLOR = "inner-dot-color",
-  LEAF_DOT_COLOR_VAL,
-  INNER_DOT_COLOR_VAL;
+  VAL_LEAF_DOT_COLOR,
+  VAL_INNER_DOT_COLOR;
+var ID_LEAF_LABEL_COLOR = "leaf-label-color",
+  ID_LEAF_LABEL_FONT = "leaf-label-font",
+  VAL_LEAF_LABEL_COLOR,
+  VAL_LEAF_LABEL_FONT;
+var ID_INNER_LABEL_COLOR = "inner-label-color",
+  ID_INNER_LABEL_FONT = "inner-label-font",
+  VAL_INNER_LABEL_COLOR,
+  VAL_INNER_LABEL_FONT;
 
 
 var ID_RESET_BUTTON = "reset";
@@ -603,7 +610,7 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("leaf-label-color", "change", function(){
+    listener(ID_LEAF_LABEL_COLOR, "change", function(){
       utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
@@ -616,7 +623,33 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("leaf-label-font", "change", function(){
+    listener(ID_LEAF_LABEL_FONT, "change", function(){
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_inner_labels();
+        draw_leaf_labels();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_INNER_LABEL_COLOR, "change", function(){
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_inner_labels();
+        draw_leaf_labels();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_INNER_LABEL_FONT, "change", function(){
       utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
@@ -782,14 +815,17 @@ function lalala(tree_input_param, mapping_input_param)
     function update_form_constants()
     {
 
-      DEFAULT_LABEL_COLOR = document.getElementById("leaf-label-color").value;
-      DEFAULT_LABEL_FONT = document.getElementById("leaf-label-font").value;
+      VAL_LEAF_LABEL_COLOR = jq(ID_LEAF_LABEL_COLOR).val();
+      VAL_LEAF_LABEL_FONT = jq(ID_LEAF_LABEL_FONT).val();
+
+      VAL_INNER_LABEL_COLOR = jq(ID_INNER_LABEL_COLOR).val();
+      VAL_INNER_LABEL_FONT = jq(ID_INNER_LABEL_FONT).val();
 
       DEFAULT_BRANCH_COLOR = document.getElementById("branch-color").value;
       DEFAULT_BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
 
-      LEAF_DOT_COLOR_VAL = jq(ID_LEAF_DOT_COLOR).val();
-      INNER_DOT_COLOR_VAL = jq(ID_INNER_DOT_COLOR).val();
+      VAL_LEAF_DOT_COLOR = jq(ID_LEAF_DOT_COLOR).val();
+      VAL_INNER_DOT_COLOR = jq(ID_INNER_DOT_COLOR).val();
 
 
       MATCHING_TYPE = document.getElementById(ID_MATCHING_TYPE).value;
@@ -1095,7 +1131,7 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("transform", function(d) {
             return pick_transform(d);
           })
-          .attr("fill", INNER_DOT_COLOR_VAL);
+          .attr("fill", VAL_INNER_DOT_COLOR);
 
         inner_dots.merge(inner_dots)
         // .transition(TR)
@@ -1103,7 +1139,7 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("transform", function(d) {
             return pick_transform(d);
           })
-          .attr("fill", INNER_DOT_COLOR_VAL);
+          .attr("fill", VAL_INNER_DOT_COLOR);
 
       } else {
         inner_dots
@@ -1131,7 +1167,7 @@ function lalala(tree_input_param, mapping_input_param)
           })
           .attr("fill", function(d) {
             var val = d.metadata.leaf_dot_color;
-            return val ? val : LEAF_DOT_COLOR_VAL;
+            return val ? val : VAL_LEAF_DOT_COLOR;
           });
 
         leaf_dots.merge(leaf_dots)
@@ -1145,7 +1181,7 @@ function lalala(tree_input_param, mapping_input_param)
           })
           .attr("fill", function(d) {
             var val = d.metadata.leaf_dot_color;
-            return val ? val : LEAF_DOT_COLOR_VAL;
+            return val ? val : VAL_LEAF_DOT_COLOR;
           } );
       } else {
         leaf_dots
@@ -1175,9 +1211,9 @@ function lalala(tree_input_param, mapping_input_param)
           })
           .text(function(d) { return d.data.name; })
           // .transition(TR)
-          .attr("fill", DEFAULT_LABEL_COLOR)
+          .attr("fill", VAL_INNER_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
-          .attr("font-family", DEFAULT_LABEL_FONT);
+          .attr("font-family", VAL_INNER_LABEL_FONT);
 
         inner_labels
           .merge(inner_labels)
@@ -1188,9 +1224,9 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("transform", function(d) {
             return pick_transform(d);
           })
-          .attr("fill", DEFAULT_LABEL_COLOR)
+          .attr("fill", VAL_INNER_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
-          .attr("font-family", DEFAULT_LABEL_FONT);
+          .attr("font-family", VAL_INNER_LABEL_FONT);
 
       } else {
         inner_labels
@@ -1233,11 +1269,11 @@ function lalala(tree_input_param, mapping_input_param)
           })
           .attr("font-family", function(d) {
             var font = d.metadata.leaf_label_font;
-            return font ? font : DEFAULT_LABEL_FONT;
+            return font ? font : VAL_LEAF_LABEL_FONT;
           })
           .attr("fill", function(d) {
             var color = d.metadata.leaf_label_color;
-            return color ? color : DEFAULT_LABEL_COLOR;
+            return color ? color : VAL_LEAF_LABEL_COLOR;
           });
 
         labels
@@ -1262,11 +1298,11 @@ function lalala(tree_input_param, mapping_input_param)
           })
           .attr("font-family", function(d) {
             var font = d.metadata.leaf_label_font;
-            return font ? font : DEFAULT_LABEL_FONT;
+            return font ? font : VAL_LEAF_LABEL_FONT;
           })
           .attr("fill", function(d) {
             var color = d.metadata.leaf_label_color;
-            return color ? color : DEFAULT_LABEL_COLOR;
+            return color ? color : VAL_LEAF_LABEL_COLOR;
           });
 
       } else {
@@ -2379,8 +2415,11 @@ function reset_all_to_defaults()
   uncheck("align-tip-labels");
   $("#label-rotation").val(0);
 
-  $("#leaf-label-color").val("#000000");
-  $("#leaf-label-font").val("Helvetica");
+  jq(ID_LEAF_LABEL_COLOR).val("#000000");
+  jq(ID_LEAF_LABEL_FONT).val("Helvetica");
+
+  jq(ID_INNER_LABEL_COLOR).val("#000000");
+  jq(ID_INNER_LABEL_FONT).val("Helvetica");
 
   // Dot options
   uncheck("show-inner-dots");
