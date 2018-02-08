@@ -228,15 +228,6 @@ test('trees with duplicate leaf names are fine', function() {
   expect(parse_mapping_file(dup_leaf_names_mapping_str)).toEqual(color_map);
 });
 
-// Get names from parsed newick file.
-test('leaf_names() returns all leaf names in a tree', function() {
-  var names = ["Ryan", "Ryan", "Amelia", "Amelia", "Amelia"];
-
-  console.log(parse_mapping_file(dup_leaf_names_mapping_str));
-
-  expect(leaf_names(parseNewick(tree_dup_leaf_names_str))).toEqual(names);
-});
-
 // Check for duplicate strings
 test('has_duplicate_strings() returns duplicated strings', function(){
   var ary = ['a', 'b', 'a', 'b', 'c', 'a'];
