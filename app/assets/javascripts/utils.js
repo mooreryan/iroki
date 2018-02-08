@@ -28,12 +28,8 @@ function utils__set_status_msg_to_done()
   jq("status-msg").html("Here is your tree!");
 }
 
-
-
-// TODO unused functions from here down
-
-// load dataset
-function utils_load_dataset(tree_file, mapping_file) {
+// load dataset.  This function is called right on the viewer.html.slim page.
+function utils__load_dataset(tree_file, mapping_file) {
   d3.select("#load-tree-first-message").remove();
   document.getElementById("options-panel").appendChild(OPTIONS_DIV);
 

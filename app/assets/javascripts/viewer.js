@@ -22,6 +22,7 @@ function upload_button(submit_id, uploader_id, callback) {
   var tree_reader = new FileReader();
   var mapping_reader = new FileReader();
 
+  // The callback in this case is utils__load_dataset
   tree_reader.onload = function(tree_event) {
     var tree_str = tree_event.target.result;
     var mapping_file = mapping_uploader.files[0];
@@ -142,7 +143,10 @@ var the_width, the_height, the_width, the_height, padding;
 
 var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH;
 
-var name2md, category_names = [], previous_category_names = null;
+// The name2md var will be set to null if there is no metadata mapping data.
+var name2md = null;
+
+var category_names = [], previous_category_names = null;
 
 var MATCHING_TYPE;
 
@@ -210,9 +214,14 @@ var md_cat_name2id = {
   "branch_color": null
 };
 
+// Hold these as globals so that we can make sure the reset button resets them.
+var mapping_input, tree_input;
 // The mega function
-function lalala(tree_input, mapping_input)
+function lalala(tree_input_param, mapping_input_param)
 {
+
+  tree_input = tree_input_param;
+  mapping_input = mapping_input_param;
 
   // Check if there is more than one semicolon.  TODO this will give a false positive if there are semicolons within quoted names.
 
@@ -288,7 +297,8 @@ function lalala(tree_input, mapping_input)
 
       // Also this will pop up a warning if there are any branches of length zero. and set the minbranch length.
 
-      if ($("#matching-type").val() === "partial") {
+
+      if (jq(ID_MATCHING_TYPE).val() === "partial") {
         if (has_non_specific_matching(tmp_root, name2md)) {
           // Reset name2md to null so we skip the mapping stuff and disabling certain features.
           name2md = null;
@@ -366,7 +376,7 @@ function lalala(tree_input, mapping_input)
         if (mapping_input) {
           name2md = parse_mapping_file(mapping_input);
 
-          if ($("#matching-type").val() === "partial") {
+          if (jq(ID_MATCHING_TYPE).val() === "partial") {
             // Reshow the warning.
             if (has_non_specific_matching(tmp_root, name2md)) {
               name2md = null
@@ -2344,6 +2354,11 @@ function jq(id)
 function reset_all_to_defaults()
 {
   EXTRA_NAME_WARNINGS = false;
+
+  // Set these to null as this function is called when clicking the submit or reset buttons.  Either of which will re-set these anyway.  But doing this avoids some weird bugs where the mapping file is still hanging around after hitting reset.  See https://github.com/mooreryan/iroki_web/issues/32.
+  tree_input = null;
+  mapping_input = null;
+  // name2md = null;
 
   // Tree options
   // jq(ID_MATCHING_TYPE).val("partial");
