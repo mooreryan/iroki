@@ -74,6 +74,7 @@ var tree_with_semicolos = "('sea;nie':1,(amelia:1,\"ry;an\":1):1);";
 var kelly_and_r_colors_str = "name\tleaf_label_color\nclock\tk_purple\ntire\t1\ngeode\tr_chocolate4";
 
 
+
 //// TESTS
 
 
@@ -161,16 +162,25 @@ test('parse_mapping_file() sets bad colors to black instead', function(){
   };
   expect(parse_mapping_file(bad_color_str)).toEqual(obj);
 });
-test('parse_mapping_file() can nadle R colors and Kelly colors', function(){
+test('parse_mapping_file() can handle R colors and Kelly colors', function(){
   var r_chocolate4 = "#8B4513";
   var k_purple = "#875692";
   var obj = {
     "geode" : { "leaf_label_color" : r_chocolate4 },
     "tire" : { "leaf_label_color" : k_purple },
     "clock" : { "leaf_label_color" : k_purple }
-  }
+  };
 
   expect(parse_mapping_file(kelly_and_r_colors_str)).toEqual(obj);
+});
+test('parse_mapping_file() can handle hex codes without the starting # char', function() {
+  var hex_codes_without_pound = "name\tbranch_color\ngeode\tFF00FF\n";
+
+  var obj = {
+    "geode" : { "branch_color" : "#ff00ff" }
+  };
+
+  expect(parse_mapping_file(hex_codes_without_pound)).toEqual(obj);
 });
 
 test('push_unless_present() pushes an item if it is not there already', function() {

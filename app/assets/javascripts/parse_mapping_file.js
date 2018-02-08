@@ -1030,6 +1030,10 @@ function parse_mapping_file(str)
           if (valid_colors[color_val]) {
             // Replace it with the hexcode. TODO if the casing is wrong in user input will the browser care?
             md[option] = valid_colors[color_val];
+          } else if (is_hex("#" + color_val)) {
+            // It is a hex code but just missing the first # symbol, so pass it in with the # appended to the front.
+
+            md[option] = ("#" + color_val);
           } else {
             bad_color_errors.push("WARNING -- there was an invalid color name in the mapping file: '" + color_val + "'.  The default color will be used instead.")
 
@@ -1048,6 +1052,7 @@ function parse_mapping_file(str)
   return mapping;
 }
 
+// Also returns the hex code
 function is_hex(str)
 {
   return str.match(/^#[0-9A-Fa-f]{6}$/);
