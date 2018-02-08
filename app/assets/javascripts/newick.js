@@ -2,13 +2,32 @@
 // Copyright 2011 Jason Davies
 function newick__parse(tree_string)
 {
+  var quote_open = null;
+  var quote_close = null;
+  var quote_complete = null;
+
   var subtree;
   var errors = [];
   try {
     // Setting the branch length to 1 to handle the cases where a tree has no lengths.
-    for(var ary=[], current_tree={ branch_length: 1 }, tokens=tree_string.split(/\s*(;|\(|\)|,|:)\s*/), idx=0; idx < tokens.length; idx++) {
+    for(var ary = [],
+          current_tree = { branch_length: 1 },
+          tokens = tree_string.split(/\s*(;|\(|\)|,|:)\s*/),
+          idx = 0;
+        idx < tokens.length;
+        idx++) {
 
       var token = tokens[idx];
+
+      // Check if it is quoted.  If it is quoted and has split chars within it then it will only be one of the two.  If it is fully quoted it will be both.
+      quote_open = token[0] === "'";
+      quote_close = token[token.length-1] === "'";
+
+      quote_complete = quote_open && quote_close;
+      if (quote_complete) {
+        // Remove the quotes, we don't want them in the name.
+        token = token.replace(/'/g, "");
+      }
 
       switch(token) {
         case "(" : // start of a new (sub)tree
@@ -39,6 +58,7 @@ function newick__parse(tree_string)
           break;
 
         default:
+          // This might be a name or a distance.
           var last_token = tokens[idx-1];
 
           if (last_token === ")" || last_token === "(" || last_token === ",") {
