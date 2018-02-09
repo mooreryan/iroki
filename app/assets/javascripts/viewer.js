@@ -117,7 +117,7 @@ var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
 var the_x, the_y;
 var SIZE, INNER_SIZE;
 var width, padding, height;
-var root, svg, chart, data, circles, labels, inner_labels, leaf_labels, linkExtension, link, inner_dots, leaf_dots;
+var ROOT, svg, chart, data, circles, labels, inner_labels, leaf_labels, linkExtension, link, inner_dots, leaf_dots;
 
 var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
 
@@ -196,10 +196,15 @@ var ID_INNER_LABEL_COLOR = "inner-label-color",
   VAL_INNER_LABEL_COLOR,
   VAL_INNER_LABEL_FONT;
 
+var ID_BIOLOGICALLY_ROOTED = "biological-root",
+  VAL_BIOLOGICALLY_ROOTED;
+
 
 var ID_RESET_BUTTON = "reset";
 
 var tmp_root;
+
+var TREE_IS_ROOTED_ON_A_LEAF_NODE;
 
 
 var defaults = {
@@ -471,6 +476,21 @@ function lalala(tree_input_param, mapping_input_param)
     });
 
     listener("tree-rotation", "change", set_msg_and_draw);
+
+    listener(ID_BIOLOGICALLY_ROOTED, "change", function() {
+      // TODO which things actaully need to be updates?
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        set_options_by_metadata();
+        update_form_constants();
+        draw_links();
+        draw_link_extensions();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
 
     // TODO needs longer timer to actually work.  Not sure why.
     listener("tree-sort", "change", function() {
@@ -815,6 +835,9 @@ function lalala(tree_input_param, mapping_input_param)
     function update_form_constants()
     {
 
+      VAL_BIOLOGICALLY_ROOTED = is_checked(ID_BIOLOGICALLY_ROOTED);
+      // try_disable_bio_rooted();
+
       VAL_LEAF_LABEL_COLOR = jq(ID_LEAF_LABEL_COLOR).val();
       VAL_LEAF_LABEL_FONT = jq(ID_LEAF_LABEL_FONT).val();
 
@@ -1029,30 +1052,33 @@ function lalala(tree_input_param, mapping_input_param)
         .size([the_width * 1, the_height * 1])
         .separation(function(a, b) { return 1; });
 
-      root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
+      ROOT = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
         .sum(function(d) { return d.branchset ? 0 : 1; })
         .sort(sort_function);
 
+      TREE_IS_ROOTED_ON_A_LEAF_NODE = is_rooted_on_a_leaf_node(ROOT);
+      try_disable_bio_rooted();
+
       // Add metadata if it is available.
       if (name2md) {
-        add_metadata(root, name2md, MATCHING_TYPE);
+        add_metadata(ROOT, name2md, MATCHING_TYPE);
       } else {
-        add_blank_metadata(root);
+        add_blank_metadata(ROOT);
       }
 
       // Set the root branch length to zero each time.
       if (LAYOUT_CIRCLE) {
-        circle_cluster(root);
-        setRadius(root, root.data.branch_length = 0, (the_width / 2) / maxLength(root));
+        circle_cluster(ROOT);
+        setRadius(ROOT, ROOT.data.branch_length = 0, (the_width / 2) / maxLength(ROOT));
 
       } else if (LAYOUT_STRAIGHT) {
-        rectangle_cluster(root);
+        rectangle_cluster(ROOT);
         // TODO should this be width or height
-        setRadius(root, root.data.branch_length = 0, (the_height * 1) / maxLength(root));
+        setRadius(ROOT, ROOT.data.branch_length = 0, (the_height * 1) / maxLength(ROOT));
       } else { // LAYOUT_RADIAL
-        radial_cluster(root);
+        radial_cluster(ROOT);
         // TODO should this actually be the same as for straight layout?
-        setRadius(root, root.data.branch_length = 0, (the_height * 1) / maxLength(root));
+        setRadius(ROOT, ROOT.data.branch_length = 0, (the_height * 1) / maxLength(ROOT));
 
       }
     }
@@ -1121,7 +1147,7 @@ function lalala(tree_input_param, mapping_input_param)
     {
       inner_dots = d3.select("#inner-dot-container")
         .selectAll("circle")
-        .data(root.descendants().filter(is_inner));
+        .data(ROOT.descendants().filter(is_inner));
 
       if (SHOW_INNER_DOTS) {
         inner_dots
@@ -1152,7 +1178,7 @@ function lalala(tree_input_param, mapping_input_param)
     {
       leaf_dots = d3.select("#leaf-dot-container")
         .selectAll("circle")
-        .data(root.descendants().filter(is_leaf));
+        .data(ROOT.descendants().filter(is_leaf));
 
       if (SHOW_LEAF_DOTS) {
         leaf_dots
@@ -1193,7 +1219,7 @@ function lalala(tree_input_param, mapping_input_param)
     {
       inner_labels = d3.select("#inner-label-container")
         .selectAll("text")
-        .data(root.descendants().filter(is_inner));
+        .data(ROOT.descendants().filter(is_inner));
 
       if (SHOW_INNER_LABELS) {
 
@@ -1241,7 +1267,7 @@ function lalala(tree_input_param, mapping_input_param)
 
       labels = d3.select("#leaf-label-container")
         .selectAll("text")
-        .data(root.descendants().filter(is_leaf));
+        .data(ROOT.descendants().filter(is_leaf));
 
       if (SHOW_LEAF_LABELS) {
         labels.exit().remove();
@@ -1319,7 +1345,7 @@ function lalala(tree_input_param, mapping_input_param)
       if (!LAYOUT_RADIAL) {
         linkExtension = d3.select("#link-extension-container")
           .selectAll("path")
-          .data(root.links().filter(function (d) {
+          .data(ROOT.links().filter(function (d) {
             return !d.target.children;
           }));
 
@@ -1367,7 +1393,7 @@ function lalala(tree_input_param, mapping_input_param)
     {
       link = d3.select("#link-container")
         .selectAll("path")
-        .data(root.links());
+        .data(ROOT.links());
 
       link.enter().append("path")
         .attr("fill", "none")
@@ -1881,21 +1907,21 @@ function draw_scale_bar()
     var SCALE_BAR_TEXT_PADDING = 5;
 
 
-    var first_link = root.links()[0];
+    var first_link = ROOT.links()[0];
     var pixels_per_unit_length;
 
     if (LAYOUT_RADIAL) {
-      lengths = root.descendants().map(function(d) { return d.data.branch_length });
+      lengths = ROOT.descendants().map(function(d) { return d.data.branch_length });
 
       pixels_per_unit_length = RADIAL_LAYOUT_WEIGHT * Math.sqrt(Math.pow(first_link.target.radial_layout_info.x - first_link.source.radial_layout_info.x, 2) + Math.pow(first_link.target.radial_layout_info.y - first_link.source.radial_layout_info.y, 2)) / first_link.target.data.branch_length;
 
     } else {
       if (TREE_BRANCH_STYLE == TREE_BRANCH_NORMAL) {
-        lengths = root.descendants().map(function(d) { return d.data.branch_length });
+        lengths = ROOT.descendants().map(function(d) { return d.data.branch_length });
         pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.branch_length;
 
       } else {
-        lengths = root.descendants().map(function(d) { return d.height });
+        lengths = ROOT.descendants().map(function(d) { return d.height });
 
         // The source height will be higher than the target height as the leaf nodes have a height of 0 and internal nodes add 1 for each speciation event.
         pixels_per_unit_length = (first_link.target.y - first_link.source.y) / (first_link.source.height - first_link.target.height);
@@ -2149,24 +2175,150 @@ function add_blank_metadata(root)
 // }
 
 
-// The branch option needs to be the underscore version.
-// TODO this is the slow function.  Just do this once at the beginning and mark all targets with the appropriate metadata.
+// // The branch option needs to be the underscore version.
+// // TODO this is the slow function.  Just do this once at the beginning and mark all targets with the appropriate metadata.
+// function get_branch_md_val(node, branch_option, default_value)
+// {
+//   var sibling, children;
+//
+//   if ((sibling = is_silly(node))) {
+//     // this is a silly node, so get the md value from the sibling
+//     return sibling.metadata[branch_option] || default_value;
+//   }
+//   // TODO START HERE.  NEED TO SEE IF THE SIBLING OF WONKY NODE HAS SAME MD VALUE.  IF SO YOU CAN USE IT, IF NOT THEY BOTH NEED TO BE DEFAULT.  A WONKY NODE IS A DEPTH 1 NODE THAT IS NOT A LEAF NODE AND IT'S SIBLING(S) ARE ALSO NOT LEAF NODE.  IT HAPPENS IN A TREE ROOTED NOT ON A LEAF NODE.
+//   else if ((children = is_wonky(node))){
+//     var md_vals = []
+//     children.forEach(function(child) {
+//       if (is_wonky(child)) {
+//         // TODO if the child of a wonky node is also wonky, there was an error.  Just return the default value and be done.
+//         alert("WARNING -- the child of a wonky node was also wonky.  Using default value for branch option.")
+//         return default_value;
+//       } else {
+//         push_unless_present(md_vals, get_branch_md_val(child, branch_option, default_value));
+//       }
+//
+//       // If the children have all same md vals, then the radial tree wont look weird, but if not it will.
+//       return md_vals.length === 1 ? md_vals[0] : default_value;
+//     });
+//   }
+//   else {
+//     var leaves = get_leaves(node);
+//     var md_vals = [];
+//
+//     leaves.forEach(function(leaf){
+//       // Assumes that metadata has already been added.
+//       var val = leaf.metadata[branch_option];
+//       if (val) {
+//         push_unless_present(md_vals, val);
+//       } else { // got undefined, push defualt value
+//         push_unless_present(md_vals, default_value);
+//       }
+//     });
+//
+//     return md_vals.length === 1 ? md_vals[0] : default_value;
+//   }
+// }
+
 function get_branch_md_val(node, branch_option, default_value)
 {
-  var leaves = get_leaves(node);
-  var md_vals = [];
+  function get_md_val(node, branch_option, default_value) {
+    // First, get the metadata val for this node.
+    var leaves = get_leaves(node);
+    var md_vals = [];
 
-  leaves.forEach(function(leaf){
-    // Assumes that metadata has already been added.
-    var val = leaf.metadata[branch_option];
-    if (val) {
-      push_unless_present(md_vals, val);
-    } else { // got undefined, push defualt value
-      push_unless_present(md_vals, default_value);
+    leaves.forEach(function(leaf) {
+      // TODO check if metadata is actually an attr of leaf.
+      var val = leaf.metadata[branch_option];
+      if (val) {
+        push_unless_present(md_vals, val);
+      }
+      else {
+        // Got undefined, push default value
+        push_unless_present(md_vals, default_value);
+      }
+    });
+
+    return md_vals.length === 1 ? md_vals[0] : default_value;
+  }
+
+  function get_sibling_md_val(node, branch_option, default_value) {
+    var parent = node.parent;
+    var children = parent.children;
+
+    // If there is more than one sibling, then things are strange just put the defualt value.
+    if (children.length !== 2) {
+      alert("WARNING -- The biological root has multiple sibling nodes.  Automatic branch styling is not handled in this case.  Using the default color value.  If the branch styling near the root looks strange, this is likely the reason.");
+      return default_value;
     }
-  });
+    else {
+      var sibling = children[0] === node ? children[1] : children[0];
+      return get_md_val(sibling, branch_option, default_value);
+    }
+  }
 
-  return md_vals.length === 1 ? md_vals[0] : default_value;
+  var md_val_for_this_node = get_md_val(node, branch_option, default_value);
+
+  if (is_silly(node)) {
+    // This is a silly node and we need to check for odd rooting behavior.
+    if (LAYOUT_RADIAL && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
+      // Give the styling of this node the same styling as its sibling (the biological root of the tree).
+      return get_sibling_md_val(node, branch_option, default_value);
+    }
+    else if (LAYOUT_RADIAL && VAL_BIOLOGICALLY_ROOTED) {
+      // The tree is rooted somewhere between two leaf nodes.  In this case the root is known to be biologically meaningful, so the biological node and the computational node are the same.  In this case coloring of clades coming from the root are colored normally.
+      return md_val_for_this_node;
+    }
+    else if (LAYOUT_RADIAL) {
+      // Same as above except that in this case the computational root is not biologically meaningful, so we don't want a case where the backbone of a radial tree is two different colors.  Only color this node's branch if it's sibling is the same color.
+      var sibling_md_val = get_sibling_md_val(node, branch_option, default_value);
+      if (sibling_md_val === md_val_for_this_node) {
+        return md_val_for_this_node;
+      }
+      else {
+
+        return default_value;
+      }
+    }
+    else {
+      return md_val_for_this_node;
+    }
+  }
+  else {
+    // This is a regular node so just style the branches normally.
+    return md_val_for_this_node;
+  }
+}
+
+
+
+// The node is silly if the tree is in radial layout and parent is the true root and one of the siblings is the biological root.  OR if the parent is a true root and the biological root and the node is depth 1.
+function is_silly(node)
+{
+  if (!LAYOUT_RADIAL) {
+    return false;
+  }
+  // Is this branch attached to the root of the tree?
+  else if (is_rooted_on_this_leaf_node(node)) {
+    return false;
+  }
+  else if (node.depth === 1) {
+    if (!TREE_IS_ROOTED_ON_A_LEAF_NODE) {
+      return true;
+    }
+    else {
+      // Check if has a sibling that is a leaf and a biological root
+      var depth_one_nodes = node.parent.children;
+      var i = 0;
+      for (i = 0; i < depth_one_nodes.length; ++i) {
+        var sibling = depth_one_nodes[i];
+        if (sibling !== node && is_rooted_on_this_leaf_node(sibling)) {
+          return sibling;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 function set_options_by_metadata()
@@ -2207,6 +2359,35 @@ function set_options_by_metadata()
   }
 }
 
+function is_rooted_on_this_leaf_node(d)
+{
+  // Depth is 1 means it is one level from root.
+  return is_leaf(d) && d.depth === 1;
+}
+
+
+// TODO you have to check for true or string in the output.
+function is_rooted_on_a_leaf_node(d3_tree)
+{
+
+  var children = d3_tree.children;
+  var i = 0;
+  for (i = 0; i < children.length; ++i) {
+    var child = children[i];
+    if (is_rooted_on_this_leaf_node(child)) {
+      if (child.data.name === "") {
+        // TODO not sure if a leaf can ever have a blank name, but if it can "" will be falsey and mess up the results, so just return true.
+        return true;
+      } else {
+        return child.data.name
+      }
+    }
+  }
+
+  return false;
+}
+
+// Start here.  If it is rooted on a leaf node, and that leaf node has a color, need to propegate the color of that leaf node's branch to the other depth 1 branch adjacent to the root node if it is a radial tree.  If not a radial tree, do nothing.
 
 function is_leaf(d)
 {
@@ -2216,6 +2397,11 @@ function is_leaf(d)
 function is_inner(d)
 {
   return !is_leaf(d);
+}
+
+function is_root_node(d)
+{
+  return d.depth === 1;
 }
 
 function get_leaves(target)
@@ -2358,6 +2544,11 @@ function get_translation(transform_str)
 //   $("#" + id).prop("selected", false);
 // }
 
+function is_checked(id) {
+  return jq(id).prop("checked");
+}
+
+
 function check(id)
 {
   $("#" + id).prop("checked", true);
@@ -2437,6 +2628,9 @@ function reset_all_to_defaults()
 
   // Viewer options
   check(ID_VIEWER_SIZE_FIXED);
+
+
+  check(ID_BIOLOGICALLY_ROOTED);
 }
 
 
@@ -2559,4 +2753,15 @@ function ryan(start, mid, stop, num_colors, transform)
 
 var tree_debug;
 
-
+// TODO this will not work properly unless TREE_IS_ROOTED_ON_A_LEAF_NODE has been set.
+function try_disable_bio_rooted()
+{
+  if (LAYOUT_RADIAL && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
+    jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", true);
+  }
+  else if (!LAYOUT_RADIAL) {
+    jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", true);
+  } else {
+    jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", false);
+  }
+}
