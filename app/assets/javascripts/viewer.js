@@ -486,6 +486,10 @@ function lalala(tree_input_param, mapping_input_param)
         update_form_constants();
         draw_links();
         draw_link_extensions();
+
+        // Changing this option might need to draw root node dot, might not.
+        draw_inner_dots();
+
         draw_scale_bar();
         adjust_tree();
         utils__set_status_msg_to_done();
@@ -1145,9 +1149,18 @@ function lalala(tree_input_param, mapping_input_param)
 
     function draw_inner_dots()
     {
+
+      var no_root_dot = LAYOUT_RADIAL && (TREE_IS_ROOTED_ON_A_LEAF_NODE || !VAL_BIOLOGICALLY_ROOTED);
+
+      var dat = no_root_dot ?
+        ROOT.descendants().filter(function(d) {
+          return is_inner(d) && ! is_root(d);
+        }) :
+        ROOT.descendants().filter(is_inner);
+
       inner_dots = d3.select("#inner-dot-container")
         .selectAll("circle")
-        .data(ROOT.descendants().filter(is_inner));
+        .data(dat);
 
       if (SHOW_INNER_DOTS) {
         inner_dots
@@ -2388,6 +2401,10 @@ function is_rooted_on_a_leaf_node(d3_tree)
 }
 
 // Start here.  If it is rooted on a leaf node, and that leaf node has a color, need to propegate the color of that leaf node's branch to the other depth 1 branch adjacent to the root node if it is a radial tree.  If not a radial tree, do nothing.
+
+function is_root(d) {
+  return d.depth === 0;
+}
 
 function is_leaf(d)
 {
