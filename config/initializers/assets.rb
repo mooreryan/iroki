@@ -8,4 +8,4 @@ Rails.application.config.assets.version = '1.0'
 
 # Precompile additional assets.
 # application.js, application.css, and all non-JS/CSS in app/assets folder are already added.
-Rails.application.config.assets.precompile += %w( viewer.js newick.js FileSaver.js Blob.js canvas-toBlob.js verge.js papaparse.js parse_mapping_file.js chroma.js)
+Rails.application.config.assets.precompile += %w( d3.js viewer.js newick.js FileSaver.js Blob.js canvas-toBlob.js verge.js papaparse.js parse_mapping_file.js chroma.js)
