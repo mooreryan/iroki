@@ -196,9 +196,26 @@ var ID_INNER_LABEL_COLOR = "inner-label-color",
   VAL_INNER_LABEL_COLOR,
   VAL_INNER_LABEL_FONT;
 
+var ID_INNER_DOT_SIZE = "inner-dot-size",
+  ID_LEAF_DOT_SIZE = "leaf-dot-size";
+
 var ID_BIOLOGICALLY_ROOTED = "biological-root",
   VAL_BIOLOGICALLY_ROOTED;
 
+var ID_SHOW_INNER_DOTS = "show-inner-dots",
+  ID_SHOW_INNER_DOTS_NONE = "show-inner-dots-none",
+  ID_SHOW_INNER_DOTS_NORMAL = "show-inner-dots-normal",
+  ID_SHOW_INNER_DOTS_BOOTSTRAP = "show-inner-dots-bootstrap",
+  VAL_SHOW_INNER_DOTS;
+
+var ID_BOOTSTRAP_CUTOFF_FILLED_DOT = "bootstrap-cutoff-filled-dot",
+  ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT = "bootstrap-cutoff-unfilled-dot";
+
+var VAL_BOOTSTRAP_CUTOFF_FILLED_DOT,
+  VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT;
+
+var DEFAULT_BOOTSTRAP_CUTOFF_FILLED_DOT = 0.75,
+  DEFAULT_BOOTSTRAP_CUTOFF_UNFILLED_DOT = 0.5;
 
 var ID_RESET_BUTTON = "reset";
 
@@ -223,7 +240,7 @@ var md_cat_name2id = {
   "leaf_label_font": null,
   "leaf_label_size": "leaf-label-size",
   "leaf_dot_color": null,
-  "leaf_dot_size": "leaf-dot-size",
+  "leaf_dot_size": ID_LEAF_DOT_SIZE,
   "new_name": null,
   "branch_width": "branch-width",
   "branch_color": null
@@ -687,7 +704,7 @@ function lalala(tree_input_param, mapping_input_param)
       }, TIMEOUT);
     });
 
-    listener("show-inner-dots", "change", function() {
+    listener(ID_SHOW_INNER_DOTS, "change", function() {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
@@ -695,7 +712,7 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("inner-dot-size", "change", function() {
+    listener(ID_INNER_DOT_SIZE, "change", function() {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
@@ -717,7 +734,7 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("leaf-dot-size", "change", function() {
+    listener(ID_LEAF_DOT_SIZE, "change", function() {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function(){
@@ -761,6 +778,24 @@ function lalala(tree_input_param, mapping_input_param)
         adjust_tree();
       });
     });
+
+    listener(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT, "change", function() {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        update_and_draw(draw_inner_dots);
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_BOOTSTRAP_CUTOFF_FILLED_DOT, "change", function() {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function(){
+        update_and_draw(draw_inner_dots);
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+
 
     listener("branch-color", "change", function() {
       utils__set_status_msg_to_rendering();
@@ -839,6 +874,9 @@ function lalala(tree_input_param, mapping_input_param)
     function update_form_constants()
     {
 
+      // Make sure the bootstrap cutoffs are good
+      set_and_validate_bootstrap_cutoff_input();
+
       VAL_BIOLOGICALLY_ROOTED = is_checked(ID_BIOLOGICALLY_ROOTED);
       // try_disable_bio_rooted();
 
@@ -887,19 +925,40 @@ function lalala(tree_input_param, mapping_input_param)
 
 
       // Dots
-      SHOW_INNER_DOTS = document.getElementById("show-inner-dots").checked;
+      VAL_SHOW_INNER_DOTS = jq(ID_SHOW_INNER_DOTS).val();
+      SHOW_INNER_DOTS = document.getElementById(ID_SHOW_INNER_DOTS).checked;
       SHOW_LEAF_DOTS = document.getElementById("show-leaf-dots").checked;
-      INNER_DOT_SIZE = parseInt(document.getElementById("inner-dot-size").value);
-      LEAF_DOT_SIZE = parseInt(document.getElementById("leaf-dot-size").value);
-      if (SHOW_INNER_DOTS) {
-        document.getElementById("inner-dot-size").removeAttribute("disabled");
-      } else {
-        document.getElementById("inner-dot-size").setAttribute("disabled", "");
+      INNER_DOT_SIZE = parseInt(document.getElementById(ID_INNER_DOT_SIZE).value);
+      LEAF_DOT_SIZE = parseInt(document.getElementById(ID_LEAF_DOT_SIZE).value);
+
+      switch(VAL_SHOW_INNER_DOTS) {
+        case ID_SHOW_INNER_DOTS_NONE:
+          disable(ID_INNER_DOT_SIZE);
+          SHOW_INNER_DOTS = false;
+
+          break;
+        case ID_SHOW_INNER_DOTS_NORMAL:
+          undisable(ID_INNER_DOT_SIZE);
+          SHOW_INNER_DOTS = true;
+
+          break;
+        case ID_SHOW_INNER_DOTS_BOOTSTRAP:
+          undisable(ID_INNER_DOT_SIZE);
+          SHOW_INNER_DOTS = true;
+
+          break;
+        default:
+          // Something weird happened, just disable it.
+          disable(ID_INNER_DOT_SIZE);
+          SHOW_INNER_DOTS = false;
+
+          break;
       }
+
       if (SHOW_LEAF_DOTS) {
-        document.getElementById("leaf-dot-size").removeAttribute("disabled");
+        undisable(ID_LEAF_DOT_SIZE);
       } else {
-        document.getElementById("leaf-dot-size").setAttribute("disabled", "");
+        disable(ID_LEAF_DOT_SIZE)
       }
 
 
@@ -1170,7 +1229,9 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("transform", function(d) {
             return pick_transform(d);
           })
-          .attr("fill", VAL_INNER_DOT_COLOR);
+          .attr("fill", inner_dot_fill)
+          .attr("stroke", inner_dot_stroke)
+          .attr("stroke-width", inner_dot_stroke_width); // TODO make this an option.
 
         inner_dots.merge(inner_dots)
         // .transition(TR)
@@ -1178,7 +1239,10 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("transform", function(d) {
             return pick_transform(d);
           })
-          .attr("fill", VAL_INNER_DOT_COLOR);
+          .attr("fill", inner_dot_fill)
+          .attr("stroke", inner_dot_stroke)
+          .attr("stroke-width", inner_dot_stroke_width); // TODO make this an option.
+
 
       } else {
         inner_dots
@@ -2580,6 +2644,13 @@ function jq(id)
   return $("#" + id);
 }
 
+function disable(id) {
+  return jq(id).prop("disabled", true);
+}
+
+function undisable(id) {
+  return jq(id).prop("disabled", false);
+}
 
 // Currently, these are all the defaults for the radial tree.
 function reset_all_to_defaults()
@@ -2630,7 +2701,7 @@ function reset_all_to_defaults()
   jq(ID_INNER_LABEL_FONT).val("Helvetica");
 
   // Dot options
-  uncheck("show-inner-dots");
+  uncheck(ID_SHOW_INNER_DOTS);
   $("#inner-dot-size").val(5);
 
   uncheck("show-leaf-dots");
@@ -2781,4 +2852,103 @@ function try_disable_bio_rooted()
   } else {
     jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", false);
   }
+}
+
+function inner_dot_fill(d) {
+  var val = parseFloat(d.data.name);
+  var bootstrap_val = isNaN(val) ? 0.0 : val;
+
+  if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NONE) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NORMAL) {
+    return VAL_INNER_DOT_COLOR;
+  }
+  else if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_BOOTSTRAP) {
+    if (bootstrap_val >= VAL_BOOTSTRAP_CUTOFF_FILLED_DOT) {
+      return VAL_INNER_DOT_COLOR;
+    }
+    else {
+      return "none";
+    }
+  }
+}
+
+function inner_dot_stroke(d) {
+  var val = parseFloat(d.data.name);
+  var bootstrap_val = isNaN(val) ? 0.0 : val;
+
+  if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NONE) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NORMAL) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_BOOTSTRAP) {
+    if (bootstrap_val >= VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT) {
+      return VAL_INNER_DOT_COLOR;
+    }
+    else {
+      return "none";
+    }
+  }
+}
+
+function inner_dot_stroke_width(d) {
+  var val = parseFloat(d.data.name);
+  var bootstrap_val = isNaN(val) ? 0.0 : val;
+
+  if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NONE) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NORMAL) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_BOOTSTRAP) {
+    if (bootstrap_val >= VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT) {
+      return "2px";
+    }
+    else {
+      return "none";
+    }
+  }
+}
+
+function set_and_validate_bootstrap_cutoff_input() {
+  VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT = parseFloat(jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val());
+  VAL_BOOTSTRAP_CUTOFF_FILLED_DOT = parseFloat(jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val());
+
+  // First check if either are NaN, if so use the default value.
+  if (isNaN(VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT)) {
+    // Set it to the deault value.
+    jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(DEFAULT_BOOTSTRAP_CUTOFF_UNFILLED_DOT);
+    VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT = DEFAULT_BOOTSTRAP_CUTOFF_UNFILLED_DOT;
+  }
+
+  if (isNaN(VAL_BOOTSTRAP_CUTOFF_FILLED_DOT)) {
+    // Set it to the deault value.
+    jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val(DEFAULT_BOOTSTRAP_CUTOFF_FILLED_DOT);
+    VAL_BOOTSTRAP_CUTOFF_FILLED_DOT = DEFAULT_BOOTSTRAP_CUTOFF_FILLED_DOT;
+  }
+
+  // Then check to make sure that the unfilled cutoff is less than the filled cutoff.
+  if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > VAL_BOOTSTRAP_CUTOFF_FILLED_DOT) {
+    // Set it to the upper val
+    jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(VAL_BOOTSTRAP_CUTOFF_FILLED_DOT);
+  }
+
+  // Make sure it is between 0 and 100.  Bootstraps will run between 0 and 1 or 0 and 100.
+  if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > 100) {
+    jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(100);
+  }
+  if (VAL_BOOTSTRAP_CUTOFF_FILLED_DOT > 100) {
+    jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val(100);
+  }
+  if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT < 0) {
+    jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(0);
+  }
+  if (VAL_BOOTSTRAP_CUTOFF_FILLED_DOT < 0) {
+    jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val(0);
+  }
+
 }

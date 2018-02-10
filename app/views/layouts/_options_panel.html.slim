@@ -120,27 +120,43 @@
       li class="accordion-item" data-accordion-item=""
         a href="#" class="accordion-title" Dot options
         .accordion-content data-tab-content=""
+          h4 Inner dots
+          .row
+            .small-12.columns
+              label for="show-inner-dots" Show inner dots?
+              select id="show-inner-dots"
+                option id="show-inner-dots-none" value="show-inner-dots-none" selected="" None
+                option id="show-inner-dots-normal" value="show-inner-dots-normal" Normal
+                option id="show-inner-dots-bootstrap" value="show-inner-dots-bootstrap" Bootstrap support
+
+          / Get vals for bootstrap support cutoff values.
           .row
             .small-12.medium-12.large-6.columns
-              label for="show-inner-dots" Show inner dots?
-              input id="show-inner-dots" type="checkbox"
+              label for="bootstrap-cutoff-unfilled-dot" Bootstrap open dot cutoff
+              input id="bootstrap-cutoff-unfilled-dot" value="0.5"
+            .small-12.medium-12.large-6.columns
+              label for="bootstrap-cutoff-filled-dot" Bootstrap filled dot cutoff
+              input id="bootstrap-cutoff-filled-dot" value="0.75"
+          .row
+            .small-12.medium-12.large-6.columns
+              label for="inner-dot-color" Inner dot color
+              input id="inner-dot-color" type="color" value="#000000"
             .small-12.medium-12.large-6.columns
               label for="inner-dot-size" Inner dot size
               input id="inner-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
+
+          h4 Leaf dots
           .row
-            .small-12.medium-12.large-6.columns
+            .small-12.columns
               label for="show-leaf-dots" Show leaf dots?
               input id="show-leaf-dots" type="checkbox"
+          .row
+            .small-12.medium-12.large-6.columns
+              label for="leaf-dot-color" Leaf dot color
+              input id="leaf-dot-color" type="color" value="#000000"
             .small-12.medium-12.large-6.columns
               label for="leaf-dot-size" Leaf dot size
               input id="leaf-dot-size" type="range" min="2" max="8" value="5" class="slider width-100"
-          .row
-            .small-6.columns
-              label for="leaf-dot-color" Leaf dot color
-              input id="leaf-dot-color" type="color" value="#000000"
-            .small-6.columns
-              label for="inner-dot-color" Inner dot color
-              input id="inner-dot-color" type="color" value="#000000"
 
       li class="accordion-item" data-accordion-item=""
         a href="#" class="accordion-title" Branch options
