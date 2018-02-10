@@ -65,4 +65,6 @@ Amelia	blue
 - Export custom name/color labeling from viewer.  I.e., export an iroki mapping file for import to the next iroki session.
 
 
+Dashed line for inner node bootstrap support (i.e. 3 levels).  stroke-dasharray="2,2" looks nice for the range of sizes available for the inner nodes.
+
 

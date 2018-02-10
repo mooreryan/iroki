@@ -782,6 +782,13 @@ function lalala(tree_input_param, mapping_input_param)
     listener(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT, "change", function() {
       utils__set_status_msg_to_rendering();
 
+      VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT = jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val();
+      // We just changed unfilled so update the filled one with a valid value.
+      if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > VAL_BOOTSTRAP_CUTOFF_FILLED_DOT) {
+        // Set it to the upper val
+        jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val(VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT);
+      }
+
       setTimeout(function(){
         update_and_draw(draw_inner_dots);
         utils__set_status_msg_to_done();
@@ -789,6 +796,15 @@ function lalala(tree_input_param, mapping_input_param)
     });
     listener(ID_BOOTSTRAP_CUTOFF_FILLED_DOT, "change", function() {
       utils__set_status_msg_to_rendering();
+
+      VAL_BOOTSTRAP_CUTOFF_FILLED_DOT = jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val();
+
+      // We just changed the filled one so update the unfilled one to be valid.
+      if (VAL_BOOTSTRAP_CUTOFF_FILLED_DOT < VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT) {
+        // Set it to the upper val
+        jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(VAL_BOOTSTRAP_CUTOFF_FILLED_DOT);
+      }
+
 
       setTimeout(function(){
         update_and_draw(draw_inner_dots);
@@ -2931,11 +2947,11 @@ function set_and_validate_bootstrap_cutoff_input() {
     VAL_BOOTSTRAP_CUTOFF_FILLED_DOT = DEFAULT_BOOTSTRAP_CUTOFF_FILLED_DOT;
   }
 
-  // Then check to make sure that the unfilled cutoff is less than the filled cutoff.
-  if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > VAL_BOOTSTRAP_CUTOFF_FILLED_DOT) {
-    // Set it to the upper val
-    jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(VAL_BOOTSTRAP_CUTOFF_FILLED_DOT);
-  }
+  // // Then check to make sure that the unfilled cutoff is less than the filled cutoff.
+  // if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > VAL_BOOTSTRAP_CUTOFF_FILLED_DOT) {
+  //   // Set it to the upper val
+  //   jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(VAL_BOOTSTRAP_CUTOFF_FILLED_DOT);
+  // }
 
   // Make sure it is between 0 and 100.  Bootstraps will run between 0 and 1 or 0 and 100.
   if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > 100) {
