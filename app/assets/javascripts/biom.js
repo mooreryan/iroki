@@ -276,9 +276,9 @@ function biom__colors_from_biom_str(biom_str) {
 }
 
 function json_to_tsv(json) {
-  var strings = [];
+  var strings = ["name\tbranch_color\tleaf_label_color\tleaf_dot_color"];
   json_each(json, function(key, val) {
-    var str = [key, val].join("\t");
+    var str = [key, val, val, val].join("\t");
 
     strings.push(str);
   });
@@ -293,4 +293,39 @@ function biom__save_abundance_colors(biom_str) {
   var blob = new Blob([tsv_str], {type: "text/plain;charset=utf-8"});
 
   saveAs(blob, "mapping.txt");
+}
+
+// handle upload button
+function biom__upload_button() {
+  var submit_id = "submit";
+  var uploader_id = "uploader";
+
+  var uploader = document.getElementById(uploader_id);
+  var submit_button = document.getElementById(submit_id);
+  
+  var biom_reader = new FileReader();
+
+  biom_reader.onload = function(event) {
+    var biom_str = event.target.result;
+    biom__save_abundance_colors(biom_str);
+  };
+
+  uploader.addEventListener("change", function(){
+    undisable("submit");
+  });
+  submit_button.addEventListener("click", function() {
+    handleFiles();
+  }, false);
+  document.getElementById(ID_RESET_BUTTON).addEventListener("click", function() {
+    $("#reset").prop("disabled", true);
+    document.getElementById("file-upload-form").reset();
+  });
+
+  function handleFiles() {
+    submit_button.setAttribute("disabled", "");
+    var file = uploader.files[0];
+    if (file) {
+      biom_reader.readAsText(file);
+    }
+  }
 }

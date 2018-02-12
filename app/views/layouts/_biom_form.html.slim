@@ -1,0 +1,19 @@
+p Hi, I'm the biom form.
+
+.row#everything
+
+  ul#example-tabs.tabs data-tabs=""
+    li.tabs-title.is-active
+      a#upload-tab-button aria-selected="true" href="#upload-panel" Upload
+    /li.tabs-title
+    /  a#options-tab-button href="#options-panel" Options
+    /li.tabs-title
+    /  a#save-tab-button href="#save-panel" Save
+
+  #form-div.tabs-content data-tabs-content="example-tabs"
+    #upload-panel.tabs-panel.is-active
+      = render "layouts/biom_upload_panel"
+    /#options-panel.tabs-panel
+    /  = render "layouts/options_panel"
+    /#save-panel.tabs-panel
+    /  = render "layouts/save_panel"
