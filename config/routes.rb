@@ -17,7 +17,7 @@ Rails.application.routes.draw do
 
   get 'docs' => 'pages#docs', as: :docs
 
-  get 'biom' => 'pages#biom', as: :biom
+  # get 'biom' => 'pages#biom', as: :biom
 
   # get 'viewer' => 'pages#home', as: :viewer
   # get 'viewer', to: 'pages#home'
