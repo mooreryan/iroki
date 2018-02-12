@@ -1,5 +1,13 @@
-.row.upload-form
-  = render "layouts/biom_form"
+.row
+  h1 Biom to color map converter
+
+.row
+  p Hi, I'm the biom file to color map converter!  I take your tab seperated biom file and give each OTU a color based on its abundance profile.
+
+.row.thick-border
+  .small-12.columns#outer-container
+    .row.expanded.upload-form
+      = render "layouts/biom_form"
 
 javascript:
   // biom__save_abundance_colors is a function that takes a single arg, the biom file as a string.

@@ -206,26 +206,12 @@ function centroids_of_samples(biom_txt)
 
 function colors_from_centroids(centroids, csv)
 {
-  function mag(pt)
-  {
-    return Math.sqrt(Math.pow(pt.x, 2) + Math.pow(pt.y, 2));
-  }
-
-  function rad_to_deg(rad)
-  {
-    return rad * 180 / Math.PI;
-  }
-
-
-  console.log(centroids);
-  console.log(csv);
-
   var avg_counts = {};
   var max_avg_count = 0;
+  var min_avg_count = 999999999;
   csv.data.forEach(function(dat) {
     var n = 0;
     var this_leaf = "";
-    console.log("dat is: " + JSON.stringify(dat, null, 2));
     json_each(dat, function(key, val) {
       if (key === "name") {
         this_leaf = val;
@@ -237,35 +223,70 @@ function colors_from_centroids(centroids, csv)
     });
 
 
-    console.log("n: " + n);
-    console.log("avg_counts before: " + JSON.stringify(avg_counts));
     avg_counts[this_leaf] /= n;
 
     if (max_avg_count < avg_counts[this_leaf]) {
       max_avg_count = avg_counts[this_leaf];
     }
+    if (min_avg_count > avg_counts[this_leaf]) {
+      min_avg_count = avg_counts[this_leaf];
+    }
   });
 
-  console.log(avg_counts);
-
-  var colors = {}
+  var colors = {};
   json_each(centroids, function(leaf, pt) {
-    // the angle of the vector from origin to centroid.
-    var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
-    console.log("RYAN: leaf: " + leaf + " pt: " + JSON.stringify(pt) + " hue: " + hue);
-
-    // double it cos the max is half the radius but should be 1.
-    var saturation = mag(pt) * 2;
-
-    // we want the highest to be 0.5 ie pure color.
-    var lightness = avg_counts[leaf] / max_avg_count / 2;
-
-    console.log("leaf: " + leaf + " " + chroma.hsl(hue, saturation, lightness).hsl());
-
-    colors[leaf] = chroma.hsl(hue, saturation, lightness).hex();
-  });
+    colors[leaf] = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count); });
 
   return colors;
+}
+
+function mag(pt) {
+  return Math.sqrt(Math.pow(pt.x, 2) + Math.pow(pt.y, 2));
+}
+
+function rad_to_deg(rad) {
+  return rad * 180 / Math.PI;
+}
+
+function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
+  // the angle of the vector from origin to centroid.
+  var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
+
+  // double it cos the max is half the radius but should be 1.
+  var chroma_val = mag(pt) * 2 * 100;
+
+  var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, 20, 85);
+
+  return chroma.hcl(hue, chroma_val, lightness).hex();
+
+}
+function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
+  // the angle of the vector from origin to centroid.
+  var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
+
+  // double it cos the max is half the radius but should be 1.
+  var saturation = mag(pt) * 2;
+
+  var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, 0.2, 0.85);
+
+  return chroma.hsl(hue, saturation, lightness).hex();
+
+
+}
+
+
+function max(ary) {
+  return ary.reduce(function(a, b) {
+    return Math.max(a, b);
+  });
+}
+function min(ary) {
+  return ary.reduce(function(a, b) {
+    return Math.min(a, b);
+  });
+}
+function scale(val, old_min, old_max, new_min, new_max) {
+  return ((((new_max - new_min) * (val - old_min)) / (old_max - old_min)) + new_min);
 }
 
 function biom__colors_from_biom_str(biom_str) {
@@ -276,9 +297,9 @@ function biom__colors_from_biom_str(biom_str) {
 }
 
 function json_to_tsv(json) {
-  var strings = ["name\tbranch_color\tleaf_label_color\tleaf_dot_color"];
+  var strings = ["name\tbranch_color\tleaf_label_color\tleaf_dot_color\tbranch_width\tleaf_dot_size"];
   json_each(json, function(key, val) {
-    var str = [key, val, val, val].join("\t");
+    var str = [key, val, val, val, 10, 20].join("\t");
 
     strings.push(str);
   });
@@ -295,13 +316,39 @@ function biom__save_abundance_colors(biom_str) {
   saveAs(blob, "mapping.txt");
 }
 
+var g_ID_COLOR_SPACE = "color-space",
+  g_ID_COLOR_SPACE_HCL = "color-space-hcl",
+  g_ID_COLOR_SPACE_HSL = "color-space-hsl",
+  g_val_color_space,
+  g_color_space_fn;
+
 // handle upload button
 function biom__upload_button() {
-  var submit_id = "submit";
+  function set_color_space_fn(g_val_color_space) {
+    switch (g_val_color_space) {
+      case g_ID_COLOR_SPACE_HCL:
+        g_color_space_fn = get_hcl_color;
+        break;
+      case g_ID_COLOR_SPACE_HSL:
+        g_color_space_fn = get_hsl_color;
+        break;
+      default:
+        g_color_space_fn = get_hcl_color;
+        break;
+    }
+  }
+
+  disable("submit-button");
+  disable("reset-button");
+  g_val_color_space = jq(g_ID_COLOR_SPACE).val();
+  set_color_space_fn(g_val_color_space);
+
+  var submit_id = "submit-button";
   var uploader_id = "uploader";
 
   var uploader = document.getElementById(uploader_id);
   var submit_button = document.getElementById(submit_id);
+  var color_space_dropdown = document.getElementById(g_ID_COLOR_SPACE);
   
   var biom_reader = new FileReader();
 
@@ -311,14 +358,24 @@ function biom__upload_button() {
   };
 
   uploader.addEventListener("change", function(){
-    undisable("submit");
+    undisable("submit-button");
+    undisable("reset-button");
+  });
+  color_space_dropdown.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    g_val_color_space = jq(g_ID_COLOR_SPACE).val();
+    set_color_space_fn(g_val_color_space);
   });
   submit_button.addEventListener("click", function() {
+    undisable("reset-button")
     handleFiles();
   }, false);
-  document.getElementById(ID_RESET_BUTTON).addEventListener("click", function() {
-    $("#reset").prop("disabled", true);
-    document.getElementById("file-upload-form").reset();
+  document.getElementById("reset-button").addEventListener("click", function() {
+    disable("reset-button");
+    undisable("submit-button");
+    document.getElementById("biom-file-upload-form").reset();
   });
 
   function handleFiles() {
@@ -326,6 +383,8 @@ function biom__upload_button() {
     var file = uploader.files[0];
     if (file) {
       biom_reader.readAsText(file);
+    } else {
+      alert("Don't forget to select a biom file!");
     }
   }
 }

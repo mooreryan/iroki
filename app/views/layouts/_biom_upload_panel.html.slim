@@ -2,15 +2,22 @@ hr.row
 
 .row
   h4 Upload biom file
-  form id="file-upload-form"
-    .small-12.columns
-      label for="uploader" Biom tsv file
-      input id="uploader" type="file" name="biom"
-
-hr.row
-
-.row
-  h4 Submit
-  .small-12.columns
-    label for="submit" Submit your files
-    input id="submit" type="button" value="Submit!" disabled=""
+  form id="biom-file-upload-form"
+    .row
+      .small-12.columns
+        label for="uploader" Biom tsv file
+        input id="uploader" type="file" name="biom"
+    .row
+      .small-12.columns
+        label for="color-space" Color space
+        select id="color-space"
+          option id="color-space-hcl" value="color-space-hcl" selected="" Hue Chroma Lightness
+          option id="color-space-hsl" value="color-space-hsl" Hue Saturation Lightness
+    .row
+      .small-12.columns
+        label for="submit-button" Submit file
+        input id="submit-button" type="button" value="Submit!" disabled=""
+    .row
+      .small-12.columns
+        label for="reset-button" Reset form
+        input id="reset-button" type="button" value="Reset!" disabled=""

@@ -2723,8 +2723,8 @@ function reset_all_to_defaults()
   uncheck("show-leaf-dots");
   $("#leaf-dot-size").val(5);
 
-  jq(ID_LEAF_DOT_COLOR).val("black");
-  jq(ID_INNER_DOT_COLOR).val("black");
+  jq(ID_LEAF_DOT_COLOR).val("#000000");
+  jq(ID_INNER_DOT_COLOR).val("#000000");
 
   // Branch options
   $("#branch-color").val("#000000");
@@ -2968,3 +2968,30 @@ function set_and_validate_bootstrap_cutoff_input() {
   }
 
 }
+
+
+
+// TODO the wonky thing about hcl is that the ranges are differnt for c and l depending on the hue.
+// Test lightness portion of hcl vs hsl.
+// var test_vals = [0.00, 0.17, 0.33, 0.50, 0.67, 0.83, 1.00];
+// var _hue = 0;
+// var ys = [];
+// d3.selectAll("circle").remove();
+// test_vals.forEach(function(l, idx) {
+//   ys.push((l*325) + 125);
+//   d3.select("#svg-tree")
+//     .append("circle")
+//     .attr("r", 25)
+//     .attr("fill", chroma.hcl(_hue, 75, l * 100).hex())
+//     .attr("cx", 300).attr("cy", ys[idx]);
+// });
+// test_vals.forEach(function(l, idx) {
+//   d3.select("#svg-tree")
+//     .append("circle")
+//     .attr("r", 25)
+//     .attr("fill", chroma.hsl(_hue, 0.50, l).hex())
+//     .attr("cx", 125).attr("cy", ys[idx])
+// });
+//
+
+// Same thing but varying different parts of the hcl scale.
