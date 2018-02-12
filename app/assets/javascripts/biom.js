@@ -78,8 +78,8 @@ function get_point(count, sample_idx, num_samples)
   var angle = sample_to_angle(sample_idx, num_samples);
 
   var pt = {
-    x: round_to(count * Math.cos(angle), 10000),
-    y: round_to(count * Math.sin(angle), 10000)
+    x: count * Math.cos(angle),
+    y: count * Math.sin(angle)
   };
 
   return pt;
@@ -104,32 +104,51 @@ function sample_counts_to_points(csv)
   // TODO check to see if the json keeps the order.
   var points = {};
 
-  count_data.forEach(function(dat) {
+  count_data.forEach(function(row) {
     var leaf_name = "";
 
     // First you need the max count.
-    var max_count = null;
-    json_each(dat, function(sample_name, count) {
+    var max_count = 0;
+    var min_count = null;
+    var min_non_zero_count = null;
+    json_each(row, function(sample_name, count) {
       if (sample_name !== "name") {
-        var count = dat[sample_name];
-
-        if (!max_count || max_count < count) {
+        if (max_count < count) {
           max_count = count;
+        }
+
+        if (min_count === null || min_count > count) {
+          min_count = count;
+        }
+
+        if (count !== 0 && (min_non_zero_count === null || min_non_zero_count > count)) {
+          min_non_zero_count = count;
         }
       }
     });
 
+    // If the smallest non-zero val is smaller than 1e-5 take a tenth of that or else just take 1e-5.  It should be small enoughnot to matter most of the time.
+    var zero_replacement_val = min_non_zero_count < 1e-5 ? min_non_zero_count * 0.1 : 1e-5;
 
     samples.forEach(function(sample, sample_idx) {
-      // subract one to account for the 'name' field.
-      sample_idx -= 1;
+      // The first thing is 'name' not a sample.
+      var true_sample_idx = sample_idx - 1;
 
-      if (sample === "name") {
-        leaf_name = dat[sample];
+
+      if (sample === "name") {  // It isn't a sample, but the name of the row/otu
+        leaf_name = row[sample];
         points[leaf_name] = {};
-      } else  { // one of the fields is name (not a sample)
-        var count = dat[sample] / max_count;
-        var pt = get_point(count, sample_idx, num_samples);
+      } else  { // it is a sample not the name of the row/otu
+        var count = null;
+        if (max_count === 0 || row[sample] === 0) {
+          // Set it to a tiny number that won't get rounded to zero.
+          count = zero_replacement_val;
+        } else {
+          count = row[sample] / max_count;
+        }
+        console.log([leaf_name, sample, min_count, max_count, row[sample], count].join(" " ));
+
+        var pt = get_point(count, true_sample_idx, num_samples);
 
         points[leaf_name][sample] = pt;
       }
@@ -209,11 +228,12 @@ function colors_from_centroids(centroids, csv)
   var avg_counts = {};
   var max_avg_count = 0;
   var min_avg_count = 999999999;
-  csv.data.forEach(function(dat) {
+  csv.data.forEach(function(row) {
+
     var n = 0;
     var this_leaf = "";
-    json_each(dat, function(key, val) {
-      if (key === "name") {
+    json_each(row, function(col_name, val) {
+      if (col_name === "name") {
         this_leaf = val;
         avg_counts[this_leaf] = 0;
       } else {
@@ -257,7 +277,11 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
 
   var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, 20, 85);
 
-  return chroma.hcl(hue, chroma_val, lightness).hex();
+  var hex = chroma.hcl(hue, chroma_val, lightness).hex();
+
+  console.log([leaf, JSON.stringify(pt), hue, chroma_val, lightness].join(" "));
+
+  return hex;
 
 }
 function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
