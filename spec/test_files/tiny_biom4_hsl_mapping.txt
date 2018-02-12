@@ -1,0 +1,6 @@
+﻿name	branch_color	leaf_label_color	leaf_dot_color	branch_width	leaf_dot_size
+geode	#d9d9d9	#d9d9d9	#d9d9d9	10	20
+clock	#35d7d7	#35d7d7	#35d7d7	10	20
+tire	#031b63	#031b63	#031b63	10	20
+banana	#634b03	#634b03	#634b03	10	20
+eggplant	#86d735	#86d735	#86d735	10	20

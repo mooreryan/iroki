@@ -1,0 +1,6 @@
+name	sample_1
+geode	5
+clock	1
+tire	2
+banana	9
+eggplant	10

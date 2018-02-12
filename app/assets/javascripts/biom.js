@@ -98,8 +98,37 @@ function sample_counts_to_points(csv)
   var count_data = csv.data;
   var samples = csv.meta.fields;
 
+  console.log(count_data);
+  console.log(samples);
+
   // subtract 1 to account for the 'name' field
   var num_samples = samples.length - 1;
+
+  if (num_samples === 1) {
+    // Need to add fake samples with zero counts to ensure we have at least a triangle to get the centroid of.
+    var fake_samples = ["iroki_fake_1", "iroki_fake_2"];
+  } else if (num_samples === 2) {
+    var fake_samples = ["iroki_fake_1"];
+  } else {
+    var fake_samples = [];
+  }
+
+  if (fake_samples.length > 0) {
+    count_data.forEach(function(row) {
+      fake_samples.forEach(function(name) {
+        // TODO this will break if one of these sample names is used.
+        row[name] = 0;
+      });
+    });
+
+    fake_samples.forEach(function(name) { samples.push(name); });
+  }
+
+  console.log(count_data);
+  console.log(samples);
+
+
+
 
   // TODO check to see if the json keeps the order.
   var points = {};
@@ -273,6 +302,7 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
 
   // double it cos the max is half the radius but should be 1.
+  // TODO is this still correct for the 1 and 2 sample biom files?
   var chroma_val = mag(pt) * 2 * 100;
 
   var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, 20, 85);
