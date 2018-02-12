@@ -75,7 +75,7 @@ function round_to(x, place)
 // TODO should this be multiplyed by two?
 function get_point(count, sample_idx, num_samples)
 {
-  var angle = sample_to_angle(sample_idx, num_samples);
+  var angle = sample_to_angle(sample_idx, num_samples, deg_to_rad(g_val_hue_angle_offset));
 
   var pt = {
     x: count * Math.cos(angle),
@@ -86,9 +86,9 @@ function get_point(count, sample_idx, num_samples)
 }
 
 // Sample idx starts at zero
-function sample_to_angle(sample_idx, num_samples)
+function sample_to_angle(sample_idx, num_samples, angle_offset)
 {
-  return (2 * Math.PI / num_samples) * sample_idx;
+  return ((2 * Math.PI / num_samples) * sample_idx) + angle_offset;
 }
 
 // Count data is from the csv.data from Papa.
@@ -97,9 +97,6 @@ function sample_counts_to_points(csv)
 {
   var count_data = csv.data;
   var samples = csv.meta.fields;
-
-  console.log(count_data);
-  console.log(samples);
 
   // subtract 1 to account for the 'name' field
   var num_samples = samples.length - 1;
@@ -123,12 +120,6 @@ function sample_counts_to_points(csv)
 
     fake_samples.forEach(function(name) { samples.push(name); });
   }
-
-  console.log(count_data);
-  console.log(samples);
-
-
-
 
   // TODO check to see if the json keeps the order.
   var points = {};
@@ -175,7 +166,7 @@ function sample_counts_to_points(csv)
         } else {
           count = row[sample] / max_count;
         }
-        console.log([leaf_name, sample, min_count, max_count, row[sample], count].join(" " ));
+        // console.log([leaf_name, sample, min_count, max_count, row[sample], count].join(" " ));
 
         var pt = get_point(count, true_sample_idx, num_samples);
 
@@ -262,17 +253,25 @@ function colors_from_centroids(centroids, csv)
     var n = 0;
     var this_leaf = "";
     json_each(row, function(col_name, val) {
+      var count_this_value = val > 0 || g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
+
+      console.log([count_this_value, col_name, val].join(" " ));
+
       if (col_name === "name") {
         this_leaf = val;
         avg_counts[this_leaf] = 0;
-      } else {
+      } else if (count_this_value) {
         avg_counts[this_leaf] += val;
         n += 1;
       }
     });
 
+    console.log(avg_counts);
 
+    // TODO this will blow up if an OTU has all 0 sample counts.
     avg_counts[this_leaf] /= n;
+
+    console.log(avg_counts);
 
     if (max_avg_count < avg_counts[this_leaf]) {
       max_avg_count = avg_counts[this_leaf];
@@ -309,7 +308,7 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
 
   var hex = chroma.hcl(hue, chroma_val, lightness).hex();
 
-  console.log([leaf, JSON.stringify(pt), hue, chroma_val, lightness].join(" "));
+  console.log([leaf, JSON.stringify(pt), hue, chroma_val, lightness, hex].join(" "));
 
   return hex;
 
@@ -340,7 +339,14 @@ function min(ary) {
   });
 }
 function scale(val, old_min, old_max, new_min, new_max) {
-  return ((((new_max - new_min) * (val - old_min)) / (old_max - old_min)) + new_min);
+
+  // This can happen if you use the mean across non-zero samples.
+  if (old_max - old_min === 0) {
+    // TODO better default value than this?
+    return (new_min + new_max) / 2;
+  } else {
+    return ((((new_max - new_min) * (val - old_min)) / (old_max - old_min)) + new_min);
+  }
 }
 
 function biom__colors_from_biom_str(biom_str) {
@@ -376,6 +382,16 @@ var g_ID_COLOR_SPACE = "color-space",
   g_val_color_space,
   g_color_space_fn;
 
+var g_ID_AVG_METHOD = "avg-method",
+  g_ID_AVG_METHOD_ALL_SAMPLES_MEAN = "avg-method-all-samples-mean",
+  g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN = "avg-method-nonzero-samples-mean",
+  g_ID_AVG_METHOD_ALL_SAMPLES_MEDIAN = "avg-method-all-samples-median",
+  g_ID_AVG_METHOD_NONZERO_SAMPLES_MEDIAN = "avg-method-nonzero-samples-median",
+  g_val_avg_method;
+
+var g_ID_HUE_ANGLE_OFFSET = "hue-angle-offset",
+  g_val_hue_angle_offset;
+
 // handle upload button
 function biom__upload_button() {
   function set_color_space_fn(g_val_color_space) {
@@ -397,12 +413,23 @@ function biom__upload_button() {
   g_val_color_space = jq(g_ID_COLOR_SPACE).val();
   set_color_space_fn(g_val_color_space);
 
+  g_val_avg_method = jq(g_ID_AVG_METHOD).val();
+
+  // The input is in degrees.
+  g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
+
+  var display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
+  jq("hue-angle-offset-label").css("color", display_color);
+
+
   var submit_id = "submit-button";
   var uploader_id = "uploader";
 
   var uploader = document.getElementById(uploader_id);
   var submit_button = document.getElementById(submit_id);
   var color_space_dropdown = document.getElementById(g_ID_COLOR_SPACE);
+  var avg_method_dropdown = document.getElementById(g_ID_AVG_METHOD);
+  var hue_angle_offset_slider = document.getElementById(g_ID_HUE_ANGLE_OFFSET);
   
   var biom_reader = new FileReader();
 
@@ -422,8 +449,30 @@ function biom__upload_button() {
     g_val_color_space = jq(g_ID_COLOR_SPACE).val();
     set_color_space_fn(g_val_color_space);
   });
+  avg_method_dropdown.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    g_val_avg_method = jq(g_ID_AVG_METHOD).val();
+  });
+  hue_angle_offset_slider.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
+    if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
+      g_val_hue_angle_offset = 0;
+      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+    } else if (g_val_hue_angle_offset >= 360) {
+      g_val_hue_angle_offset = 359;
+      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+    }
+    display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
+    jq("hue-angle-offset-label").css("color", display_color);
+
+  });
   submit_button.addEventListener("click", function() {
-    undisable("reset-button")
+    undisable("reset-button");
     handleFiles();
   }, false);
   document.getElementById("reset-button").addEventListener("click", function() {
