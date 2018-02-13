@@ -255,7 +255,7 @@ function colors_from_centroids(centroids, csv)
     json_each(row, function(col_name, val) {
       var count_this_value = val > 0 || g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
 
-      console.log([count_this_value, col_name, val].join(" " ));
+      // console.log([count_this_value, col_name, val].join(" " ));
 
       if (col_name === "name") {
         this_leaf = val;
@@ -266,12 +266,12 @@ function colors_from_centroids(centroids, csv)
       }
     });
 
-    console.log(avg_counts);
+    // console.log(avg_counts);
 
     // TODO this will blow up if an OTU has all 0 sample counts.
     avg_counts[this_leaf] /= n;
 
-    console.log(avg_counts);
+    // console.log(avg_counts);
 
     if (max_avg_count < avg_counts[this_leaf]) {
       max_avg_count = avg_counts[this_leaf];
@@ -308,7 +308,7 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
 
   var hex = chroma.hcl(hue, chroma_val, lightness).hex();
 
-  console.log([leaf, JSON.stringify(pt), hue, chroma_val, lightness, hex].join(" "));
+  // console.log([leaf, JSON.stringify(pt), hue, chroma_val, lightness, hex].join(" "));
 
   return hex;
 
@@ -352,6 +352,9 @@ function scale(val, old_min, old_max, new_min, new_max) {
 function biom__colors_from_biom_str(biom_str) {
   var centroids = centroids_of_samples(biom_str)
   var biom_csv = parse_biom_file(biom_str);
+
+  console.log(centroids);
+  console.log(biom_csv);
 
   return colors_from_centroids(centroids, biom_csv);
 }
@@ -490,4 +493,280 @@ function biom__upload_button() {
       alert("Don't forget to select a biom file!");
     }
   }
+}
+
+
+
+function mat__elem_at(M, ridx, cidx) {
+  // M.n is the number of columns.
+  // M.val is the raw data
+  return M.val[ridx * M.n + cidx];
+}
+
+var ary = [
+  [ 25,  40,  50, 34  ],
+  [ 10,  15,  94, 110 ],
+  [ 5,   8,   80, 100 ],
+  [ 100, 140, 11, 20  ],
+  [ 90,  130, 14, 15  ]
+];
+
+// If num_dimensions is more than possible, just take as many as possible.
+// Projects an array of arrays into a lower dimension using SVD.  Rows are OTUs, cols are samples.
+function project(ary)
+{
+  var centered_mat = apply_to_cols(array2mat(ary), vec__center);
+
+  var svd_centered_mat = svd(centered_mat, "thinU");
+
+  // Check if any of the singular values are basically 0.
+  var i = 0;
+  var non_zero_sing_vals = [];
+  for (i = 0; i < svd_centered_mat.s.length; ++i) {
+    if (svd_centered_mat.s[i] > 1e-5) {
+      non_zero_sing_vals.push(svd_centered_mat.s[i]);
+    } else {
+      break;
+    }
+  }
+
+  // Next we want to take only enough singular values to get 80% of the variance.
+  var x = 0;
+  var sum_of_sq = 0;
+  non_zero_sing_vals.forEach(function(val) {
+    sum_of_sq += Math.pow(val, 2);
+  });
+  var variance_exlained = non_zero_sing_vals.map(function(sing_val) {
+    return Math.pow(sing_val, 2) / sum_of_sq * 100;
+  });
+  console.log("var expl: " + variance_exlained);
+
+  var cum_var_explained = 0;
+  for (i = 0; i < non_zero_sing_vals.length; ++i) {
+    if (cum_var_explained > 80) {
+      break;
+    } else {
+      cum_var_explained += variance_exlained[i];
+    }
+  }
+
+  var num_sing_vals = i;
+
+  console.log("num_sing_vals: " + num_sing_vals);
+  if (num_sing_vals === 0) {
+    throw Error("Got no singular values....");
+  }
+
+  var scores, sing_vals, take_these_cols;
+  if (num_sing_vals === 1) {
+    sing_vals = non_zero_sing_vals[0];
+    take_these_cols = [0];
+  } else {
+    sing_vals = diag(non_zero_sing_vals.slice(0, num_sing_vals));
+    take_these_cols = range(num_sing_vals);
+  }
+  var u_component = getCols(svd_centered_mat.U, take_these_cols);
+
+
+
+  scores = mul(u_component, sing_vals);
+
+
+  if (num_sing_vals === 1) {
+    var abs_min_val = Math.abs(min(scores));
+    var scaled_scores = scores.map(function(score) { return score + abs_min_val + 1});
+    return [num_sing_vals, scaled_scores];
+  } else {
+    return [num_sing_vals, apply_to_cols(scores, function(col) {
+      var abs_min_val = Math.abs(min(col));
+      return col.map(function(val) {
+        return val + abs_min_val + 1;
+      });
+    })];
+  }
+}
+
+// function project(ary, num_dimensions)
+// {
+//   if (num_dimensions === undefined || num_dimensions < 1) {
+//     num_dimensions = 1;
+//   }
+//
+//   var centered_mat = apply_to_cols(array2mat(ary), vec__center);
+//
+//   var svd_centered_mat = svd(centered_mat, "thinU");
+//
+//   // Check if any of the singular values are basically 0.
+//   var i = 0;
+//   var non_zero_sing_vals = [];
+//   for (i = 0; i < svd_centered_mat.s.length; ++i) {
+//     if (svd_centered_mat.s[i] > 1e-5) {
+//       non_zero_sing_vals.push(svd_centered_mat.s[i]);
+//     } else {
+//       break;
+//     }
+//   }
+//
+//   var num_sing_vals = non_zero_sing_vals.length < num_dimensions ? non_zero_sing_vals.length : num_dimensions;
+//
+//   console.log("num_sing_vals: " + num_sing_vals);
+//   if (num_sing_vals === 0) {
+//     throw Error("There were non-zero singular values.");
+//   }
+//
+//   var scores, sing_vals, take_these_cols;
+//   if (num_sing_vals === 1) {
+//     sing_vals = non_zero_sing_vals[0];
+//     take_these_cols = [0];
+//   } else {
+//     sing_vals = diag(non_zero_sing_vals.slice(0, num_sing_vals));
+//     take_these_cols = range(num_sing_vals);
+//   }
+//   var u_component = getCols(svd_centered_mat.U, take_these_cols);
+//
+//
+//
+//   scores = mul(u_component, sing_vals);
+//
+//
+//   if (num_sing_vals === 1) {
+//     var abs_min_val = Math.abs(min(scores));
+//     var scaled_scores = scores.map(function(score) { return score + abs_min_val});
+//     return [num_sing_vals, scaled_scores];
+//   } else {
+//     return [num_sing_vals, apply_to_cols(scores, function(col) {
+//       var abs_min_val = Math.abs(min(col));
+//       return col.map(function(val) {
+//         return val + abs_min_val;
+//       });
+//     })];
+//   }
+// }
+
+
+function apply_to_cols(M, fn)
+{
+  var cidx, ncols = M.n;
+
+  var new_ary = [];
+
+  for (cidx = 0; cidx < ncols; ++cidx) {
+    var col = getCols(M, [cidx]);
+
+    new_ary.push(fn(col));
+  }
+
+  return transposeMatrix(array2mat(new_ary));
+}
+
+// Input is a LALOLib vector.
+function vec__scale_0_to_1(vec) {
+  var abs_col_min = Math.abs(min(vec));
+
+  // TODO take abs value of max as well in case it is a negative number?
+  var col_max = max(vec);
+  var col_min = min(vec);
+
+  if (col_min === col_max) {
+    // All the numbers in the original are the same, so just set it to 0.5
+    return vec.map(function(val) { return 0.5 });
+  } else {
+    return vec.map(function(val) {
+      return (val + abs_col_min) / (col_max + abs_col_min);
+    });
+  }
+}
+
+function vec__center(vec) {
+  var total = sum(vec);
+  var mean = total / vec.length;
+
+  return vec.map(function(val) {
+    return val - mean;
+  });
+}
+
+function biom_to_ary(biom_str) {
+  var biom = parse_biom_file(biom_str);
+  var leaf_names = biom.data.map(function(obj) { return obj[biom.meta.fields[0]] });
+  var sample_names = biom.meta.fields;
+  sample_names.shift(); // remove the first field, it is 'name'
+
+  var counts =  biom.data.map(function(obj) {
+    return sample_names.map(function(name) {
+      return obj[name];
+    });
+  });
+
+  return [leaf_names, counts];
+}
+
+// var biom_str = "name\tsample_1\tsample_2\napple\t10\t20\npie\t200\t100\n"
+// var str = "name\tsample_1\tsample_2\tsample_3\ngeode\t25\t40\t50\nclock\t10\t15\t94\ntire\t5\t8\t80\nbanana\t100\t140\t11\neggplant\t90\t130\t14\n"
+
+function make_projected_biom_str(biom_str) {
+  var biom_ary = biom_to_ary(biom_str);
+  var leaves = biom_ary[0];
+  var counts = biom_ary[1];
+  var tmp = project(counts);
+  var num_sing_vals = tmp[0];
+  var proj = tmp[1];
+
+  if (leaves.length !== proj.length) {
+    console.log("the proj: ")
+    console.log(proj);
+    throw Error("Length mismatch in leaves and projection");
+  }
+
+  // This is for making an fake csv biom obj.
+  // var all_objs = [];
+  // if (num_sing_vals === 1) {
+  //   leaves.forEach(function(leaf, leaf_idx) {
+  //     var obj = {};
+  //
+  //     obj.name = leaf;
+  //     obj.pc_1 = proj[leaf_idx];
+  //     all_objs.push(obj);
+  //   });
+  // } else {
+  //   leaves.forEach(function(leaf, leaf_idx) {
+  //     var obj = {};
+  //     obj.name = leaf;
+  //
+  //     var row = getRows(proj, [leaf_idx]);
+  //     row.forEach(function(count, pc_idx) {
+  //       obj["pc_" + pc_idx] = count;
+  //     });
+  //
+  //     all_objs.push(obj);
+  //   });
+  // }
+
+  // Make a fake biom str.
+  var new_biom = [["name"]];
+  var i = 0;
+  for (i = 0; i < num_sing_vals; ++i) {
+    new_biom[0].push("pc_" + i);
+  }
+
+  if (num_sing_vals === 1) {
+    leaves.forEach(function(leaf, leaf_idx) {
+      var row = [leaf, proj[leaf_idx]];
+
+      new_biom.push(row);
+    });
+  } else {
+    leaves.forEach(function(leaf, leaf_idx) {
+      var row = [leaf];
+
+      getRows(proj, [leaf_idx]).forEach(function(row_count) {
+        row.push(row_count);
+      });
+
+      new_biom.push(row);
+    });
+  }
+
+
+  return new_biom.map(function(row) { return row.join("\t"); }).join("\n");
 }
