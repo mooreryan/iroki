@@ -166,7 +166,6 @@ function sample_counts_to_points(csv)
         } else {
           count = row[sample] / max_count;
         }
-        // console.log([leaf_name, sample, min_count, max_count, row[sample], count].join(" " ));
 
         var pt = get_point(count, true_sample_idx, num_samples);
 
@@ -255,8 +254,6 @@ function colors_from_centroids(centroids, csv)
     json_each(row, function(col_name, val) {
       var count_this_value = val > 0 || g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
 
-      // console.log([count_this_value, col_name, val].join(" " ));
-
       if (col_name === "name") {
         this_leaf = val;
         avg_counts[this_leaf] = 0;
@@ -266,12 +263,8 @@ function colors_from_centroids(centroids, csv)
       }
     });
 
-    // console.log(avg_counts);
-
     // TODO this will blow up if an OTU has all 0 sample counts.
     avg_counts[this_leaf] /= n;
-
-    // console.log(avg_counts);
 
     if (max_avg_count < avg_counts[this_leaf]) {
       max_avg_count = avg_counts[this_leaf];
@@ -307,8 +300,6 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, 20, 85);
 
   var hex = chroma.hcl(hue, chroma_val, lightness).hex();
-
-  // console.log([leaf, JSON.stringify(pt), hue, chroma_val, lightness, hex].join(" "));
 
   return hex;
 
@@ -353,9 +344,6 @@ function biom__colors_from_biom_str(biom_str) {
   var centroids = centroids_of_samples(biom_str)
   var biom_csv = parse_biom_file(biom_str);
 
-  console.log(centroids);
-  console.log(biom_csv);
-
   return colors_from_centroids(centroids, biom_csv);
 }
 
@@ -371,9 +359,39 @@ function json_to_tsv(json) {
 }
 
 function biom__save_abundance_colors(biom_str) {
-  var str = g_val_reduce_dimension ? reduce_dimension(biom_str) : biom_str;
-
-  if (g_val_reduce_dimension) { console.log("reducing dimension!"); }
+  var str;
+  switch(g_val_reduce_dimension) {
+    case g_ID_REDUCE_DIMENSION_NONE:
+      str = biom_str;
+      break;
+    case g_ID_REDUCE_DIMENSION_AUTO_50:
+      str = reduce_dimension(biom_str, "auto", 50);
+      break;
+    case g_ID_REDUCE_DIMENSION_AUTO_75:
+      str = reduce_dimension(biom_str, "auto", 75);
+      break;
+    case g_ID_REDUCE_DIMENSION_AUTO_90:
+      str = reduce_dimension(biom_str, "auto", 90);
+      break;
+    case g_ID_REDUCE_DIMENSION_1_PC:
+      str = reduce_dimension(biom_str, "pc", 1);
+      break;
+    case g_ID_REDUCE_DIMENSION_2_PC:
+      str = reduce_dimension(biom_str, "pc", 2);
+      break;
+    case g_ID_REDUCE_DIMENSION_3_PC:
+      str = reduce_dimension(biom_str, "pc", 3);
+      break;
+    case g_ID_REDUCE_DIMENSION_4_PC:
+      str = reduce_dimension(biom_str, "pc", 4);
+      break;
+    case g_ID_REDUCE_DIMENSION_5_PC:
+      str = reduce_dimension(biom_str, "pc", 5);
+      break;
+    default:
+      str = biom_str;
+      break;
+  }
 
   var colors = biom__colors_from_biom_str(str);
   var tsv_str = json_to_tsv(colors);
@@ -400,6 +418,15 @@ var g_ID_HUE_ANGLE_OFFSET = "hue-angle-offset",
   g_val_hue_angle_offset;
 
 var g_ID_REDUCE_DIMENSION = "reduce-dimension",
+  g_ID_REDUCE_DIMENSION_NONE = "reduce-dimension-none",
+  g_ID_REDUCE_DIMENSION_AUTO_50 = "reduce-dimension-auto-50",
+  g_ID_REDUCE_DIMENSION_AUTO_75 = "reduce-dimension-auto-75",
+  g_ID_REDUCE_DIMENSION_AUTO_90 = "reduce-dimension-auto-90",
+  g_ID_REDUCE_DIMENSION_1_PC = "reduce-dimension-1-pc",
+  g_ID_REDUCE_DIMENSION_2_PC = "reduce-dimension-2-pc",
+  g_ID_REDUCE_DIMENSION_3_PC = "reduce-dimension-3-pc",
+  g_ID_REDUCE_DIMENSION_4_PC = "reduce-dimension-4-pc",
+  g_ID_REDUCE_DIMENSION_5_PC = "reduce-dimension-5-pc",
   g_val_reduce_dimension;
 
 // handle upload button
@@ -431,7 +458,7 @@ function biom__upload_button() {
   var display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
   jq("hue-angle-offset-label").css("color", display_color);
 
-  g_val_reduce_dimension =  is_checked(g_ID_REDUCE_DIMENSION);
+  g_val_reduce_dimension =  jq(g_ID_REDUCE_DIMENSION).val();
 
 
   var submit_id = "submit-button";
@@ -442,7 +469,7 @@ function biom__upload_button() {
   var color_space_dropdown = document.getElementById(g_ID_COLOR_SPACE);
   var avg_method_dropdown = document.getElementById(g_ID_AVG_METHOD);
   var hue_angle_offset_slider = document.getElementById(g_ID_HUE_ANGLE_OFFSET);
-  var reduce_dimension_checkbox = document.getElementById(g_ID_REDUCE_DIMENSION);
+  var reduce_dimension_select = document.getElementById(g_ID_REDUCE_DIMENSION);
   
   var biom_reader = new FileReader();
 
@@ -484,11 +511,11 @@ function biom__upload_button() {
     jq("hue-angle-offset-label").css("color", display_color);
 
   });
-  reduce_dimension_checkbox.addEventListener("change", function() {
+  reduce_dimension_select.addEventListener("change", function() {
     undisable("submit-button");
     undisable("reset-button");
 
-    g_val_reduce_dimension = is_checked(g_ID_REDUCE_DIMENSION);
+    g_val_reduce_dimension = jq(g_ID_REDUCE_DIMENSION).val();
   });
   submit_button.addEventListener("click", function() {
     undisable("reset-button");
@@ -497,7 +524,22 @@ function biom__upload_button() {
   document.getElementById("reset-button").addEventListener("click", function() {
     disable("reset-button");
     undisable("submit-button");
+
+
     document.getElementById("biom-file-upload-form").reset();
+
+    // Reset the color back to normal.
+    g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
+    if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
+      g_val_hue_angle_offset = 0;
+      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+    } else if (g_val_hue_angle_offset >= 360) {
+      g_val_hue_angle_offset = 359;
+      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+    }
+    console.log(g_val_hue_angle_offset);
+    display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
+    jq("hue-angle-offset-label").css("color", display_color);
   });
 
   function handleFiles() {
@@ -512,25 +554,15 @@ function biom__upload_button() {
 }
 
 
-
+/*
 function mat__elem_at(M, ridx, cidx) {
   // M.n is the number of columns.
   // M.val is the raw data
   return M.val[ridx * M.n + cidx];
 }
+*/
 
-// var ary = [
-//   [ 25,  40,  50, 34  ],
-//   [ 10,  15,  94, 110 ],
-//   [ 5,   8,   80, 100 ],
-//   [ 100, 140, 11, 20  ],
-//   [ 90,  130, 14, 15  ]
-// ];
-//
-// If num_dimensions is more than possible, just take as many as possible.
-// Projects an array of arrays into a lower dimension using SVD.  Rows are OTUs, cols are samples.
-function project(ary)
-{
+function project(ary, type, cutoff) {
   var centered_mat = apply_to_cols(array2mat(ary), vec__center);
 
   var svd_centered_mat = svd(centered_mat, "thinU");
@@ -546,8 +578,95 @@ function project(ary)
     }
   }
 
-  // Next we want to take only enough singular values to get 80% of the variance.
-  var x = 0;
+  if (type === "auto") {
+    // Next we want to take only enough singular values to get the required % of the variance.
+    var sum_of_sq = 0;
+    non_zero_sing_vals.forEach(function(val) {
+      sum_of_sq += Math.pow(val, 2);
+    });
+    var variance_exlained = non_zero_sing_vals.map(function(sing_val) {
+      return Math.pow(sing_val, 2) / sum_of_sq * 100;
+    });
+
+    var cum_var_explained = 0;
+    for (i = 0; i < non_zero_sing_vals.length; ++i) {
+      if (cum_var_explained > cutoff) {
+        break;
+      } else {
+        cum_var_explained += variance_exlained[i];
+      }
+    }
+
+    var num_sing_vals = i;
+  } else if (type === "pc") {
+    var num_sing_vals = non_zero_sing_vals.length < cutoff ? non_zero_sing_vals.length : cutoff;
+  } else {
+    throw Error("Bad type in project function: " + type);
+  }
+
+  if (num_sing_vals === 0) {
+    throw Error("Got no singular values....");
+  }
+
+  var scores, sing_vals, take_these_cols;
+  if (num_sing_vals === 1) {
+    sing_vals = non_zero_sing_vals[0];
+    take_these_cols = [0];
+  } else {
+    sing_vals = diag(non_zero_sing_vals.slice(0, num_sing_vals));
+    take_these_cols = range(num_sing_vals);
+  }
+  var u_component = getCols(svd_centered_mat.U, take_these_cols);
+
+
+
+  scores = mul(u_component, sing_vals);
+
+
+  if (num_sing_vals === 1) {
+    var abs_min_val = Math.abs(min(scores));
+    var scaled_scores = scores.map(function(score) { return score + abs_min_val + 1});
+    return [num_sing_vals, scaled_scores];
+  } else {
+    return [num_sing_vals, apply_to_cols(scores, function(col) {
+      var abs_min_val = Math.abs(min(col));
+      return col.map(function(val) {
+        return val + abs_min_val + 1;
+      });
+    })];
+  }
+
+
+}
+
+// var ary = [
+//   [ 25,  40,  50, 34  ],
+//   [ 10,  15,  94, 110 ],
+//   [ 5,   8,   80, 100 ],
+//   [ 100, 140, 11, 20  ],
+//   [ 90,  130, 14, 15  ]
+// ];
+//
+// If num_dimensions is more than possible, just take as many as possible.
+// Projects an array of arrays into a lower dimension using SVD.  Rows are OTUs, cols are samples.
+/*
+function project_auto(ary, min_variance) {
+  var centered_mat = apply_to_cols(array2mat(ary), vec__center);
+
+  var svd_centered_mat = svd(centered_mat, "thinU");
+
+  // Check if any of the singular values are basically 0.
+  var i = 0;
+  var non_zero_sing_vals = [];
+  for (i = 0; i < svd_centered_mat.s.length; ++i) {
+    if (svd_centered_mat.s[i] > 1e-5) {
+      non_zero_sing_vals.push(svd_centered_mat.s[i]);
+    } else {
+      break;
+    }
+  }
+
+  // Next we want to take only enough singular values to get the required % of the variance.
   var sum_of_sq = 0;
   non_zero_sing_vals.forEach(function(val) {
     sum_of_sq += Math.pow(val, 2);
@@ -559,7 +678,7 @@ function project(ary)
 
   var cum_var_explained = 0;
   for (i = 0; i < non_zero_sing_vals.length; ++i) {
-    if (cum_var_explained > 75) {
+    if (cum_var_explained > min_variance) {
       break;
     } else {
       cum_var_explained += variance_exlained[i];
@@ -601,64 +720,65 @@ function project(ary)
     })];
   }
 }
+*/
 
-// function project(ary, num_dimensions)
-// {
-//   if (num_dimensions === undefined || num_dimensions < 1) {
-//     num_dimensions = 1;
-//   }
-//
-//   var centered_mat = apply_to_cols(array2mat(ary), vec__center);
-//
-//   var svd_centered_mat = svd(centered_mat, "thinU");
-//
-//   // Check if any of the singular values are basically 0.
-//   var i = 0;
-//   var non_zero_sing_vals = [];
-//   for (i = 0; i < svd_centered_mat.s.length; ++i) {
-//     if (svd_centered_mat.s[i] > 1e-5) {
-//       non_zero_sing_vals.push(svd_centered_mat.s[i]);
-//     } else {
-//       break;
-//     }
-//   }
-//
-//   var num_sing_vals = non_zero_sing_vals.length < num_dimensions ? non_zero_sing_vals.length : num_dimensions;
-//
-//   console.log("num_sing_vals: " + num_sing_vals);
-//   if (num_sing_vals === 0) {
-//     throw Error("There were non-zero singular values.");
-//   }
-//
-//   var scores, sing_vals, take_these_cols;
-//   if (num_sing_vals === 1) {
-//     sing_vals = non_zero_sing_vals[0];
-//     take_these_cols = [0];
-//   } else {
-//     sing_vals = diag(non_zero_sing_vals.slice(0, num_sing_vals));
-//     take_these_cols = range(num_sing_vals);
-//   }
-//   var u_component = getCols(svd_centered_mat.U, take_these_cols);
-//
-//
-//
-//   scores = mul(u_component, sing_vals);
-//
-//
-//   if (num_sing_vals === 1) {
-//     var abs_min_val = Math.abs(min(scores));
-//     var scaled_scores = scores.map(function(score) { return score + abs_min_val});
-//     return [num_sing_vals, scaled_scores];
-//   } else {
-//     return [num_sing_vals, apply_to_cols(scores, function(col) {
-//       var abs_min_val = Math.abs(min(col));
-//       return col.map(function(val) {
-//         return val + abs_min_val;
-//       });
-//     })];
-//   }
-// }
+/*
+function project_pc(ary, num_dimensions) {
+  if (num_dimensions === undefined || num_dimensions < 1) {
+    num_dimensions = 1;
+  }
 
+  var centered_mat = apply_to_cols(array2mat(ary), vec__center);
+
+  var svd_centered_mat = svd(centered_mat, "thinU");
+
+  // Check if any of the singular values are basically 0.
+  var i = 0;
+  var non_zero_sing_vals = [];
+  for (i = 0; i < svd_centered_mat.s.length; ++i) {
+    if (svd_centered_mat.s[i] > 1e-5) {
+      non_zero_sing_vals.push(svd_centered_mat.s[i]);
+    } else {
+      break;
+    }
+  }
+
+  var num_sing_vals = non_zero_sing_vals.length < num_dimensions ? non_zero_sing_vals.length : num_dimensions;
+
+  console.log("num_sing_vals: " + num_sing_vals);
+  if (num_sing_vals === 0) {
+    throw Error("There were non-zero singular values.");
+  }
+
+  var scores, sing_vals, take_these_cols;
+  if (num_sing_vals === 1) {
+    sing_vals = non_zero_sing_vals[0];
+    take_these_cols = [0];
+  } else {
+    sing_vals = diag(non_zero_sing_vals.slice(0, num_sing_vals));
+    take_these_cols = range(num_sing_vals);
+  }
+  var u_component = getCols(svd_centered_mat.U, take_these_cols);
+
+
+
+  scores = mul(u_component, sing_vals);
+
+
+  if (num_sing_vals === 1) {
+    var abs_min_val = Math.abs(min(scores));
+    var scaled_scores = scores.map(function(score) { return score + abs_min_val + 1});
+    return [num_sing_vals, scaled_scores];
+  } else {
+    return [num_sing_vals, apply_to_cols(scores, function(col) {
+      var abs_min_val = Math.abs(min(col));
+      return col.map(function(val) {
+        return val + abs_min_val + 1;
+      });
+    })];
+  }
+}
+*/
 
 function apply_to_cols(M, fn)
 {
@@ -675,6 +795,7 @@ function apply_to_cols(M, fn)
   return transposeMatrix(array2mat(new_ary));
 }
 
+/*
 // Input is a LALOLib vector.
 function vec__scale_0_to_1(vec) {
   var abs_col_min = Math.abs(min(vec));
@@ -692,6 +813,7 @@ function vec__scale_0_to_1(vec) {
     });
   }
 }
+*/
 
 function vec__center(vec) {
   var total = sum(vec);
@@ -717,20 +839,15 @@ function biom_to_ary(biom_str) {
   return [leaf_names, counts];
 }
 
-// var biom_str = "name\tsample_1\tsample_2\napple\t10\t20\npie\t200\t100\n"
-// var str = "name\tsample_1\tsample_2\tsample_3\ngeode\t25\t40\t50\nclock\t10\t15\t94\ntire\t5\t8\t80\nbanana\t100\t140\t11\neggplant\t90\t130\t14\n"
-
-function reduce_dimension(biom_str) {
+function reduce_dimension(biom_str, type, cutoff) {
   var biom_ary = biom_to_ary(biom_str);
   var leaves = biom_ary[0];
   var counts = biom_ary[1];
-  var tmp = project(counts);
+  var tmp = project(counts, type, cutoff);
   var num_sing_vals = tmp[0];
   var proj = tmp[1];
 
   if (leaves.length !== proj.length) {
-    console.log("the proj: ")
-    console.log(proj);
     throw Error("Length mismatch in leaves and projection");
   }
 
