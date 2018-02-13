@@ -348,9 +348,9 @@ function biom__colors_from_biom_str(biom_str) {
 }
 
 function json_to_tsv(json) {
-  var strings = ["name\tbranch_color\tleaf_label_color\tleaf_dot_color\tbranch_width\tleaf_dot_size"];
+  var strings = ["name\tbranch_color\tleaf_label_color\tleaf_dot_color"];
   json_each(json, function(key, val) {
-    var str = [key, val, val, val, 10, 20].join("\t");
+    var str = [key, val, val, val].join("\t");
 
     strings.push(str);
   });
