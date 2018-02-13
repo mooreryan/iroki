@@ -1,0 +1,6 @@
+name	sample_1	sample_2	sample_3	sample_4	sample_5
+geode	25	40	50	45	100
+clock	10	15	94	90	30
+tire	5	8	80	95	70
+banana	100	140	11	20	33
+eggplant	90	130	14	8	75

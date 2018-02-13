@@ -371,7 +371,11 @@ function json_to_tsv(json) {
 }
 
 function biom__save_abundance_colors(biom_str) {
-  var colors = biom__colors_from_biom_str(biom_str);
+  var str = g_val_reduce_dimension ? reduce_dimension(biom_str) : biom_str;
+
+  if (g_val_reduce_dimension) { console.log("reducing dimension!"); }
+
+  var colors = biom__colors_from_biom_str(str);
   var tsv_str = json_to_tsv(colors);
 
   var blob = new Blob([tsv_str], {type: "text/plain;charset=utf-8"});
@@ -394,6 +398,9 @@ var g_ID_AVG_METHOD = "avg-method",
 
 var g_ID_HUE_ANGLE_OFFSET = "hue-angle-offset",
   g_val_hue_angle_offset;
+
+var g_ID_REDUCE_DIMENSION = "reduce-dimension",
+  g_val_reduce_dimension;
 
 // handle upload button
 function biom__upload_button() {
@@ -424,6 +431,8 @@ function biom__upload_button() {
   var display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
   jq("hue-angle-offset-label").css("color", display_color);
 
+  g_val_reduce_dimension =  is_checked(g_ID_REDUCE_DIMENSION);
+
 
   var submit_id = "submit-button";
   var uploader_id = "uploader";
@@ -433,6 +442,7 @@ function biom__upload_button() {
   var color_space_dropdown = document.getElementById(g_ID_COLOR_SPACE);
   var avg_method_dropdown = document.getElementById(g_ID_AVG_METHOD);
   var hue_angle_offset_slider = document.getElementById(g_ID_HUE_ANGLE_OFFSET);
+  var reduce_dimension_checkbox = document.getElementById(g_ID_REDUCE_DIMENSION);
   
   var biom_reader = new FileReader();
 
@@ -474,6 +484,12 @@ function biom__upload_button() {
     jq("hue-angle-offset-label").css("color", display_color);
 
   });
+  reduce_dimension_checkbox.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    g_val_reduce_dimension = is_checked(g_ID_REDUCE_DIMENSION);
+  });
   submit_button.addEventListener("click", function() {
     undisable("reset-button");
     handleFiles();
@@ -503,14 +519,14 @@ function mat__elem_at(M, ridx, cidx) {
   return M.val[ridx * M.n + cidx];
 }
 
-var ary = [
-  [ 25,  40,  50, 34  ],
-  [ 10,  15,  94, 110 ],
-  [ 5,   8,   80, 100 ],
-  [ 100, 140, 11, 20  ],
-  [ 90,  130, 14, 15  ]
-];
-
+// var ary = [
+//   [ 25,  40,  50, 34  ],
+//   [ 10,  15,  94, 110 ],
+//   [ 5,   8,   80, 100 ],
+//   [ 100, 140, 11, 20  ],
+//   [ 90,  130, 14, 15  ]
+// ];
+//
 // If num_dimensions is more than possible, just take as many as possible.
 // Projects an array of arrays into a lower dimension using SVD.  Rows are OTUs, cols are samples.
 function project(ary)
@@ -543,7 +559,7 @@ function project(ary)
 
   var cum_var_explained = 0;
   for (i = 0; i < non_zero_sing_vals.length; ++i) {
-    if (cum_var_explained > 80) {
+    if (cum_var_explained > 75) {
       break;
     } else {
       cum_var_explained += variance_exlained[i];
@@ -704,7 +720,7 @@ function biom_to_ary(biom_str) {
 // var biom_str = "name\tsample_1\tsample_2\napple\t10\t20\npie\t200\t100\n"
 // var str = "name\tsample_1\tsample_2\tsample_3\ngeode\t25\t40\t50\nclock\t10\t15\t94\ntire\t5\t8\t80\nbanana\t100\t140\t11\neggplant\t90\t130\t14\n"
 
-function make_projected_biom_str(biom_str) {
+function reduce_dimension(biom_str) {
   var biom_ary = biom_to_ary(biom_str);
   var leaves = biom_ary[0];
   var counts = biom_ary[1];
