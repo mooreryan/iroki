@@ -290,6 +290,14 @@ function rad_to_deg(rad) {
 }
 
 function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
+  if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
+    var new_lightness_min = 80;
+    var new_lightness_max = 20;
+  } else { // abundant samples are light
+    var new_lightness_min = 20;
+    var new_lightness_max = 80;
+  }
+
   // the angle of the vector from origin to centroid.
   var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
 
@@ -297,25 +305,29 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   // TODO is this still correct for the 1 and 2 sample biom files?
   var chroma_val = mag(pt) * 2 * 100;
 
-  var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, 20, 85);
+  var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
-  var hex = chroma.hcl(hue, chroma_val, lightness).hex();
-
-  return hex;
+  return chroma.hcl(hue, chroma_val, lightness).hex();
 
 }
 function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
+  if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
+    var new_lightness_min = 0.85;
+    var new_lightness_max = 0.2;
+  } else { // abundant samples are light
+    var new_lightness_min = 0.20;
+    var new_lightness_max = 0.85;
+  }
+
   // the angle of the vector from origin to centroid.
   var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
 
   // double it cos the max is half the radius but should be 1.
   var saturation = mag(pt) * 2;
 
-  var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, 0.2, 0.85);
+  var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
   return chroma.hsl(hue, saturation, lightness).hex();
-
-
 }
 
 
@@ -341,7 +353,7 @@ function scale(val, old_min, old_max, new_min, new_max) {
 }
 
 function biom__colors_from_biom_str(biom_str) {
-  var centroids = centroids_of_samples(biom_str)
+  var centroids = centroids_of_samples(biom_str);
   var biom_csv = parse_biom_file(biom_str);
 
   return colors_from_centroids(centroids, biom_csv);
@@ -401,36 +413,40 @@ function biom__save_abundance_colors(biom_str) {
   saveAs(blob, "mapping.txt");
 }
 
-var g_ID_COLOR_SPACE = "color-space",
+var g_ID_COLOR_SPACE   = "color-space",
   g_ID_COLOR_SPACE_HCL = "color-space-hcl",
   g_ID_COLOR_SPACE_HSL = "color-space-hsl",
   g_val_color_space,
   g_color_space_fn;
 
-var g_ID_AVG_METHOD = "avg-method",
-  g_ID_AVG_METHOD_ALL_SAMPLES_MEAN = "avg-method-all-samples-mean",
-  g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN = "avg-method-nonzero-samples-mean",
-  g_ID_AVG_METHOD_ALL_SAMPLES_MEDIAN = "avg-method-all-samples-median",
+var g_ID_AVG_METHOD                      = "avg-method",
+  g_ID_AVG_METHOD_ALL_SAMPLES_MEAN       = "avg-method-all-samples-mean",
+  g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN   = "avg-method-nonzero-samples-mean",
+  g_ID_AVG_METHOD_ALL_SAMPLES_MEDIAN     = "avg-method-all-samples-median",
   g_ID_AVG_METHOD_NONZERO_SAMPLES_MEDIAN = "avg-method-nonzero-samples-median",
   g_val_avg_method;
 
 var g_ID_HUE_ANGLE_OFFSET = "hue-angle-offset",
   g_val_hue_angle_offset;
 
-var g_ID_REDUCE_DIMENSION = "reduce-dimension",
-  g_ID_REDUCE_DIMENSION_NONE = "reduce-dimension-none",
+var g_ID_REDUCE_DIMENSION       = "reduce-dimension",
+  g_ID_REDUCE_DIMENSION_NONE    = "reduce-dimension-none",
   g_ID_REDUCE_DIMENSION_AUTO_50 = "reduce-dimension-auto-50",
   g_ID_REDUCE_DIMENSION_AUTO_75 = "reduce-dimension-auto-75",
   g_ID_REDUCE_DIMENSION_AUTO_90 = "reduce-dimension-auto-90",
-  g_ID_REDUCE_DIMENSION_1_PC = "reduce-dimension-1-pc",
-  g_ID_REDUCE_DIMENSION_2_PC = "reduce-dimension-2-pc",
-  g_ID_REDUCE_DIMENSION_3_PC = "reduce-dimension-3-pc",
-  g_ID_REDUCE_DIMENSION_4_PC = "reduce-dimension-4-pc",
-  g_ID_REDUCE_DIMENSION_5_PC = "reduce-dimension-5-pc",
+  g_ID_REDUCE_DIMENSION_1_PC    = "reduce-dimension-1-pc",
+  g_ID_REDUCE_DIMENSION_2_PC    = "reduce-dimension-2-pc",
+  g_ID_REDUCE_DIMENSION_3_PC    = "reduce-dimension-3-pc",
+  g_ID_REDUCE_DIMENSION_4_PC    = "reduce-dimension-4-pc",
+  g_ID_REDUCE_DIMENSION_5_PC    = "reduce-dimension-5-pc",
   g_val_reduce_dimension;
 
-// handle upload button
-function biom__upload_button() {
+var g_ID_ABUNDANT_SAMPLES_ARE     = "abundant-samples-are",
+  g_ID_ABUNDANT_SAMPLES_ARE_LIGHT = "abundant-samples-are-light",
+  g_ID_ABUNDANT_SAMPLES_ARE_DARK  = "abundant-samples-are-dark",
+  g_val_abundant_samples_are;
+
+function update_form_vals() {
   function set_color_space_fn(g_val_color_space) {
     switch (g_val_color_space) {
       case g_ID_COLOR_SPACE_HCL:
@@ -445,113 +461,33 @@ function biom__upload_button() {
     }
   }
 
-  disable("submit-button");
-  disable("reset-button");
+  // Color options
   g_val_color_space = jq(g_ID_COLOR_SPACE).val();
   set_color_space_fn(g_val_color_space);
 
-  g_val_avg_method = jq(g_ID_AVG_METHOD).val();
-
-  // The input is in degrees.
   g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
-
+  if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
+    g_val_hue_angle_offset = 0;
+    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+  } else if (g_val_hue_angle_offset >= 360) {
+    g_val_hue_angle_offset = 359;
+    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+  }
   var display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
   jq("hue-angle-offset-label").css("color", display_color);
 
+
+
+  g_val_abundant_samples_are = jq(g_ID_ABUNDANT_SAMPLES_ARE).val();
+
+  // Other options
+  g_val_avg_method = jq(g_ID_AVG_METHOD).val();
   g_val_reduce_dimension =  jq(g_ID_REDUCE_DIMENSION).val();
-
-
-  var submit_id = "submit-button";
-  var uploader_id = "uploader";
-
-  var uploader = document.getElementById(uploader_id);
-  var submit_button = document.getElementById(submit_id);
-  var color_space_dropdown = document.getElementById(g_ID_COLOR_SPACE);
-  var avg_method_dropdown = document.getElementById(g_ID_AVG_METHOD);
-  var hue_angle_offset_slider = document.getElementById(g_ID_HUE_ANGLE_OFFSET);
-  var reduce_dimension_select = document.getElementById(g_ID_REDUCE_DIMENSION);
-  
-  var biom_reader = new FileReader();
-
-  biom_reader.onload = function(event) {
-    var biom_str = event.target.result;
-    biom__save_abundance_colors(biom_str);
-  };
-
-  uploader.addEventListener("change", function(){
-    undisable("submit-button");
-    undisable("reset-button");
-  });
-  color_space_dropdown.addEventListener("change", function() {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    g_val_color_space = jq(g_ID_COLOR_SPACE).val();
-    set_color_space_fn(g_val_color_space);
-  });
-  avg_method_dropdown.addEventListener("change", function() {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    g_val_avg_method = jq(g_ID_AVG_METHOD).val();
-  });
-  hue_angle_offset_slider.addEventListener("change", function() {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
-    if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
-      g_val_hue_angle_offset = 0;
-      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
-    } else if (g_val_hue_angle_offset >= 360) {
-      g_val_hue_angle_offset = 359;
-      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
-    }
-    display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
-    jq("hue-angle-offset-label").css("color", display_color);
-
-  });
-  reduce_dimension_select.addEventListener("change", function() {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    g_val_reduce_dimension = jq(g_ID_REDUCE_DIMENSION).val();
-  });
-  submit_button.addEventListener("click", function() {
-    undisable("reset-button");
-    handleFiles();
-  }, false);
-  document.getElementById("reset-button").addEventListener("click", function() {
-    disable("reset-button");
-    undisable("submit-button");
-
-
-    document.getElementById("biom-file-upload-form").reset();
-
-    // Reset the color back to normal.
-    g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
-    if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
-      g_val_hue_angle_offset = 0;
-      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
-    } else if (g_val_hue_angle_offset >= 360) {
-      g_val_hue_angle_offset = 359;
-      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
-    }
-    console.log(g_val_hue_angle_offset);
-    display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
-    jq("hue-angle-offset-label").css("color", display_color);
-  });
-
-  function handleFiles() {
-    submit_button.setAttribute("disabled", "");
-    var file = uploader.files[0];
-    if (file) {
-      biom_reader.readAsText(file);
-    } else {
-      alert("Don't forget to select a biom file!");
-    }
-  }
 }
+
+
+
+// handle upload button
 
 
 /*
@@ -902,4 +838,94 @@ function reduce_dimension(biom_str, type, cutoff) {
 
 
   return new_biom.map(function(row) { return row.join("\t"); }).join("\n");
+}
+
+
+
+// Handle the biom upload form
+function biom__upload_button() {
+  function handleFiles() {
+    submit_button.setAttribute("disabled", "");
+    var file = uploader.files[0];
+    if (file) {
+      biom_reader.readAsText(file);
+    } else {
+      alert("Don't forget to select a biom file!");
+    }
+  }
+
+  disable("submit-button");
+  disable("reset-button");
+  update_form_vals();
+
+
+  var submit_id   = "submit-button";
+  var uploader_id = "uploader";
+
+  var uploader                    = document.getElementById(uploader_id);
+  var submit_button               = document.getElementById(submit_id);
+  var color_space_dropdown        = document.getElementById(g_ID_COLOR_SPACE);
+  var avg_method_dropdown         = document.getElementById(g_ID_AVG_METHOD);
+  var hue_angle_offset_slider     = document.getElementById(g_ID_HUE_ANGLE_OFFSET);
+  var reduce_dimension_select     = document.getElementById(g_ID_REDUCE_DIMENSION);
+  var abundant_samples_are_select = document.getElementById(g_ID_ABUNDANT_SAMPLES_ARE);
+
+  var biom_reader = new FileReader();
+
+  biom_reader.onload = function(event) {
+    var biom_str = event.target.result;
+    biom__save_abundance_colors(biom_str);
+  };
+
+  uploader.addEventListener("change", function(){
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+  });
+  color_space_dropdown.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+  });
+  avg_method_dropdown.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+  });
+  hue_angle_offset_slider.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+  });
+  reduce_dimension_select.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+  });
+  abundant_samples_are_select.addEventListener("change", function() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+  });
+  submit_button.addEventListener("click", function() {
+    undisable("reset-button");
+
+    update_form_vals();
+
+    handleFiles();
+  }, false);
+  document.getElementById("reset-button").addEventListener("click", function() {
+    disable("reset-button");
+    undisable("submit-button");
+
+    document.getElementById("biom-file-upload-form").reset();
+
+    update_form_vals();
+  });
 }

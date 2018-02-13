@@ -8,6 +8,9 @@ hr.row
         label for="uploader" Biom tsv file
         input id="uploader" type="file" name="biom"
 
+    hr.row
+
+    h4 Color options
     .row
       .small-12.columns
         label for="color-space" Color space
@@ -16,14 +19,23 @@ hr.row
           option id="color-space-hsl" value="color-space-hsl" Hue Saturation Lightness
     .row
       .small-12.columns
+        label style="font-weight: bold;" id="hue-angle-offset-label" for="hue-angle-offset" Approximate starting hue
+        input id="hue-angle-offset" type="range" min="0" max="359" value="0" step="0"
+    .row
+      .small-12.columns
+        label for="abundant-samples-are" Abundant samples are...
+        select id="abundant-samples-are"
+          option id="abundant-samples-are-light" value="abundant-samples-are-light" selected="" Lighter
+          option id="abundant-samples-are-dark" value="abundant-samples-are-dark" Darker
+    hr.row
+
+    h4 Other options
+    .row
+      .small-12.columns
         label for="avg-method" Averaging method
         select id="avg-method"
           option id="avg-method-nonzero-samples-mean" value="avg-method-nonzero-samples-mean" selected="" Mean across non-zero samples
           option id="avg-method-all-samples-mean" value="avg-method-all-samples-mean" Mean across all samples
-    .row
-      .small-12.columns
-        label style="font-weight: bold;" id="hue-angle-offset-label" for="hue-angle-offset" Approximate starting hue
-        input id="hue-angle-offset" type="range" min="0" max="359" value="0" step="0"
     .row
       .small-12.columns
         label for="reduce-dimension" Reduce dimensions?
@@ -37,6 +49,10 @@ hr.row
           option id="reduce-dimension-3-pc" value="reduce-dimension-3-pc" Three dimensional projection
           option id="reduce-dimension-4-pc" value="reduce-dimension-4-pc" Four dimensional projection
           option id="reduce-dimension-5-pc" value="reduce-dimension-4-pc" Five dimensional projection
+
+    hr.row
+
+    h4 Submit
     .row
       .small-12.columns
         label for="submit-button" Submit file
@@ -45,3 +61,5 @@ hr.row
       .small-12.columns
         label for="reset-button" Reset form
         input id="reset-button" type="button" value="Reset!" disabled=""
+
+    hr.row
