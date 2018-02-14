@@ -4,4 +4,96 @@
   h1 Documentation
 
 .row
-  p Coming soon!
+  p Here is all the sweet documentation for using Iroki!!  It's still a work in progress....
+
+.row
+  h2 Newick trees
+
+.row
+  p Iroki reads Newick formatted trees. This is a widely used format for storing phylogenetic and other types of trees in plain text.
+
+  p Here is an example of a tree with bootstrap support values.  In this case, the support values run from 0 - 1, but depending on your tree building software, they might run from 0 - 100, or look super neat like this <code>95.6/100</code> if you used IQ-TREE.
+
+  p Knowing which type of bootstrap support values your tree has will be important if you want to use the inner dots to represent bootstrap support.
+
+.row
+  pre
+    code
+      | ((geode:1, (clock:0.5, tire:5.3)0.4:2)0.75:6, (banana:1.7, eggplant:1.5)0.5:3);
+
+.row
+  p You can download this tree #{link_to "here", "/doc_stuff/tiny_tree_with_bootstraps.txt"}.
+
+  p This tree will look like this when viewed with Iroki.
+
+.row
+  = image_tag "/doc_stuff/tiny_tree_with_bootstraps.png", id: "tiny_tree_with_bootstraps"
+
+.row
+  p For the rest of the examples, we will use this tree.
+
+.row
+  h2 Mapping files
+
+.row
+  p Iroki is all about mapping files, so we try to make them as simple to use as possible.
+
+  p Here is an example mapping file.  It's just a sweet screenshot of a spreadsheet.
+
+.row
+  = image_tag "/doc_stuff/tiny_tree_simple_mapping.png", id: "tiny_tree_simple_mapping"
+
+.row
+  p Mapping files should be tab-delimited.  We reccomend making your mapping file in your favorite spreadsheet program and then exporting it as a tab-delimited text file (tsv).  Right click #{link_to "here", "/doc_stuff/tiny_tree_simple_mapping.txt"} and select Download to get the above mapping file as a tab seperated text file.
+
+.row
+  h3 Styling options
+
+.row
+  p The first row of the mapping file tells Iroki what aspects of the tree that you want to style.
+
+  p The first column of the first row must always be <code>name</code>.
+
+  p The above mapping file has all the options currently supported by Iroki.  Here they are again:
+
+  p There are options for styling labels (<code>leaf_label_color</code>, <code>leaf_label_font</code>, <code>leaf_label_size</code>), leaf dots (<code>leaf_dot_color</code>, <code>leaf_dot_size</code>), branches (<code>branch_width</code>, <code>branch_color</code>), and for renaming nodes (<code>new_name</code>).
+
+  p If you have anything in the first row of your mapping file that is not one of these options, Iroki will let you know about it.
+
+  p Note that you should only include the styling labels that you actually want to use in your mapping file.  This is because Iroki will take whatever is in the mapping file and lock those options in the viewer.  For example, if I have <code>leaf_label_color</code> in my header row, then Iroki will lock the option for "Show leaf labels?" to on.
+
+.row
+  h4 Branch styling
+
+.row
+  p If you have branch styling in your mapping file, Iroki will recursively color as far down as possible. That way you can easily identify clades with the same metadata.
+
+.row
+  h3 Mapping file priority
+
+.row
+  p Iroki will take whatever is in your mapping file and generate styling options that will override whatever was previously set in the options panel.  Here is an example.
+
+.row
+  p First we have a tree and we have manually set the branch color to magenta.
+
+.row
+  = image_tag "/doc_stuff/mapping_file_priority_1.png", id: "mapping_file_priority_1"
+
+.row
+  p Next, we upload the mapping file from above.  Note that it has <code>branch_color</code> in the header row.
+
+.row
+  = image_tag "/doc_stuff/mapping_file_priority_2.png", id: "mapping_file_priority_2"
+
+.row
+  p As you can see, the branch_option is still set to magenta, but the branch colors have been set by the mapping automatically.
+
+.row
+  p Let's look at one more example.  This time, the mapping file will only set <code>branch_color</code> for certain clock and tire.  You can see the mapping file #{link_to "here", "/doc_stuff/tiny_tree_some_branch_colors.txt"}.
+
+.row
+  = image_tag "/doc_stuff/mapping_file_priority_3.png", id: "mapping_file_priority_3"
+
+.row
+  p As you can see, the clock and tire clade is colored blue (by the mapping file) and the rest of the branches are colored magenta (by the option set by the user in the options panel).
