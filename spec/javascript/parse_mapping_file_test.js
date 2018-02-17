@@ -182,6 +182,15 @@ test('parse_mapping_file() can handle hex codes without the starting # char', fu
 
   expect(parse_mapping_file(hex_codes_without_pound)).toEqual(obj);
 });
+test('parse_mapping_file() strips spaces from the name column', function() {
+  var with_spaces = "name\tbranch_color\n   apple    \t#ff00ff\n";
+
+  var obj = {
+    "apple" : { "branch_color" : "#ff00ff" }
+  };
+
+  expect(parse_mapping_file(with_spaces)).toEqual(obj);
+});
 
 test('push_unless_present() pushes an item if it is not there already', function() {
   var ary = [1,2];

@@ -363,7 +363,7 @@ function lalala(tree_input_param, mapping_input_param)
       } else if (LAYOUT_STRAIGHT) {
         return rectangle_transform(d, the_x, the_y);
       } else {
-        var rotate_by = rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
+        var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
         if (-90 < rotate_by && rotate_by < 90) {
           // Don't change rotate by
@@ -1632,7 +1632,7 @@ function lalala(tree_input_param, mapping_input_param)
         return circular_label_flipping_test(d[the_x]) ? "0.6em" : "-0.6em";
       } else if (LAYOUT_RADIAL) {
         // Positive moves text anchor start labels away from branch tip, but moves text anchor end labels closer to the branch tip.
-        var rotate_by = rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
+        var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
         if (-90 < rotate_by && rotate_by < 90) {
           // Don't change rotate by
@@ -1744,7 +1744,7 @@ function lalala(tree_input_param, mapping_input_param)
 
     function radial_text_anchor(d)
     {
-      var rotate_by = rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
+      var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
       if (-90 < rotate_by && rotate_by < 90) {
         // Don't change rotate by
@@ -2596,7 +2596,7 @@ function radial_cluster(root)
         "y" : 0,
         "num_leaves_in_subtree" : 0,
         "wedge_size" : 2 * Math.PI,
-        "wedge_border" : deg_to_rad(TREE_ROTATION)
+        "wedge_border" : utils__deg_to_rad(TREE_ROTATION)
       };
     } else {
       vertex.radial_layout_info = {
@@ -2612,16 +2612,6 @@ function radial_cluster(root)
 
   postorder_traversal(root);
   preorder_traversal(root);
-}
-
-function deg_to_rad(deg)
-{
-  return deg / 180 * Math.PI;
-}
-
-function rad_to_deg(rad)
-{
-  return rad * 180 / Math.PI;
 }
 
 function get_translation(transform_str)

@@ -75,7 +75,7 @@ function round_to(x, place)
 // TODO should this be multiplyed by two?
 function get_point(count, sample_idx, num_samples)
 {
-  var angle = sample_to_angle(sample_idx, num_samples, deg_to_rad(g_val_hue_angle_offset));
+  var angle = sample_to_angle(sample_idx, num_samples, utils__deg_to_rad(g_val_hue_angle_offset));
 
   var pt = {
     x: count * Math.cos(angle),
@@ -359,7 +359,7 @@ function biom__colors_from_biom_str(biom_str) {
   return colors_from_centroids(centroids, biom_csv);
 }
 
-function json_to_tsv(json) {
+function make_tsv_string(json) {
   var strings = ["name\tbranch_color\tleaf_label_color\tleaf_dot_color"];
   json_each(json, function(key, val) {
     var str = [key, val, val, val].join("\t");
@@ -406,7 +406,7 @@ function biom__save_abundance_colors(biom_str) {
   }
 
   var colors = biom__colors_from_biom_str(str);
-  var tsv_str = json_to_tsv(colors);
+  var tsv_str = make_tsv_string(colors);
 
   var blob = new Blob([tsv_str], {type: "text/plain;charset=utf-8"});
 

@@ -54,3 +54,14 @@ function utils__load_dataset(tree_file, mapping_file) {
     lalala(tree_file, mapping_file);
   }
 }
+
+function utils__deg_to_rad(deg)
+{
+  return deg / 180 * Math.PI;
+}
+
+function utils__rad_to_deg(rad)
+{
+  return rad * 180 / Math.PI;
+}
+
