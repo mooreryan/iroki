@@ -939,11 +939,20 @@ function is_bad_col_header(str)
 
 function parse_mapping_file(str)
 {
+  // Strip spaces from the start and end of all tokens.
+  var stripped_str = str
+    .replace(/\r?\n/g, "\n") // First make all newlines \n
+    .replace(/^ +/g, "") // Then remove spaces at the front
+    .replace(/\n +/g, "\n") // Spaces that follow a newline
+    .replace(/ +\n/g, "\n") // Spaces right before a newline
+    .replace(/\t +| +\t/g, "\t"); // Spaces just before and just after a \t
+
   // To hold messages about bad colors in the mapping file.
   var bad_color_errors = [];
+  
 
   // Parse mapping string.
-  var mapping_csv = Papa.parse(chomp(str), PAPA_CONFIG);
+  var mapping_csv = Papa.parse(chomp(stripped_str), PAPA_CONFIG);
 
   // Check for erros
   if (has_papa_errors(mapping_csv)) {
