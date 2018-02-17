@@ -223,6 +223,8 @@ var tmp_root;
 
 var TREE_IS_ROOTED_ON_A_LEAF_NODE;
 
+var biological_root_sibling_warnings = [];
+
 // Any value higher than this will be dropped down to this value.  Some tree software puts the number of bootstrap trees with support rather than a percent so this number can get pretty high.
 var MAX_BOOTSTRAP_VAL = 1e9;
 
@@ -1486,6 +1488,9 @@ function lalala(tree_input_param, mapping_input_param)
 
     function draw_links()
     {
+      // reset the bio root warnings container
+      biological_root_sibling_warnings = [];
+
       link = d3.select("#link-container")
         .selectAll("path")
         .data(ROOT.links());
@@ -1518,7 +1523,10 @@ function lalala(tree_input_param, mapping_input_param)
           return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
         });
 
-      // .attr("stroke", function(d) { return d.target.color; });
+      if (biological_root_sibling_warnings.length > 0) {
+        // There were some warnings.
+        alert(biological_root_sibling_warnings.join("\n"));
+      }
     }
 
     function adjust_tree()
@@ -2342,7 +2350,7 @@ function get_branch_md_val(node, branch_option, default_value)
 
     // If there is more than one sibling, then things are strange just put the defualt value.
     if (children.length !== 2) {
-      alert("WARNING -- The biological root has multiple sibling nodes.  Automatic branch styling is not handled in this case.  Using the default color value.  If the branch styling near the root looks strange, this is likely the reason.");
+      push_unless_present(biological_root_sibling_warnings, "WARNING -- The biological root has multiple sibling nodes.  Automatic branch styling is not handled in this case.  Using the default color value.  If the branch styling near the root looks strange, this is likely the reason.");
       return default_value;
     }
     else {
