@@ -223,6 +223,8 @@ var tmp_root;
 
 var TREE_IS_ROOTED_ON_A_LEAF_NODE;
 
+// Any value higher than this will be dropped down to this value.  Some tree software puts the number of bootstrap trees with support rather than a percent so this number can get pretty high.
+var MAX_BOOTSTRAP_VAL = 1e9;
 
 var defaults = {
   "leaf_label_color": "#000000",
@@ -2947,18 +2949,12 @@ function set_and_validate_bootstrap_cutoff_input() {
     VAL_BOOTSTRAP_CUTOFF_FILLED_DOT = DEFAULT_BOOTSTRAP_CUTOFF_FILLED_DOT;
   }
 
-  // // Then check to make sure that the unfilled cutoff is less than the filled cutoff.
-  // if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > VAL_BOOTSTRAP_CUTOFF_FILLED_DOT) {
-  //   // Set it to the upper val
-  //   jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(VAL_BOOTSTRAP_CUTOFF_FILLED_DOT);
-  // }
-
-  // Make sure it is between 0 and 100.  Bootstraps will run between 0 and 1 or 0 and 100.
-  if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > 100) {
-    jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(100);
+  // Make sure that the bootstrap values are okay.
+  if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > MAX_BOOTSTRAP_VAL) {
+    jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(MAX_BOOTSTRAP_VAL);
   }
-  if (VAL_BOOTSTRAP_CUTOFF_FILLED_DOT > 100) {
-    jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val(100);
+  if (VAL_BOOTSTRAP_CUTOFF_FILLED_DOT > MAX_BOOTSTRAP_VAL) {
+    jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val(MAX_BOOTSTRAP_VAL);
   }
   if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT < 0) {
     jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(0);
