@@ -40,3 +40,4 @@ jquery-3.3.1.slim.min.js
 ignore
 
 spec/test_files/mapping\ *
+spec/test_files/cpf_tree*
