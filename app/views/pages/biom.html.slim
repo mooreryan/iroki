@@ -1,10 +1,15 @@
 = javascript_include_tag "http://mlweb.loria.fr/lalolib.js", "data-turbolinks-track" => false
 
+- provide :title, 'Biom converter'
+
 .row
   h1 Biom to color map converter
 
 .row
-  p Hi, I'm the biom file to color map converter!  I take your tab seperated biom file and give each OTU a color based on its abundance profile.
+  p Hi, I'm the biom file to color map converter!  I take your #{link_to "tab separated biom file", "http://biom-format.org/documentation/biom_conversion.html#general-usage-examples"} biom file and give each OTU a color based on its abundance profile.
+
+  p I'll spit out a mapping file to use on the #{link_to "viewer page", root_path}, but you might want to edit it first and remove any style attributes that you don't want on your tree.
+
   p I'm still in beta, so if something goes wrong or looks icky, please #{mail_to "admin@iroki.net", "send us an email", cc: "IrokiHelp@gmail.com", subject: "Iroki help", target: "blank"}!
 
 .row.thick-border
