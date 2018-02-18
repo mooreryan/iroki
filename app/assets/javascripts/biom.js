@@ -159,7 +159,6 @@ function sample_counts_to_points(csv) {
   return points;
 }
 
-
 function signed_area_of_triangle(p1, p2, p3) {
   return ((p1.x * (p2.y - p3.y)) + (p2.x * (p3.y - p1.y)) + (p3.x * (p1.y - p2.y))) / 2;
 }
@@ -347,14 +346,15 @@ function biom__colors_from_biom_str(biom_str) {
 }
 
 function make_tsv_string(json) {
-  var strings = ["name\tbranch_color\tleaf_label_color\tleaf_dot_color"];
+  var header  = "name\tbranch_color\tleaf_label_color\tleaf_dot_color\n";
+  var strings = [];
   json_each(json, function (key, val) {
     var str = [key, val, val, val].join("\t");
 
     strings.push(str);
   });
 
-  return strings.join("\n");
+  return header + strings.join("\n");
 }
 
 function biom__save_abundance_colors(biom_str) {
@@ -397,7 +397,8 @@ function biom__save_abundance_colors(biom_str) {
 
   var blob = new Blob([tsv_str], { type : "text/plain;charset=utf-8" });
 
-  saveAs(blob, "mapping.txt");
+  // Unicode standard does not recommend using the BOM for UTF-8, so pass in true to NOT put it in.
+  saveAs(blob, "mapping.txt", true);
 }
 
 var g_ID_COLOR_SPACE     = "color-space",
