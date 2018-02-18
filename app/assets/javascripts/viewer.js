@@ -2033,7 +2033,7 @@ function draw_scale_bar()
 
 
     var rotated_rectangle = LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
-    mean_length = round_to(ary_mean(lengths), ROUNDING_PLACE);
+    mean_length = utils__round_to(ary_mean(lengths), ROUNDING_PLACE);
 
     var min_scale_bar_size;
     if (LAYOUT_CIRCLE) {
@@ -2062,12 +2062,12 @@ function draw_scale_bar()
     // If the original scale bar is smaller than the min size, bump up the size.
     if (scale_bar_pixels < min_scale_bar_size) {
       scale_bar_pixels = min_scale_bar_size;
-      // scale_bar_label_text = round_to(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PLACE);
+      // scale_bar_label_text = utils__round_to(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PLACE);
     }
 
     // // Now that we have a minimum scale bar size, weight it by the slider value.
     // scale_bar_pixels *= SCALE_BAR_LENGTH;
-    var scale_bar_label_text = round_to(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PLACE);
+    var scale_bar_label_text = utils__round_to(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PLACE);
     jq(ID_SCALE_BAR_LENGTH).val(scale_bar_label_text);
 
 
@@ -2157,52 +2157,6 @@ function draw_scale_bar()
   }
 }
 
-function round_to(x, place)
-{
-  return Math.round(place * x) / place;
-}
-
-function add_circle(x, y)
-{
-  d3.select("#svg-tree").append("circle").attr("r", 0).transition().attr("fill", "green").attr("r", 10).attr("cx", x).attr("cy", y).attr("class", "delete-me");
-}
-
-function delete_circles()
-{
-  d3.select("circle.delete-me").transition().attr("r", 0).remove();
-}
-
-function rot(p) { return pt(p.y, -p.x); }
-function pt(x, y) { return { "x" : x, "y" : y } }
-
-
-
-// function get_metadata(dat, md_cat_names)
-// {
-//
-//   var name2md = {}
-//   var i = 0;
-//   for (i = 0; i < dat.length; ++i) {
-//     name2md[dat[i][0]] = {};
-//     var j = 0;
-//     for (j = 0; j < md_cat_names.length; ++j) {
-//       name2md[dat[i][0]][md_cat_names[j]] = dat[i][j+1];
-//     }
-//   }
-//
-//   return name2md;
-// }
-//
-// function parse_metadata_string(str)
-// {
-//   var dat = str.split(/\r?\n/).filter(function(s) { return s; }).map(function(s) { return s.split("\t"); });
-//   var md_cat_names = dat.shift();
-//   md_cat_names.shift(); // pop off the first thing (will be "name")
-//   md_cat_names = md_cat_names.map(function(s) { return s.replace(/ /g, "_") });
-//
-//   return get_metadata(dat, md_cat_names);
-// }
-
 function add_metadata(root, name2md, match_style)
 {
   // Everything starts with black metadata.  Later functions should handle defualts with blank metadata later.
@@ -2257,70 +2211,6 @@ function add_blank_metadata(root)
 {
   root.leaves().forEach(function(d) { return d.metadata = {}; })
 }
-
-// function is_target_md_pure_for(root, branch_option, defualt_value)
-// {
-//   var targets = root.links().map(function(d) { return d.target });
-//
-//   targets.forEach(function(target){
-//     var leaves = get_leaves(target);
-//
-//     // TODO does this assume that all leaves are in the mapping file?
-//     var md_vals = [];
-//     leaves.forEach(function(leaf) {
-//       // Assumes that metadata has already been added.
-//       var val = d.metadata[branch_option];
-//       push_unless_present(md_vals, val);
-//     });
-//   });
-//
-//   return md_vals.length == 1 ? md_vals[0] : default_value;
-// }
-
-
-// // The branch option needs to be the underscore version.
-// // TODO this is the slow function.  Just do this once at the beginning and mark all targets with the appropriate metadata.
-// function get_branch_md_val(node, branch_option, default_value)
-// {
-//   var sibling, children;
-//
-//   if ((sibling = is_silly(node))) {
-//     // this is a silly node, so get the md value from the sibling
-//     return sibling.metadata[branch_option] || default_value;
-//   }
-//   // TODO START HERE.  NEED TO SEE IF THE SIBLING OF WONKY NODE HAS SAME MD VALUE.  IF SO YOU CAN USE IT, IF NOT THEY BOTH NEED TO BE DEFAULT.  A WONKY NODE IS A DEPTH 1 NODE THAT IS NOT A LEAF NODE AND IT'S SIBLING(S) ARE ALSO NOT LEAF NODE.  IT HAPPENS IN A TREE ROOTED NOT ON A LEAF NODE.
-//   else if ((children = is_wonky(node))){
-//     var md_vals = []
-//     children.forEach(function(child) {
-//       if (is_wonky(child)) {
-//         // TODO if the child of a wonky node is also wonky, there was an error.  Just return the default value and be done.
-//         alert("WARNING -- the child of a wonky node was also wonky.  Using default value for branch option.")
-//         return default_value;
-//       } else {
-//         push_unless_present(md_vals, get_branch_md_val(child, branch_option, default_value));
-//       }
-//
-//       // If the children have all same md vals, then the radial tree wont look weird, but if not it will.
-//       return md_vals.length === 1 ? md_vals[0] : default_value;
-//     });
-//   }
-//   else {
-//     var leaves = get_leaves(node);
-//     var md_vals = [];
-//
-//     leaves.forEach(function(leaf){
-//       // Assumes that metadata has already been added.
-//       var val = leaf.metadata[branch_option];
-//       if (val) {
-//         push_unless_present(md_vals, val);
-//       } else { // got undefined, push defualt value
-//         push_unless_present(md_vals, default_value);
-//       }
-//     });
-//
-//     return md_vals.length === 1 ? md_vals[0] : default_value;
-//   }
-// }
 
 function get_branch_md_val(node, branch_option, default_value)
 {

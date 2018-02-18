@@ -55,6 +55,10 @@ function utils__load_dataset(tree_file, mapping_file) {
   }
 }
 
+
+
+// Some math functions
+
 function utils__deg_to_rad(deg)
 {
   return deg / 180 * Math.PI;
@@ -63,5 +67,32 @@ function utils__deg_to_rad(deg)
 function utils__rad_to_deg(rad)
 {
   return rad * 180 / Math.PI;
+}
+
+function utils__round_to(x, place)
+{
+  return Math.round(place * x) / place;
+}
+
+
+
+
+// Functions for dealing with points.
+function utils__pt(x, y) { return { "x" : x, "y" : y } }
+function utils__rot(p) { return utils__pt(p.y, -p.x); }
+
+
+
+
+// Some D3 helpers for debugging
+
+function utils__add_circle(x, y)
+{
+  d3.select("#svg-tree").append("circle").attr("r", 0).transition().attr("fill", "green").attr("r", 10).attr("cx", x).attr("cy", y).attr("class", "delete-me");
+}
+
+function utils__delete_circles()
+{
+  d3.select("circle.delete-me").transition().attr("r", 0).remove();
 }
 
