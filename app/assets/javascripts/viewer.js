@@ -1,4 +1,3 @@
-
 var MAPPING_CHANGED, TREE_CHANGED;
 
 
@@ -15,42 +14,44 @@ function upload_button(submit_id, uploader_id, callback) {
   utils__clear_elem("options-div");
   utils__upload_tree_first();
 
-  var uploader = document.getElementById(uploader_id);
+  var uploader         = document.getElementById(uploader_id);
   var mapping_uploader = document.getElementById("mapping-file-uploader");
 
-  var submit_button = document.getElementById(submit_id);
-  var tree_reader = new FileReader();
+  var submit_button  = document.getElementById(submit_id);
+  var tree_reader    = new FileReader();
   var mapping_reader = new FileReader();
 
   // The callback in this case is utils__load_dataset
-  tree_reader.onload = function(tree_event) {
-    var tree_str = tree_event.target.result;
+  tree_reader.onload = function (tree_event) {
+    var tree_str     = tree_event.target.result;
     var mapping_file = mapping_uploader.files[0];
     if (mapping_file) {
       mapping_reader.readAsText(mapping_file);
-    } else {
+    }
+    else {
       callback(tree_str, null);
     }
 
-    mapping_reader.onload = function(mapping_event) {
+    mapping_reader.onload = function (mapping_event) {
       var mapping_str = mapping_event.target.result;
 
       callback(tree_str, mapping_str)
     };
   };
 
-  uploader.addEventListener("change", function(){
+  uploader.addEventListener("change", function () {
     TREE_CHANGED = true;
     submit_button.removeAttribute("disabled");
   });
-  mapping_uploader.addEventListener("change", function() {
+  mapping_uploader.addEventListener("change", function () {
     MAPPING_CHANGED = true;
     submit_button.removeAttribute("disabled");
   });
-  submit_button.addEventListener("click", function() {
+  submit_button.addEventListener("click", function () {
     if (MAPPING_CHANGED && !TREE_CHANGED) {
       // Don't reset
-    } else {
+    }
+    else {
       utils__clear_elem("svg-tree");
       reset_all_to_defaults();
     }
@@ -64,13 +65,13 @@ function upload_button(submit_id, uploader_id, callback) {
     //   .html("Loading tree! Please wait....");
 
     MAPPING_CHANGED = false;
-    TREE_CHANGED = false;
+    TREE_CHANGED    = false;
 
     handleFiles();
   }, false);
-  document.getElementById(ID_RESET_BUTTON).addEventListener("click", function() {
+  document.getElementById(ID_RESET_BUTTON).addEventListener("click", function () {
     MAPPING_CHANGED = false;
-    TREE_CHANGED = false;
+    TREE_CHANGED    = false;
 
     d3.select("#status-msg").html("I'm still in beta.  Please report any bugs on the contact page.");
 
@@ -95,15 +96,14 @@ function upload_button(submit_id, uploader_id, callback) {
     var file = uploader.files[0];
     if (file) {
       tree_reader.readAsText(file);
-    } else {
+    }
+    else {
       // d3.select("#loading-message").remove();
       utils__set_status_msg_to_done();
       alert("Don't forget a tree file!");
     }
   }
 }
-
-
 
 
 // TODO get this from the CSS
@@ -117,7 +117,8 @@ var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
 var the_x, the_y;
 var SIZE, INNER_SIZE;
 var width, padding, height;
-var ROOT, svg, chart, data, circles, labels, inner_labels, leaf_labels, linkExtension, link, inner_dots, leaf_dots;
+var ROOT, svg, chart, data, circles, labels, inner_labels, leaf_labels,
+    linkExtension, link, inner_dots, leaf_dots;
 
 var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
 
@@ -148,7 +149,7 @@ var name2md = null;
 
 var MATCHING_TYPE;
 
-var EXTRA_NAME_WARNINGS = false;
+var EXTRA_NAME_WARNINGS       = false;
 var MIN_LENGTH_IN_TREE;
 var MIN_DEFUALT_BRANCH_LENGTH = 1e-10;
 var NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES;
@@ -165,57 +166,57 @@ var TR;
 var RADIAL_LAYOUT_WEIGHT = 1;
 
 // These vars hold elem IDs
-var ID_MATCHING_TYPE = "matching-type";
-var ID_LAYOUT = "tree-shape",
-  ID_LAYOUT_RECTANGULAR = "rectangular-tree",
-  ID_LAYOUT_CIRCULAR = "circular-tree",
-  ID_LAYOUT_RADIAL = "radial-tree";
-var ID_TREE_BRANCH_STYLE = "tree-branch-style",
-  ID_TREE_BRANCH_STYLE_NORMAL = "normalogram",
-  ID_TREE_BRANCH_STYLE_CLADOGRAM = "cladogram";
-var ID_SORT = "tree-sort",
-  ID_SORT_FORWARD = "descending",
-  ID_SORT_REVERSE = "ascending",
-  ID_SORT_UNSORTED = "not-sorted";
-var ID_SCALE_BAR_SHOW = "show-scale-bar",
-  ID_SCALE_BAR_OFFSET_WEIGHT = "scale-bar-offset-weight",
-  ID_SCALE_BAR_AUTOSIZE = "scale-bar-auto-size",
-  ID_SCALE_BAR_LENGTH = "scale-bar-length";
-var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
-var ID_OPTIONS_ACCORDION = "options-accordion";
-var ID_LEAF_DOT_COLOR = "leaf-dot-color",
-  ID_INNER_DOT_COLOR = "inner-dot-color",
-  VAL_LEAF_DOT_COLOR,
-  VAL_INNER_DOT_COLOR;
-var ID_LEAF_LABEL_COLOR = "leaf-label-color",
-  ID_LEAF_LABEL_FONT = "leaf-label-font",
-  VAL_LEAF_LABEL_COLOR,
-  VAL_LEAF_LABEL_FONT;
-var ID_INNER_LABEL_COLOR = "inner-label-color",
-  ID_INNER_LABEL_FONT = "inner-label-font",
-  VAL_INNER_LABEL_COLOR,
-  VAL_INNER_LABEL_FONT;
+var ID_MATCHING_TYPE               = "matching-type";
+var ID_LAYOUT                      = "tree-shape",
+    ID_LAYOUT_RECTANGULAR          = "rectangular-tree",
+    ID_LAYOUT_CIRCULAR             = "circular-tree",
+    ID_LAYOUT_RADIAL               = "radial-tree";
+var ID_TREE_BRANCH_STYLE           = "tree-branch-style",
+    ID_TREE_BRANCH_STYLE_NORMAL    = "normalogram",
+    ID_TREE_BRANCH_STYLE_CLADOGRAM = "cladogram";
+var ID_SORT                        = "tree-sort",
+    ID_SORT_FORWARD                = "descending",
+    ID_SORT_REVERSE                = "ascending",
+    ID_SORT_UNSORTED               = "not-sorted";
+var ID_SCALE_BAR_SHOW              = "show-scale-bar",
+    ID_SCALE_BAR_OFFSET_WEIGHT     = "scale-bar-offset-weight",
+    ID_SCALE_BAR_AUTOSIZE          = "scale-bar-auto-size",
+    ID_SCALE_BAR_LENGTH            = "scale-bar-length";
+var ID_VIEWER_SIZE_FIXED           = "viewer-size-fixed";
+var ID_OPTIONS_ACCORDION           = "options-accordion";
+var ID_LEAF_DOT_COLOR              = "leaf-dot-color",
+    ID_INNER_DOT_COLOR             = "inner-dot-color",
+    VAL_LEAF_DOT_COLOR,
+    VAL_INNER_DOT_COLOR;
+var ID_LEAF_LABEL_COLOR            = "leaf-label-color",
+    ID_LEAF_LABEL_FONT             = "leaf-label-font",
+    VAL_LEAF_LABEL_COLOR,
+    VAL_LEAF_LABEL_FONT;
+var ID_INNER_LABEL_COLOR           = "inner-label-color",
+    ID_INNER_LABEL_FONT            = "inner-label-font",
+    VAL_INNER_LABEL_COLOR,
+    VAL_INNER_LABEL_FONT;
 
 var ID_INNER_DOT_SIZE = "inner-dot-size",
-  ID_LEAF_DOT_SIZE = "leaf-dot-size";
+    ID_LEAF_DOT_SIZE  = "leaf-dot-size";
 
 var ID_BIOLOGICALLY_ROOTED = "biological-root",
-  VAL_BIOLOGICALLY_ROOTED;
+    VAL_BIOLOGICALLY_ROOTED;
 
-var ID_SHOW_INNER_DOTS = "show-inner-dots",
-  ID_SHOW_INNER_DOTS_NONE = "show-inner-dots-none",
-  ID_SHOW_INNER_DOTS_NORMAL = "show-inner-dots-normal",
-  ID_SHOW_INNER_DOTS_BOOTSTRAP = "show-inner-dots-bootstrap",
-  VAL_SHOW_INNER_DOTS;
+var ID_SHOW_INNER_DOTS           = "show-inner-dots",
+    ID_SHOW_INNER_DOTS_NONE      = "show-inner-dots-none",
+    ID_SHOW_INNER_DOTS_NORMAL    = "show-inner-dots-normal",
+    ID_SHOW_INNER_DOTS_BOOTSTRAP = "show-inner-dots-bootstrap",
+    VAL_SHOW_INNER_DOTS;
 
-var ID_BOOTSTRAP_CUTOFF_FILLED_DOT = "bootstrap-cutoff-filled-dot",
-  ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT = "bootstrap-cutoff-unfilled-dot";
+var ID_BOOTSTRAP_CUTOFF_FILLED_DOT   = "bootstrap-cutoff-filled-dot",
+    ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT = "bootstrap-cutoff-unfilled-dot";
 
 var VAL_BOOTSTRAP_CUTOFF_FILLED_DOT,
-  VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT;
+    VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT;
 
-var DEFAULT_BOOTSTRAP_CUTOFF_FILLED_DOT = 0.75,
-  DEFAULT_BOOTSTRAP_CUTOFF_UNFILLED_DOT = 0.5;
+var DEFAULT_BOOTSTRAP_CUTOFF_FILLED_DOT   = 0.75,
+    DEFAULT_BOOTSTRAP_CUTOFF_UNFILLED_DOT = 0.5;
 
 var ID_RESET_BUTTON = "reset";
 
@@ -229,34 +230,34 @@ var biological_root_sibling_warnings = [];
 var MAX_BOOTSTRAP_VAL = 1e9;
 
 var defaults = {
-  "leaf_label_color": "#000000",
-  "leaf_label_font": "Helvetica",
-  "leaf_label_size": 16,
-  "leaf_dot_color": "#000000",
-  "leaf_dot_size": 2,
-  "new_name": null,
-  "branch_width": 2,
-  "branch_color": "#000000"
+  "leaf_label_color" : "#000000",
+  "leaf_label_font" : "Helvetica",
+  "leaf_label_size" : 16,
+  "leaf_dot_color" : "#000000",
+  "leaf_dot_size" : 2,
+  "new_name" : null,
+  "branch_width" : 2,
+  "branch_color" : "#000000"
 };
 
 var md_cat_name2id = {
-  "leaf_label_color": null,
-  "leaf_label_font": null,
-  "leaf_label_size": "leaf-label-size",
-  "leaf_dot_color": null,
-  "leaf_dot_size": ID_LEAF_DOT_SIZE,
-  "new_name": null,
-  "branch_width": "branch-width",
-  "branch_color": null
+  "leaf_label_color" : null,
+  "leaf_label_font" : null,
+  "leaf_label_size" : "leaf-label-size",
+  "leaf_dot_color" : null,
+  "leaf_dot_size" : ID_LEAF_DOT_SIZE,
+  "new_name" : null,
+  "branch_width" : "branch-width",
+  "branch_color" : null
 };
 
 // Hold these as globals so that we can make sure the reset button resets them.
 var mapping_input, tree_input;
-// The mega function
-function lalala(tree_input_param, mapping_input_param)
-{
 
-  tree_input = tree_input_param;
+// The mega function
+function lalala(tree_input_param, mapping_input_param) {
+
+  tree_input    = tree_input_param;
   mapping_input = mapping_input_param;
 
   // Check if there is more than one semicolon.  TODO this will give a false positive if there are semicolons within quoted names.
@@ -276,8 +277,8 @@ function lalala(tree_input_param, mapping_input_param)
     var duplicated_strings = has_duplicate_strings(newick__leaf_names(parsed_newick));
     if (duplicated_strings) {
       var err_str = "WARNING -- Your tree had some duplicated leaf names: ";
-      var reps = [];
-      json_each(duplicated_strings, function(name, count) {
+      var reps    = [];
+      json_each(duplicated_strings, function (name, count) {
         str = name + " (" + count + " times)";
         reps.push(str);
       });
@@ -285,9 +286,13 @@ function lalala(tree_input_param, mapping_input_param)
       alert(err_str + reps.join(", "));
     }
 
-    tmp_root = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
-      .sum(function(d) { return d.branchset ? 0 : 1; })
-      .sort(sort_function);
+    tmp_root = d3.hierarchy(parsed_newick, function (d) {
+      return d.branchset;
+    })
+                 .sum(function (d) {
+                   return d.branchset ? 0 : 1;
+                 })
+                 .sort(sort_function);
 
     // If it is a big tree, uncheck the viewer size fixed button.  It goes way faster.
     if (tmp_root.descendants().length > LARGE_TREE_CUTOFF) {
@@ -299,7 +304,8 @@ function lalala(tree_input_param, mapping_input_param)
     var colon_match = tree_input.match(/:/g)
     if (colon_match) {
       num_colons = colon_match.length;
-    } else {
+    }
+    else {
       num_colons = 0;
     }
     // Subtract off one to account for the root, which doesn't need to have a branch length in the newick file.
@@ -322,7 +328,8 @@ function lalala(tree_input_param, mapping_input_param)
     // Set the min tree length to bump up zero length branches to.
     if ((MIN_LENGTH_IN_TREE / 2) < MIN_DEFUALT_BRANCH_LENGTH) {
       NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES = (MIN_LENGTH_IN_TREE / 2);
-    } else {
+    }
+    else {
       NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES = MIN_DEFUALT_BRANCH_LENGTH;
     }
 
@@ -342,36 +349,41 @@ function lalala(tree_input_param, mapping_input_param)
           name2md = null;
         }
       }
-    } else {
+    }
+    else {
       name2md = null;
     }
 
     // TODO this transition doesn't get picked up by the draw functions when they are called by a listener.
     TR = d3.transition().duration(750).ease(d3.easeExp);
 
-    function listener(id, action, fn)
-    {
+    function listener(id, action, fn) {
       d3.select("#" + id).on(action, fn);
     }
 
-    function pick_transform(d)
-    {
+    function pick_transform(d) {
       if (LAYOUT_CIRCLE && is_leaf(d)) {
         return circle_transform(d, the_x, align_tip_labels ? "y" : the_y);
-      } else if (LAYOUT_CIRCLE) {
+      }
+      else if (LAYOUT_CIRCLE) {
         return circle_transform(d, the_x, the_y);
-      } else if (LAYOUT_STRAIGHT && is_leaf(d)) {
+      }
+      else if (LAYOUT_STRAIGHT && is_leaf(d)) {
         return rectangle_transform(d, the_x, align_tip_labels ? "y" : the_y);
-      } else if (LAYOUT_STRAIGHT) {
+      }
+      else if (LAYOUT_STRAIGHT) {
         return rectangle_transform(d, the_x, the_y);
-      } else {
+      }
+      else {
         var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
         if (-90 < rotate_by && rotate_by < 90) {
           // Don't change rotate by
-        } else if (rotate_by >= 90) { // TODO which should have the equal part
+        }
+        else if (rotate_by >= 90) { // TODO which should have the equal part
           rotate_by += 180; // TODO also flip the text-anchor to end
-        } else if (rotate_by <= -90) {
+        }
+        else if (rotate_by <= -90) {
           rotate_by -= 180; // TODO also flip the text anchor to end
         }
 
@@ -385,7 +397,7 @@ function lalala(tree_input_param, mapping_input_param)
 
 
     // Set rotation constants
-    ROTATED = 270;
+    ROTATED     = 270;
     NOT_ROTATED = 0;
 
     // Listen for save
@@ -396,23 +408,22 @@ function lalala(tree_input_param, mapping_input_param)
 
     // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
 
-    function set_msg_and_draw()
-    {
+    function set_msg_and_draw() {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function() {
+      setTimeout(function () {
         draw_tree();
         utils__set_status_msg_to_done();
       });
     }
 
     var TIMEOUT = 10;
-    listener(ID_MATCHING_TYPE, "change", function(){
+    listener(ID_MATCHING_TYPE, "change", function () {
       // First check that you actually have a tree and mapping file.
       if (tree_input && mapping_input) {
         utils__set_status_msg_to_rendering();
 
-        setTimeout(function() {
+        setTimeout(function () {
           if (mapping_input) {
             name2md = parse_mapping_file(mapping_input);
 
@@ -422,7 +433,8 @@ function lalala(tree_input_param, mapping_input_param)
                 name2md = null
               }
             }
-          } else {
+          }
+          else {
             name2md = null;
           }
           draw_tree();
@@ -436,12 +448,12 @@ function lalala(tree_input_param, mapping_input_param)
     listener("height", "change", set_msg_and_draw);
 
     // TODO no status-msg
-    listener(ID_LAYOUT, "change", function() {
+    listener(ID_LAYOUT, "change", function () {
       utils__set_status_msg_to_rendering();
-      setTimeout(function(){
+      setTimeout(function () {
 
         // First adjust the slider.
-        var width_elem = $("#width");
+        var width_elem  = $("#width");
         var height_elem = $("#height");
 
         if (document.getElementById("rectangular-tree").selected) {
@@ -456,7 +468,8 @@ function lalala(tree_input_param, mapping_input_param)
             .attr("max", 150)
             .attr("step", 1)
             .val(22);
-        } else if (document.getElementById("circular-tree").selected) {
+        }
+        else if (document.getElementById("circular-tree").selected) {
           width_elem
             .attr("min", 15)
             .attr("max", 150)
@@ -468,7 +481,8 @@ function lalala(tree_input_param, mapping_input_param)
             .attr("max", 150)
             .attr("step", 1)
             .val(22);
-        } else { // radial
+        }
+        else { // radial
           // The values look weird since they are polynomial transformed later.
           width_elem
             .attr("min", 5)
@@ -487,10 +501,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, 10);
     });
-    listener("tree-branch-style", "change", function() {
+    listener("tree-branch-style", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         redraw_tree();
         utils__set_status_msg_to_done();
       }, TIMEOUT);
@@ -498,11 +512,11 @@ function lalala(tree_input_param, mapping_input_param)
 
     listener("tree-rotation", "change", set_msg_and_draw);
 
-    listener(ID_BIOLOGICALLY_ROOTED, "change", function() {
+    listener(ID_BIOLOGICALLY_ROOTED, "change", function () {
       // TODO which things actaully need to be updates?
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_links();
@@ -518,19 +532,19 @@ function lalala(tree_input_param, mapping_input_param)
     });
 
     // TODO needs longer timer to actually work.  Not sure why.
-    listener("tree-sort", "change", function() {
+    listener("tree-sort", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         draw_tree();
         utils__set_status_msg_to_done();
       }, TIMEOUT * 2);
     });
 
-    listener(ID_SCALE_BAR_SHOW, "change", function() {
+    listener(ID_SCALE_BAR_SHOW, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_scale_bar();
@@ -538,10 +552,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_SCALE_BAR_OFFSET_WEIGHT, "change", function() {
+    listener(ID_SCALE_BAR_OFFSET_WEIGHT, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function() {
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_scale_bar();
@@ -549,13 +563,14 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_SCALE_BAR_AUTOSIZE, "change", function(){
+    listener(ID_SCALE_BAR_AUTOSIZE, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
           jq(ID_SCALE_BAR_LENGTH).prop("disabled", true);
-        } else {
+        }
+        else {
           jq(ID_SCALE_BAR_LENGTH).prop("disabled", false);
         }
 
@@ -566,10 +581,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_SCALE_BAR_LENGTH, "change", function() {
+    listener(ID_SCALE_BAR_LENGTH, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_scale_bar();
@@ -590,26 +605,26 @@ function lalala(tree_input_param, mapping_input_param)
     //   adjust_tree();
     // });
 
-    listener("show-inner-labels", "change", function() {
+    listener("show-inner-labels", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         update_and_draw(draw_inner_labels);
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("inner-label-size", "change", function() {
+    listener("inner-label-size", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         update_and_draw(draw_inner_labels);
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("show-leaf-labels", "change", function() {
+    listener("show-leaf-labels", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_link_extensions();
@@ -620,18 +635,18 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("leaf-label-size", "change", function() {
+    listener("leaf-label-size", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         update_and_draw(draw_leaf_labels);
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("align-tip-labels", "change", function() {
+    listener("align-tip-labels", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_link_extensions();
@@ -642,10 +657,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("label-rotation", "change", function() {
+    listener("label-rotation", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_inner_labels();
@@ -655,10 +670,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_LABEL_COLOR, "change", function(){
+    listener(ID_LEAF_LABEL_COLOR, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_inner_labels();
@@ -668,10 +683,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_LABEL_FONT, "change", function(){
+    listener(ID_LEAF_LABEL_FONT, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_inner_labels();
@@ -681,10 +696,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_INNER_LABEL_COLOR, "change", function(){
+    listener(ID_INNER_LABEL_COLOR, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_inner_labels();
@@ -694,10 +709,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_INNER_LABEL_FONT, "change", function(){
+    listener(ID_INNER_LABEL_FONT, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_inner_labels();
@@ -708,26 +723,26 @@ function lalala(tree_input_param, mapping_input_param)
       }, TIMEOUT);
     });
 
-    listener(ID_SHOW_INNER_DOTS, "change", function() {
+    listener(ID_SHOW_INNER_DOTS, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         update_and_draw(draw_inner_dots);
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_INNER_DOT_SIZE, "change", function() {
+    listener(ID_INNER_DOT_SIZE, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         update_and_draw(draw_inner_dots);
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("show-leaf-dots", "change", function() {
+    listener("show-leaf-dots", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_link_extensions(); // may need to be removed.
@@ -738,18 +753,18 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_DOT_SIZE, "change", function() {
+    listener(ID_LEAF_DOT_SIZE, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         update_and_draw(draw_leaf_dots);
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_DOT_COLOR, "change", function() {
+    listener(ID_LEAF_DOT_COLOR, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function() {
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
 
@@ -764,10 +779,10 @@ function lalala(tree_input_param, mapping_input_param)
         adjust_tree();
       });
     });
-    listener(ID_INNER_DOT_COLOR, "change", function() {
+    listener(ID_INNER_DOT_COLOR, "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function() {
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
 
@@ -783,7 +798,7 @@ function lalala(tree_input_param, mapping_input_param)
       });
     });
 
-    listener(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT, "change", function() {
+    listener(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT, "change", function () {
       utils__set_status_msg_to_rendering();
 
       VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT = jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val();
@@ -793,12 +808,12 @@ function lalala(tree_input_param, mapping_input_param)
         jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val(VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT);
       }
 
-      setTimeout(function(){
+      setTimeout(function () {
         update_and_draw(draw_inner_dots);
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_BOOTSTRAP_CUTOFF_FILLED_DOT, "change", function() {
+    listener(ID_BOOTSTRAP_CUTOFF_FILLED_DOT, "change", function () {
       utils__set_status_msg_to_rendering();
 
       VAL_BOOTSTRAP_CUTOFF_FILLED_DOT = jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val();
@@ -810,17 +825,17 @@ function lalala(tree_input_param, mapping_input_param)
       }
 
 
-      setTimeout(function(){
+      setTimeout(function () {
         update_and_draw(draw_inner_dots);
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
 
 
-    listener("branch-color", "change", function() {
+    listener("branch-color", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_links();
@@ -830,10 +845,10 @@ function lalala(tree_input_param, mapping_input_param)
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("branch-width", "change", function() {
+    listener("branch-width", "change", function () {
       utils__set_status_msg_to_rendering();
 
-      setTimeout(function(){
+      setTimeout(function () {
         set_options_by_metadata();
         update_form_constants();
         draw_links();
@@ -845,7 +860,7 @@ function lalala(tree_input_param, mapping_input_param)
     });
 
 
-    listener(ID_VIEWER_SIZE_FIXED, "change", function() {
+    listener(ID_VIEWER_SIZE_FIXED, "change", function () {
       // utils__set_status_msg_to_rendering();
       update_viewer_size_fixed();
       // utils__set_status_msg_to_done();
@@ -858,41 +873,36 @@ function lalala(tree_input_param, mapping_input_param)
     var circle_cluster, rectangle_cluster;
 
 
-    function set_value_of(id, val)
-    {
-      var elem = document.getElementById(id);
+    function set_value_of(id, val) {
+      var elem   = document.getElementById(id);
       elem.value = val;
     }
 
     // Choose sorting function
-    function sort_descending(a, b)
-    {
+    function sort_descending(a, b) {
       return (a.value - b.value) || d3.ascending(a.data.branch_length, b.data.branch_length);
     }
 
-    function sort_ascending(a, b)
-    {
+    function sort_ascending(a, b) {
       return (b.value - a.value) || d3.descending(a.data.branch_length, b.data.branch_length);
     }
 
-    function sort_none(a, b)
-    {
+    function sort_none(a, b) {
       return 0;
     }
 
     // Start here.  TODO this function is wonky.
-    function update_viewer_size_fixed()
-    {
+    function update_viewer_size_fixed() {
       var is_checked = jq(ID_VIEWER_SIZE_FIXED).prop("checked");
       if (is_checked) {
         jq("tree-div").attr("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
-      } else {
+      }
+      else {
         jq("tree-div").attr("style", null);
       }
     }
 
-    function update_form_constants()
-    {
+    function update_form_constants() {
 
       // Make sure the bootstrap cutoffs are good
       set_and_validate_bootstrap_cutoff_input();
@@ -901,38 +911,39 @@ function lalala(tree_input_param, mapping_input_param)
       // try_disable_bio_rooted();
 
       VAL_LEAF_LABEL_COLOR = jq(ID_LEAF_LABEL_COLOR).val();
-      VAL_LEAF_LABEL_FONT = jq(ID_LEAF_LABEL_FONT).val();
+      VAL_LEAF_LABEL_FONT  = jq(ID_LEAF_LABEL_FONT).val();
 
       VAL_INNER_LABEL_COLOR = jq(ID_INNER_LABEL_COLOR).val();
-      VAL_INNER_LABEL_FONT = jq(ID_INNER_LABEL_FONT).val();
+      VAL_INNER_LABEL_FONT  = jq(ID_INNER_LABEL_FONT).val();
 
       DEFAULT_BRANCH_COLOR = document.getElementById("branch-color").value;
       DEFAULT_BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
 
-      VAL_LEAF_DOT_COLOR = jq(ID_LEAF_DOT_COLOR).val();
+      VAL_LEAF_DOT_COLOR  = jq(ID_LEAF_DOT_COLOR).val();
       VAL_INNER_DOT_COLOR = jq(ID_INNER_DOT_COLOR).val();
 
 
       MATCHING_TYPE = document.getElementById(ID_MATCHING_TYPE).value;
 
       // Get sorting options
-      SORT_NONE = "not-sorted";
-      SORT_ASCENDING = "ascending";
+      SORT_NONE       = "not-sorted";
+      SORT_ASCENDING  = "ascending";
       SORT_DESCENDING = "descending";
-      SORT_STATE = document.getElementById("tree-sort").value;
+      SORT_STATE      = document.getElementById("tree-sort").value;
 
       if (SORT_STATE === SORT_NONE) {
         sort_function = sort_none;
-      } else if (SORT_STATE === SORT_ASCENDING) {
+      }
+      else if (SORT_STATE === SORT_ASCENDING) {
         sort_function = sort_ascending;
-      } else {
+      }
+      else {
         sort_function = sort_descending;
       }
 
-      SHOW_SCALE_BAR = document.getElementById(ID_SCALE_BAR_SHOW).checked;
+      SHOW_SCALE_BAR          = document.getElementById(ID_SCALE_BAR_SHOW).checked;
       SCALE_BAR_OFFSET_WEIGHT = parseFloat(document.getElementById(ID_SCALE_BAR_OFFSET_WEIGHT).value);
-      SCALE_BAR_LENGTH = parseFloat(document.getElementById(ID_SCALE_BAR_LENGTH).value);
-
+      SCALE_BAR_LENGTH        = parseFloat(document.getElementById(ID_SCALE_BAR_LENGTH).value);
 
 
       LAYOUT_CIRCLE   = document.getElementById("circular-tree").selected;
@@ -946,12 +957,12 @@ function lalala(tree_input_param, mapping_input_param)
 
       // Dots
       VAL_SHOW_INNER_DOTS = jq(ID_SHOW_INNER_DOTS).val();
-      SHOW_INNER_DOTS = document.getElementById(ID_SHOW_INNER_DOTS).checked;
-      SHOW_LEAF_DOTS = document.getElementById("show-leaf-dots").checked;
-      INNER_DOT_SIZE = parseInt(document.getElementById(ID_INNER_DOT_SIZE).value);
-      LEAF_DOT_SIZE = parseInt(document.getElementById(ID_LEAF_DOT_SIZE).value);
+      SHOW_INNER_DOTS     = document.getElementById(ID_SHOW_INNER_DOTS).checked;
+      SHOW_LEAF_DOTS      = document.getElementById("show-leaf-dots").checked;
+      INNER_DOT_SIZE      = parseInt(document.getElementById(ID_INNER_DOT_SIZE).value);
+      LEAF_DOT_SIZE       = parseInt(document.getElementById(ID_LEAF_DOT_SIZE).value);
 
-      switch(VAL_SHOW_INNER_DOTS) {
+      switch (VAL_SHOW_INNER_DOTS) {
         case ID_SHOW_INNER_DOTS_NONE:
           disable(ID_INNER_DOT_SIZE);
           SHOW_INNER_DOTS = false;
@@ -977,42 +988,45 @@ function lalala(tree_input_param, mapping_input_param)
 
       if (SHOW_LEAF_DOTS) {
         undisable(ID_LEAF_DOT_SIZE);
-      } else {
+      }
+      else {
         disable(ID_LEAF_DOT_SIZE)
       }
 
 
-
       INNER_LABEL_SIZE = parseInt(document.getElementById("inner-label-size").value);
-      LEAF_LABEL_SIZE = parseInt(document.getElementById("leaf-label-size").value);
+      LEAF_LABEL_SIZE  = parseInt(document.getElementById("leaf-label-size").value);
 
       TREE_BRANCH_CLADOGRAM = "cladogram";
-      TREE_BRANCH_NORMAL = "normalogram";
+      TREE_BRANCH_NORMAL    = "normalogram";
       if (LAYOUT_RADIAL) {
         TREE_BRANCH_STYLE = "normalogram"
         $("#tree-branch-style").prop("disabled", true);
-      } else {
+      }
+      else {
         $("#tree-branch-style").prop("disabled", false);
         TREE_BRANCH_STYLE = document.getElementById("tree-branch-style").value;
       }
 
       if (LAYOUT_STRAIGHT) {
         // It could be coming from the circle which has a different slider behavior
-        elem = document.getElementById("tree-rotation");
+        elem    = document.getElementById("tree-rotation");
         var val = parseInt(elem.value);
         if (val < 180) { // The slider will jump to the beginning so set it to 0.
           TREE_ROTATION = 0;
           elem.setAttribute("value", "0");
-        } else {
+        }
+        else {
           TREE_ROTATION = 270;
           elem.setAttribute("value", "270");
         }
         elem.setAttribute("min", "0");
         elem.setAttribute("max", "270");
         elem.setAttribute("step", "270")
-      } else {
+      }
+      else {
         // Works for both circular and radial
-        elem = document.getElementById("tree-rotation");
+        elem          = document.getElementById("tree-rotation");
         TREE_ROTATION = parseInt(elem.value);
         // Flip tree rotation to 0
         TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
@@ -1023,11 +1037,12 @@ function lalala(tree_input_param, mapping_input_param)
 
       if (LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
         LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value) + 90;
-      } else {
+      }
+      else {
         LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value);
       }
       SHOW_INNER_LABELS = document.getElementById("show-inner-labels").checked;
-      SHOW_LEAF_LABELS = document.getElementById("show-leaf-labels").checked;
+      SHOW_LEAF_LABELS  = document.getElementById("show-leaf-labels").checked;
 
 
       // Show or hide align tip labels
@@ -1035,7 +1050,8 @@ function lalala(tree_input_param, mapping_input_param)
         document.getElementById("align-tip-labels").setAttribute("disabled", "");
         document.getElementById("align-tip-labels").removeAttribute("checked");
         align_tip_labels = false;
-      } else {
+      }
+      else {
         document.getElementById("align-tip-labels").removeAttribute("disabled");
         align_tip_labels = document.getElementById("align-tip-labels").checked;
       }
@@ -1043,27 +1059,30 @@ function lalala(tree_input_param, mapping_input_param)
       // Show/hide labels size
       if (SHOW_LEAF_LABELS) {
         document.getElementById("leaf-label-size").removeAttribute("disabled");
-      } else {
+      }
+      else {
         document.getElementById("leaf-label-size").setAttribute("disabled", "");
       }
 
       // If it's circle the label rotation gets disabled
       if (LAYOUT_STRAIGHT && (SHOW_LEAF_LABELS || SHOW_INNER_LABELS)) {
         document.getElementById("label-rotation").removeAttribute("disabled");
-      } else {
+      }
+      else {
         document.getElementById("label-rotation").setAttribute("disabled", "");
       }
 
       if (SHOW_INNER_LABELS) {
         document.getElementById("inner-label-size").removeAttribute("disabled");
-      } else {
+      }
+      else {
         document.getElementById("inner-label-size").setAttribute("disabled", "");
       }
 
       // Set the align tip labels button to false if it is a cladogram or radial layout.
       if (TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM || LAYOUT_RADIAL) {
-        elem = null;
-        elem = document.getElementById("align-tip-labels");
+        elem         = null;
+        elem         = document.getElementById("align-tip-labels");
         elem.checked = false;
       }
 
@@ -1071,10 +1090,10 @@ function lalala(tree_input_param, mapping_input_param)
       // Set the height to match the width
       if (LAYOUT_CIRCLE || LAYOUT_RADIAL) {
         // Disable the height slider
-        elem = document.getElementById("height");
+        elem          = document.getElementById("height");
         elem.disabled = true;
 
-        width = size_transform(parseInt(document.getElementById("width").value));
+        width  = size_transform(parseInt(document.getElementById("width").value));
         height = width;
 
         padding = parseFloat(document.getElementById("padding").value);
@@ -1083,11 +1102,12 @@ function lalala(tree_input_param, mapping_input_param)
 
         $("#width-label").html("Size");
 
-      } else {
-        elem = document.getElementById("height");
+      }
+      else {
+        elem          = document.getElementById("height");
         elem.disabled = false;
 
-        width = size_transform(parseInt(document.getElementById("width").value));
+        width  = size_transform(parseInt(document.getElementById("width").value));
         height = size_transform(parseInt(document.getElementById("height").value));
 
         padding = parseFloat(document.getElementById("padding").value);
@@ -1095,27 +1115,28 @@ function lalala(tree_input_param, mapping_input_param)
         $("#width-label").html("Horizontal");
       }
 
-      elem = document.getElementById("width");
+      elem                 = document.getElementById("width");
       RADIAL_LAYOUT_WEIGHT = size_transform(elem.value);
 
       //  padding is the total % of padding.  If it is set to 0.1, then the inner width will be 90% of the svg.
-      width = Math.round(width * (1 - padding));
+      width  = Math.round(width * (1 - padding));
       height = Math.round(height * (1 - padding));
 
       if (TREE_ROTATION == ROTATED) {
         // Need to flip height and width
-        the_width = height;
+        the_width  = height;
         the_height = width;
 
-        the_width = height;
+        the_width  = height;
         the_height = width;
 
-      } else {
+      }
+      else {
 
-        the_width = width;
+        the_width  = width;
         the_height = height;
 
-        the_width = width;
+        the_width  = width;
         the_height = height;
       }
       the_x = "x";
@@ -1124,20 +1145,27 @@ function lalala(tree_input_param, mapping_input_param)
       update_viewer_size_fixed();
     }
 
-    function set_up_hierarchy()
-    {
+    function set_up_hierarchy() {
       // Circles specify 360 and the RADIUS, but the width is a diameter.
       circle_cluster = d3.cluster()
-        .size([360, the_width / 2])
-        .separation(function(a, b) { return 1; });
+                         .size([360, the_width / 2])
+                         .separation(function (a, b) {
+                           return 1;
+                         });
 
       rectangle_cluster = d3.cluster()
-        .size([the_width * 1, the_height * 1])
-        .separation(function(a, b) { return 1; });
+                            .size([the_width * 1, the_height * 1])
+                            .separation(function (a, b) {
+                              return 1;
+                            });
 
-      ROOT = d3.hierarchy(parsed_newick, function(d) { return d.branchset; })
-        .sum(function(d) { return d.branchset ? 0 : 1; })
-        .sort(sort_function);
+      ROOT = d3.hierarchy(parsed_newick, function (d) {
+        return d.branchset;
+      })
+               .sum(function (d) {
+                 return d.branchset ? 0 : 1;
+               })
+               .sort(sort_function);
 
       TREE_IS_ROOTED_ON_A_LEAF_NODE = is_rooted_on_a_leaf_node(ROOT);
       try_disable_bio_rooted();
@@ -1145,7 +1173,8 @@ function lalala(tree_input_param, mapping_input_param)
       // Add metadata if it is available.
       if (name2md) {
         add_metadata(ROOT, name2md, MATCHING_TYPE);
-      } else {
+      }
+      else {
         add_blank_metadata(ROOT);
       }
 
@@ -1154,11 +1183,13 @@ function lalala(tree_input_param, mapping_input_param)
         circle_cluster(ROOT);
         setRadius(ROOT, ROOT.data.branch_length = 0, (the_width / 2) / maxLength(ROOT));
 
-      } else if (LAYOUT_STRAIGHT) {
+      }
+      else if (LAYOUT_STRAIGHT) {
         rectangle_cluster(ROOT);
         // TODO should this be width or height
         setRadius(ROOT, ROOT.data.branch_length = 0, (the_height * 1) / maxLength(ROOT));
-      } else { // LAYOUT_RADIAL
+      }
+      else { // LAYOUT_RADIAL
         radial_cluster(ROOT);
         // TODO should this actually be the same as for straight layout?
         setRadius(ROOT, ROOT.data.branch_length = 0, (the_height * 1) / maxLength(ROOT));
@@ -1166,31 +1197,30 @@ function lalala(tree_input_param, mapping_input_param)
       }
     }
 
-    function draw_svg()
-    {
+    function draw_svg() {
       if (document.getElementById("svg-tree")) {
         svg.merge(svg)
-        // .transition(TR)
-          .attr("width", the_width * 1)
-          .attr("height", the_height * 1)
-          .style("background-color", "white"); // TODO make bg color an option
-      } else {
+           // .transition(TR)
+           .attr("width", the_width * 1)
+           .attr("height", the_height * 1)
+           .style("background-color", "white"); // TODO make bg color an option
+      }
+      else {
         // First remove loading message if there is one.
         // utils__set_status_msg_to_done();
         // d3.select("#loading-message").remove();
 
         // And add the svg.
         svg = d3.select("#tree-div")
-          .append("svg")
-          .attr("id", "svg-tree")
-          .attr("width", the_width * 1)
-          .attr("height", the_height * 1)
-          .style("background-color", "white"); // TODO make bg color an option
+                .append("svg")
+                .attr("id", "svg-tree")
+                .attr("width", the_width * 1)
+                .attr("height", the_height * 1)
+                .style("background-color", "white"); // TODO make bg color an option
       }
     }
 
-    function draw_chart()
-    {
+    function draw_chart() {
       var chart_width, chart_height;
       var chart_transform_width, chart_transform_height;
       if (LAYOUT_CIRCLE) {
@@ -1199,7 +1229,8 @@ function lalala(tree_input_param, mapping_input_param)
 
         chart_transform_width  = the_width;
         chart_transform_height = the_height;
-      } else {
+      }
+      else {
         chart_width  = the_width * 1;
         chart_height = the_height * 1;
 
@@ -1209,44 +1240,44 @@ function lalala(tree_input_param, mapping_input_param)
 
       if (document.getElementById("chart-container")) {
         chart.merge(chart)
-        // .transition(TR)
-          .attr("width", chart_width)
-          .attr("height", chart_height)
-          .attr("transform",
-            "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
-            "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
-      } else {
+             // .transition(TR)
+             .attr("width", chart_width)
+             .attr("height", chart_height)
+             .attr("transform",
+               "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
+               "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
+      }
+      else {
         chart = svg.append("g")
-          .attr("id", "chart-container")
-          .attr("width", chart_width)
-          .attr("height", chart_height)
-          .attr("transform",
-            "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
-            "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
+                   .attr("id", "chart-container")
+                   .attr("width", chart_width)
+                   .attr("height", chart_height)
+                   .attr("transform",
+                     "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
+                     "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
       }
     }
 
-    function draw_inner_dots()
-    {
+    function draw_inner_dots() {
 
       var no_root_dot = LAYOUT_RADIAL && (TREE_IS_ROOTED_ON_A_LEAF_NODE || !VAL_BIOLOGICALLY_ROOTED);
 
       var dat = no_root_dot ?
-        ROOT.descendants().filter(function(d) {
-          return is_inner(d) && ! is_root(d);
+        ROOT.descendants().filter(function (d) {
+          return is_inner(d) && !is_root(d);
         }) :
         ROOT.descendants().filter(is_inner);
 
       inner_dots = d3.select("#inner-dot-container")
-        .selectAll("circle")
-        .data(dat);
+                     .selectAll("circle")
+                     .data(dat);
 
       if (SHOW_INNER_DOTS) {
         inner_dots
           .enter().append("circle")
           .attr("class", "inner")
           .attr("r", INNER_DOT_SIZE)
-          .attr("transform", function(d) {
+          .attr("transform", function (d) {
             return pick_transform(d);
           })
           .attr("fill", inner_dot_fill)
@@ -1254,69 +1285,69 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("stroke-width", inner_dot_stroke_width); // TODO make this an option.
 
         inner_dots.merge(inner_dots)
-        // .transition(TR)
-          .attr("r", INNER_DOT_SIZE)
-          .attr("transform", function(d) {
-            return pick_transform(d);
-          })
-          .attr("fill", inner_dot_fill)
-          .attr("stroke", inner_dot_stroke)
-          .attr("stroke-width", inner_dot_stroke_width); // TODO make this an option.
+                  // .transition(TR)
+                  .attr("r", INNER_DOT_SIZE)
+                  .attr("transform", function (d) {
+                    return pick_transform(d);
+                  })
+                  .attr("fill", inner_dot_fill)
+                  .attr("stroke", inner_dot_stroke)
+                  .attr("stroke-width", inner_dot_stroke_width); // TODO make this an option.
 
 
-      } else {
+      }
+      else {
         inner_dots
         // .transition(TR)
           .remove();
       }
     }
 
-    function draw_leaf_dots()
-    {
+    function draw_leaf_dots() {
       leaf_dots = d3.select("#leaf-dot-container")
-        .selectAll("circle")
-        .data(ROOT.descendants().filter(is_leaf));
+                    .selectAll("circle")
+                    .data(ROOT.descendants().filter(is_leaf));
 
       if (SHOW_LEAF_DOTS) {
         leaf_dots
           .enter().append("circle")
           .attr("class", "leaf")
-          .attr("transform", function(d) {
+          .attr("transform", function (d) {
             return pick_transform(d);
           })
-          .attr("r", function(d) {
+          .attr("r", function (d) {
             var val = d.metadata.leaf_dot_size;
             return val ? val : LEAF_DOT_SIZE;
           })
-          .attr("fill", function(d) {
+          .attr("fill", function (d) {
             var val = d.metadata.leaf_dot_color;
             return val ? val : VAL_LEAF_DOT_COLOR;
           });
 
         leaf_dots.merge(leaf_dots)
-        // .transition(TR)
-          .attr("transform", function(d) {
-            return pick_transform(d);
-          })
-          .attr("r", function(d) {
-            var val = d.metadata.leaf_dot_size;
-            return val ? val : LEAF_DOT_SIZE;
-          })
-          .attr("fill", function(d) {
-            var val = d.metadata.leaf_dot_color;
-            return val ? val : VAL_LEAF_DOT_COLOR;
-          } );
-      } else {
+                 // .transition(TR)
+                 .attr("transform", function (d) {
+                   return pick_transform(d);
+                 })
+                 .attr("r", function (d) {
+                   var val = d.metadata.leaf_dot_size;
+                   return val ? val : LEAF_DOT_SIZE;
+                 })
+                 .attr("fill", function (d) {
+                   var val = d.metadata.leaf_dot_color;
+                   return val ? val : VAL_LEAF_DOT_COLOR;
+                 });
+      }
+      else {
         leaf_dots
           .remove();
       }
     }
 
-    function draw_inner_labels()
-    {
+    function draw_inner_labels() {
       inner_labels = d3.select("#inner-label-container")
-        .selectAll("text")
-        .data(ROOT.descendants().filter(is_inner));
+                       .selectAll("text")
+                       .data(ROOT.descendants().filter(is_inner));
 
       if (SHOW_INNER_LABELS) {
 
@@ -1329,10 +1360,12 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("dy", text_y_offset)
           .attr("dx", text_x_offset)
           .attr("text-anchor", text_anchor)
-          .attr("transform", function(d) {
+          .attr("transform", function (d) {
             return pick_transform(d);
           })
-          .text(function(d) { return d.data.name; })
+          .text(function (d) {
+            return d.data.name;
+          })
           // .transition(TR)
           .attr("fill", VAL_INNER_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
@@ -1344,14 +1377,15 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("dy", text_y_offset)
           .attr("dx", text_x_offset)
           .attr("text-anchor", text_anchor)
-          .attr("transform", function(d) {
+          .attr("transform", function (d) {
             return pick_transform(d);
           })
           .attr("fill", VAL_INNER_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
           .attr("font-family", VAL_INNER_LABEL_FONT);
 
-      } else {
+      }
+      else {
         inner_labels
         // .transition(TR)
         // .attr("font-size", 0)
@@ -1359,12 +1393,11 @@ function lalala(tree_input_param, mapping_input_param)
       }
     }
 
-    function draw_leaf_labels()
-    {
+    function draw_leaf_labels() {
 
       labels = d3.select("#leaf-label-container")
-        .selectAll("text")
-        .data(ROOT.descendants().filter(is_leaf));
+                 .selectAll("text")
+                 .data(ROOT.descendants().filter(is_leaf));
 
       if (SHOW_LEAF_LABELS) {
         labels.exit().remove();
@@ -1377,24 +1410,24 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("dy", text_y_offset)
           .attr("dx", text_x_offset)
           .attr("text-anchor", text_anchor)
-          .attr("transform", function(d) {
+          .attr("transform", function (d) {
             return pick_transform(d);
           })
-          .text(function(d) {
+          .text(function (d) {
             var new_name = d.metadata.new_name;
 
             return new_name ? new_name : d.data.name;
           })
           // .transition(TR) // This transistion prevents the bounding box calculation.  TODO need to wait on it.
-          .attr("font-size", function(d) {
+          .attr("font-size", function (d) {
             var size = d.metadata.leaf_label_size;
             return size ? size : LEAF_LABEL_SIZE;
           })
-          .attr("font-family", function(d) {
+          .attr("font-family", function (d) {
             var font = d.metadata.leaf_label_font;
             return font ? font : VAL_LEAF_LABEL_FONT;
           })
-          .attr("fill", function(d) {
+          .attr("fill", function (d) {
             var color = d.metadata.leaf_label_color;
             return color ? color : VAL_LEAF_LABEL_COLOR;
           });
@@ -1407,28 +1440,29 @@ function lalala(tree_input_param, mapping_input_param)
           .attr("dy", text_y_offset)
           .attr("dx", text_x_offset)
           .attr("text-anchor", text_anchor)
-          .attr("transform", function(d) {
+          .attr("transform", function (d) {
             return pick_transform(d);
           })
-          .text(function(d) {
+          .text(function (d) {
             var new_name = d.metadata.new_name;
 
             return new_name ? new_name : d.data.name;
           })
-          .attr("font-size", function(d) {
+          .attr("font-size", function (d) {
             var size = d.metadata.leaf_label_size;
             return size ? size : LEAF_LABEL_SIZE;
           })
-          .attr("font-family", function(d) {
+          .attr("font-family", function (d) {
             var font = d.metadata.leaf_label_font;
             return font ? font : VAL_LEAF_LABEL_FONT;
           })
-          .attr("fill", function(d) {
+          .attr("fill", function (d) {
             var color = d.metadata.leaf_label_color;
             return color ? color : VAL_LEAF_LABEL_COLOR;
           });
 
-      } else {
+      }
+      else {
         labels
         // .transition(TR)
         // .attr("font-size", 0)
@@ -1436,15 +1470,14 @@ function lalala(tree_input_param, mapping_input_param)
       }
     }
 
-    function draw_link_extensions()
-    {
+    function draw_link_extensions() {
       // Link extensions should never be drawn with radial layouts
       if (!LAYOUT_RADIAL) {
         linkExtension = d3.select("#link-extension-container")
-          .selectAll("path")
-          .data(ROOT.links().filter(function (d) {
-            return !d.target.children;
-          }));
+                          .selectAll("path")
+                          .data(ROOT.links().filter(function (d) {
+                            return !d.target.children;
+                          }));
 
         // var starts = root.links().filter(function(d) {
         //   return !d.target.children;
@@ -1470,12 +1503,12 @@ function lalala(tree_input_param, mapping_input_param)
             .attr("stroke-width", DEFAULT_BRANCH_WIDTH > 2 ? 2 : DEFAULT_BRANCH_WIDTH)
             .attr("stroke-dasharray", "1, 5")
             .attr("class", "dotted-links")
-            .each(function (d)
-            {
+            .each(function (d) {
               d.target.linkExtensionNode = this;
             })
             .attr("d", link_extension_path);
-        } else {
+        }
+        else {
           linkExtension
           // .transition(TR)
           // .attr("d", function(d, i) {
@@ -1486,42 +1519,45 @@ function lalala(tree_input_param, mapping_input_param)
       }
     }
 
-    function draw_links()
-    {
+    function draw_links() {
       // reset the bio root warnings container
       biological_root_sibling_warnings = [];
 
       link = d3.select("#link-container")
-        .selectAll("path")
-        .data(ROOT.links());
+               .selectAll("path")
+               .data(ROOT.links());
 
       link.enter().append("path")
-        .attr("fill", "none")
-        .attr("stroke", "#000")
-        .each(function(d) { d.target.linkNode = this; })
-        .attr("d", link_path)
-        // TODO this is very slow for the tree of life.
-        .attr("stroke", function(d) {
-          return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
-        })
-        .attr("stroke-width", function (d) {
-          return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
-        });
+          .attr("fill", "none")
+          .attr("stroke", "#000")
+          .each(function (d) {
+            d.target.linkNode = this;
+          })
+          .attr("d", link_path)
+          // TODO this is very slow for the tree of life.
+          .attr("stroke", function (d) {
+            return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
+          })
+          .attr("stroke-width", function (d) {
+            return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
+          });
 
       // .attr("stroke", function(d) { return d.target.color; });
 
       link.merge(link)
-      // .transition(TR)
-        .attr("fill", "none")
-        .attr("stroke", "#000")
-        .each(function(d) { d.target.linkNode = this; })
-        .attr("d", link_path)
-        .attr("stroke", function(d) {
-          return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
-        })
-        .attr("stroke-width", function (d) {
-          return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
-        });
+          // .transition(TR)
+          .attr("fill", "none")
+          .attr("stroke", "#000")
+          .each(function (d) {
+            d.target.linkNode = this;
+          })
+          .attr("d", link_path)
+          .attr("stroke", function (d) {
+            return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
+          })
+          .attr("stroke-width", function (d) {
+            return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
+          });
 
       if (biological_root_sibling_warnings.length > 0) {
         // There were some warnings.
@@ -1529,13 +1565,11 @@ function lalala(tree_input_param, mapping_input_param)
       }
     }
 
-    function adjust_tree()
-    {
+    function adjust_tree() {
       resize_svg_straight_layout("svg-tree", "chart-container");
     }
 
-    function update_and_draw(draw_fn)
-    {
+    function update_and_draw(draw_fn) {
       set_options_by_metadata();
       update_form_constants();
       draw_fn();
@@ -1544,8 +1578,7 @@ function lalala(tree_input_param, mapping_input_param)
     }
 
     // Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
-    function redraw_tree()
-    {
+    function redraw_tree() {
       set_options_by_metadata();
       update_form_constants();
 
@@ -1564,8 +1597,7 @@ function lalala(tree_input_param, mapping_input_param)
     }
 
     // For redrawing tree even when you need to recalculate hierarchy and merge svg and g chart.
-    function set_up_and_redraw()
-    {
+    function set_up_and_redraw() {
       set_options_by_metadata();
       update_form_constants();
 
@@ -1590,8 +1622,7 @@ function lalala(tree_input_param, mapping_input_param)
     }
 
     // A magical function
-    function draw_tree()
-    {
+    function draw_tree() {
       // jq("status-msg").html("apple");
       utils__clear_elem("svg-tree");
 
@@ -1631,14 +1662,14 @@ function lalala(tree_input_param, mapping_input_param)
       // jq("status-msg").html("seanie");
     }
 
-    function text_x_offset(d)
-    {
+    function text_x_offset(d) {
       // TODO replace these with function params
       // var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
 
       if (LAYOUT_CIRCLE) { // circular
         return circular_label_flipping_test(d[the_x]) ? "0.6em" : "-0.6em";
-      } else if (LAYOUT_RADIAL) {
+      }
+      else if (LAYOUT_RADIAL) {
         // Positive moves text anchor start labels away from branch tip, but moves text anchor end labels closer to the branch tip.
         var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
@@ -1646,11 +1677,13 @@ function lalala(tree_input_param, mapping_input_param)
           // Don't change rotate by
           // return "start";
           return "0.6em"
-        } else if (rotate_by >= 90) { // TODO which should have the equal part
+        }
+        else if (rotate_by >= 90) { // TODO which should have the equal part
           // rotate_by += 180; // TODO also flip the text-anchor to end
           // return "end";
           return "-0.6em";
-        } else if (rotate_by <= -90) {
+        }
+        else if (rotate_by <= -90) {
           // rotate_by -= 180; // TODO also flip the text anchor to end
           // return "end";
           return "-0.6em";
@@ -1658,36 +1691,44 @@ function lalala(tree_input_param, mapping_input_param)
         }
 
         return "1.0em"; // TODO radial layout placeholder
-      } else {
+      }
+      else {
         if (LABEL_ROTATION == 90) {
           return "0.6em"; // They're going up and down so move away from branch
-        } else if (LABEL_ROTATION == -90) {
+        }
+        else if (LABEL_ROTATION == -90) {
           return "-0.6em";
-        } else {
+        }
+        else {
           return "0em";
         }
       }
     }
 
-    function text_y_offset(d)
-    {
+    function text_y_offset(d) {
       if (LAYOUT_CIRCLE) { // circular
         return "0.2em"  // center the label on the branch;
-      } else if (LAYOUT_RADIAL) {
+      }
+      else if (LAYOUT_RADIAL) {
         return "0.3em";
-      } else {
+      }
+      else {
         if (TREE_ROTATION == 0) {
           if (LABEL_ROTATION == 90 || LABEL_ROTATION == -90) {
             return "0.3em"; // They're going up and down so center them
-          } else {
+          }
+          else {
             return "1.2em";
           }
-        } else {
+        }
+        else {
           if (LABEL_ROTATION == 0 || LABEL_ROTATION == 45) {
             return "1.2em";
-          } else if (LABEL_ROTATION == 90) {
+          }
+          else if (LABEL_ROTATION == 90) {
             return "0.3em";
-          } else if (LABEL_ROTATION == 135 || LABEL_ROTATION == 180) {
+          }
+          else if (LABEL_ROTATION == 135 || LABEL_ROTATION == 180) {
             return "-1.2em";
           }
         }
@@ -1695,24 +1736,23 @@ function lalala(tree_input_param, mapping_input_param)
     }
 
 
-
     // Depending on the tree rotation, you need to have a different test for whether the labels flip.
-    function circular_label_flipping_test(x)
-    {
+    function circular_label_flipping_test(x) {
       // Returns the value at the bottom of the circle
-      function circle_key_points(rot)
-      {
+      function circle_key_points(rot) {
         var bottom, top;
 
         if (rot <= 90) {
           bottom = 90 - rot;
-          top = bottom + 180;
-        } else if (rot <= 270) {
+          top    = bottom + 180;
+        }
+        else if (rot <= 270) {
           bottom = 360 - (rot - 90);
-          top = bottom - 180;
-        } else {
+          top    = bottom - 180;
+        }
+        else {
           bottom = 360 - (rot - 90);
-          top = bottom + 180;
+          top    = bottom + 180;
         }
 
         return { "bottom" : bottom, "top" : top };
@@ -1722,13 +1762,13 @@ function lalala(tree_input_param, mapping_input_param)
 
       if (TREE_ROTATION <= 90 || TREE_ROTATION > 270) {
         return x < key_points.bottom || x > key_points.top;
-      } else {
+      }
+      else {
         return x < key_points.bottom && x > key_points.top;
       }
     }
 
-    function circular_text_anchor(d)
-    {
+    function circular_text_anchor(d) {
       return circular_label_flipping_test(d[the_x]) ? "start" : "end";
     }
 
@@ -1736,58 +1776,62 @@ function lalala(tree_input_param, mapping_input_param)
       if (TREE_ROTATION == 0) {
         if (LABEL_ROTATION == 0) {
           return "middle";
-        } else if (LABEL_ROTATION < 0) {
+        }
+        else if (LABEL_ROTATION < 0) {
           return "end";
-        } else {
+        }
+        else {
           return "start";
         }
-      } else {
+      }
+      else {
         if (LABEL_ROTATION == 0 || LABEL_ROTATION == 180) {
           return "middle";
-        } else {
+        }
+        else {
           return "start";
         }
       }
     }
 
-    function radial_text_anchor(d)
-    {
+    function radial_text_anchor(d) {
       var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
       if (-90 < rotate_by && rotate_by < 90) {
         // Don't change rotate by
         return "start";
-      } else if (rotate_by >= 90) { // TODO which should have the equal part
+      }
+      else if (rotate_by >= 90) { // TODO which should have the equal part
         // rotate_by += 180; // TODO also flip the text-anchor to end
         return "end";
-      } else if (rotate_by <= -90) {
+      }
+      else if (rotate_by <= -90) {
         // rotate_by -= 180; // TODO also flip the text anchor to end
         return "end";
       }
     }
 
-    function text_anchor(d)
-    {
+    function text_anchor(d) {
       if (LAYOUT_CIRCLE) {
         return circular_text_anchor(d);
-      } else if (LAYOUT_STRAIGHT) {
+      }
+      else if (LAYOUT_STRAIGHT) {
         return straight_text_anchor(d);
-      } else {
+      }
+      else {
         return radial_text_anchor(d);
       }
     }
 
 
-// These functions update the layout
-    function circle_transform(d, x, y)
-    {
+    // These functions update the layout
+    function circle_transform(d, x, y) {
       return "rotate(" + d[x] +
         ") translate(" + d[y] + ", 0)" +
-        (circular_label_flipping_test(d[x]) ?  "" : "rotate(180)");
+        (circular_label_flipping_test(d[x]) ? "" : "rotate(180)");
     }
 
-    function rectangle_transform(d, x, y)
-    {
+    function rectangle_transform(d, x, y) {
       return "rotate(0) translate(" + d[x] + " " + d[y] + ") rotate(" +
         LABEL_ROTATION + ")";
     }
@@ -1814,74 +1858,74 @@ function lalala(tree_input_param, mapping_input_param)
       return "M " + start_point + " L " + mid_point + " L " + end_point;
     }
 
-    function link_rectangle_extension(d, x, y)
-    {
+    function link_rectangle_extension(d, x, y) {
       var start_point = d.target[x] + " " + d.target["radius"];
       var end_point   = d.target[x] + " " + d.target["y"];
-
-      return "M " + start_point +  " L " + end_point;
-    }
-
-    function link_radial(d)
-    {
-      var start_point = (d.target.radial_layout_info.parent_x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.parent_y * RADIAL_LAYOUT_WEIGHT);
-      var end_point = (d.target.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT)
 
       return "M " + start_point + " L " + end_point;
     }
 
-    function link_path(d)
-    {
+    function link_radial(d) {
+      var start_point = (d.target.radial_layout_info.parent_x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.parent_y * RADIAL_LAYOUT_WEIGHT);
+      var end_point   = (d.target.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT)
+
+      return "M " + start_point + " L " + end_point;
+    }
+
+    function link_path(d) {
       if (LAYOUT_CIRCLE) {
         return linkCircle(d);
-      } else if (LAYOUT_STRAIGHT) {
+      }
+      else if (LAYOUT_STRAIGHT) {
         return rectangle_link(d, the_x, the_y);
-      } else {
+      }
+      else {
         return link_radial(d);
       }
     }
 
-    function link_extension_path(d)
-    {
+    function link_extension_path(d) {
       if (LAYOUT_CIRCLE) {
         return linkCircleExtension(d);
-      } else {
+      }
+      else {
         return link_rectangle_extension(d, the_x, "y");
       }
     }
-
-
-
 
 
     function linkCircle(d) {
       return linkStep(d.source[the_x], d.source[the_y], d.target[the_x], d.target[the_y]);
     }
 
-// TODO need an option for labels lined up on the radius or labels at the end of the links.
+    // TODO need an option for labels lined up on the radius or labels at the end of the links.
     // the_width here is actually the diameter, not the radius.
     function linkCircleExtension(d) {
       return linkStep(d.target[the_x], d.target[the_y], d.target[the_x], the_width / 2);
     }
 
-// Like d3.svg.diagonal.radial, but with square corners.
+    // Like d3.svg.diagonal.radial, but with square corners.
     function linkStep(startAngle, startRadius, endAngle, endRadius) {
-      var c0 = Math.cos(startAngle = (startAngle ) / 180 * Math.PI),
-        s0 = Math.sin(startAngle),
-        c1 = Math.cos(endAngle = (endAngle ) / 180 * Math.PI),
-        s1 = Math.sin(endAngle);
+      var c0 = Math.cos(startAngle = (startAngle) / 180 * Math.PI),
+          s0 = Math.sin(startAngle),
+          c1 = Math.cos(endAngle = (endAngle) / 180 * Math.PI),
+          s1 = Math.sin(endAngle);
       return "M" + startRadius * c0 + "," + startRadius * s0
         + (endAngle === startAngle ? "" : "A" + startRadius + "," + startRadius + " 0 0 " + (endAngle > startAngle ? 1 : 0) + " " + startRadius * c1 + "," + startRadius * s1)
         + "L" + endRadius * c1 + "," + endRadius * s1;
     }
 
-// Set the radius of each node by recursively summing and scaling the distance from the root.
+    // Set the radius of each node by recursively summing and scaling the distance from the root.
     function setRadius(d, y0, k) {
       d.radius = (y0 += d.data.branch_length) * k;
-      if (d.children) d.children.forEach(function(d) { setRadius(d, y0, k); });
+      if (d.children) {
+        d.children.forEach(function (d) {
+          setRadius(d, y0, k);
+        });
+      }
     }
 
-// Compute the maximum cumulative length of any node in the tree.
+    // Compute the maximum cumulative length of any node in the tree.
     function maxLength(d) {
       return d.data.branch_length + (d.children ? d3.max(d.children, maxLength) : 0);
     }
@@ -1893,8 +1937,7 @@ function lalala(tree_input_param, mapping_input_param)
 
 
 // These are for saving
-function svg_elem_to_string(id)
-{
+function svg_elem_to_string(id) {
   var svg_elem = document.getElementById(id);
 
   if (svg_elem) {
@@ -1903,19 +1946,17 @@ function svg_elem_to_string(id)
 }
 
 // TODO png should keep background color
-function save_png_data()
-{
+function save_png_data() {
   var svg_string = svg_elem_to_string("svg-tree");
 
   var canvas = document.createElement("canvas");
   canvg(canvas, svg_string);
-  canvas.toBlobHD(function(blob) {
+  canvas.toBlobHD(function (blob) {
     saveAs(blob, "tree.png");
   })
 }
 
-function save_svg_data()
-{
+function save_svg_data() {
   saveAs(
     new Blob([svg_elem_to_string("svg-tree")],
       { type : "application/svg+xml" }),
@@ -1928,11 +1969,10 @@ function save_svg_data()
 //   // Height and width of the elem are the same regardless of roatation.
 // In the rotated state, the g elem width (x) and height (y) stay the same, but the SVG must swap them.
 
-function resize_svg_straight_layout(svg_id, chart_id)
-{
+function resize_svg_straight_layout(svg_id, chart_id) {
 
   var the_chart = document.getElementById(chart_id);
-  var the_svg = document.getElementById(svg_id);
+  var the_svg   = document.getElementById(svg_id);
 
   var chart_bbox = the_chart.getBBox();
   the_chart.setAttribute("width", chart_bbox.width);
@@ -1940,7 +1980,7 @@ function resize_svg_straight_layout(svg_id, chart_id)
 
   var new_svg_height, new_svg_width;
 
-  var chart_bbox_width_padding = chart_bbox.width * padding;
+  var chart_bbox_width_padding  = chart_bbox.width * padding;
   var chart_bbox_height_padding = chart_bbox.height * padding;
 
   var g_chart_transform;
@@ -1952,27 +1992,29 @@ function resize_svg_straight_layout(svg_id, chart_id)
     new_svg_height = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_width  = chart_bbox.height + (2 * chart_bbox_height_padding);
 
-    g_chart_transform = "rotate(270) translate("  +
+    g_chart_transform = "rotate(270) translate(" +
       -(new_svg_height + chart_bbox.x - chart_bbox_width_padding) + " " +
       chart_bbox_height_padding + ")";
 
-  } else if (LAYOUT_STRAIGHT || LAYOUT_RADIAL) {
-    new_svg_width = chart_bbox.width + (2 * chart_bbox_width_padding);
-    new_svg_height  = chart_bbox.height + (2 * chart_bbox_height_padding);
+  }
+  else if (LAYOUT_STRAIGHT || LAYOUT_RADIAL) {
+    new_svg_width  = chart_bbox.width + (2 * chart_bbox_width_padding);
+    new_svg_height = chart_bbox.height + (2 * chart_bbox_height_padding);
 
     g_chart_transform = "rotate(0) translate(" +
       // TODO sometimes the bbox x and y values are negative
       (chart_bbox_width_padding - chart_bbox.x) + " " +
-      (chart_bbox_height_padding- chart_bbox.y) + ")";
-  } else if (LAYOUT_CIRCLE) {
-    var radius = chart_bbox.width > chart_bbox.height ? chart_bbox.width / 2: chart_bbox.height / 2;
-    var diameter = radius * 2;
+      (chart_bbox_height_padding - chart_bbox.y) + ")";
+  }
+  else if (LAYOUT_CIRCLE) {
+    var radius     = chart_bbox.width > chart_bbox.height ? chart_bbox.width / 2 : chart_bbox.height / 2;
+    var diameter   = radius * 2;
     var padding_px = diameter * padding;
 
     // This is actually the length of the diagonal plus padding.
     var diameter_with_padding = Math.sqrt(Math.pow(diameter, 2) * 2) + (padding_px * 2);
 
-    new_svg_width = diameter_with_padding;
+    new_svg_width  = diameter_with_padding;
     new_svg_height = diameter_with_padding;
 
     g_chart_transform = "translate(" + (new_svg_width / 2) + "," + (new_svg_height / 2) +
@@ -1989,24 +2031,24 @@ function resize_svg_straight_layout(svg_id, chart_id)
   the_chart.setAttribute("transform", g_chart_transform);
 }
 
-function ary_mean(ary)
-{
+function ary_mean(ary) {
   var num_elems = ary.length;
-  var total = 0;
-  ary.map(function(d) { total += d; });
+  var total     = 0;
+  ary.map(function (d) {
+    total += d;
+  });
 
   return total / num_elems;
 }
 
-function draw_scale_bar()
-{
+function draw_scale_bar() {
   d3.select("#scale-bar-container").remove();
 
   if (SHOW_SCALE_BAR) {
     var lengths;
     var mean_length;
 
-    var SCALE_BAR_PADDING = 50; // in pixels
+    var SCALE_BAR_PADDING      = 50; // in pixels
     var SCALE_BAR_TEXT_PADDING = 5;
 
 
@@ -2014,17 +2056,25 @@ function draw_scale_bar()
     var pixels_per_unit_length;
 
     if (LAYOUT_RADIAL) {
-      lengths = ROOT.descendants().map(function(d) { return d.data.branch_length });
+      lengths = ROOT.descendants().map(function (d) {
+        return d.data.branch_length
+      });
 
       pixels_per_unit_length = RADIAL_LAYOUT_WEIGHT * Math.sqrt(Math.pow(first_link.target.radial_layout_info.x - first_link.source.radial_layout_info.x, 2) + Math.pow(first_link.target.radial_layout_info.y - first_link.source.radial_layout_info.y, 2)) / first_link.target.data.branch_length;
 
-    } else {
+    }
+    else {
       if (TREE_BRANCH_STYLE == TREE_BRANCH_NORMAL) {
-        lengths = ROOT.descendants().map(function(d) { return d.data.branch_length });
+        lengths                = ROOT.descendants().map(function (d) {
+          return d.data.branch_length
+        });
         pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.branch_length;
 
-      } else {
-        lengths = ROOT.descendants().map(function(d) { return d.height });
+      }
+      else {
+        lengths = ROOT.descendants().map(function (d) {
+          return d.height
+        });
 
         // The source height will be higher than the target height as the leaf nodes have a height of 0 and internal nodes add 1 for each speciation event.
         pixels_per_unit_length = (first_link.target.y - first_link.source.y) / (first_link.source.height - first_link.target.height);
@@ -2033,14 +2083,16 @@ function draw_scale_bar()
 
 
     var rotated_rectangle = LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
-    mean_length = utils__round_to(ary_mean(lengths), ROUNDING_PLACE);
+    mean_length           = utils__round_to(ary_mean(lengths), ROUNDING_PLACE);
 
     var min_scale_bar_size;
     if (LAYOUT_CIRCLE) {
       min_scale_bar_size = 50; // circles look a bit smaller so make this half.
-    } else if (LAYOUT_STRAIGHT) {
+    }
+    else if (LAYOUT_STRAIGHT) {
       min_scale_bar_size = 100;
-    } else {
+    }
+    else {
       min_scale_bar_size = 25;
     }
 
@@ -2048,7 +2100,8 @@ function draw_scale_bar()
     if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
       scale_bar_pixels = mean_length * pixels_per_unit_length;
       jq(ID_SCALE_BAR_LENGTH).val(mean_length);
-    } else {
+    }
+    else {
       scale_bar_pixels = jq(ID_SCALE_BAR_LENGTH).val() * pixels_per_unit_length;
 
       if (isNaN(scale_bar_pixels)) {
@@ -2056,7 +2109,6 @@ function draw_scale_bar()
         jq(ID_SCALE_BAR_LENGTH).val(mean_length);
       }
     }
-
 
 
     // If the original scale bar is smaller than the min size, bump up the size.
@@ -2071,12 +2123,11 @@ function draw_scale_bar()
     jq(ID_SCALE_BAR_LENGTH).val(scale_bar_label_text);
 
 
-
     var label_x, label_y;
 
     // New where to add it?
-    var chart_container = document.getElementById("chart-container");
-    var chart_bbox = chart_container.getBBox();
+    var chart_container     = document.getElementById("chart-container");
+    var chart_bbox          = chart_container.getBBox();
     var scale_bar_transform = "";
 
     // TODO not quite centered, take into account bounding box? Or center on svg?
@@ -2095,7 +2146,8 @@ function draw_scale_bar()
 
       label_x = start_x + (scale_bar_pixels / 2);
       label_y = start_y + SCALE_BAR_TEXT_PADDING;
-    } else if (LAYOUT_RADIAL) {
+    }
+    else if (LAYOUT_RADIAL) {
       start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
       start_y = (chart_bbox.height + SCALE_BAR_PADDING + chart_bbox.y) * (1 + ((SCALE_BAR_OFFSET_WEIGHT - 1) / 4)); // Reduce the weighting power by a lot.
 
@@ -2104,7 +2156,8 @@ function draw_scale_bar()
 
       label_x = start_x + (scale_bar_pixels / 2);
       label_y = start_y + SCALE_BAR_TEXT_PADDING;
-    } else if (rotated_rectangle) {
+    }
+    else if (rotated_rectangle) {
       start_x = (chart_bbox.x - SCALE_BAR_PADDING - (scale_bar_pixels / 2)) * (1 + ((SCALE_BAR_OFFSET_WEIGHT - 1) / 1.2)); // Reduce the weighting power by a bit.
       start_y = (chart_bbox.height / 2);
 
@@ -2114,41 +2167,42 @@ function draw_scale_bar()
       label_x = start_x + (scale_bar_pixels / 2);
       label_y = start_y + SCALE_BAR_TEXT_PADDING;
 
-    } else { // circular
+    }
+    else { // circular
       start_x = -(scale_bar_pixels / 2);
 
       // The chart bounding box height is the same as the width and it is centered, so the branches only extend half of that out.
       start_y = ((chart_bbox.height / 2) + SCALE_BAR_PADDING) * SCALE_BAR_OFFSET_WEIGHT;
 
-      label_x = start_x + (scale_bar_pixels / 2);
-      label_y = start_y + SCALE_BAR_TEXT_PADDING;
-      path_d = "M " + start_x + " " + start_y + " L " + (start_x + scale_bar_pixels) + " " + start_y;
+      label_x             = start_x + (scale_bar_pixels / 2);
+      label_y             = start_y + SCALE_BAR_TEXT_PADDING;
+      path_d              = "M " + start_x + " " + start_y + " L " + (start_x + scale_bar_pixels) + " " + start_y;
       scale_bar_transform = "rotate(" + (-TREE_ROTATION) + ")";
     }
 
     var container = d3.select("#chart-container")
-      .append("g")
-      .attr("id", "scale-bar-container");
+                      .append("g")
+                      .attr("id", "scale-bar-container");
 
     container.append("path")
-      .attr("id", "scale-bar")
-      .attr("stroke", "black")
-      .attr("stroke-width", DEFAULT_BRANCH_WIDTH > 2 ? 2 : DEFAULT_BRANCH_WIDTH)
-      .attr("d", path_d)
-      .attr("transform", scale_bar_transform);
+             .attr("id", "scale-bar")
+             .attr("stroke", "black")
+             .attr("stroke-width", DEFAULT_BRANCH_WIDTH > 2 ? 2 : DEFAULT_BRANCH_WIDTH)
+             .attr("d", path_d)
+             .attr("transform", scale_bar_transform);
 
     container.append("text")
-      .attr("id", "scale-bar-text")
-      .attr("dominant-baseline", "hanging")
-      .attr("text-anchor", "middle")
-      .attr("x", label_x)
-      .attr("y", label_y)
-      .text(scale_bar_label_text)
-      .attr("transform", scale_bar_transform)
-      .attr("font-family", defaults.leaf_label_font);
+             .attr("id", "scale-bar-text")
+             .attr("dominant-baseline", "hanging")
+             .attr("text-anchor", "middle")
+             .attr("x", label_x)
+             .attr("y", label_y)
+             .text(scale_bar_label_text)
+             .attr("transform", scale_bar_transform)
+             .attr("font-family", defaults.leaf_label_font);
 
     if (rotated_rectangle) {
-      var box = document.getElementById("scale-bar-container").getBBox();
+      var box           = document.getElementById("scale-bar-container").getBBox();
       var box_center_pt = (box.x + (box.width / 2)) + " " + (box.y + (box.height / 2));
 
       d3.select("#scale-bar-container")
@@ -2157,8 +2211,7 @@ function draw_scale_bar()
   }
 }
 
-function add_metadata(root, name2md, match_style)
-{
+function add_metadata(root, name2md, match_style) {
   // Everything starts with black metadata.  Later functions should handle defualts with blank metadata later.
   add_blank_metadata(root);
 
@@ -2175,9 +2228,10 @@ function add_metadata(root, name2md, match_style)
           d.metadata = md;
         }
       });
-    } else if (match_style === "partial") {
-      json_each(name2md, function(name, metadata) {
-        root.leaves().forEach(function(d) {
+    }
+    else if (match_style === "partial") {
+      json_each(name2md, function (name, metadata) {
+        root.leaves().forEach(function (d) {
           // Since it's partial mapping, all leaves could match a single name.
           if (d.data.name.indexOf(name) !== -1) { // match
             push_unless_present(names_with_matches_in_tree, name);
@@ -2185,13 +2239,14 @@ function add_metadata(root, name2md, match_style)
           }
         });
       });
-    } else {
+    }
+    else {
       // TODO regex
     }
 
     if (names_with_matches_in_tree.length < json_keys(name2md).length) {
       var unused_names = [];
-      json_keys(name2md).forEach(function(name){
+      json_keys(name2md).forEach(function (name) {
         if (names_with_matches_in_tree.indexOf(name) === -1) { // no match
           push_unless_present(unused_names, name);
         }
@@ -2207,19 +2262,19 @@ function add_metadata(root, name2md, match_style)
 }
 
 
-function add_blank_metadata(root)
-{
-  root.leaves().forEach(function(d) { return d.metadata = {}; })
+function add_blank_metadata(root) {
+  root.leaves().forEach(function (d) {
+    return d.metadata = {};
+  })
 }
 
-function get_branch_md_val(node, branch_option, default_value)
-{
+function get_branch_md_val(node, branch_option, default_value) {
   function get_md_val(node, branch_option, default_value) {
     // First, get the metadata val for this node.
-    var leaves = get_leaves(node);
+    var leaves  = get_leaves(node);
     var md_vals = [];
 
-    leaves.forEach(function(leaf) {
+    leaves.forEach(function (leaf) {
       // TODO check if metadata is actually an attr of leaf.
       var val = leaf.metadata[branch_option];
       if (val) {
@@ -2235,7 +2290,7 @@ function get_branch_md_val(node, branch_option, default_value)
   }
 
   function get_sibling_md_val(node, branch_option, default_value) {
-    var parent = node.parent;
+    var parent   = node.parent;
     var children = parent.children;
 
     // If there is more than one sibling, then things are strange just put the defualt value.
@@ -2283,10 +2338,8 @@ function get_branch_md_val(node, branch_option, default_value)
 }
 
 
-
 // The node is silly if the tree is in radial layout and parent is the true root and one of the siblings is the biological root.  OR if the parent is a true root and the biological root and the node is depth 1.
-function is_silly(node)
-{
+function is_silly(node) {
   if (!LAYOUT_RADIAL) {
     return false;
   }
@@ -2301,7 +2354,7 @@ function is_silly(node)
     else {
       // Check if has a sibling that is a leaf and a biological root
       var depth_one_nodes = node.parent.children;
-      var i = 0;
+      var i               = 0;
       for (i = 0; i < depth_one_nodes.length; ++i) {
         var sibling = depth_one_nodes[i];
         if (sibling !== node && is_rooted_on_this_leaf_node(sibling)) {
@@ -2314,23 +2367,22 @@ function is_silly(node)
   return false;
 }
 
-function set_options_by_metadata()
-{
+function set_options_by_metadata() {
   var category_names = [];
 
   if (name2md) {
 
-    json_each(name2md, function(seq_name, metadata) {
-      json_each(metadata, function(category_name, value) {
+    json_each(name2md, function (seq_name, metadata) {
+      json_each(metadata, function (category_name, value) {
         push_unless_present(category_names, category_name);
       });
     });
 
     var
-      leaf_dot_options_present = false,
+      leaf_dot_options_present   = false,
       leaf_label_options_present = false;
 
-    category_names.forEach(function(cat_name) {
+    category_names.forEach(function (cat_name) {
       if (LEAF_DOT_OPTIONS.includes(cat_name)) {
         leaf_dot_options_present = true;
       }
@@ -2352,26 +2404,25 @@ function set_options_by_metadata()
   }
 }
 
-function is_rooted_on_this_leaf_node(d)
-{
+function is_rooted_on_this_leaf_node(d) {
   // Depth is 1 means it is one level from root.
   return is_leaf(d) && d.depth === 1;
 }
 
 
 // TODO you have to check for true or string in the output.
-function is_rooted_on_a_leaf_node(d3_tree)
-{
+function is_rooted_on_a_leaf_node(d3_tree) {
 
   var children = d3_tree.children;
-  var i = 0;
+  var i        = 0;
   for (i = 0; i < children.length; ++i) {
     var child = children[i];
     if (is_rooted_on_this_leaf_node(child)) {
       if (child.data.name === "") {
         // TODO not sure if a leaf can ever have a blank name, but if it can "" will be falsey and mess up the results, so just return true.
         return true;
-      } else {
+      }
+      else {
         return child.data.name
       }
     }
@@ -2386,28 +2437,24 @@ function is_root(d) {
   return d.depth === 0;
 }
 
-function is_leaf(d)
-{
+function is_leaf(d) {
   return d.value === 1;
 }
 
-function is_inner(d)
-{
+function is_inner(d) {
   return !is_leaf(d);
 }
 
-function is_root_node(d)
-{
+function is_root_node(d) {
   return d.depth === 1;
 }
 
-function get_leaves(target)
-{
-  function get_leaves_iter(target)
-  {
+function get_leaves(target) {
+  function get_leaves_iter(target) {
     if (is_leaf(target)) {
       leaves.push(target);
-    } else {
+    }
+    else {
       target.children.map(function (d) {
         leaves.push(get_leaves(d));
       });
@@ -2420,15 +2467,14 @@ function get_leaves(target)
   return flatten(leaves);
 }
 
-function flatten(ary)
-{
-  function flatten_iter(ary)
-  {
+function flatten(ary) {
+  function flatten_iter(ary) {
     for (var i = 0; i < ary.length; ++i) {
       var val = ary[i];
       if (Array.isArray(val)) {
         flatten_iter(val);
-      } else {
+      }
+      else {
         flat_ary.push(val);
       }
     }
@@ -2440,23 +2486,21 @@ function flatten(ary)
   return flat_ary;
 }
 
-function radial_cluster(root)
-{
+function radial_cluster(root) {
   // Helpers
-  function postorder_traversal(vertex)
-  {
+  function postorder_traversal(vertex) {
     if (is_leaf(vertex)) { // if deg(vertex) == 1
       vertex.radial_layout_info.num_leaves_in_subtree = 1;
-    } else {
-      vertex.children.forEach(function(child){
+    }
+    else {
+      vertex.children.forEach(function (child) {
         postorder_traversal(child);
         vertex.radial_layout_info.num_leaves_in_subtree += child.radial_layout_info.num_leaves_in_subtree;
       });
     }
   }
 
-  function preorder_traversal(vertex)
-  {
+  function preorder_traversal(vertex) {
     if (vertex != root) {
       var parent = vertex.parent;
 
@@ -2464,10 +2508,11 @@ function radial_cluster(root)
       var distance_to_parent = vertex.data.branch_length === 0 ? NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES : vertex.data.branch_length;
 
       var x = parent.radial_layout_info.x + distance_to_parent * Math.cos(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));
-      var y = parent.radial_layout_info.y + distance_to_parent * Math.sin(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));;
+      var y = parent.radial_layout_info.y + distance_to_parent * Math.sin(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));
+      ;
 
-      vertex.radial_layout_info.x = x;
-      vertex.radial_layout_info.y = y;
+      vertex.radial_layout_info.x        = x;
+      vertex.radial_layout_info.y        = y;
       vertex.radial_layout_info.parent_x = parent.radial_layout_info.x;
       vertex.radial_layout_info.parent_y = parent.radial_layout_info.y;
 
@@ -2476,8 +2521,8 @@ function radial_cluster(root)
     var current_vertex_wedge_border = vertex.radial_layout_info.wedge_border;
 
     if (is_inner(vertex)) { // leaves don't have a children attr
-      vertex.children.forEach(function(child) {
-        child.radial_layout_info.wedge_size = (child.radial_layout_info.num_leaves_in_subtree / root.radial_layout_info.num_leaves_in_subtree) * 2 * Math.PI;
+      vertex.children.forEach(function (child) {
+        child.radial_layout_info.wedge_size   = (child.radial_layout_info.num_leaves_in_subtree / root.radial_layout_info.num_leaves_in_subtree) * 2 * Math.PI;
         child.radial_layout_info.wedge_border = current_vertex_wedge_border;
         current_vertex_wedge_border += child.radial_layout_info.wedge_size;
         preorder_traversal(child);
@@ -2486,7 +2531,7 @@ function radial_cluster(root)
   }
 
   // Set defaults
-  root.descendants().map(function(vertex) {
+  root.descendants().map(function (vertex) {
     if (vertex == root) {
       root.radial_layout_info = {
         "name" : root.data.name,
@@ -2496,7 +2541,8 @@ function radial_cluster(root)
         "wedge_size" : 2 * Math.PI,
         "wedge_border" : utils__deg_to_rad(TREE_ROTATION)
       };
-    } else {
+    }
+    else {
       vertex.radial_layout_info = {
         "name" : vertex.data.name,
         "x" : 0,
@@ -2512,12 +2558,12 @@ function radial_cluster(root)
   preorder_traversal(root);
 }
 
-function get_translation(transform_str)
-{
+function get_translation(transform_str) {
   var match = transform_str.match(/translate\((\d+\.?\d*) (\d+\.?\d*)\)/);
   if (match) {
     return { "x" : parseFloat(match[1]), "y" : parseFloat(match[2]) };
-  } else {
+  }
+  else {
     return { "x" : 0, "y" : 0 };
   }
 }
@@ -2536,17 +2582,15 @@ function is_checked(id) {
 }
 
 
-function check(id)
-{
+function check(id) {
   $("#" + id).prop("checked", true);
 }
-function uncheck(id)
-{
+
+function uncheck(id) {
   $("#" + id).prop("checked", false);
 }
 
-function jq(id)
-{
+function jq(id) {
   return $("#" + id);
 }
 
@@ -2559,14 +2603,13 @@ function undisable(id) {
 }
 
 // Currently, these are all the defaults for the radial tree.
-function reset_all_to_defaults()
-{
+function reset_all_to_defaults() {
   EXTRA_NAME_WARNINGS = false;
 
   // The set_options_by_metadata function will change the value of the *_options_present vars, but if you change the mapping file to a new one, these don't appear to get changed back.
 
   // Set these to null as this function is called when clicking the submit or reset buttons.  Either of which will re-set these anyway.  But doing this avoids some weird bugs where the mapping file is still hanging around after hitting reset.  See https://github.com/mooreryan/iroki_web/issues/32.
-  tree_input = null;
+  tree_input    = null;
   mapping_input = null;
   // name2md = null;
 
@@ -2628,17 +2671,15 @@ function reset_all_to_defaults()
 }
 
 
-function size_transform(val)
-{
+function size_transform(val) {
   return Math.pow(val, 2);
 }
 
 
-function ary_min_max(ary)
-{
+function ary_min_max(ary) {
   var min = null;
   var max = null;
-  ary.forEach(function(val){
+  ary.forEach(function (val) {
     if (!max || val > max) {
       max = val;
     }
@@ -2648,14 +2689,13 @@ function ary_min_max(ary)
     }
   });
 
-  return { min: min, max: max };
+  return { min : min, max : max };
 }
 
 // Space hsl looks nice for an even mix of counts.  lch looks pretty good for typical power law count data.
-function color_test(space)
-{
+function color_test(space) {
   // var counts = [1, 2, 4, 8, 16, 32, 64, 128];
-  var counts = [1,10,20,30,40,50,60];
+  var counts = [1, 10, 20, 30, 40, 50, 60];
   // counts = counts.map(function(count){
   //   return Math.round(Math.log(count));
   // });
@@ -2683,11 +2723,10 @@ function color_test(space)
 }
 
 // Also can make it two colors.
-function ryan(start, mid, stop, num_colors, transform)
-{
+function ryan(start, mid, stop, num_colors, transform) {
   d3.selectAll("circle").remove();
 
-  var counts = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
+  var counts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
   var color;
 
   var colors = chroma.scale([start, mid, stop]).mode("hsl").colors(num_colors);
@@ -2748,20 +2787,20 @@ function ryan(start, mid, stop, num_colors, transform)
 var tree_debug;
 
 // TODO this will not work properly unless TREE_IS_ROOTED_ON_A_LEAF_NODE has been set.
-function try_disable_bio_rooted()
-{
+function try_disable_bio_rooted() {
   if (LAYOUT_RADIAL && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
     jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", true);
   }
   else if (!LAYOUT_RADIAL) {
     jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", true);
-  } else {
+  }
+  else {
     jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", false);
   }
 }
 
 function inner_dot_fill(d) {
-  var val = parseFloat(d.data.name);
+  var val           = parseFloat(d.data.name);
   var bootstrap_val = isNaN(val) ? 0.0 : val;
 
   if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NONE) {
@@ -2781,7 +2820,7 @@ function inner_dot_fill(d) {
 }
 
 function inner_dot_stroke(d) {
-  var val = parseFloat(d.data.name);
+  var val           = parseFloat(d.data.name);
   var bootstrap_val = isNaN(val) ? 0.0 : val;
 
   if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NONE) {
@@ -2801,7 +2840,7 @@ function inner_dot_stroke(d) {
 }
 
 function inner_dot_stroke_width(d) {
-  var val = parseFloat(d.data.name);
+  var val           = parseFloat(d.data.name);
   var bootstrap_val = isNaN(val) ? 0.0 : val;
 
   if (VAL_SHOW_INNER_DOTS === ID_SHOW_INNER_DOTS_NONE) {
@@ -2822,7 +2861,7 @@ function inner_dot_stroke_width(d) {
 
 function set_and_validate_bootstrap_cutoff_input() {
   VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT = parseFloat(jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val());
-  VAL_BOOTSTRAP_CUTOFF_FILLED_DOT = parseFloat(jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val());
+  VAL_BOOTSTRAP_CUTOFF_FILLED_DOT   = parseFloat(jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val());
 
   // First check if either are NaN, if so use the default value.
   if (isNaN(VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT)) {
@@ -2852,7 +2891,6 @@ function set_and_validate_bootstrap_cutoff_input() {
   }
 
 }
-
 
 
 // TODO the wonky thing about hcl is that the ranges are differnt for c and l depending on the hue.
