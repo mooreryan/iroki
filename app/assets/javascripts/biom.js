@@ -215,8 +215,8 @@ function centroids_of_points(all_points) {
   return centroids;
 }
 
-function centroids_of_samples(biom_txt) {
-  var points = sample_counts_to_points(parse_biom_file_str(biom_txt));
+function centroids_of_samples(parsed_biom) {
+  var points = sample_counts_to_points(parsed_biom);
 
   return centroids_of_points(points);
 }
@@ -362,11 +362,14 @@ function make_biom_with_colors_html(biom_csv, colors, color_details) {
 
   var header_str = "<tr>\n";
   fields.forEach(function (field) {
-    if (field === "color" || field === "lightness") {
-      header_str += "<th class='thick-right-border'>" + field + "</th>"
-    }
-    else {
-      header_str += th_tag(field);
+    // Don't put the fake fields in the output.
+    if (!field.match(/iroki_fake_[12]/)) {
+      if (field === "color" || field === "lightness") {
+        header_str += "<th class='thick-right-border'>" + field + "</th>"
+      }
+      else {
+        header_str += th_tag(field);
+      }
     }
   });
   header_str += "</tr>";
@@ -378,28 +381,30 @@ function make_biom_with_colors_html(biom_csv, colors, color_details) {
 
     // Add on the parts from the biom file
     json_each(line_json, function (field, value) {
-      if (field === "name") {
-        // Get the color with this name
-        // TODO set a default value if it is not in the hash
-        this_color = colors[value];
+      if (!field.match(/iroki_fake_[12]/)) {
+        if (field === "name") {
+          // Get the color with this name
+          // TODO set a default value if it is not in the hash
+          this_color = colors[value];
 
-        table_rows_str += td_tag(value);
+          table_rows_str += td_tag(value);
 
-        // Put the color column right after the name.
-        table_rows_str += td_tag_with_background(this_color, this_color);
+          // Put the color column right after the name.
+          table_rows_str += td_tag_with_background(this_color, this_color);
 
-        // Add on the parts from the color info
-        var hue       = Math.round(color_details[value].hue)
-        var chroma    = Math.round(color_details[value].chroma);
-        var lightness = Math.round(color_details[value].lightness);
+          // Add on the parts from the color info
+          var hue       = Math.round(color_details[value].hue)
+          var chroma    = Math.round(color_details[value].chroma);
+          var lightness = Math.round(color_details[value].lightness);
 
-        // Flip hue around the circle if the angle is negative.
-        hue = hue < 0 ? hue + 360 : hue;
+          // Flip hue around the circle if the angle is negative.
+          hue = hue < 0 ? hue + 360 : hue;
 
-        table_rows_str += (td_tag(hue) + td_tag(chroma) + "<td class='thick-right-border'>" + lightness + "</td>");
-      }
-      else {
-        table_rows_str += td_tag(value);
+          table_rows_str += (td_tag(hue) + td_tag(chroma) + "<td class='thick-right-border'>" + lightness + "</td>");
+        }
+        else {
+          table_rows_str += td_tag(value);
+        }
       }
     });
 
@@ -422,13 +427,12 @@ function make_biom_with_colors_html(biom_csv, colors, color_details) {
 
 var debug_biom_csv, debug_colors_json, debug_color_details;
 
-function biom__colors_from_biom_str(biom_str) {
-  var centroids = centroids_of_samples(biom_str);
-  var biom_csv  = parse_biom_file_str(biom_str);
+function biom__colors_from_biom_str(parsed_biom) {
+  var centroids = centroids_of_samples(parsed_biom);
 
-  debug_biom_csv = biom_csv;
+  debug_biom_csv = parsed_biom;
 
-  return colors_from_centroids(centroids, biom_csv);
+  return colors_from_centroids(centroids, parsed_biom);
 }
 
 function make_tsv_string(json) {
@@ -478,7 +482,9 @@ function biom__save_abundance_colors(biom_str) {
       break;
   }
 
-  var ret_val         = biom__colors_from_biom_str(str);
+  var parsed_biom = parse_biom_file_str(str);
+
+  var ret_val         = biom__colors_from_biom_str(parsed_biom);
   var colors          = ret_val[0];
   var color_details   = ret_val[1];
   debug_colors_json   = colors;
@@ -487,7 +493,7 @@ function biom__save_abundance_colors(biom_str) {
 
   if (g_val_download_legend) {
     // TODO don't call parse_biom_file again, have a single function do it and pass that around.
-    var html_str = make_biom_with_colors_html(parse_biom_file_str(str), colors, color_details);
+    var html_str = make_biom_with_colors_html(parsed_biom, colors, color_details);
 
     var zip = new JSZip();
 
@@ -697,8 +703,8 @@ function apply_to_cols(M, fn) {
   return transposeMatrix(array2mat(new_ary));
 }
 
-function biom_to_ary(biom_str) {
-  var biom         = parse_biom_file_str(biom_str);
+function biom_to_ary(parsed_biom) {
+  var biom         = parsed_biom;
   var leaf_names   = biom.data.map(function (obj) {
     return obj[biom.meta.fields[0]]
   });
@@ -714,8 +720,9 @@ function biom_to_ary(biom_str) {
   return [leaf_names, counts];
 }
 
+// This function takes biom_str rather than parsed biom string since it returns a new adjusted biom string.  TODO: We could take the parsed biom string and return an adjusted parsed biom string if the parsing is a bottleneck.
 function reduce_dimension(biom_str, type, cutoff) {
-  var biom_ary      = biom_to_ary(biom_str);
+  var biom_ary      = biom_to_ary(parse_biom_file_str(biom_str));
   var leaves        = biom_ary[0];
   var counts        = biom_ary[1];
   var tmp           = project(counts, type, cutoff);
