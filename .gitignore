@@ -41,3 +41,4 @@ ignore
 
 spec/test_files/mapping\ *
 spec/test_files/cpf_tree*
+spec/test_files/iroki_mapping*

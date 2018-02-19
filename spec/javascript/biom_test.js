@@ -15,7 +15,7 @@ test('sample_to_angle() converts sample idx to an angle theta', function () {
 });
 
 test('sample_counts_to_points() takes csv and return points', function () {
-  var csv = parse_biom_file(biom_str);
+  var csv = parse_biom_file_str(biom_str);
 
   var expected_points = {
     "geode" : {
@@ -173,15 +173,15 @@ test('centroids_of_points() takes points and gives the centroids for each shape'
 // TODO Chroma doesn't work in the context of jest.  You need to set the chroma function in a global variable so that is accesible, but then you need to change the iroki code that uses it.
 // test('colors_from_centroids() lalalal', function() {
 //   var centroids = centroids_of_samples(biom_str);
-//   var csv = parse_biom_file(biom_str);
+//   var csv = parse_biom_file_str(biom_str);
 //
 //   expect(colors_from_centroids(centroids, csv)).toEqual(123);
 // });
 
-// test('parse_biom_file() returns a obj', function() {
+// test('parse_biom_file_str() returns a obj', function() {
 //   var obj = {};
 //
-//   expect(parse_biom_file(biom_str)).toEqual(obj);
+//   expect(parse_biom_file_str(biom_str)).toEqual(obj);
 // });
 
 test('centroids_of_samples() does some stuff', function () {

@@ -101,11 +101,11 @@ function utils__vec_center(vec) {
 
 // Input is a LALOLib vector.
 function utils__vec_scale_0_to_1(vec) {
-  var abs_col_min = Math.abs(min(vec));
+  var abs_col_min = Math.abs(fn.ary.min(vec));
 
   // TODO take abs value of max as well in case it is a negative number?
-  var col_max = max(vec);
-  var col_min = min(vec);
+  var col_max = fn.ary.max(vec);
+  var col_min = fn.ary.min(vec);
 
   if (col_min === col_max) {
     // All the numbers in the original are the same, so just set it to 0.5

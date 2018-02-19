@@ -1,4 +1,4 @@
-function parse_biom_file(str) {
+function parse_biom_file_str(str) {
   // Parse mapping string.
   var csv = Papa.parse(chomp(str), PAPA_CONFIG);
 
@@ -216,7 +216,7 @@ function centroids_of_points(all_points) {
 }
 
 function centroids_of_samples(biom_txt) {
-  var points = sample_counts_to_points(parse_biom_file(biom_txt));
+  var points = sample_counts_to_points(parse_biom_file_str(biom_txt));
 
   return centroids_of_points(points);
 }
@@ -253,12 +253,21 @@ function colors_from_centroids(centroids, csv) {
     }
   });
 
-  var colors = {};
+  var colors        = {};
+  var color_details = {};
   json_each(centroids, function (leaf, pt) {
-    colors[leaf] = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count);
+    var return_val = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count);
+
+    colors[leaf] = return_val[0];
+
+    color_details[leaf]              = {};
+    color_details[leaf]["hue"]       = return_val[1];
+    color_details[leaf]["chroma"]    = return_val[2];
+    color_details[leaf]["lightness"] = return_val[3];
+
   });
 
-  return colors;
+  return [colors, color_details];
 }
 
 function mag(pt) {
@@ -288,7 +297,7 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
 
   var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
-  return chroma.hcl(hue, chroma_val, lightness).hex();
+  return [chroma.hcl(hue, chroma_val, lightness).hex(), hue, chroma_val, lightness];
 
 }
 
@@ -310,20 +319,7 @@ function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
 
   var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
-  return chroma.hsl(hue, saturation, lightness).hex();
-}
-
-
-function max(ary) {
-  return ary.reduce(function (a, b) {
-    return Math.max(a, b);
-  });
-}
-
-function min(ary) {
-  return ary.reduce(function (a, b) {
-    return Math.min(a, b);
-  });
+  return [chroma.hsl(hue, saturation, lightness).hex(), hue, saturation, lightness];
 }
 
 function scale(val, old_min, old_max, new_min, new_max) {
@@ -338,9 +334,99 @@ function scale(val, old_min, old_max, new_min, new_max) {
   }
 }
 
+// TODO make sure all color tags are hex codes
+function make_biom_with_colors_html(biom_csv, colors, color_details) {
+  // biom csv
+  // { data: [], errors: [], meta: {} }
+  // in data the entries are like this: { name: leaf_name, sample1: 12, sample2: 10.5 }
+
+  // colors
+  // { leaf_name: "#00ff00", leaf2_name: "#ff00ff" }
+
+  function th_tag(str) {
+    return "<th>" + str + "</th>";
+  }
+
+  function td_tag(str) {
+    return "<td>" + str + "</td>";
+  }
+
+  function td_tag_with_background(str, color) {
+    return "<td class='thick-right-border' style='background-color:" + color + ";'>" + str + "</td>";
+  }
+
+  var fields = biom_csv.meta.fields;
+
+  // Make color the second field
+  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness");
+
+  var header_str = "<tr>\n";
+  fields.forEach(function (field) {
+    if (field === "color" || field === "lightness") {
+      header_str += "<th class='thick-right-border'>" + field + "</th>"
+    }
+    else {
+      header_str += th_tag(field);
+    }
+  });
+  header_str += "</tr>";
+
+  var table_rows = [];
+  biom_csv.data.forEach(function (line_json) {
+    var this_color     = null;
+    var table_rows_str = "<tr>";
+
+    // Add on the parts from the biom file
+    json_each(line_json, function (field, value) {
+      if (field === "name") {
+        // Get the color with this name
+        // TODO set a default value if it is not in the hash
+        this_color = colors[value];
+
+        table_rows_str += td_tag(value);
+
+        // Put the color column right after the name.
+        table_rows_str += td_tag_with_background(this_color, this_color);
+
+        // Add on the parts from the color info
+        var hue       = Math.round(color_details[value].hue)
+        var chroma    = Math.round(color_details[value].chroma);
+        var lightness = Math.round(color_details[value].lightness);
+
+        // Flip hue around the circle if the angle is negative.
+        hue = hue < 0 ? hue + 360 : hue;
+
+        table_rows_str += (td_tag(hue) + td_tag(chroma) + "<td class='thick-right-border'>" + lightness + "</td>");
+      }
+      else {
+        table_rows_str += td_tag(value);
+      }
+    });
+
+    // Finish off the row
+    table_rows_str += "</tr>";
+    table_rows.push(table_rows_str);
+  });
+
+  var style_str = "<style>" +
+    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
+    "th, td {padding: 5px} " +
+    "th {text-align: left; border-bottom: 2px solid #2d2d2d} " +
+    ".thick-right-border {border-right: 2px solid #2d2d2d}" +
+    "</style>"
+
+  var md_str = "<!DOCTYPE html><head>" + style_str + "<title>Color table</title></head>";
+
+  return md_str + "<body><table>" + header_str + table_rows.join("\n") + "</table></body></html>";
+}
+
+var debug_biom_csv, debug_colors_json, debug_color_details;
+
 function biom__colors_from_biom_str(biom_str) {
   var centroids = centroids_of_samples(biom_str);
-  var biom_csv  = parse_biom_file(biom_str);
+  var biom_csv  = parse_biom_file_str(biom_str);
+
+  debug_biom_csv = biom_csv;
 
   return colors_from_centroids(centroids, biom_csv);
 }
@@ -392,13 +478,35 @@ function biom__save_abundance_colors(biom_str) {
       break;
   }
 
-  var colors  = biom__colors_from_biom_str(str);
-  var tsv_str = make_tsv_string(colors);
+  var ret_val         = biom__colors_from_biom_str(str);
+  var colors          = ret_val[0];
+  var color_details   = ret_val[1];
+  debug_colors_json   = colors;
+  debug_color_details = color_details;
+  var tsv_str         = make_tsv_string(colors);
 
-  var blob = new Blob([tsv_str], { type : "text/plain;charset=utf-8" });
+  if (g_val_download_legend) {
+    // TODO don't call parse_biom_file again, have a single function do it and pass that around.
+    var html_str = make_biom_with_colors_html(parse_biom_file_str(str), colors, color_details);
 
-  // Unicode standard does not recommend using the BOM for UTF-8, so pass in true to NOT put it in.
-  saveAs(blob, "mapping.txt", true);
+    var zip = new JSZip();
+
+    zip.folder("iroki_mapping")
+       .file("mapping.txt", tsv_str)
+       .file("counts_with_colors.html", html_str);
+
+    zip.generateAsync({ type : "blob" })
+       .then(function (blob) {
+         saveAs(blob, "iroki_mapping.zip");
+       });
+  }
+  else {
+    var blob = new Blob([tsv_str], { type : "text/plain;charset=utf-8" });
+
+    // Unicode standard does not recommend using the BOM for UTF-8, so pass in true to NOT put it in.
+    saveAs(blob, "mapping.txt", true);
+  }
+
 }
 
 var g_ID_COLOR_SPACE     = "color-space",
@@ -433,6 +541,9 @@ var g_ID_ABUNDANT_SAMPLES_ARE       = "abundant-samples-are",
     g_ID_ABUNDANT_SAMPLES_ARE_LIGHT = "abundant-samples-are-light",
     g_ID_ABUNDANT_SAMPLES_ARE_DARK  = "abundant-samples-are-dark",
     g_val_abundant_samples_are;
+
+var g_ID_DOWNLOAD_LEGEND = "download-legend",
+    g_val_download_legend;
 
 function update_form_vals() {
   function set_color_space_fn(g_val_color_space) {
@@ -471,6 +582,9 @@ function update_form_vals() {
   // Other options
   g_val_avg_method       = jq(g_ID_AVG_METHOD).val();
   g_val_reduce_dimension = jq(g_ID_REDUCE_DIMENSION).val();
+
+  // Legend options
+  g_val_download_legend = is_checked(g_ID_DOWNLOAD_LEGEND);
 }
 
 
@@ -584,7 +698,7 @@ function apply_to_cols(M, fn) {
 }
 
 function biom_to_ary(biom_str) {
-  var biom         = parse_biom_file(biom_str);
+  var biom         = parse_biom_file_str(biom_str);
   var leaf_names   = biom.data.map(function (obj) {
     return obj[biom.meta.fields[0]]
   });
@@ -673,6 +787,7 @@ function biom__upload_button() {
   var hue_angle_offset_slider     = document.getElementById(g_ID_HUE_ANGLE_OFFSET);
   var reduce_dimension_select     = document.getElementById(g_ID_REDUCE_DIMENSION);
   var abundant_samples_are_select = document.getElementById(g_ID_ABUNDANT_SAMPLES_ARE);
+  var download_legend             = document.getElementById(g_ID_DOWNLOAD_LEGEND);
 
   var biom_reader = new FileReader();
 
@@ -717,6 +832,12 @@ function biom__upload_button() {
 
     update_form_vals();
   });
+  download_legend.addEventListener("change", function () {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+  });
   submit_button.addEventListener("click", function () {
     undisable("reset-button");
 
@@ -726,7 +847,9 @@ function biom__upload_button() {
   }, false);
   document.getElementById("reset-button").addEventListener("click", function () {
     disable("reset-button");
-    undisable("submit-button");
+
+    // Turn the submit off because it will turn back on once a mapping file is uploaded.
+    disable("submit-button");
 
     document.getElementById("biom-file-upload-form").reset();
 
