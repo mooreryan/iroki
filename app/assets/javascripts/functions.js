@@ -1,5 +1,6 @@
 var fn = {};
 fn.ary = {};
+fn.math = {};
 
 fn.ary.max = function (ary) {
   return ary.reduce(function (a, b) {
@@ -34,4 +35,12 @@ fn.ary.evenness = function(ary) {
   var shannon_max = Math.log2(ary.length);
 
   return fn.ary.shannon(ary) / shannon_max;
+};
+
+// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+fn.math.round = function(number, precision) {
+  var factor = Math.pow(10, precision);
+  var tempNumber = number * factor;
+  var roundedTempNumber = Math.round(tempNumber);
+  return roundedTempNumber / factor;
 };

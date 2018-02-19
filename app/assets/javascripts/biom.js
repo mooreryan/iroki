@@ -335,7 +335,8 @@ function scale(val, old_min, old_max, new_min, new_max) {
 }
 
 // TODO make sure all color tags are hex codes
-function make_biom_with_colors_html(biom_csv, colors, color_details) {
+// The orig_biom_str is for when the parsed_biom has the reduced dimensions so we can put the original dimensions onto the end of the file.
+function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_details) {
   // biom csv
   // { data: [], errors: [], meta: {} }
   // in data the entries are like this: { name: leaf_name, sample1: 12, sample2: 10.5 }
@@ -355,7 +356,12 @@ function make_biom_with_colors_html(biom_csv, colors, color_details) {
     return "<td class='thick-right-border' style='background-color:" + color + ";'>" + str + "</td>";
   }
 
-  var fields = biom_csv.meta.fields;
+  var parsed_orig_biom = null;
+  if (orig_biom_str) {
+    parsed_orig_biom = parse_biom_file_str(orig_biom_str);
+  }
+
+  var fields = parsed_biom.meta.fields;
 
   // Make color the second field
   fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness");
@@ -372,10 +378,26 @@ function make_biom_with_colors_html(biom_csv, colors, color_details) {
       }
     }
   });
+
+  if (parsed_orig_biom) {
+    // Add on the original header fields.
+    var original_fields = parsed_orig_biom.meta.fields;
+    // remove the name field
+    original_fields.shift();
+
+    original_fields.forEach(function (field, idx) {
+      if (idx === 0) {
+        header_str += "<th class='thick-left-border'>" + field + "</th>"
+      }
+      else {
+        header_str += th_tag(field);
+      }
+    });
+  }
   header_str += "</tr>";
 
   var table_rows = [];
-  biom_csv.data.forEach(function (line_json) {
+  parsed_biom.data.forEach(function (line_json, line_idx) {
     var this_color     = null;
     var table_rows_str = "<tr>";
 
@@ -393,20 +415,37 @@ function make_biom_with_colors_html(biom_csv, colors, color_details) {
           table_rows_str += td_tag_with_background(this_color, this_color);
 
           // Add on the parts from the color info
-          var hue       = Math.round(color_details[value].hue)
-          var chroma    = Math.round(color_details[value].chroma);
-          var lightness = Math.round(color_details[value].lightness);
+          var hue       = color_details[value].hue
+          var chroma    = fn.math.round(color_details[value].chroma, 2);
+          var lightness = fn.math.round(color_details[value].lightness, 2);
 
           // Flip hue around the circle if the angle is negative.
-          hue = hue < 0 ? hue + 360 : hue;
+          hue = hue < 0 ? fn.math.round(hue + 360, 2) : fn.math.round(hue, 2);
 
           table_rows_str += (td_tag(hue) + td_tag(chroma) + "<td class='thick-right-border'>" + lightness + "</td>");
         }
         else {
-          table_rows_str += td_tag(value);
+          table_rows_str += td_tag(fn.math.round(value, 2));
         }
       }
     });
+
+    if (parsed_orig_biom) {
+      var orig_data      = parsed_orig_biom.data[line_idx];
+      var orig_val_count = 0;
+      json_each(orig_data, function (field, value) {
+        if (field !== "name") {
+          if (orig_val_count === 0) {
+            table_rows_str += ("<td class='thick-left-border'>" + fn.math.round(value, 2) + "</td>");
+          }
+          else {
+            table_rows_str += td_tag(fn.math.round(value, 2));
+          }
+
+          orig_val_count += 1;
+        }
+      });
+    }
 
     // Finish off the row
     table_rows_str += "</tr>";
@@ -416,8 +455,9 @@ function make_biom_with_colors_html(biom_csv, colors, color_details) {
   var style_str = "<style>" +
     "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
     "th, td {padding: 5px} " +
-    "th {text-align: left; border-bottom: 2px solid #2d2d2d} " +
-    ".thick-right-border {border-right: 2px solid #2d2d2d}" +
+    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
+    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
+    ".thick-left-border {border-left: 3px solid #2d2d2d}" +
     "</style>"
 
   var md_str = "<!DOCTYPE html><head>" + style_str + "<title>Color table</title></head>";
@@ -493,7 +533,14 @@ function biom__save_abundance_colors(biom_str) {
 
   if (g_val_download_legend) {
     // TODO don't call parse_biom_file again, have a single function do it and pass that around.
-    var html_str = make_biom_with_colors_html(parsed_biom, colors, color_details);
+
+    if (g_val_reduce_dimension === "reduce-dimension-none") {
+      var html_str = make_biom_with_colors_html(parsed_biom, false, colors, color_details);
+    }
+    else {
+      var html_str = make_biom_with_colors_html(parsed_biom, biom_str, colors, color_details);
+
+    }
 
     var zip = new JSZip();
 
@@ -737,7 +784,7 @@ function reduce_dimension(biom_str, type, cutoff) {
   var new_biom = [["name"]];
   var i        = 0;
   for (i = 0; i < num_sing_vals; ++i) {
-    new_biom[0].push("pc_" + i);
+    new_biom[0].push("pc_" + (i + 1));
   }
 
   if (num_sing_vals === 1) {
