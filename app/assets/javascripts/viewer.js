@@ -437,7 +437,8 @@ function lalala(tree_input_param, mapping_input_param) {
           else {
             name2md = null;
           }
-          draw_tree();
+          // Draw tree and set on metadata option
+          draw_tree(true);
           utils__set_status_msg_to_done();
         }, TIMEOUT);
       }
@@ -517,7 +518,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_links();
         draw_link_extensions();
@@ -545,7 +546,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_scale_bar();
         adjust_tree();
@@ -556,7 +557,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_scale_bar();
         adjust_tree();
@@ -574,7 +575,7 @@ function lalala(tree_input_param, mapping_input_param) {
           jq(ID_SCALE_BAR_LENGTH).prop("disabled", false);
         }
 
-        set_options_by_metadata();
+
         update_form_constants();
         draw_scale_bar();
         adjust_tree();
@@ -585,7 +586,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_scale_bar();
         adjust_tree();
@@ -625,7 +626,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_link_extensions();
         draw_leaf_dots();
@@ -647,7 +648,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_link_extensions();
         draw_leaf_dots();
@@ -661,7 +662,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_inner_labels();
         draw_leaf_labels();
@@ -674,7 +675,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_inner_labels();
         draw_leaf_labels();
@@ -687,7 +688,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_inner_labels();
         draw_leaf_labels();
@@ -700,7 +701,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_inner_labels();
         draw_leaf_labels();
@@ -713,7 +714,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_inner_labels();
         draw_leaf_labels();
@@ -743,7 +744,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_link_extensions(); // may need to be removed.
         draw_leaf_dots();
@@ -765,7 +766,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
 
         draw_inner_dots();
@@ -783,7 +784,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
 
         draw_inner_dots();
@@ -836,7 +837,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+
         update_form_constants();
         draw_links();
         draw_link_extensions();
@@ -849,7 +850,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        set_options_by_metadata();
+        
         update_form_constants();
         draw_links();
         draw_link_extensions();
@@ -867,7 +868,10 @@ function lalala(tree_input_param, mapping_input_param) {
     });
 
     utils__set_status_msg_to_rendering();
-    draw_tree();
+
+    // In the lalala function, this is the first time that draw_tree is called, so lock options by metadata if it is available.
+    draw_tree(true);
+
     utils__set_status_msg_to_done();
 
     var circle_cluster, rectangle_cluster;
@@ -1570,7 +1574,7 @@ function lalala(tree_input_param, mapping_input_param) {
     }
 
     function update_and_draw(draw_fn) {
-      set_options_by_metadata();
+
       update_form_constants();
       draw_fn();
       draw_scale_bar();
@@ -1579,7 +1583,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
     function redraw_tree() {
-      set_options_by_metadata();
+
       update_form_constants();
 
       draw_links();
@@ -1598,7 +1602,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // For redrawing tree even when you need to recalculate hierarchy and merge svg and g chart.
     function set_up_and_redraw() {
-      set_options_by_metadata();
+
       update_form_constants();
 
       set_up_hierarchy();
@@ -1622,11 +1626,13 @@ function lalala(tree_input_param, mapping_input_param) {
     }
 
     // A magical function
-    function draw_tree() {
+    function draw_tree(lock_metadata_opts) {
       // jq("status-msg").html("apple");
       utils__clear_elem("svg-tree");
 
-      set_options_by_metadata();
+      if (lock_metadata_opts) {
+        set_options_by_metadata();
+      }
       update_form_constants();
 
       set_up_hierarchy();
