@@ -150,6 +150,7 @@ function sample_counts_to_points(csv) {
         }
 
         var pt = get_point(count, true_sample_idx, num_samples);
+        console.log("leaf: " + leaf_name + " sample: " + sample + " sample_idx: " + sample_idx + " pt: " + JSON.stringify(pt));
 
         points[leaf_name][sample] = pt;
       }
@@ -168,8 +169,18 @@ function centroid_of_triangle(p1, p2, p3) {
 }
 
 // TODO instead of calculating all triangles, could save some steps by removing p2 from the points obj and rerunning.  (this would also required using signed area)
-// TODO needs at least 3 samples.
-function centroids_of_points(all_points) {
+function centroids_of_points(all_points, non_zero_count_samples) {
+  function get_non_zero_points(pts) {
+    var non_zero_points = [];
+
+    pts.forEach(function (pt) {
+      if (!fn.pt.is_zero(pt)) {
+        non_zero_points.push(pt);
+      }
+    });
+
+    return non_zero_points;
+  }
 
   var centroids = {};
 
@@ -179,46 +190,137 @@ function centroids_of_points(all_points) {
     var sum_y_numer = 0;
     var sum_denom   = 0;
 
-    // For each triangle...
-    for (var i = 0; i < samples.length; ++i) {
-      if (i < samples.length - 2) {
-        var p1 = points[samples[i]];
-        var p2 = points[samples[i + 1]];
-        var p3 = points[samples[i + 2]];
-      }
-      else if (i < samples.length - 1) {
-        var p1 = points[samples[i]];
-        var p2 = points[samples[i + 1]];
-        var p3 = points[samples[0]];
-      }
-      else {
-        var p1 = points[samples[i]];
-        var p2 = points[samples[0]];
-        var p3 = points[samples[1]];
-      }
 
-      var signed_area = signed_area_of_triangle(p1, p2, p3);
-      var area        = Math.abs(signed_area);
-      var centroid    = centroid_of_triangle(p1, p2, p3);
+    switch (non_zero_count_samples[leaf]) {
+      case "none":
+        // It has a zero count in every sample
+        centroids[leaf] = fn.pt.new(0, 0);
+        break;
+      case "many":
+        // Just do the regular stuff
+        if (samples.length < 3) {
+          // This should never happen as fake samples get added on to make sure there are at least 3.
+          throw Error("Leaf " + leaf + " had less than 3 samples.  Got " + samples.length);
+        }
+        else if (samples.length === 3) {
+          // There is only one triangle to do
+          var p1 = points[samples[0]];
+          var p2 = points[samples[1]];
+          var p3 = points[samples[2]];
 
-      sum_x_numer += area * centroid.x;
-      sum_y_numer += area * centroid.y;
-      sum_denom += area;
+
+          var signed_area = signed_area_of_triangle(p1, p2, p3);
+          var area        = Math.abs(signed_area);
+          var centroid    = centroid_of_triangle(p1, p2, p3);
+
+          sum_x_numer += area * centroid.x;
+          sum_y_numer += area * centroid.y;
+          sum_denom += area;
+        }
+        else {
+          // There are at least 4 triangles.
+          // For each triangle...
+          for (var i = 0; i < samples.length; ++i) {
+            if (i < samples.length - 2) {
+              var p1 = points[samples[i]];
+              var p2 = points[samples[i + 1]];
+              var p3 = points[samples[i + 2]];
+            }
+            else if (i < samples.length - 1) {
+              var p1 = points[samples[i]];
+              var p2 = points[samples[i + 1]];
+              var p3 = points[samples[0]];
+            }
+            else {
+              var p1 = points[samples[i]];
+              var p2 = points[samples[0]];
+              var p3 = points[samples[1]];
+            }
+
+            var signed_area = signed_area_of_triangle(p1, p2, p3);
+            var area        = Math.abs(signed_area);
+            var centroid    = centroid_of_triangle(p1, p2, p3);
+
+            sum_x_numer += area * centroid.x;
+            sum_y_numer += area * centroid.y;
+            sum_denom += area;
+          }
+        }
+
+        centroids[leaf] = fn.pt.new(sum_x_numer / sum_denom, sum_y_numer / sum_denom);
+        break;
+      default:
+        // It has a single sample with a non zero count.
+        var non_zero_sample = non_zero_count_samples[leaf];
+        var non_zero_point  = points[non_zero_sample];
+        centroids[leaf] = fn.pt.new(non_zero_point.x / 2, non_zero_point.y / 2);
+        break;
     }
-
-    centroids[leaf] = {
-      x : sum_x_numer / sum_denom,
-      y : sum_y_numer / sum_denom
-    };
   });
 
   return centroids;
 }
 
-function centroids_of_samples(parsed_biom) {
-  var points = sample_counts_to_points(parsed_biom);
 
-  return centroids_of_points(points);
+function get_non_zero_count_samples(parsed_biom) {
+  var obj = {};
+  parsed_biom.data.forEach(function (data_row) {
+    var leaf_name              = "";
+    var non_zero_count_samples = [];
+    json_each(data_row, function (field, value) {
+      if (field === "name") {
+        leaf_name = value;
+      }
+      else if (value !== 0) {
+        non_zero_count_samples.push(field);
+      }
+    });
+
+    switch (non_zero_count_samples.length) {
+      case 0:
+        obj[leaf_name] = "none";
+        break;
+      case 1:
+        obj[leaf_name] = non_zero_count_samples[0];
+        break;
+      default:
+        obj[leaf_name] = "many";
+        break;
+    }
+  });
+
+  return obj;
+}
+
+function centroids_of_samples(parsed_biom) {
+  var points                 = sample_counts_to_points(parsed_biom);
+  var non_zero_count_samples = get_non_zero_count_samples(parsed_biom);
+
+  return centroids_of_points(points, non_zero_count_samples);
+}
+
+function shannon_evenness(parsed_biom) {
+  var evenness = {};
+
+  parsed_biom.data.forEach(function (data_row) {
+    var leaf_name = null;
+    var counts    = [];
+
+    // Get all the counts into an ary
+    json_each(data_row, function (field, value) {
+      if (field === "name") {
+        leaf_name = value;
+      }
+      else {
+        counts.push(value);
+      }
+    });
+
+    // Now calculate evenness
+    evenness[leaf_name] = fn.diversity.evenness(counts);
+  });
+
+  return evenness;
 }
 
 function colors_from_centroids(centroids, parsed_biom) {
@@ -298,6 +400,7 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   // double it cos the max is half the radius but should be 1.
   // TODO is this still correct for the 1 and 2 sample biom files?
   // START HERE TODO this is not quite right.
+  console.log("leaf: " + leaf + " mag(pt) " + mag(pt) + " pt: " + JSON.stringify(pt));
   var chroma_val = mag(pt) * 2 * 100;
   // chroma_val = scale(mag(pt), 0, 0.5, 0, 100);
 
@@ -362,6 +465,8 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
     return "<td class='thick-right-border' style='background-color:" + color + ";'>" + str + "</td>";
   }
 
+  var evenness = shannon_evenness(parsed_biom);
+
   var parsed_orig_biom = null;
   if (orig_biom_str) {
     parsed_orig_biom = parse_biom_file_str(orig_biom_str);
@@ -370,7 +475,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var fields = parsed_biom.meta.fields;
 
   // Make color the second field
-  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness");
+  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness", "evenness");
 
   var header_str = "<tr>\n";
   fields.forEach(function (field) {
@@ -429,6 +534,9 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
           hue = hue < 0 ? fn.math.round(hue + 360, 2) : fn.math.round(hue, 2);
 
           table_rows_str += (td_tag(hue) + td_tag(chroma) + "<td class='thick-right-border'>" + lightness + "</td>");
+
+          // And now add in the evenness
+          table_rows_str += ("<td class='thick-right-border'>" + fn.math.round(evenness[value], 2) + "</td>");
         }
         else {
           table_rows_str += td_tag(fn.math.round(value, 2));
@@ -774,8 +882,8 @@ var g_ID_ABUNDANT_SAMPLES_ARE       = "abundant-samples-are",
 var g_ID_DOWNLOAD_LEGEND = "download-legend",
     g_val_download_legend;
 
-var g_ID_LIGHTNESS_MIN = "lightness-min",
-    g_ID_LIGHTNESS_MAX = "lightness-max",
+var g_ID_LIGHTNESS_MIN      = "lightness-min",
+    g_ID_LIGHTNESS_MAX      = "lightness-max",
     g_DEFAULT_LIGHTNESS_MIN = 25,
     g_DEFAULT_LIGHTNESS_MAX = 85,
     g_val_lightness_min, // default 20
@@ -923,7 +1031,6 @@ function biom__upload_button() {
       jq(g_ID_LIGHTNESS_MIN).val(g_DEFAULT_LIGHTNESS_MIN);
     }
     else if (g_val_lightness_min < 0) {
-      console.log("hi");
       jq(g_ID_LIGHTNESS_MIN).val(0);
     }
     else if (g_val_lightness_min > g_val_lightness_max) {
