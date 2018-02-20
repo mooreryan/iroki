@@ -2,5 +2,5 @@ name	sample_1	sample_2	sample_3	sample_4
 geode	1	1	1	1
 clock	0	1	1	1
 tire	0	0	1	1
-banana	1	1	0	0
+banana	1	0	0	0
 eggplant	1	1	1	0

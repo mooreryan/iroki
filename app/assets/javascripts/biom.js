@@ -280,12 +280,12 @@ function rad_to_deg(rad) {
 
 function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
-    var new_lightness_min = 80;
-    var new_lightness_max = 20;
+    var new_lightness_min = g_val_lightness_max;
+    var new_lightness_max = g_val_lightness_min;
   }
   else { // abundant samples are light
-    var new_lightness_min = 20;
-    var new_lightness_max = 80;
+    var new_lightness_min = g_val_lightness_min;
+    var new_lightness_max = g_val_lightness_max;
   }
 
   // the angle of the vector from origin to centroid.
@@ -293,7 +293,9 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
 
   // double it cos the max is half the radius but should be 1.
   // TODO is this still correct for the 1 and 2 sample biom files?
+  // START HERE TODO this is not quite right.
   var chroma_val = mag(pt) * 2 * 100;
+  // chroma_val = scale(mag(pt), 0, 0.5, 0, 100);
 
   var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
@@ -303,12 +305,12 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
 
 function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
-    var new_lightness_min = 0.85;
-    var new_lightness_max = 0.2;
+    var new_lightness_min = g_val_lightness_max / 100;
+    var new_lightness_max = g_val_lightness_min / 100;
   }
   else { // abundant samples are light
-    var new_lightness_min = 0.20;
-    var new_lightness_max = 0.85;
+    var new_lightness_min = g_val_lightness_min / 100;
+    var new_lightness_max = g_val_lightness_max / 100;
   }
 
   // the angle of the vector from origin to centroid.
@@ -562,87 +564,6 @@ function biom__save_abundance_colors(biom_str) {
 
 }
 
-var g_ID_COLOR_SPACE     = "color-space",
-    g_ID_COLOR_SPACE_HCL = "color-space-hcl",
-    g_ID_COLOR_SPACE_HSL = "color-space-hsl",
-    g_val_color_space,
-    g_color_space_fn;
-
-var g_ID_AVG_METHOD                        = "avg-method",
-    g_ID_AVG_METHOD_ALL_SAMPLES_MEAN       = "avg-method-all-samples-mean",
-    g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN   = "avg-method-nonzero-samples-mean",
-    g_ID_AVG_METHOD_ALL_SAMPLES_MEDIAN     = "avg-method-all-samples-median",
-    g_ID_AVG_METHOD_NONZERO_SAMPLES_MEDIAN = "avg-method-nonzero-samples-median",
-    g_val_avg_method;
-
-var g_ID_HUE_ANGLE_OFFSET = "hue-angle-offset",
-    g_val_hue_angle_offset;
-
-var g_ID_REDUCE_DIMENSION         = "reduce-dimension",
-    g_ID_REDUCE_DIMENSION_NONE    = "reduce-dimension-none",
-    g_ID_REDUCE_DIMENSION_AUTO_50 = "reduce-dimension-auto-50",
-    g_ID_REDUCE_DIMENSION_AUTO_75 = "reduce-dimension-auto-75",
-    g_ID_REDUCE_DIMENSION_AUTO_90 = "reduce-dimension-auto-90",
-    g_ID_REDUCE_DIMENSION_1_PC    = "reduce-dimension-1-pc",
-    g_ID_REDUCE_DIMENSION_2_PC    = "reduce-dimension-2-pc",
-    g_ID_REDUCE_DIMENSION_3_PC    = "reduce-dimension-3-pc",
-    g_ID_REDUCE_DIMENSION_4_PC    = "reduce-dimension-4-pc",
-    g_ID_REDUCE_DIMENSION_5_PC    = "reduce-dimension-5-pc",
-    g_val_reduce_dimension;
-
-var g_ID_ABUNDANT_SAMPLES_ARE       = "abundant-samples-are",
-    g_ID_ABUNDANT_SAMPLES_ARE_LIGHT = "abundant-samples-are-light",
-    g_ID_ABUNDANT_SAMPLES_ARE_DARK  = "abundant-samples-are-dark",
-    g_val_abundant_samples_are;
-
-var g_ID_DOWNLOAD_LEGEND = "download-legend",
-    g_val_download_legend;
-
-function update_form_vals() {
-  function set_color_space_fn(g_val_color_space) {
-    switch (g_val_color_space) {
-      case g_ID_COLOR_SPACE_HCL:
-        g_color_space_fn = get_hcl_color;
-        break;
-      case g_ID_COLOR_SPACE_HSL:
-        g_color_space_fn = get_hsl_color;
-        break;
-      default:
-        g_color_space_fn = get_hcl_color;
-        break;
-    }
-  }
-
-  // Color options
-  g_val_color_space = jq(g_ID_COLOR_SPACE).val();
-  set_color_space_fn(g_val_color_space);
-
-  g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
-  if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
-    g_val_hue_angle_offset = 0;
-    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
-  }
-  else if (g_val_hue_angle_offset >= 360) {
-    g_val_hue_angle_offset = 359;
-    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
-  }
-  var display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
-  jq("hue-angle-offset-label").css("color", display_color);
-
-
-  g_val_abundant_samples_are = jq(g_ID_ABUNDANT_SAMPLES_ARE).val();
-
-  // Other options
-  g_val_avg_method       = jq(g_ID_AVG_METHOD).val();
-  g_val_reduce_dimension = jq(g_ID_REDUCE_DIMENSION).val();
-
-  // Legend options
-  g_val_download_legend = is_checked(g_ID_DOWNLOAD_LEGEND);
-}
-
-
-// handle upload button
-
 
 /*
 function mat__elem_at(M, ridx, cidx) {
@@ -813,6 +734,99 @@ function reduce_dimension(biom_str, type, cutoff) {
 }
 
 
+var g_ID_COLOR_SPACE     = "color-space",
+    g_ID_COLOR_SPACE_HCL = "color-space-hcl",
+    g_ID_COLOR_SPACE_HSL = "color-space-hsl",
+    g_val_color_space,
+    g_color_space_fn;
+
+var g_ID_AVG_METHOD                        = "avg-method",
+    g_ID_AVG_METHOD_ALL_SAMPLES_MEAN       = "avg-method-all-samples-mean",
+    g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN   = "avg-method-nonzero-samples-mean",
+    g_ID_AVG_METHOD_ALL_SAMPLES_MEDIAN     = "avg-method-all-samples-median",
+    g_ID_AVG_METHOD_NONZERO_SAMPLES_MEDIAN = "avg-method-nonzero-samples-median",
+    g_val_avg_method;
+
+var g_ID_HUE_ANGLE_OFFSET = "hue-angle-offset",
+    g_val_hue_angle_offset;
+
+var g_ID_REDUCE_DIMENSION         = "reduce-dimension",
+    g_ID_REDUCE_DIMENSION_NONE    = "reduce-dimension-none",
+    g_ID_REDUCE_DIMENSION_AUTO_50 = "reduce-dimension-auto-50",
+    g_ID_REDUCE_DIMENSION_AUTO_75 = "reduce-dimension-auto-75",
+    g_ID_REDUCE_DIMENSION_AUTO_90 = "reduce-dimension-auto-90",
+    g_ID_REDUCE_DIMENSION_1_PC    = "reduce-dimension-1-pc",
+    g_ID_REDUCE_DIMENSION_2_PC    = "reduce-dimension-2-pc",
+    g_ID_REDUCE_DIMENSION_3_PC    = "reduce-dimension-3-pc",
+    g_ID_REDUCE_DIMENSION_4_PC    = "reduce-dimension-4-pc",
+    g_ID_REDUCE_DIMENSION_5_PC    = "reduce-dimension-5-pc",
+    g_val_reduce_dimension;
+
+var g_ID_ABUNDANT_SAMPLES_ARE       = "abundant-samples-are",
+    g_ID_ABUNDANT_SAMPLES_ARE_LIGHT = "abundant-samples-are-light",
+    g_ID_ABUNDANT_SAMPLES_ARE_DARK  = "abundant-samples-are-dark",
+    g_val_abundant_samples_are;
+
+var g_ID_DOWNLOAD_LEGEND = "download-legend",
+    g_val_download_legend;
+
+var g_ID_LIGHTNESS_MIN = "lightness-min",
+    g_ID_LIGHTNESS_MAX = "lightness-max",
+    g_DEFAULT_LIGHTNESS_MIN = 25,
+    g_DEFAULT_LIGHTNESS_MAX = 85,
+    g_val_lightness_min, // default 20
+    g_val_lightness_max; // default 80
+
+function update_form_vals() {
+  function set_color_space_fn(g_val_color_space) {
+    switch (g_val_color_space) {
+      case g_ID_COLOR_SPACE_HCL:
+        g_color_space_fn = get_hcl_color;
+        break;
+      case g_ID_COLOR_SPACE_HSL:
+        g_color_space_fn = get_hsl_color;
+        break;
+      default:
+        g_color_space_fn = get_hcl_color;
+        break;
+    }
+  }
+
+  // Color options
+  g_val_color_space = jq(g_ID_COLOR_SPACE).val();
+  set_color_space_fn(g_val_color_space);
+
+  g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
+  if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
+    g_val_hue_angle_offset = 0;
+    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+  }
+  else if (g_val_hue_angle_offset >= 360) {
+    g_val_hue_angle_offset = 359;
+    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+  }
+  var display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
+  jq("hue-angle-offset-label").css("color", display_color);
+
+
+  g_val_abundant_samples_are = jq(g_ID_ABUNDANT_SAMPLES_ARE).val();
+
+  // Other options
+  g_val_avg_method       = jq(g_ID_AVG_METHOD).val();
+  g_val_reduce_dimension = jq(g_ID_REDUCE_DIMENSION).val();
+
+  // Legend options
+  g_val_download_legend = is_checked(g_ID_DOWNLOAD_LEGEND);
+
+  // Lightness options
+  g_val_lightness_min = parseFloat(jq(g_ID_LIGHTNESS_MIN).val());
+  g_val_lightness_max = parseFloat(jq(g_ID_LIGHTNESS_MAX).val());
+}
+
+
+// handle upload button
+
+
 // Handle the biom upload form
 function biom__upload_button() {
   function handleFiles() {
@@ -842,6 +856,8 @@ function biom__upload_button() {
   var reduce_dimension_select     = document.getElementById(g_ID_REDUCE_DIMENSION);
   var abundant_samples_are_select = document.getElementById(g_ID_ABUNDANT_SAMPLES_ARE);
   var download_legend             = document.getElementById(g_ID_DOWNLOAD_LEGEND);
+  var lightness_min_input         = document.getElementById(g_ID_LIGHTNESS_MIN);
+  var lightness_max_input         = document.getElementById(g_ID_LIGHTNESS_MAX);
 
   var biom_reader = new FileReader();
 
@@ -891,6 +907,41 @@ function biom__upload_button() {
     undisable("reset-button");
 
     update_form_vals();
+  });
+  lightness_min_input.addEventListener("change", function () {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+
+    // Make sure the vals are still good.
+    if (isNaN(g_val_lightness_min)) {
+      jq(g_ID_LIGHTNESS_MIN).val(g_DEFAULT_LIGHTNESS_MIN);
+    }
+    else if (g_val_lightness_min < 0) {
+      console.log("hi");
+      jq(g_ID_LIGHTNESS_MIN).val(0);
+    }
+    else if (g_val_lightness_min > g_val_lightness_max) {
+      jq(g_ID_LIGHTNESS_MIN).val(g_val_lightness_max);
+    }
+  });
+  lightness_max_input.addEventListener("change", function () {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
+
+    // Make sure the vals are still good.
+    if (isNaN(g_val_lightness_max)) {
+      jq(g_ID_LIGHTNESS_MAX).val(g_DEFAULT_LIGHTNESS_MAX);
+    }
+    else if (g_val_lightness_max > 100) {
+      jq(g_ID_LIGHTNESS_MAX).val(100);
+    }
+    else if (g_val_lightness_min > g_val_lightness_max) {
+      jq(g_ID_LIGHTNESS_MAX).val(g_val_lightness_min);
+    }
   });
   submit_button.addEventListener("click", function () {
     undisable("reset-button");
