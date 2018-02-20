@@ -221,11 +221,11 @@ function centroids_of_samples(parsed_biom) {
   return centroids_of_points(points);
 }
 
-function colors_from_centroids(centroids, csv) {
+function colors_from_centroids(centroids, parsed_biom) {
   var avg_counts    = {};
   var max_avg_count = 0;
   var min_avg_count = 999999999;
-  csv.data.forEach(function (row) {
+  parsed_biom.data.forEach(function (row) {
 
     var n         = 0;
     var this_leaf = "";
@@ -242,8 +242,12 @@ function colors_from_centroids(centroids, csv) {
       }
     });
 
-    // TODO this will blow up if an OTU has all 0 sample counts.
-    avg_counts[this_leaf] /= n;
+    if (n === 0) {
+      avg_counts[this_leaf] = 0;
+    }
+    else {
+      avg_counts[this_leaf] /= n;
+    }
 
     if (max_avg_count < avg_counts[this_leaf]) {
       max_avg_count = avg_counts[this_leaf];
