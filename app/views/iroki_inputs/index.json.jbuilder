@@ -1,1 +1,0 @@
-json.array! @iroki_inputs, partial: 'iroki_inputs/iroki_input', as: :iroki_input
