@@ -52,6 +52,17 @@ fn.math.round = function (number, precision) {
   return roundedTempNumber / factor;
 };
 
+fn.math.scale = function (val, old_min, old_max, new_min, new_max) {
+  // This can happen if you use the mean across non-zero samples.
+  if (old_max - old_min === 0) {
+    // TODO better default value than this?
+    return (new_min + new_max) / 2;
+  }
+  else {
+    return ((((new_max - new_min) * (val - old_min)) / (old_max - old_min)) + new_min);
+  }
+};
+
 fn.pt.is_zero = function (pt) {
   return pt.x === 0 && pt.y === 0;
 };

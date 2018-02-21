@@ -402,9 +402,9 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   // START HERE TODO this is not quite right.
   console.log("leaf: " + leaf + " mag(pt) " + mag(pt) + " pt: " + JSON.stringify(pt));
   var chroma_val = mag(pt) * 2 * 100;
-  // chroma_val = scale(mag(pt), 0, 0.5, 0, 100);
+  // chroma_val = fn.math.scale(mag(pt), 0, 0.5, 0, 100);
 
-  var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
+  var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
   return [chroma.hcl(hue, chroma_val, lightness).hex(), hue, chroma_val, lightness];
 
@@ -426,21 +426,9 @@ function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   // double it cos the max is half the radius but should be 1.
   var saturation = mag(pt) * 2;
 
-  var lightness = scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
+  var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
   return [chroma.hsl(hue, saturation, lightness).hex(), hue, saturation, lightness];
-}
-
-function scale(val, old_min, old_max, new_min, new_max) {
-
-  // This can happen if you use the mean across non-zero samples.
-  if (old_max - old_min === 0) {
-    // TODO better default value than this?
-    return (new_min + new_max) / 2;
-  }
-  else {
-    return ((((new_max - new_min) * (val - old_min)) / (old_max - old_min)) + new_min);
-  }
 }
 
 // TODO make sure all color tags are hex codes
