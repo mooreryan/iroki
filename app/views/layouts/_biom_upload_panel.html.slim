@@ -34,6 +34,13 @@ hr.row
       .small-6.columns
         label for="lightness-max" Maximum lightness value (0-100)
         input id="lightness-max" value="85"
+    .row
+      .small-12.columns
+        label for="chroma-method" Chroma/Saturation calculation method
+        select id="chroma-method"
+          option id="chroma-method-magnitude" value="chroma-method-magnitude" selected="" Magnitude of sample centroid vector
+          option id="chroma-method-evenness" value="chroma-method-evenness" Sample evenness
+
     hr.row
 
     h4 Other options

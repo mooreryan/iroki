@@ -253,7 +253,7 @@ function centroids_of_points(all_points, non_zero_count_samples) {
         // It has a single sample with a non zero count.
         var non_zero_sample = non_zero_count_samples[leaf];
         var non_zero_point  = points[non_zero_sample];
-        centroids[leaf] = fn.pt.new(non_zero_point.x / 2, non_zero_point.y / 2);
+        centroids[leaf]     = fn.pt.new(non_zero_point.x / 2, non_zero_point.y / 2);
         break;
     }
   });
@@ -324,6 +324,25 @@ function shannon_evenness(parsed_biom) {
 }
 
 function colors_from_centroids(centroids, parsed_biom) {
+  var evenness = {};
+  var min_evenness = null;
+  var max_evenness = null;
+  if (g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS) {
+    // Need to calculate the evenness and pass it to the color space function.
+    evenness = shannon_evenness(parsed_biom);
+
+    // Set min and max evenness.
+    json_each(evenness, function(leaf, val) {
+      if (min_evenness === null || val < min_evenness) {
+        min_evenness = val;
+      }
+
+      if (max_evenness === null || val > max_evenness) {
+        max_evenness = val;
+      }
+    });
+  }
+
   var avg_counts    = {};
   var max_avg_count = 0;
   var min_avg_count = 999999999;
@@ -362,7 +381,7 @@ function colors_from_centroids(centroids, parsed_biom) {
   var colors        = {};
   var color_details = {};
   json_each(centroids, function (leaf, pt) {
-    var return_val = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count);
+    var return_val = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness[leaf], max_evenness, min_evenness);
 
     colors[leaf] = return_val[0];
 
@@ -384,7 +403,7 @@ function rad_to_deg(rad) {
   return rad * 180 / Math.PI;
 }
 
-function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
+function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness, max_evenness, min_evenness) {
   if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
     var new_lightness_min = g_val_lightness_max;
     var new_lightness_max = g_val_lightness_min;
@@ -401,8 +420,17 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   // TODO is this still correct for the 1 and 2 sample biom files?
   // START HERE TODO this is not quite right.
   console.log("leaf: " + leaf + " mag(pt) " + mag(pt) + " pt: " + JSON.stringify(pt));
-  var chroma_val = mag(pt) * 2 * 100;
-  // chroma_val = fn.math.scale(mag(pt), 0, 0.5, 0, 100);
+
+  if (evenness) {
+    // Use evenness of samples for chroma_val.  Eveness is oposite of chroma running 0 to 1, so subtract from 1.
+    var chroma_val = fn.math.scale(1 - evenness, min_evenness, max_evenness, 0, 100);
+    console.log("using evenness");
+  }
+  else {
+    // Use magnitude of hue angle vector.
+    console.log("using magnitude");
+    var chroma_val = mag(pt) * 2 * 100;
+  }
 
   var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
@@ -410,7 +438,7 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
 
 }
 
-function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
+function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness, max_evenness, min_evenness) {
   if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
     var new_lightness_min = g_val_lightness_max / 100;
     var new_lightness_max = g_val_lightness_min / 100;
@@ -423,8 +451,17 @@ function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count) {
   // the angle of the vector from origin to centroid.
   var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
 
-  // double it cos the max is half the radius but should be 1.
-  var saturation = mag(pt) * 2;
+  if (evenness) {
+    // Use evenness of samples for chroma_val
+    var saturation = fn.math.scale(1 - evenness, min_evenness, max_evenness, 0, 100);
+    console.log("using evenness");
+  }
+  else {
+    // Use magnitude of hue angle vector.
+    console.log("using magnitude");
+    // double it cos the max is half the radius but should be 1.
+    var saturation = mag(pt) * 2;
+  }
 
   var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
@@ -469,7 +506,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   fields.forEach(function (field) {
     // Don't put the fake fields in the output.
     if (!field.match(/iroki_fake_[12]/)) {
-      if (field === "color" || field === "lightness") {
+      if (field === "color" || field === "lightness" || field === "evenness") {
         header_str += "<th class='thick-right-border'>" + field + "</th>"
       }
       else {
@@ -877,6 +914,11 @@ var g_ID_LIGHTNESS_MIN      = "lightness-min",
     g_val_lightness_min, // default 20
     g_val_lightness_max; // default 80
 
+var g_ID_CHROMA_METHOD           = "chroma-method",
+    g_ID_CHROMA_METHOD_MAGNITUDE = "chroma-method-magnitude",
+    g_ID_CHROMA_METHOD_EVENNESS  = "chroma-method-evenness",
+    g_val_chroma_method;
+
 function update_form_vals() {
   function set_color_space_fn(g_val_color_space) {
     switch (g_val_color_space) {
@@ -921,6 +963,9 @@ function update_form_vals() {
   // Lightness options
   g_val_lightness_min = parseFloat(jq(g_ID_LIGHTNESS_MIN).val());
   g_val_lightness_max = parseFloat(jq(g_ID_LIGHTNESS_MAX).val());
+
+  // Chroma opts
+  g_val_chroma_method = jq(g_ID_CHROMA_METHOD).val();
 }
 
 
@@ -938,6 +983,13 @@ function biom__upload_button() {
     else {
       alert("Don't forget to select a biom file!");
     }
+  }
+
+  function undisable_and_update() {
+    undisable("submit-button");
+    undisable("reset-button");
+
+    update_form_vals();
   }
 
   disable("submit-button");
@@ -958,6 +1010,7 @@ function biom__upload_button() {
   var download_legend             = document.getElementById(g_ID_DOWNLOAD_LEGEND);
   var lightness_min_input         = document.getElementById(g_ID_LIGHTNESS_MIN);
   var lightness_max_input         = document.getElementById(g_ID_LIGHTNESS_MAX);
+  var chroma_method_input         = document.getElementById(g_ID_CHROMA_METHOD);
 
   var biom_reader = new FileReader();
 
@@ -967,52 +1020,31 @@ function biom__upload_button() {
   };
 
   uploader.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
   });
   color_space_dropdown.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
   });
   avg_method_dropdown.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
   });
   hue_angle_offset_slider.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
   });
   reduce_dimension_select.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
   });
   abundant_samples_are_select.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
   });
   download_legend.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
+  });
+  chroma_method_input.addEventListener("change", function () {
+    undisable_and_update();
   });
   lightness_min_input.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
 
     // Make sure the vals are still good.
     if (isNaN(g_val_lightness_min)) {
@@ -1026,10 +1058,7 @@ function biom__upload_button() {
     }
   });
   lightness_max_input.addEventListener("change", function () {
-    undisable("submit-button");
-    undisable("reset-button");
-
-    update_form_vals();
+    undisable_and_update();
 
     // Make sure the vals are still good.
     if (isNaN(g_val_lightness_max)) {
