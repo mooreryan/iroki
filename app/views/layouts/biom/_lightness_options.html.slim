@@ -1,0 +1,23 @@
+.row
+
+  .small-12.medium-6.columns
+    label for="avg-method" Abundance calculation
+    select id="avg-method"
+      option id="avg-method-nonzero-samples-mean" value="avg-method-nonzero-samples-mean" selected="" Mean across non-zero samples
+      option id="avg-method-all-samples-mean" value="avg-method-all-samples-mean" Mean across all samples
+
+  .small-12.medium-6.columns
+    label for="abundant-samples-are" Abundant samples are...
+    select id="abundant-samples-are"
+      option id="abundant-samples-are-light" value="abundant-samples-are-light" selected="" Lighter
+      option id="abundant-samples-are-dark" value="abundant-samples-are-dark" Darker
+
+.row
+
+  .small-12.medium-6.columns
+    label for="lightness-min" Minimum lightness value (0-100)
+    input id="lightness-min" value="25"
+
+  .small-12.medium-6.columns
+    label for="lightness-max" Maximum lightness value (0-100)
+    input id="lightness-max" value="85"

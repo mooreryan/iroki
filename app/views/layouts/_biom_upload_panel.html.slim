@@ -4,80 +4,22 @@ hr.row
   h4 Upload biom file
   form id="biom-file-upload-form"
     .row
-      .small-12.columns
+      .small-12.medium-6.columns
         label for="uploader" Biom tsv file
         input id="uploader" type="file" name="biom"
-
-    hr.row
-
-    h4 Color options
-    .row
-      .small-12.columns
-        label for="color-space" Color space
-        select id="color-space"
-          option id="color-space-hcl" value="color-space-hcl" selected="" Hue Chroma Lightness
-          option id="color-space-hsl" value="color-space-hsl" Hue Saturation Lightness
-    .row
-      .small-12.columns
-        label style="font-weight: bold;" id="hue-angle-offset-label" for="hue-angle-offset" Approximate starting hue
-        input id="hue-angle-offset" type="range" min="0" max="359" value="0" step="0"
-    .row
-      .small-12.columns
-        label for="abundant-samples-are" Abundant samples are...
-        select id="abundant-samples-are"
-          option id="abundant-samples-are-light" value="abundant-samples-are-light" selected="" Lighter
-          option id="abundant-samples-are-dark" value="abundant-samples-are-dark" Darker
-    .row
-      .small-6.columns
-        label for="lightness-min" Minimum lightness value (0-100)
-        input id="lightness-min" value="25"
-      .small-6.columns
-        label for="lightness-max" Maximum lightness value (0-100)
-        input id="lightness-max" value="85"
-    .row
-      .small-12.columns
-        label for="chroma-method" Chroma/Saturation calculation method
-        select id="chroma-method"
-          option id="chroma-method-magnitude" value="chroma-method-magnitude" selected="" Magnitude of sample centroid vector
-          option id="chroma-method-evenness" value="chroma-method-evenness" Sample evenness
-
-    hr.row
-
-    h4 Other options
-    .row
-      .small-12.columns
-        label for="avg-method" Averaging method
-        select id="avg-method"
-          option id="avg-method-nonzero-samples-mean" value="avg-method-nonzero-samples-mean" selected="" Mean across non-zero samples
-          option id="avg-method-all-samples-mean" value="avg-method-all-samples-mean" Mean across all samples
-    .row
-      .small-12.columns
-        label for="reduce-dimension" Reduce dimensions?
-        select id="reduce-dimension"
-          option id="reduce-dimension-none" value="reduce-dimension-none" None
-          option id="reduce-dimension-auto-50" value="reduce-dimension-auto-50" Keep at least 50% of variance
-          option id="reduce-dimension-auto-75" value="reduce-dimension-auto-75" Keep at least 75% of variance
-          option id="reduce-dimension-auto-90" value="reduce-dimension-auto-90" Keep at least 90% of variance
-          option id="reduce-dimension-1-pc" value="reduce-dimension-1-pc" One dimensional projection
-          option id="reduce-dimension-2-pc" value="reduce-dimension-2-pc" Two dimensional projection
-          option id="reduce-dimension-3-pc" value="reduce-dimension-3-pc" Three dimensional projection
-          option id="reduce-dimension-4-pc" value="reduce-dimension-4-pc" Four dimensional projection
-          option id="reduce-dimension-5-pc" value="reduce-dimension-4-pc" Five dimensional projection
-
-    hr.row
-
-    h4 Submit
-    .row
-      .small-12.columns
+      .small-12.medium-6.columns
         label for="download-legend" Create a legend?
         input id="download-legend" type="checkbox"
     .row
-      .small-12.columns
+      .small-12.medium-6.columns
         label for="submit-button" Submit file
         input id="submit-button" type="button" value="Submit!" disabled=""
-    .row
-      .small-12.columns
+      .small-12.medium-6.columns
         label for="reset-button" Reset form
         input id="reset-button" type="button" value="Reset!" disabled=""
 
     hr.row
+
+    = render "layouts/biom_options_panel"
+
+hr.row
