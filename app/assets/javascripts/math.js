@@ -1,6 +1,6 @@
 var math = {};
 
-math.shannon = function(ary, base) {
+math.shannon_entropy = function(ary, base) {
   if (base === undefined) {
     base = 2;
   }

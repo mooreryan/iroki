@@ -22,7 +22,7 @@ fn.ary.sum = function (ary) {
   }, 0);
 };
 
-fn.diversity.shannon = function (ary) {
+fn.diversity.shannon_entropy = function (ary) {
   // First convert counts to proportions
   var ary_sum = fn.ary.sum(ary);
 
@@ -38,20 +38,20 @@ fn.diversity.shannon = function (ary) {
   }));
 };
 
-fn.diversity.shannon_true = function(ary) {
-  return Math.pow(2, fn.diversity.shannon(ary));
+fn.diversity.shannon_diversity = function(ary) {
+  return Math.pow(2, fn.diversity.shannon_entropy(ary));
 };
 
-fn.diversity.evenness = function (ary) {
+fn.diversity.evenness_entropy = function (ary) {
   var shannon_max = Math.log2(ary.length);
 
-  return fn.diversity.shannon(ary) / shannon_max;
+  return fn.diversity.shannon_entropy(ary) / shannon_max;
 };
 
-fn.diversity.evenness_true = function (ary) {
+fn.diversity.evenness_diversity = function (ary) {
   var shannon_max = ary.length;
 
-  return fn.diversity.shannon_true(ary) / shannon_max;
+  return fn.diversity.shannon_diversity(ary) / shannon_max;
 };
 
 // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
