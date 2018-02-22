@@ -1,0 +1,8 @@
+name	s1	s2	s3	s4	s5	s6
+amelia 1	0	0	0	0	0	1
+amelia 2	0	0	0	0	1	1
+amelia 3	0	0	0	1	1	1
+seanie	1	1	1	1	1	1
+ryan 3	1	1	1	0	0	0
+ryan 2	1	1	0	0	0	0
+ryan 1	1	0	0	0	0	0

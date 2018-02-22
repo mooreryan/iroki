@@ -38,10 +38,20 @@ fn.diversity.shannon = function (ary) {
   }));
 };
 
+fn.diversity.shannon_true = function(ary) {
+  return Math.pow(2, fn.diversity.shannon(ary));
+};
+
 fn.diversity.evenness = function (ary) {
   var shannon_max = Math.log2(ary.length);
 
   return fn.diversity.shannon(ary) / shannon_max;
+};
+
+fn.diversity.evenness_true = function (ary) {
+  var shannon_max = ary.length;
+
+  return fn.diversity.shannon_true(ary) / shannon_max;
 };
 
 // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round

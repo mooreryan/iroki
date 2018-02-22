@@ -299,7 +299,8 @@ function centroids_of_samples(parsed_biom) {
   return centroids_of_points(points, non_zero_count_samples);
 }
 
-function shannon_evenness(parsed_biom) {
+// Technically we want 1 - evenness to get it going the same way as chroma.
+function inverse_shannon_evenness(parsed_biom) {
   var evenness = {};
 
   parsed_biom.data.forEach(function (data_row) {
@@ -317,7 +318,7 @@ function shannon_evenness(parsed_biom) {
     });
 
     // Now calculate evenness
-    evenness[leaf_name] = fn.diversity.evenness(counts);
+    evenness[leaf_name] = 1 - fn.diversity.evenness(counts);
   });
 
   return evenness;
@@ -329,7 +330,8 @@ function colors_from_centroids(centroids, parsed_biom) {
   var max_evenness = null;
   if (g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS) {
     // Need to calculate the evenness and pass it to the color space function.
-    evenness = shannon_evenness(parsed_biom);
+    evenness = inverse_shannon_evenness(parsed_biom);
+
 
     // Set min and max evenness.
     json_each(evenness, function(leaf, val) {
@@ -342,6 +344,8 @@ function colors_from_centroids(centroids, parsed_biom) {
       }
     });
   }
+
+  console.log("min_evenness: " + min_evenness + " max_evenness: " + max_evenness);
 
   var avg_counts    = {};
   var max_avg_count = 0;
@@ -423,7 +427,7 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenn
 
   if (evenness) {
     // Use evenness of samples for chroma_val.  Eveness is oposite of chroma running 0 to 1, so subtract from 1.
-    var chroma_val = fn.math.scale(1 - evenness, min_evenness, max_evenness, 0, 100);
+    var chroma_val = fn.math.scale(evenness, min_evenness, max_evenness, 0, 100);
     console.log("using evenness");
   }
   else {
@@ -453,7 +457,7 @@ function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenn
 
   if (evenness) {
     // Use evenness of samples for chroma_val
-    var saturation = fn.math.scale(1 - evenness, min_evenness, max_evenness, 0, 100);
+    var saturation = fn.math.scale(evenness, min_evenness, max_evenness, 0, 100);
     console.log("using evenness");
   }
   else {
@@ -490,7 +494,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
     return "<td class='thick-right-border' style='background-color:" + color + ";'>" + str + "</td>";
   }
 
-  var evenness = shannon_evenness(parsed_biom);
+  var evenness = inverse_shannon_evenness(parsed_biom);
 
   var parsed_orig_biom = null;
   if (orig_biom_str) {
@@ -500,7 +504,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var fields = parsed_biom.meta.fields;
 
   // Make color the second field
-  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness", "evenness");
+  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness", "inverse evenness");
 
   var header_str = "<tr>\n";
   fields.forEach(function (field) {

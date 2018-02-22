@@ -1,0 +1,6 @@
+name	s1	s2	s3	s4
+geode	1	1	1	1
+clock	1	1	0	0
+tire	1	0	0	0
+banana	0	0	0	1
+eggplatn	0	0	1	1
