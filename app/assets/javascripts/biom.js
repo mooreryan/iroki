@@ -380,10 +380,18 @@ function colors_from_centroids(centroids, parsed_biom) {
     }
   });
 
+  // Calculate min and max magnitude
+  var mags = [];
+  json_each(centroids, function (leaf, pt) {
+    mags.push(fn.pt.mag(pt));
+  });
+  var min_mag = fn.ary.min(mags);
+  var max_mag = fn.ary.max(mags);
+
   var colors        = {};
   var color_details = {};
   json_each(centroids, function (leaf, pt) {
-    var return_val = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness[leaf], max_evenness, min_evenness);
+    var return_val = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness[leaf], max_evenness, min_evenness, min_mag, max_mag);
 
     colors[leaf] = return_val[0];
 
@@ -397,20 +405,20 @@ function colors_from_centroids(centroids, parsed_biom) {
   return [colors, color_details];
 }
 
-function mag(pt) {
-  return Math.sqrt(Math.pow(pt.x, 2) + Math.pow(pt.y, 2));
-}
-
 function rad_to_deg(rad) {
   return rad * 180 / Math.PI;
 }
 
-function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness, max_evenness, min_evenness) {
+function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness, max_evenness, min_evenness, min_mag, max_mag) {
 
   // If it is absolute evenness, then don't "scale" the values, but run it from 0 to 1 naturally.
   if (g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE) {
     min_evenness = 0;
     max_evenness = 1;
+  }
+  if (g_val_chroma_method === g_ID_CHROMA_METHOD_MAGNITUDE_ABSOLUTE) {
+    min_mag = 0;
+    max_mag = 0.5; // Half the radius of the unit circle.
   }
 
   if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
@@ -428,18 +436,19 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenn
   // double it cos the max is half the radius but should be 1.
   // TODO is this still correct for the 1 and 2 sample biom files?
   // START HERE TODO this is not quite right.
-  console.log("leaf: " + leaf + " mag(pt) " + mag(pt) + " pt: " + JSON.stringify(pt));
+  console.log("leaf: " + leaf + " fn.pt.mag(pt) " + fn.pt.mag(pt) + " pt: " + JSON.stringify(pt));
 
+  var chroma_val = null;
   if (evenness) {
     // Use evenness of samples for chroma_val.  Eveness is oposite of chroma running 0 to 1, so subtract from 1.
     // Evenness naturally runs from 0 to 1 so just use the actual values rather than scaling the min to zero and max to 100.
-    var chroma_val = fn.math.scale(evenness, min_evenness, max_evenness, 0, 100);
+    chroma_val = fn.math.scale(evenness, min_evenness, max_evenness, g_val_chroma_min, g_val_chroma_max);
     console.log("using evenness");
   }
   else {
     // Use magnitude of hue angle vector.
     console.log("using magnitude");
-    var chroma_val = mag(pt) * 2 * 100;
+    chroma_val = fn.math.scale(fn.pt.mag(pt), min_mag, max_mag, g_val_chroma_min, g_val_chroma_max);
   }
 
   var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
@@ -448,43 +457,6 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenn
 
 }
 
-function get_hsl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness, max_evenness, min_evenness) {
-
-  // If it is absolute evenness, then don't "scale" the values, but run it from 0 to 1 naturally.
-  if (g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE) {
-    min_evenness = 0;
-    max_evenness = 1;
-  }
-
-  if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
-    var new_lightness_min = g_val_lightness_max / 100;
-    var new_lightness_max = g_val_lightness_min / 100;
-  }
-  else { // abundant samples are light
-    var new_lightness_min = g_val_lightness_min / 100;
-    var new_lightness_max = g_val_lightness_max / 100;
-  }
-
-  // the angle of the vector from origin to centroid.
-  var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
-
-  if (evenness) {
-    // Use evenness of samples for chroma_val
-    // Evenness naturally runs from 0 to 1 so just use the actual values rather than scaling the min to zero and max to 100.
-    var saturation = fn.math.scale(evenness, min_evenness, max_evenness, 0, 100);
-    console.log("using evenness");
-  }
-  else {
-    // Use magnitude of hue angle vector.
-    console.log("using magnitude");
-    // double it cos the max is half the radius but should be 1.
-    var saturation = mag(pt) * 2;
-  }
-
-  var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
-
-  return [chroma.hsl(hue, saturation, lightness).hex(), hue, saturation, lightness];
-}
 
 // TODO make sure all color tags are hex codes
 // The orig_biom_str is for when the parsed_biom has the reduced dimensions so we can put the original dimensions onto the end of the file.
@@ -929,8 +901,16 @@ var g_ID_LIGHTNESS_MIN      = "lightness-min",
     g_ID_LIGHTNESS_MAX      = "lightness-max",
     g_DEFAULT_LIGHTNESS_MIN = 30,
     g_DEFAULT_LIGHTNESS_MAX = 90,
-    g_val_lightness_min, // default 20
-    g_val_lightness_max; // default 80
+    g_val_lightness_min,
+    g_val_lightness_max;
+
+var g_ID_CHROMA_MIN      = "chroma-min",
+    g_ID_CHROMA_MAX      = "chroma-max",
+    g_DEFAULT_CHROMA_MIN = 0,
+    g_DEFAULT_CHROMA_MAX = 100,
+    g_val_chroma_min,
+    g_val_chroma_max;
+
 
 var g_ID_CHROMA_METHOD                    = "chroma-method",
     g_ID_CHROMA_METHOD_MAGNITUDE_ABSOLUTE = "chroma-method-magnitude-absolute",
@@ -940,18 +920,22 @@ var g_ID_CHROMA_METHOD                    = "chroma-method",
     g_val_chroma_method;
 
 function update_form_vals() {
+  // Technically only needed when there are multiple color space options.  But we just dropped hsl.
   function set_color_space_fn(g_val_color_space) {
-    switch (g_val_color_space) {
-      case g_ID_COLOR_SPACE_HCL:
-        g_color_space_fn = get_hcl_color;
-        break;
-      case g_ID_COLOR_SPACE_HSL:
-        g_color_space_fn = get_hsl_color;
-        break;
-      default:
-        g_color_space_fn = get_hcl_color;
-        break;
-    }
+    // switch (g_val_color_space) {
+    //   case g_ID_COLOR_SPACE_HCL:
+    //     g_color_space_fn = get_hcl_color;
+    //     break;
+    //   case g_ID_COLOR_SPACE_HSL:
+    //     g_color_space_fn = get_hsl_color;
+    //     break;
+    //   default:
+    //     g_color_space_fn = get_hcl_color;
+    //     break;
+    // }
+    //
+
+    g_color_space_fn = get_hcl_color;
   }
 
   // Color options
@@ -986,6 +970,8 @@ function update_form_vals() {
 
   // Chroma opts
   g_val_chroma_method = jq(g_ID_CHROMA_METHOD).val();
+  g_val_chroma_min    = parseFloat(jq(g_ID_CHROMA_MIN).val());
+  g_val_chroma_max    = parseFloat(jq(g_ID_CHROMA_MAX).val());
 }
 
 
@@ -1020,17 +1006,25 @@ function biom__upload_button() {
   var submit_id   = "submit-button";
   var uploader_id = "uploader";
 
-  var uploader                    = document.getElementById(uploader_id);
-  var submit_button               = document.getElementById(submit_id);
-  var color_space_dropdown        = document.getElementById(g_ID_COLOR_SPACE);
-  var avg_method_dropdown         = document.getElementById(g_ID_AVG_METHOD);
-  var hue_angle_offset_slider     = document.getElementById(g_ID_HUE_ANGLE_OFFSET);
-  var reduce_dimension_select     = document.getElementById(g_ID_REDUCE_DIMENSION);
+  // Upload elements
+  var uploader        = document.getElementById(uploader_id);
+  var submit_button   = document.getElementById(submit_id);
+  var download_legend = document.getElementById(g_ID_DOWNLOAD_LEGEND);
+
+  var color_space_dropdown    = document.getElementById(g_ID_COLOR_SPACE);
+  var hue_angle_offset_slider = document.getElementById(g_ID_HUE_ANGLE_OFFSET);
+  var reduce_dimension_select = document.getElementById(g_ID_REDUCE_DIMENSION);
+
+  // Lightness elements
   var abundant_samples_are_select = document.getElementById(g_ID_ABUNDANT_SAMPLES_ARE);
-  var download_legend             = document.getElementById(g_ID_DOWNLOAD_LEGEND);
+  var avg_method_dropdown         = document.getElementById(g_ID_AVG_METHOD);
   var lightness_min_input         = document.getElementById(g_ID_LIGHTNESS_MIN);
   var lightness_max_input         = document.getElementById(g_ID_LIGHTNESS_MAX);
-  var chroma_method_input         = document.getElementById(g_ID_CHROMA_METHOD);
+
+  // Chroma elements
+  var chroma_method_input = document.getElementById(g_ID_CHROMA_METHOD);
+  var chroma_min_input    = document.getElementById(g_ID_CHROMA_MIN);
+  var chroma_max_input    = document.getElementById(g_ID_CHROMA_MAX);
 
   var biom_reader = new FileReader();
 
@@ -1089,6 +1083,34 @@ function biom__upload_button() {
     }
     else if (g_val_lightness_min > g_val_lightness_max) {
       jq(g_ID_LIGHTNESS_MAX).val(g_val_lightness_min);
+    }
+  });
+  chroma_min_input.addEventListener("change", function () {
+    undisable_and_update();
+
+    // Make sure the vals are still good.
+    if (isNaN(g_val_chroma_min)) {
+      jq(g_ID_CHROMA_MIN).val(g_DEFAULT_CHROMA_MIN);
+    }
+    else if (g_val_chroma_min < 0) {
+      jq(g_ID_CHROMA_MIN).val(0);
+    }
+    else if (g_val_chroma_min > g_val_chroma_max) {
+      jq(g_ID_CHROMA_MIN).val(g_val_chroma_max);
+    }
+  });
+  chroma_max_input.addEventListener("change", function () {
+    undisable_and_update();
+
+    // Make sure the vals are still good.
+    if (isNaN(g_val_chroma_max)) {
+      jq(g_ID_CHROMA_MAX).val(g_DEFAULT_CHROMA_MAX);
+    }
+    else if (g_val_chroma_max > 100) {
+      jq(g_ID_CHROMA_MAX).val(100);
+    }
+    else if (g_val_chroma_min > g_val_chroma_max) {
+      jq(g_ID_CHROMA_MAX).val(g_val_chroma_min);
     }
   });
   submit_button.addEventListener("click", function () {

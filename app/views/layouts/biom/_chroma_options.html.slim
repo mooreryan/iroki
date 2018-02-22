@@ -1,8 +1,24 @@
 .row
+
   .small-12.columns
+
     label for="chroma-method" Chroma represents...
     select id="chroma-method"
+
       option id="chroma-method-magnitude-absolute" value="chroma-method-magnitude-absolute" selected="" Absolute magnitude of sample polygon centroid vector
+
       option id="chroma-method-magnitude-relative" value="chroma-method-magnitude-relative" Relative magnitude of sample polygon centroid vector
+
       option id="chroma-method-evenness-absolute" value="chroma-method-evenness-absolute" Absolute sample evenness
+
       option id="chroma-method-evenness-relative" value="chroma-method-evenness-relative" Relative sample evenness
+
+.row
+
+  .small-12.medium-6.columns
+    label for="chroma-min" Minimum chroma value (0-100)
+    input id="chroma-min" value="0"
+
+  .small-12.medium-6.columns
+    label for="chroma-max" Maximum chroma value (0-100)
+    input id="chroma-max" value="100"

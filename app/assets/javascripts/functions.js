@@ -1,8 +1,8 @@
-var fn       = {};
-fn.ary       = {};
+var fn       = {}; // function
+fn.ary       = {}; // array
 fn.diversity = {};
 fn.math      = {};
-fn.pt        = {};
+fn.pt        = {}; // point
 
 fn.ary.max = function (ary) {
   return ary.reduce(function (a, b) {
@@ -75,6 +75,10 @@ fn.math.scale = function (val, old_min, old_max, new_min, new_max) {
 
 fn.pt.is_zero = function (pt) {
   return pt.x === 0 && pt.y === 0;
+};
+
+fn.pt.mag = function(pt) {
+  return Math.sqrt(Math.pow(pt.x, 2) + Math.pow(pt.y, 2));
 };
 
 fn.pt.new = function (x, y) {
