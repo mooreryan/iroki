@@ -150,7 +150,6 @@ function sample_counts_to_points(csv) {
         }
 
         var pt = get_point(count, true_sample_idx, num_samples);
-        console.log("leaf: " + leaf_name + " sample: " + sample + " sample_idx: " + sample_idx + " pt: " + JSON.stringify(pt));
 
         points[leaf_name][sample] = pt;
       }
@@ -345,40 +344,46 @@ function colors_from_centroids(centroids, parsed_biom) {
     });
   }
 
-  var avg_counts    = {};
-  var max_avg_count = 0;
-  var min_avg_count = 999999999;
-  parsed_biom.data.forEach(function (row) {
+  // Read: return value
+  var ret_val = fn.parsed_biom.rel_abundance(parsed_biom, g_val_avg_method);
+  var avg_counts = ret_val.abundance;
+  var min_avg_count = ret_val.min_val;
+  var max_avg_count = ret_val.max_val;
 
-    var n         = 0;
-    var this_leaf = "";
-    json_each(row, function (col_name, val) {
-      var count_this_value = val > 0 || g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
-
-      if (col_name === "name") {
-        this_leaf             = val;
-        avg_counts[this_leaf] = 0;
-      }
-      else if (count_this_value) {
-        avg_counts[this_leaf] += val;
-        n += 1;
-      }
-    });
-
-    if (n === 0) {
-      avg_counts[this_leaf] = 0;
-    }
-    else {
-      avg_counts[this_leaf] /= n;
-    }
-
-    if (max_avg_count < avg_counts[this_leaf]) {
-      max_avg_count = avg_counts[this_leaf];
-    }
-    if (min_avg_count > avg_counts[this_leaf]) {
-      min_avg_count = avg_counts[this_leaf];
-    }
-  });
+  // var avg_counts    = {};
+  // var max_avg_count = 0;
+  // var min_avg_count = 999999999;
+  // parsed_biom.data.forEach(function (row) {
+  //
+  //   var n         = 0;
+  //   var this_leaf = "";
+  //   json_each(row, function (col_name, val) {
+  //     var count_this_value = val > 0 || g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
+  //
+  //     if (col_name === "name") {
+  //       this_leaf             = val;
+  //       avg_counts[this_leaf] = 0;
+  //     }
+  //     else if (count_this_value) {
+  //       avg_counts[this_leaf] += val;
+  //       n += 1;
+  //     }
+  //   });
+  //
+  //   if (n === 0) {
+  //     avg_counts[this_leaf] = 0;
+  //   }
+  //   else {
+  //     avg_counts[this_leaf] /= n;
+  //   }
+  //
+  //   if (max_avg_count < avg_counts[this_leaf]) {
+  //     max_avg_count = avg_counts[this_leaf];
+  //   }
+  //   if (min_avg_count > avg_counts[this_leaf]) {
+  //     min_avg_count = avg_counts[this_leaf];
+  //   }
+  // });
 
   // Calculate min and max magnitude
   var mags = [];
@@ -433,21 +438,14 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenn
   // the angle of the vector from origin to centroid.
   var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
 
-  // double it cos the max is half the radius but should be 1.
-  // TODO is this still correct for the 1 and 2 sample biom files?
-  // START HERE TODO this is not quite right.
-  console.log("leaf: " + leaf + " fn.pt.mag(pt) " + fn.pt.mag(pt) + " pt: " + JSON.stringify(pt));
-
   var chroma_val = null;
   if (evenness) {
     // Use evenness of samples for chroma_val.  Eveness is oposite of chroma running 0 to 1, so subtract from 1.
     // Evenness naturally runs from 0 to 1 so just use the actual values rather than scaling the min to zero and max to 100.
     chroma_val = fn.math.scale(evenness, min_evenness, max_evenness, g_val_chroma_min, g_val_chroma_max);
-    console.log("using evenness");
   }
   else {
     // Use magnitude of hue angle vector.
-    console.log("using magnitude");
     chroma_val = fn.math.scale(fn.pt.mag(pt), min_mag, max_mag, g_val_chroma_min, g_val_chroma_max);
   }
 
@@ -480,7 +478,12 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
     return "<td class='thick-right-border' style='background-color:" + color + ";'>" + str + "</td>";
   }
 
+  var centroids = centroids_of_samples(parsed_biom);
+
   var evenness = inverse_evenness(parsed_biom);
+
+  // This is on the "new" biom string, i.e. it will us PC columns rather than original if the thing has been dimension reduced.
+  var abundance = fn.parsed_biom.rel_abundance(parsed_biom, g_val_avg_method).abundance;
 
   var parsed_orig_biom = null;
   if (orig_biom_str) {
@@ -490,13 +493,13 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var fields = parsed_biom.meta.fields;
 
   // Make color the second field
-  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness", "inverse evenness");
+  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness", "centroid", "magnitude", "inverse evenness", "abundance");
 
   var header_str = "<tr>\n";
   fields.forEach(function (field) {
     // Don't put the fake fields in the output.
     if (!field.match(/iroki_fake_[12]/)) {
-      if (field === "color" || field === "lightness" || field === "inverse evenness") {
+      if (field === "color" || field === "lightness" || field === "abundance") {
         header_str += "<th class='thick-right-border'>" + field + "</th>"
       }
       else {
@@ -525,12 +528,14 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var table_rows = [];
   parsed_biom.data.forEach(function (line_json, line_idx) {
     var this_color     = null;
+    var this_leaf = null;
     var table_rows_str = "<tr>";
 
     // Add on the parts from the biom file
     json_each(line_json, function (field, value) {
       if (!field.match(/iroki_fake_[12]/)) {
         if (field === "name") {
+          this_leaf = value;
           // Get the color with this name
           // TODO set a default value if it is not in the hash
           this_color = colors[value];
@@ -550,8 +555,17 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
 
           table_rows_str += (td_tag(hue) + td_tag(chroma) + "<td class='thick-right-border'>" + lightness + "</td>");
 
+          // Add the centroid
+          table_rows_str += td_tag(fn.pt.to_s(centroids[this_leaf]));
+
+          // Add the magnitude
+          table_rows_str += td_tag(fn.math.round(fn.pt.mag(centroids[this_leaf]), 2));
+
           // And now add in the evenness
-          table_rows_str += ("<td class='thick-right-border'>" + fn.math.round(evenness[value], 2) + "</td>");
+          table_rows_str += td_tag(fn.math.round(evenness[value], 2));
+
+          // Finally the abundance.
+          table_rows_str += ("<td class='thick-right-border'>" + fn.math.round(abundance[value], 2) + "</td>");
         }
         else {
           table_rows_str += td_tag(fn.math.round(value, 2));

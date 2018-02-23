@@ -1,8 +1,9 @@
-var fn       = {}; // function
-fn.ary       = {}; // array
-fn.diversity = {};
-fn.math      = {};
-fn.pt        = {}; // point
+var fn         = {}; // function
+fn.ary         = {}; // array
+fn.diversity   = {};
+fn.math        = {};
+fn.parsed_biom = {}; // dealing with the Papa parsed biom string
+fn.pt          = {}; // point
 
 fn.ary.max = function (ary) {
   return ary.reduce(function (a, b) {
@@ -38,7 +39,7 @@ fn.diversity.shannon_entropy = function (ary) {
   }));
 };
 
-fn.diversity.shannon_diversity = function(ary) {
+fn.diversity.shannon_diversity = function (ary) {
   return Math.pow(2, fn.diversity.shannon_entropy(ary));
 };
 
@@ -73,14 +74,61 @@ fn.math.scale = function (val, old_min, old_max, new_min, new_max) {
   }
 };
 
+// Parsed biom
+fn.parsed_biom.rel_abundance = function (parsed_biom, avg_method) {
+  var abundance      = {};
+  var abundance_vals = [];
+
+  parsed_biom.data.forEach(function (leaf_row) {
+    var counted_samples = 0;
+    var leaf            = null;
+    var count           = null;
+
+    // Fields will be name, sample 1, sample 2, ...
+    json_each(leaf_row, function (field, val) {
+      var count_this_value = val > 0 || avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
+
+      if (field === "name") {
+        leaf            = val;
+        abundance[leaf] = 0;
+      }
+      else if (count_this_value) {
+        count = val;
+        abundance[leaf] += count;
+        counted_samples += 1;
+      }
+    });
+
+    if (counted_samples > 0) {
+      abundance[leaf] /= counted_samples;
+    } // else it will still be 0
+
+    abundance_vals.push(abundance[leaf]);
+  });
+
+  var min_abundance_val = fn.ary.min(abundance_vals);
+  var max_abundance_val = fn.ary.max(abundance_vals);
+
+  return {
+    abundance : abundance,
+    min_val : min_abundance_val,
+    max_val : max_abundance_val
+  };
+};
+
+// Pt
 fn.pt.is_zero = function (pt) {
   return pt.x === 0 && pt.y === 0;
 };
 
-fn.pt.mag = function(pt) {
+fn.pt.mag = function (pt) {
   return Math.sqrt(Math.pow(pt.x, 2) + Math.pow(pt.y, 2));
 };
 
 fn.pt.new = function (x, y) {
   return { x : x, y : y };
+};
+
+fn.pt.to_s = function (pt) {
+  return "(" + fn.math.round(pt.x, 2) + ", " + fn.math.round(pt.y, 2) + ")";
 };
