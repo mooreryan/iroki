@@ -345,8 +345,8 @@ function colors_from_centroids(centroids, parsed_biom) {
   }
 
   // Read: return value
-  var ret_val = fn.parsed_biom.rel_abundance(parsed_biom, g_val_avg_method);
-  var avg_counts = ret_val.abundance;
+  var ret_val       = fn.parsed_biom.rel_abundance(parsed_biom, g_val_avg_method);
+  var avg_counts    = ret_val.abundance;
   var min_avg_count = ret_val.min_val;
   var max_avg_count = ret_val.max_val;
 
@@ -393,12 +393,14 @@ function colors_from_centroids(centroids, parsed_biom) {
   var min_mag = fn.ary.min(mags);
   var max_mag = fn.ary.max(mags);
 
-  var colors        = {};
-  var color_details = {};
+  var colors         = {};
+  var color_details  = {};
+  var luminance_vals = [];
   json_each(centroids, function (leaf, pt) {
     var return_val = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness[leaf], max_evenness, min_evenness, min_mag, max_mag);
 
     colors[leaf] = return_val[0];
+    luminance_vals.push(chroma.hex(return_val[0]).luminance());
 
     color_details[leaf]              = {};
     color_details[leaf]["hue"]       = return_val[1];
@@ -407,7 +409,20 @@ function colors_from_centroids(centroids, parsed_biom) {
 
   });
 
-  return [colors, color_details];
+  // Now we need to check if we should correct the luminance.  We have to do it after all the colors have been calculating because we want the output scaling to run from the actual min luminance to the actual max luminance.  However, we want to use lightness values directly rather than the original luminance vals.
+  if (g_val_correct_luminance) {
+    var corrected_colors = {};
+    var min_luminance    = fn.ary.min(luminance_vals);
+    var max_luminance    = fn.ary.max(luminance_vals);
+
+    json_each(colors, function (leaf, hex) {
+      corrected_colors[leaf] = fn.color.correct_luminance(hex, color_details[leaf]["lightness"], g_val_lightness_min, g_val_lightness_max, min_luminance, max_luminance);
+    });
+
+    return [corrected_colors, color_details];
+  } else {
+    return [colors, color_details];
+  }
 }
 
 function rad_to_deg(rad) {
@@ -451,8 +466,9 @@ function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenn
 
   var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
-  return [chroma.hcl(hue, chroma_val, lightness).hex(), hue, chroma_val, lightness];
+  var hex = chroma.hcl(hue, chroma_val, lightness).hex();
 
+  return [hex, hue, chroma_val, lightness];
 }
 
 
@@ -528,7 +544,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var table_rows = [];
   parsed_biom.data.forEach(function (line_json, line_idx) {
     var this_color     = null;
-    var this_leaf = null;
+    var this_leaf      = null;
     var table_rows_str = "<tr>";
 
     // Add on the parts from the biom file
@@ -538,6 +554,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
           this_leaf = value;
           // Get the color with this name
           // TODO set a default value if it is not in the hash
+
           this_color = colors[value];
 
           table_rows_str += td_tag(value);
@@ -548,7 +565,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
           // Add on the parts from the color info
           var hue       = color_details[value].hue
           var chroma    = fn.math.round(color_details[value].chroma, 2);
-          var lightness = fn.math.round(color_details[value].lightness, 2);
+          var lightness = color_details[value].lightness;
 
           // Flip hue around the circle if the angle is negative.
           hue = hue < 0 ? fn.math.round(hue + 360, 2) : fn.math.round(hue, 2);
@@ -933,6 +950,9 @@ var g_ID_CHROMA_METHOD                    = "chroma-method",
     g_ID_CHROMA_METHOD_EVENNESS_RELATIVE  = "chroma-method-evenness-relative",
     g_val_chroma_method;
 
+var g_ID_CORRECT_LUMINANCE = "correct-luminance",
+    g_val_correct_luminance;
+
 function update_form_vals() {
   // Technically only needed when there are multiple color space options.  But we just dropped hsl.
   function set_color_space_fn(g_val_color_space) {
@@ -979,8 +999,9 @@ function update_form_vals() {
   g_val_download_legend = is_checked(g_ID_DOWNLOAD_LEGEND);
 
   // Lightness options
-  g_val_lightness_min = parseFloat(jq(g_ID_LIGHTNESS_MIN).val());
-  g_val_lightness_max = parseFloat(jq(g_ID_LIGHTNESS_MAX).val());
+  g_val_lightness_min     = parseFloat(jq(g_ID_LIGHTNESS_MIN).val());
+  g_val_lightness_max     = parseFloat(jq(g_ID_LIGHTNESS_MAX).val());
+  g_val_correct_luminance = is_checked(g_ID_CORRECT_LUMINANCE);
 
   // Chroma opts
   g_val_chroma_method = jq(g_ID_CHROMA_METHOD).val();
@@ -1012,6 +1033,10 @@ function biom__upload_button() {
     update_form_vals();
   }
 
+  function listener(elem, action, fn) {
+    elem.addEventListener(action, fn);
+  }
+
   disable("submit-button");
   disable("reset-button");
   update_form_vals();
@@ -1034,6 +1059,7 @@ function biom__upload_button() {
   var avg_method_dropdown         = document.getElementById(g_ID_AVG_METHOD);
   var lightness_min_input         = document.getElementById(g_ID_LIGHTNESS_MIN);
   var lightness_max_input         = document.getElementById(g_ID_LIGHTNESS_MAX);
+  var correct_luminance           = document.getElementById(g_ID_CORRECT_LUMINANCE);
 
   // Chroma elements
   var chroma_method_input = document.getElementById(g_ID_CHROMA_METHOD);
@@ -1047,30 +1073,16 @@ function biom__upload_button() {
     biom__save_abundance_colors(biom_str);
   };
 
-  uploader.addEventListener("change", function () {
-    undisable_and_update();
-  });
-  color_space_dropdown.addEventListener("change", function () {
-    undisable_and_update();
-  });
-  avg_method_dropdown.addEventListener("change", function () {
-    undisable_and_update();
-  });
-  hue_angle_offset_slider.addEventListener("change", function () {
-    undisable_and_update();
-  });
-  reduce_dimension_select.addEventListener("change", function () {
-    undisable_and_update();
-  });
-  abundant_samples_are_select.addEventListener("change", function () {
-    undisable_and_update();
-  });
-  download_legend.addEventListener("change", function () {
-    undisable_and_update();
-  });
-  chroma_method_input.addEventListener("change", function () {
-    undisable_and_update();
-  });
+  uploader.addEventListener("change", undisable_and_update);
+  color_space_dropdown.addEventListener("change", undisable_and_update);
+  avg_method_dropdown.addEventListener("change", undisable_and_update);
+  hue_angle_offset_slider.addEventListener("change", undisable_and_update);
+  reduce_dimension_select.addEventListener("change", undisable_and_update);
+  abundant_samples_are_select.addEventListener("change", undisable_and_update);
+  download_legend.addEventListener("change", undisable_and_update);
+  chroma_method_input.addEventListener("change", undisable_and_update);
+  correct_luminance.addEventListener("change", undisable_and_update);
+
   lightness_min_input.addEventListener("change", function () {
     undisable_and_update();
 

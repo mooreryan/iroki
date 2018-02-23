@@ -1,5 +1,6 @@
 var fn         = {}; // function
 fn.ary         = {}; // array
+fn.color       = {}; // dealing with chroma api and colors
 fn.diversity   = {};
 fn.math        = {};
 fn.parsed_biom = {}; // dealing with the Papa parsed biom string
@@ -21,6 +22,17 @@ fn.ary.sum = function (ary) {
   return ary.reduce(function (a, b) {
     return a + b;
   }, 0);
+};
+
+// lightness values should run from 0 to 100
+fn.color.correct_luminance = function (hex, lightness, old_min, old_max, new_min, new_max) {
+  if (lightness < 0 || lightness > 100) {
+    throw Error("Lightness should be between 0 and 100.  Got: " + lightness);
+  }
+
+  var new_luminance = fn.math.scale(lightness, old_min, old_max, new_min, new_max);
+  
+  return chroma.hex(hex).luminance(new_luminance);
 };
 
 fn.diversity.shannon_entropy = function (ary) {
