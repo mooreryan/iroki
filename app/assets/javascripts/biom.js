@@ -397,7 +397,7 @@ function colors_from_centroids(centroids, parsed_biom) {
   var color_details  = {};
   var luminance_vals = [];
   json_each(centroids, function (leaf, pt) {
-    var params  = {
+    var params     = {
       leaf : leaf,
       pt : pt,
       avg_counts : avg_counts,
@@ -409,7 +409,7 @@ function colors_from_centroids(centroids, parsed_biom) {
       min_mag : min_mag,
       max_mag : max_mag
     };
-    var return_val = g_color_space_fn(params);
+    var return_val = get_color(params);
 
     colors[leaf] = return_val[0];
     luminance_vals.push(chroma.hex(return_val[0]).luminance());
@@ -427,8 +427,18 @@ function colors_from_centroids(centroids, parsed_biom) {
     var min_luminance    = fn.ary.min(luminance_vals);
     var max_luminance    = fn.ary.max(luminance_vals);
 
+    if (g_val_color_space === g_ID_COLOR_SPACE_HSL) {
+      // HSL lightness runs from 0 to 1
+      var lightness_min_for_correction = g_val_lightness_min / 100;
+      var lightness_max_for_correction = g_val_lightness_max / 100;
+    }
+    else {
+      var lightness_min_for_correction = g_val_lightness_min;
+      var lightness_max_for_correction = g_val_lightness_max;
+    }
+    
     json_each(colors, function (leaf, hex) {
-      corrected_colors[leaf] = fn.color.correct_luminance(hex, color_details[leaf]["lightness"], g_val_lightness_min, g_val_lightness_max, min_luminance, max_luminance);
+      corrected_colors[leaf] = fn.color.correct_luminance(hex, color_details[leaf]["lightness"], lightness_min_for_correction, lightness_max_for_correction, min_luminance, max_luminance);
     });
 
     return [corrected_colors, color_details];
@@ -442,17 +452,19 @@ function rad_to_deg(rad) {
   return rad * 180 / Math.PI;
 }
 
-function get_hcl_color(params) {
-  var leaf = params.leaf;
-  var pt = params.pt;
-  var avg_counts = params.avg_counts;
+function get_color(params) {
+  var leaf          = params.leaf;
+  var pt            = params.pt;
+  var avg_counts    = params.avg_counts;
   var max_avg_count = params.max_avg_count;
   var min_avg_count = params.min_avg_count;
-  var evenness = params.evenness;
-  var max_evenness = params.max_evenness;
-  var min_evenness = params.min_evenness;
-  var min_mag = params.min_mag;
-  var max_mag = params.max_mag;
+  var evenness      = params.evenness;
+  var max_evenness  = params.max_evenness;
+  var min_evenness  = params.min_evenness;
+  var min_mag       = params.min_mag;
+  var max_mag       = params.max_mag;
+
+  var color_fn = chroma.hcl;
 
 
   // If it is absolute evenness, then don't "scale" the values, but run it from 0 to 1 naturally.
@@ -465,6 +477,9 @@ function get_hcl_color(params) {
     max_mag = 0.5; // Half the radius of the unit circle.
   }
 
+  var new_chroma_min = g_val_chroma_min;
+  var new_chroma_max = g_val_chroma_max;
+
   if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
     var new_lightness_min = g_val_lightness_max;
     var new_lightness_max = g_val_lightness_min;
@@ -474,6 +489,17 @@ function get_hcl_color(params) {
     var new_lightness_max = g_val_lightness_max;
   }
 
+  if (g_val_color_space === g_ID_COLOR_SPACE_HSL) {
+    // HSL saturation and lightness run from 0 to 1 rather than 0 to 100ish
+    new_lightness_min /= 100;
+    new_lightness_max /= 100;
+
+    new_chroma_min /= 100;
+    new_chroma_max /= 100;
+
+    color_fn = chroma.hsl;
+  }
+
   // the angle of the vector from origin to centroid.
   var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
 
@@ -481,16 +507,17 @@ function get_hcl_color(params) {
   if (evenness) {
     // Use evenness of samples for chroma_val.  Eveness is oposite of chroma running 0 to 1, so subtract from 1.
     // Evenness naturally runs from 0 to 1 so just use the actual values rather than scaling the min to zero and max to 100.
-    chroma_val = fn.math.scale(evenness, min_evenness, max_evenness, g_val_chroma_min, g_val_chroma_max);
+    chroma_val = fn.math.scale(evenness, min_evenness, max_evenness, new_chroma_min, new_chroma_max);
   }
   else {
     // Use magnitude of hue angle vector.
-    chroma_val = fn.math.scale(fn.pt.mag(pt), min_mag, max_mag, g_val_chroma_min, g_val_chroma_max);
+    chroma_val = fn.math.scale(fn.pt.mag(pt), min_mag, max_mag, new_chroma_min, new_chroma_max);
   }
 
   var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
-  var hex = chroma.hcl(hue, chroma_val, lightness).hex();
+  var hex = color_fn(hue, chroma_val, lightness).hex();
+  console.log([hex, hue, chroma_val, lightness].join(" "));
 
   return [hex, hue, chroma_val, lightness];
 }
@@ -919,8 +946,7 @@ function reduce_dimension(biom_str, type, cutoff) {
 var g_ID_COLOR_SPACE     = "color-space",
     g_ID_COLOR_SPACE_HCL = "color-space-hcl",
     g_ID_COLOR_SPACE_HSL = "color-space-hsl",
-    g_val_color_space,
-    g_color_space_fn;
+    g_val_color_space;
 
 var g_ID_AVG_METHOD                        = "avg-method",
     g_ID_AVG_METHOD_ALL_SAMPLES_MEAN       = "avg-method-all-samples-mean",
@@ -978,27 +1004,9 @@ var g_ID_CORRECT_LUMINANCE = "correct-luminance",
     g_val_correct_luminance;
 
 function update_form_vals() {
-  // Technically only needed when there are multiple color space options.  But we just dropped hsl.
-  function set_color_space_fn(g_val_color_space) {
-    // switch (g_val_color_space) {
-    //   case g_ID_COLOR_SPACE_HCL:
-    //     g_color_space_fn = get_hcl_color;
-    //     break;
-    //   case g_ID_COLOR_SPACE_HSL:
-    //     g_color_space_fn = get_hsl_color;
-    //     break;
-    //   default:
-    //     g_color_space_fn = get_hcl_color;
-    //     break;
-    // }
-    //
-
-    g_color_space_fn = get_hcl_color;
-  }
 
   // Color options
   g_val_color_space = jq(g_ID_COLOR_SPACE).val();
-  set_color_space_fn(g_val_color_space);
 
   g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
   if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
