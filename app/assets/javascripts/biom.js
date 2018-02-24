@@ -300,7 +300,9 @@ function centroids_of_samples(parsed_biom) {
 
 // Technically we want 1 - evenness to get it going the same way as chroma.
 function inverse_evenness(parsed_biom) {
-  var evenness_fn = fn.diversity.evenness_entropy;
+  var evenness_fn = function (counts) {
+    return 1 - fn.diversity.evenness_entropy(counts);
+  };
   var evenness    = {};
 
   parsed_biom.data.forEach(function (data_row) {
@@ -312,13 +314,13 @@ function inverse_evenness(parsed_biom) {
       if (field === "name") {
         leaf_name = value;
       }
-      else {
+      else if (!fn.utils.is_fake_field(field)) {
         counts.push(value);
       }
     });
 
     // Now calculate evenness
-    evenness[leaf_name] = 1 - evenness_fn(counts);
+    evenness[leaf_name] = evenness_fn(counts);
   });
 
   return evenness;
@@ -522,7 +524,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var header_str = "<tr>\n";
   fields.forEach(function (field) {
     // Don't put the fake fields in the output.
-    if (!field.match(/iroki_fake_[12]/)) {
+    if (!fn.utils.is_fake_field(field)) {
       if (field === "color" || field === "lightness" || field === "abundance") {
         header_str += "<th class='thick-right-border'>" + field + "</th>"
       }
@@ -974,7 +976,7 @@ function update_form_vals() {
     g_val_hue_angle_offset = 359;
     jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
   }
-  var display_color = chroma.hcl(g_val_hue_angle_offset, 60, 70).hex();
+  var display_color = fn.color.approx_starting_color(g_val_hue_angle_offset);
   jq("hue-angle-offset-label").css("color", display_color);
 
 

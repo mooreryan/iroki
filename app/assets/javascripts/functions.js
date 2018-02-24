@@ -5,6 +5,7 @@ fn.diversity   = {};
 fn.math        = {};
 fn.parsed_biom = {}; // dealing with the Papa parsed biom string
 fn.pt          = {}; // point
+fn.utils       = {};
 
 fn.ary.max = function (ary) {
   return ary.reduce(function (a, b) {
@@ -31,8 +32,16 @@ fn.color.correct_luminance = function (hex, lightness, old_min, old_max, new_min
   }
 
   var new_luminance = fn.math.scale(lightness, old_min, old_max, new_min, new_max);
-  
+
   return chroma.hex(hex).luminance(new_luminance);
+};
+
+// Take a hue angle 0-360, and spit out an approx starting color as a hex code.
+fn.color.approx_starting_color = function (hue) {
+  var chroma_val = 60,
+      lightness  = 60;
+
+  return chroma.hcl(hue, chroma_val, lightness).hex();
 };
 
 fn.diversity.shannon_entropy = function (ary) {
@@ -56,9 +65,18 @@ fn.diversity.shannon_diversity = function (ary) {
 };
 
 fn.diversity.evenness_entropy = function (ary) {
-  var shannon_max = Math.log2(ary.length);
+  var ary_len = ary.length;
+  if (ary_len === 0) {
+    throw Error("ary len must be > 0");
+  }
+  else if (ary_len === 1) {
+    return 1;
+  }
+  else {
+    var shannon_max = Math.log2(ary.length);
 
-  return fn.diversity.shannon_entropy(ary) / shannon_max;
+    return fn.diversity.shannon_entropy(ary) / shannon_max;
+  }
 };
 
 fn.diversity.evenness_diversity = function (ary) {
@@ -143,4 +161,8 @@ fn.pt.new = function (x, y) {
 
 fn.pt.to_s = function (pt) {
   return "(" + fn.math.round(pt.x, 2) + ", " + fn.math.round(pt.y, 2) + ")";
+};
+
+fn.utils.is_fake_field = function(field) {
+  return field.match(/iroki_fake_[12]/);
 };
