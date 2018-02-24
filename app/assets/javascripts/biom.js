@@ -397,7 +397,19 @@ function colors_from_centroids(centroids, parsed_biom) {
   var color_details  = {};
   var luminance_vals = [];
   json_each(centroids, function (leaf, pt) {
-    var return_val = g_color_space_fn(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness[leaf], max_evenness, min_evenness, min_mag, max_mag);
+    var params  = {
+      leaf : leaf,
+      pt : pt,
+      avg_counts : avg_counts,
+      max_avg_count : max_avg_count,
+      min_avg_count : min_avg_count,
+      evenness : evenness[leaf],
+      max_evenness : max_evenness,
+      min_evenness : min_evenness,
+      min_mag : min_mag,
+      max_mag : max_mag
+    };
+    var return_val = g_color_space_fn(params);
 
     colors[leaf] = return_val[0];
     luminance_vals.push(chroma.hex(return_val[0]).luminance());
@@ -420,7 +432,8 @@ function colors_from_centroids(centroids, parsed_biom) {
     });
 
     return [corrected_colors, color_details];
-  } else {
+  }
+  else {
     return [colors, color_details];
   }
 }
@@ -429,7 +442,18 @@ function rad_to_deg(rad) {
   return rad * 180 / Math.PI;
 }
 
-function get_hcl_color(leaf, pt, avg_counts, max_avg_count, min_avg_count, evenness, max_evenness, min_evenness, min_mag, max_mag) {
+function get_hcl_color(params) {
+  var leaf = params.leaf;
+  var pt = params.pt;
+  var avg_counts = params.avg_counts;
+  var max_avg_count = params.max_avg_count;
+  var min_avg_count = params.min_avg_count;
+  var evenness = params.evenness;
+  var max_evenness = params.max_evenness;
+  var min_evenness = params.min_evenness;
+  var min_mag = params.min_mag;
+  var max_mag = params.max_mag;
+
 
   // If it is absolute evenness, then don't "scale" the values, but run it from 0 to 1 naturally.
   if (g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE) {
