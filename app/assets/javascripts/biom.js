@@ -517,7 +517,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var fields = parsed_biom.meta.fields;
 
   // Make color the second field
-  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness", "centroid", "evenness", "abundance");
+  fields.splice(1, 0, "color", "hue", "chroma/saturation", "lightness", "centroid", "evenness", "abundance");
 
   var header_str = "<tr>\n";
   fields.forEach(function (field) {
