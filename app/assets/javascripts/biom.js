@@ -436,7 +436,7 @@ function colors_from_centroids(centroids, parsed_biom) {
       var lightness_min_for_correction = g_val_lightness_min;
       var lightness_max_for_correction = g_val_lightness_max;
     }
-    
+
     json_each(colors, function (leaf, hex) {
       corrected_colors[leaf] = fn.color.correct_luminance(hex, color_details[leaf]["lightness"], lightness_min_for_correction, lightness_max_for_correction, min_luminance, max_luminance);
     });
@@ -477,16 +477,24 @@ function get_color(params) {
     max_mag = 0.5; // Half the radius of the unit circle.
   }
 
-  var new_chroma_min = g_val_chroma_min;
-  var new_chroma_max = g_val_chroma_max;
-
   if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
+    // Flip min and max
     var new_lightness_min = g_val_lightness_max;
     var new_lightness_max = g_val_lightness_min;
   }
   else { // abundant samples are light
     var new_lightness_min = g_val_lightness_min;
     var new_lightness_max = g_val_lightness_max;
+  }
+
+  if (g_val_even_leaves_are === g_ID_EVEN_LEAVES_ARE_MORE_SATURATED) {
+    // Flip the min and max
+    var new_chroma_min = g_val_chroma_max;
+    var new_chroma_max = g_val_chroma_min;
+  }
+  else {
+    var new_chroma_min = g_val_chroma_min;
+    var new_chroma_max = g_val_chroma_max;
   }
 
   if (g_val_color_space === g_ID_COLOR_SPACE_HSL) {
@@ -517,7 +525,6 @@ function get_color(params) {
   var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
   var hex = color_fn(hue, chroma_val, lightness).hex();
-  console.log([hex, hue, chroma_val, lightness].join(" "));
 
   return [hex, hue, chroma_val, lightness];
 }
@@ -542,7 +549,14 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   }
 
   function td_tag_with_background(str, color) {
-    return "<td class='thick-right-border' style='background-color:" + color + ";'>" + str + "</td>";
+    if (chroma.hex(color.hex()).luminance() < g_COLOR_IS_DARK) {
+      var text_style = "color: white;";
+    }
+    else {
+      var text_style = "color: black;";
+    }
+
+    return "<td class='thick-right-border' style='background-color:" + color + "; " + text_style + "'>" + str + "</td>";
   }
 
   var centroids = centroids_of_samples(parsed_biom);
@@ -614,14 +628,14 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
           table_rows_str += td_tag_with_background(this_color, this_color);
 
           // Add on the parts from the color info
-          var hue       = color_details[value].hue
-          var chroma    = fn.math.round(color_details[value].chroma, 2);
-          var lightness = color_details[value].lightness;
+          var hue        = color_details[value].hue
+          var chroma_val = fn.math.round(color_details[value].chroma, 2);
+          var lightness  = color_details[value].lightness;
 
           // Flip hue around the circle if the angle is negative.
           hue = hue < 0 ? fn.math.round(hue + 360, 2) : fn.math.round(hue, 2);
 
-          table_rows_str += (td_tag(hue) + td_tag(chroma) + "<td class='thick-right-border'>" + lightness + "</td>");
+          table_rows_str += (td_tag(hue) + td_tag(chroma_val) + "<td class='thick-right-border'>" + lightness + "</td>");
 
           // Add the centroid
           table_rows_str += td_tag(fn.pt.to_s(centroids[this_leaf]));
@@ -942,6 +956,7 @@ function reduce_dimension(biom_str, type, cutoff) {
   }).join("\n");
 }
 
+var g_COLOR_IS_DARK = 0.25;
 
 var g_ID_COLOR_SPACE     = "color-space",
     g_ID_COLOR_SPACE_HCL = "color-space-hcl",
@@ -1000,6 +1015,12 @@ var g_ID_CHROMA_METHOD                    = "chroma-method",
     g_ID_CHROMA_METHOD_EVENNESS_RELATIVE  = "chroma-method-evenness-relative",
     g_val_chroma_method;
 
+var g_ID_EVEN_LEAVES_ARE                = "even-leaves-are",
+    g_ID_EVEN_LEAVES_ARE_LESS_SATURATED = "even-leaves-are-less-saturated",
+    g_ID_EVEN_LEAVES_ARE_MORE_SATURATED = "even-leaves-are-more-saturated",
+    g_val_even_leaves_are;
+
+
 var g_ID_CORRECT_LUMINANCE = "correct-luminance",
     g_val_correct_luminance;
 
@@ -1036,9 +1057,10 @@ function update_form_vals() {
   g_val_correct_luminance = is_checked(g_ID_CORRECT_LUMINANCE);
 
   // Chroma opts
-  g_val_chroma_method = jq(g_ID_CHROMA_METHOD).val();
-  g_val_chroma_min    = parseFloat(jq(g_ID_CHROMA_MIN).val());
-  g_val_chroma_max    = parseFloat(jq(g_ID_CHROMA_MAX).val());
+  g_val_chroma_method   = jq(g_ID_CHROMA_METHOD).val();
+  g_val_chroma_min      = parseFloat(jq(g_ID_CHROMA_MIN).val());
+  g_val_chroma_max      = parseFloat(jq(g_ID_CHROMA_MAX).val());
+  g_val_even_leaves_are = jq(g_ID_EVEN_LEAVES_ARE).val();
 }
 
 
@@ -1094,9 +1116,10 @@ function biom__upload_button() {
   var correct_luminance           = document.getElementById(g_ID_CORRECT_LUMINANCE);
 
   // Chroma elements
-  var chroma_method_input = document.getElementById(g_ID_CHROMA_METHOD);
-  var chroma_min_input    = document.getElementById(g_ID_CHROMA_MIN);
-  var chroma_max_input    = document.getElementById(g_ID_CHROMA_MAX);
+  var chroma_method_input   = document.getElementById(g_ID_CHROMA_METHOD);
+  var chroma_min_input      = document.getElementById(g_ID_CHROMA_MIN);
+  var chroma_max_input      = document.getElementById(g_ID_CHROMA_MAX);
+  var even_leaves_are_input = document.getElementById(g_ID_EVEN_LEAVES_ARE);
 
   var biom_reader = new FileReader();
 
@@ -1113,6 +1136,7 @@ function biom__upload_button() {
   abundant_samples_are_select.addEventListener("change", undisable_and_update);
   download_legend.addEventListener("change", undisable_and_update);
   chroma_method_input.addEventListener("change", undisable_and_update);
+  even_leaves_are_input.addEventListener("change", undisable_and_update);
   correct_luminance.addEventListener("change", undisable_and_update);
 
   lightness_min_input.addEventListener("change", function () {
