@@ -7,6 +7,10 @@ fn.parsed_biom = {}; // dealing with the Papa parsed biom string
 fn.pt          = {}; // point
 fn.utils       = {};
 
+fn.ary.deep_copy = function(ary) {
+  return JSON.parse(JSON.stringify(ary));
+};
+
 fn.ary.max = function (ary) {
   return ary.reduce(function (a, b) {
     return Math.max(a, b);
@@ -105,6 +109,17 @@ fn.math.scale = function (val, old_min, old_max, new_min, new_max) {
 };
 
 // Parsed biom
+fn.parsed_biom.num_real_samples = function(parsed_biom) {
+  var num_fake_samples = 0;
+  parsed_biom.meta.fields.forEach(function(field){
+    if (field === "name" || fn.utils.is_fake_field(field)) {
+      num_fake_samples += 1;
+    }
+  });
+
+  return parsed_biom.meta.fields.length - num_fake_samples;
+};
+
 fn.parsed_biom.rel_abundance = function (parsed_biom, avg_method) {
   var abundance      = {};
   var abundance_vals = [];

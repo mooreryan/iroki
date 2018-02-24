@@ -327,6 +327,7 @@ function inverse_evenness(parsed_biom) {
 }
 
 function colors_from_centroids(centroids, parsed_biom) {
+  var num_samples = fn.parsed_biom.num_real_samples(parsed_biom);
   var evenness     = {};
   var min_evenness = null;
   var max_evenness = null;
@@ -362,7 +363,8 @@ function colors_from_centroids(centroids, parsed_biom) {
       avg_counts : avg_counts,
       max_avg_count : max_avg_count,
       min_avg_count : min_avg_count,
-      evenness : evenness[leaf],
+      // It's inverse evenness (1 means completely uneven and maximum saturation).
+      evenness : num_samples === 1 ? 1 : evenness[leaf],
       max_evenness : max_evenness,
       min_evenness : min_evenness
     };
@@ -516,7 +518,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
     parsed_orig_biom = parse_biom_file_str(orig_biom_str);
   }
 
-  var fields = parsed_biom.meta.fields;
+  var fields = fn.ary.deep_copy(parsed_biom.meta.fields);
 
   // Make color the second field
   fields.splice(1, 0, "color", "hue", "chroma/saturation", "lightness", "centroid", "evenness", "abundance");
