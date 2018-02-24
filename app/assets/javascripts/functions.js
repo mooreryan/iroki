@@ -2,12 +2,14 @@ var fn         = {}; // function
 fn.ary         = {}; // array
 fn.color       = {}; // dealing with chroma api and colors
 fn.diversity   = {};
+fn.html        = {};
 fn.math        = {};
 fn.parsed_biom = {}; // dealing with the Papa parsed biom string
 fn.pt          = {}; // point
+fn.str         = {};
 fn.utils       = {};
 
-fn.ary.deep_copy = function(ary) {
+fn.ary.deep_copy = function (ary) {
   return JSON.parse(JSON.stringify(ary));
 };
 
@@ -97,6 +99,15 @@ fn.math.round = function (number, precision) {
   return roundedTempNumber / factor;
 };
 
+fn.html.tag = function (tag, str, attr) {
+  if (attr !== undefined) {
+    return "<" + tag + " " + attr + ">" + str + "</" + tag + ">";
+  }
+  else {
+    return "<" + tag + ">" + str + "</" + tag + ">";
+  }
+};
+
 fn.math.scale = function (val, old_min, old_max, new_min, new_max) {
   // This can happen if you use the mean across non-zero samples.
   if (old_max - old_min === 0) {
@@ -109,9 +120,34 @@ fn.math.scale = function (val, old_min, old_max, new_min, new_max) {
 };
 
 // Parsed biom
-fn.parsed_biom.num_real_samples = function(parsed_biom) {
+fn.parsed_biom.sample_angles = function (parsed_biom, angle_offset) {
+  var fields      = fn.parsed_biom.sample_fields(parsed_biom);
+  var num_samples = fields.length;
+
+  var sample_angles = fields.map(function (field, idx) {
+    return rad_to_deg(sample_to_angle(idx, num_samples, angle_offset));
+  });
+
+  // Don't use an object in case there are duplicated sample names in the biom file.
+  return [fields, sample_angles];
+};
+
+// Returns the sample fields.
+fn.parsed_biom.sample_fields = function (parsed_biom) {
+  var fields = [];
+
+  parsed_biom.meta.fields.forEach(function (field) {
+    if (fn.utils.is_sample_field(field)) {
+      fields.push(field);
+    }
+  });
+
+  return fields;
+};
+
+fn.parsed_biom.num_real_samples = function (parsed_biom) {
   var num_fake_samples = 0;
-  parsed_biom.meta.fields.forEach(function(field){
+  parsed_biom.meta.fields.forEach(function (field) {
     if (field === "name" || fn.utils.is_fake_field(field)) {
       num_fake_samples += 1;
     }
@@ -161,6 +197,60 @@ fn.parsed_biom.rel_abundance = function (parsed_biom, avg_method) {
   };
 };
 
+fn.parsed_biom.sample_color_legend = function (parsed_biom, angle_offset) {
+  var sample_angle_ret_val          = fn.parsed_biom.sample_angles(parsed_biom, angle_offset);
+  var sample_names                  = sample_angle_ret_val[0];
+  var sample_angles                 = sample_angle_ret_val[1];
+  var sample_approx_starting_colors = sample_angles.map(function (hue_angle) {
+    return fn.color.approx_starting_color(hue_angle)
+  });
+
+  var sample_legend_str = "name\tappoximate starting color\n";
+  sample_names.forEach(function (name, idx) {
+    sample_legend_str += [name, sample_approx_starting_colors[idx]].join("\t") + "\n";
+  });
+
+  return sample_legend_str;
+};
+
+fn.parsed_biom.sample_color_legend_html = function (parsed_biom, angle_offset) {
+  var tsv = fn.parsed_biom.sample_color_legend(parsed_biom, angle_offset);
+
+  var rows = fn.str.chomp(tsv).split("\n").map(function (row, row_idx) {
+    var fields = row.split("\t");
+
+    var tag = row_idx === 0 ? "th" : "td";
+
+    var row_str = fields.map(function (field, col_idx) {
+      if (col_idx === 0) {
+        return fn.html.tag(tag, field, "class='thick-right-border'");
+      }
+      else if (row_idx >= 1 && col_idx === 1) {
+        return fn.html.tag(tag, field, "style='background-color: " + field + ";'");
+      }
+      else {
+        return fn.html.tag(tag, field);
+      }
+    }).join("");
+
+    return fn.html.tag("tr", row_str);
+  }).join("");
+
+  var style_str = "<style>" +
+    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
+    "th, td {padding: 5px} " +
+    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
+    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
+    ".thick-left-border {border-left: 3px solid #2d2d2d}" +
+    "</style>"
+
+  var table = fn.html.tag("table", rows);
+  var body = fn.html.tag("body", table);
+  var head = fn.html.tag("head", style_str + fn.html.tag("title", "Sample legend"));
+
+  return "<!DOCTYPE html>" + head + body + "</html>";
+};
+
 // Pt
 fn.pt.is_zero = function (pt) {
   return pt.x === 0 && pt.y === 0;
@@ -178,6 +268,14 @@ fn.pt.to_s = function (pt) {
   return "(" + fn.math.round(pt.x, 2) + ", " + fn.math.round(pt.y, 2) + ")";
 };
 
-fn.utils.is_fake_field = function(field) {
+fn.str.chomp = function (str) {
+  return str.replace(/\r?\n?$/, "");
+};
+
+fn.utils.is_fake_field = function (field) {
   return field.match(/iroki_fake_[12]/);
+};
+
+fn.utils.is_sample_field = function (field) {
+  return field !== "name" && !fn.utils.is_fake_field(field);
 };

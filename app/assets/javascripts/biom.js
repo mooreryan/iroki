@@ -327,7 +327,7 @@ function inverse_evenness(parsed_biom) {
 }
 
 function colors_from_centroids(centroids, parsed_biom) {
-  var num_samples = fn.parsed_biom.num_real_samples(parsed_biom);
+  var num_samples  = fn.parsed_biom.num_real_samples(parsed_biom);
   var evenness     = {};
   var min_evenness = null;
   var max_evenness = null;
@@ -477,6 +477,25 @@ function get_color(params) {
 }
 
 
+function th_tag(str) {
+  return "<th>" + str + "</th>";
+}
+
+function td_tag(str) {
+  return "<td>" + str + "</td>";
+}
+
+function td_tag_with_background(str, color) {
+  if (chroma.hex(color.hex()).luminance() < g_COLOR_IS_DARK) {
+    var text_style = "color: white;";
+  }
+  else {
+    var text_style = "color: black;";
+  }
+
+  return "<td class='thick-right-border' style='background-color:" + color + "; " + text_style + "'>" + str + "</td>";
+}
+
 // TODO make sure all color tags are hex codes
 // The orig_biom_str is for when the parsed_biom has the reduced dimensions so we can put the original dimensions onto the end of the file.
 function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_details) {
@@ -487,24 +506,6 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   // colors
   // { leaf_name: "#00ff00", leaf2_name: "#ff00ff" }
 
-  function th_tag(str) {
-    return "<th>" + str + "</th>";
-  }
-
-  function td_tag(str) {
-    return "<td>" + str + "</td>";
-  }
-
-  function td_tag_with_background(str, color) {
-    if (chroma.hex(color.hex()).luminance() < g_COLOR_IS_DARK) {
-      var text_style = "color: white;";
-    }
-    else {
-      var text_style = "color: black;";
-    }
-
-    return "<td class='thick-right-border' style='background-color:" + color + "; " + text_style + "'>" + str + "</td>";
-  }
 
   var centroids = centroids_of_samples(parsed_biom);
 
@@ -705,11 +706,17 @@ function biom__save_abundance_colors(biom_str) {
 
     }
 
+    // Make the tsv for sample legend.
+    var sample_color_legend_tsv_str = fn.parsed_biom.sample_color_legend(parsed_biom, g_val_hue_angle_offset);
+    var sample_color_legend_html_str = fn.parsed_biom.sample_color_legend_html(parsed_biom, g_val_hue_angle_offset);
+
     var zip = new JSZip();
 
     zip.folder("iroki_mapping")
        .file("mapping.txt", tsv_str)
-       .file("counts_with_colors.html", html_str);
+       .file("counts_with_colors.html", html_str)
+       .file("sample_approximate_starting_colors.txt", sample_color_legend_tsv_str)
+       .file("sample_approximate_starting_colors.html", sample_color_legend_html_str);
 
     zip.generateAsync({
       type : "blob",
