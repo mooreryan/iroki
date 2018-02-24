@@ -707,7 +707,13 @@ function biom__save_abundance_colors(biom_str) {
        .file("mapping.txt", tsv_str)
        .file("counts_with_colors.html", html_str);
 
-    zip.generateAsync({ type : "blob" })
+    zip.generateAsync({
+      type : "blob",
+      compression : "DEFLATE",
+      compressionOptions : {
+        level : 1
+      }
+    })
        .then(function (blob) {
          saveAs(blob, "iroki_mapping.zip");
        });
@@ -940,9 +946,9 @@ var g_ID_CHROMA_MIN      = "chroma-min",
     g_val_chroma_max;
 
 
-var g_ID_CHROMA_METHOD                    = "chroma-method",
-    g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE  = "chroma-method-evenness-absolute",
-    g_ID_CHROMA_METHOD_EVENNESS_RELATIVE  = "chroma-method-evenness-relative",
+var g_ID_CHROMA_METHOD                   = "chroma-method",
+    g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE = "chroma-method-evenness-absolute",
+    g_ID_CHROMA_METHOD_EVENNESS_RELATIVE = "chroma-method-evenness-relative",
     g_val_chroma_method;
 
 var g_ID_EVEN_LEAVES_ARE                = "even-leaves-are",
