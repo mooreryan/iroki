@@ -52,6 +52,7 @@ function upload_button(submit_id, uploader_id, callback) {
       // Don't reset
     }
     else {
+      biological_root_sibling_warnings_already_warned = false;
       utils__clear_elem("svg-tree");
       reset_all_to_defaults();
     }
@@ -70,6 +71,7 @@ function upload_button(submit_id, uploader_id, callback) {
     handleFiles();
   }, false);
   document.getElementById(ID_RESET_BUTTON).addEventListener("click", function () {
+    biological_root_sibling_warnings_already_warned = false;
     MAPPING_CHANGED = false;
     TREE_CHANGED    = false;
 
@@ -224,7 +226,8 @@ var tmp_root;
 
 var TREE_IS_ROOTED_ON_A_LEAF_NODE;
 
-var biological_root_sibling_warnings = [];
+// TODO we have to check if we've already warned about this as it will try and warn each time the links are redrawn.
+var biological_root_sibling_warnings = [], biological_root_sibling_warnings_already_warned;
 
 // Any value higher than this will be dropped down to this value.  Some tree software puts the number of bootstrap trees with support rather than a percent so this number can get pretty high.
 var MAX_BOOTSTRAP_VAL = 1e9;
@@ -1563,9 +1566,10 @@ function lalala(tree_input_param, mapping_input_param) {
             return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
           });
 
-      if (biological_root_sibling_warnings.length > 0) {
+      if (biological_root_sibling_warnings.length > 0 && !biological_root_sibling_warnings_already_warned) {
         // There were some warnings.
         alert(biological_root_sibling_warnings.join("\n"));
+        biological_root_sibling_warnings_already_warned = true;
       }
     }
 
@@ -2301,7 +2305,7 @@ function get_branch_md_val(node, branch_option, default_value) {
 
     // If there is more than one sibling, then things are strange just put the defualt value.
     if (children.length !== 2) {
-      push_unless_present(biological_root_sibling_warnings, "WARNING -- The biological root has multiple sibling nodes.  Automatic branch styling is not handled in this case.  Using the default color value.  If the branch styling near the root looks strange, this is likely the reason.");
+      push_unless_present(biological_root_sibling_warnings, "WARNING -- The biological root has multiple sibling nodes.  The branches directly attached to the root will not be automatically styled, but will use the default values.  If the branch styling near the root looks strange, this is likely the reason.");
       return default_value;
     }
     else {
