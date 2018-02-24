@@ -350,49 +350,6 @@ function colors_from_centroids(centroids, parsed_biom) {
   var min_avg_count = ret_val.min_val;
   var max_avg_count = ret_val.max_val;
 
-  // var avg_counts    = {};
-  // var max_avg_count = 0;
-  // var min_avg_count = 999999999;
-  // parsed_biom.data.forEach(function (row) {
-  //
-  //   var n         = 0;
-  //   var this_leaf = "";
-  //   json_each(row, function (col_name, val) {
-  //     var count_this_value = val > 0 || g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
-  //
-  //     if (col_name === "name") {
-  //       this_leaf             = val;
-  //       avg_counts[this_leaf] = 0;
-  //     }
-  //     else if (count_this_value) {
-  //       avg_counts[this_leaf] += val;
-  //       n += 1;
-  //     }
-  //   });
-  //
-  //   if (n === 0) {
-  //     avg_counts[this_leaf] = 0;
-  //   }
-  //   else {
-  //     avg_counts[this_leaf] /= n;
-  //   }
-  //
-  //   if (max_avg_count < avg_counts[this_leaf]) {
-  //     max_avg_count = avg_counts[this_leaf];
-  //   }
-  //   if (min_avg_count > avg_counts[this_leaf]) {
-  //     min_avg_count = avg_counts[this_leaf];
-  //   }
-  // });
-
-  // Calculate min and max magnitude
-  var mags = [];
-  json_each(centroids, function (leaf, pt) {
-    mags.push(fn.pt.mag(pt));
-  });
-  var min_mag = fn.ary.min(mags);
-  var max_mag = fn.ary.max(mags);
-
   var colors         = {};
   var color_details  = {};
   var luminance_vals = [];
@@ -405,9 +362,7 @@ function colors_from_centroids(centroids, parsed_biom) {
       min_avg_count : min_avg_count,
       evenness : evenness[leaf],
       max_evenness : max_evenness,
-      min_evenness : min_evenness,
-      min_mag : min_mag,
-      max_mag : max_mag
+      min_evenness : min_evenness
     };
     var return_val = get_color(params);
 
@@ -461,8 +416,6 @@ function get_color(params) {
   var evenness      = params.evenness;
   var max_evenness  = params.max_evenness;
   var min_evenness  = params.min_evenness;
-  var min_mag       = params.min_mag;
-  var max_mag       = params.max_mag;
 
   var color_fn = chroma.hcl;
 
@@ -471,10 +424,6 @@ function get_color(params) {
   if (g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE) {
     min_evenness = 0;
     max_evenness = 1;
-  }
-  if (g_val_chroma_method === g_ID_CHROMA_METHOD_MAGNITUDE_ABSOLUTE) {
-    min_mag = 0;
-    max_mag = 0.5; // Half the radius of the unit circle.
   }
 
   if (g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK) {
@@ -511,16 +460,10 @@ function get_color(params) {
   // the angle of the vector from origin to centroid.
   var hue = rad_to_deg(Math.atan2(pt.y, pt.x));
 
-  var chroma_val = null;
-  if (evenness) {
-    // Use evenness of samples for chroma_val.  Eveness is oposite of chroma running 0 to 1, so subtract from 1.
-    // Evenness naturally runs from 0 to 1 so just use the actual values rather than scaling the min to zero and max to 100.
-    chroma_val = fn.math.scale(evenness, min_evenness, max_evenness, new_chroma_min, new_chroma_max);
-  }
-  else {
-    // Use magnitude of hue angle vector.
-    chroma_val = fn.math.scale(fn.pt.mag(pt), min_mag, max_mag, new_chroma_min, new_chroma_max);
-  }
+  // Use evenness of samples for chroma_val.  Eveness is oposite of chroma running 0 to 1, so subtract from 1.
+  // Evenness naturally runs from 0 to 1 so just use the actual values rather than scaling the min to zero and max to 100.
+  var chroma_val = fn.math.scale(evenness, min_evenness, max_evenness, new_chroma_min, new_chroma_max);
+
 
   var lightness = fn.math.scale(avg_counts[leaf] / max_avg_count, min_avg_count / max_avg_count, 1, new_lightness_min, new_lightness_max);
 
@@ -574,7 +517,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var fields = parsed_biom.meta.fields;
 
   // Make color the second field
-  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness", "centroid", "magnitude", "inverse evenness", "abundance");
+  fields.splice(1, 0, "color", "hue angle", "chroma/saturation", "lightness", "centroid", "evenness", "abundance");
 
   var header_str = "<tr>\n";
   fields.forEach(function (field) {
@@ -630,7 +573,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
           // Add on the parts from the color info
           var hue        = color_details[value].hue
           var chroma_val = fn.math.round(color_details[value].chroma, 2);
-          var lightness  = color_details[value].lightness;
+          var lightness  = fn.math.round(color_details[value].lightness, 2);
 
           // Flip hue around the circle if the angle is negative.
           hue = hue < 0 ? fn.math.round(hue + 360, 2) : fn.math.round(hue, 2);
@@ -640,11 +583,8 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
           // Add the centroid
           table_rows_str += td_tag(fn.pt.to_s(centroids[this_leaf]));
 
-          // Add the magnitude
-          table_rows_str += td_tag(fn.math.round(fn.pt.mag(centroids[this_leaf]), 2));
-
           // And now add in the evenness
-          table_rows_str += td_tag(fn.math.round(evenness[value], 2));
+          table_rows_str += td_tag(fn.math.round(1 - evenness[value], 2));
 
           // Finally the abundance.
           table_rows_str += ("<td class='thick-right-border'>" + fn.math.round(abundance[value], 2) + "</td>");
@@ -735,12 +675,6 @@ function biom__save_abundance_colors(biom_str) {
       break;
     case g_ID_REDUCE_DIMENSION_3_PC:
       str = reduce_dimension(biom_str, "pc", 3);
-      break;
-    case g_ID_REDUCE_DIMENSION_4_PC:
-      str = reduce_dimension(biom_str, "pc", 4);
-      break;
-    case g_ID_REDUCE_DIMENSION_5_PC:
-      str = reduce_dimension(biom_str, "pc", 5);
       break;
     default:
       str = biom_str;
@@ -981,8 +915,6 @@ var g_ID_REDUCE_DIMENSION         = "reduce-dimension",
     g_ID_REDUCE_DIMENSION_1_PC    = "reduce-dimension-1-pc",
     g_ID_REDUCE_DIMENSION_2_PC    = "reduce-dimension-2-pc",
     g_ID_REDUCE_DIMENSION_3_PC    = "reduce-dimension-3-pc",
-    g_ID_REDUCE_DIMENSION_4_PC    = "reduce-dimension-4-pc",
-    g_ID_REDUCE_DIMENSION_5_PC    = "reduce-dimension-5-pc",
     g_val_reduce_dimension;
 
 var g_ID_ABUNDANT_SAMPLES_ARE       = "abundant-samples-are",
@@ -1009,8 +941,6 @@ var g_ID_CHROMA_MIN      = "chroma-min",
 
 
 var g_ID_CHROMA_METHOD                    = "chroma-method",
-    g_ID_CHROMA_METHOD_MAGNITUDE_ABSOLUTE = "chroma-method-magnitude-absolute",
-    g_ID_CHROMA_METHOD_MAGNITUDE_RELATIVE = "chroma-method-magnitude-relative",
     g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE  = "chroma-method-evenness-absolute",
     g_ID_CHROMA_METHOD_EVENNESS_RELATIVE  = "chroma-method-evenness-relative",
     g_val_chroma_method;
