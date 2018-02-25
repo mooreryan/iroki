@@ -43,7 +43,8 @@ group :development, :test do
 
   # For js testing
   gem 'teaspoon-mocha', '~> 2.3', '>= 2.3.3'
-  gem 'phantomjs', '~> 2.1', '>= 2.1.1.0'
+  gem 'poltergeist'
+  gem 'phantomjs', :require => 'phantomjs/poltergeist'
   gem 'magic_lamp', '~> 1.8', '>= 1.8.1'
 end
 
