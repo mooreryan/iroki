@@ -3,8 +3,8 @@ ruby "2.3.1"
 
 gem 'dotenv-rails', :groups => [:development, :test]
 
-# Specify this version of nokogiri to address security vulnerability.
-gem 'nokogiri', '~> 1.8', '>= 1.8.2'
+# # Specify this version of nokogiri to address security vulnerability.
+# gem 'nokogiri', '~> 1.8', '>= 1.8.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
