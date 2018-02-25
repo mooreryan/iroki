@@ -45,6 +45,8 @@ group :development, :test do
   gem 'poltergeist'
   gem 'phantomjs', :require => 'phantomjs/poltergeist'
   gem 'magic_lamp', '~> 1.8', '>= 1.8.1'
+
+  gem 'rb-readline', '~> 0.5.3'
 end
 
 group :development do
@@ -52,9 +54,11 @@ group :development do
   gem 'web-console'
   gem 'listen', '~> 3.0.5'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'spring'
-  gem 'spring-commands-rspec'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  # gem 'spring'
+  # gem 'spring-commands-rspec'
+  # gem 'spring-watcher-listen', '~> 2.0.0'
+
+  gem 'guard-rspec', require: false
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
