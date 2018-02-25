@@ -67,8 +67,8 @@ end
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 
-gem 'foundation-rails', '~> 6.2.3', '>= 6.2.3.0'
-gem 'iroki', '~> 0.0.34'
+# gem 'foundation-rails', '~> 6.2.3', '>= 6.2.3.0'
+gem 'foundation-rails', '6.2.3'
 gem 'delayed_job_active_record'
 gem 'slim-rails'
 gem 'annotate', '~> 2.7', '>= 2.7.1'

@@ -1,7 +1,6 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    abort_if (0.1.2)
     actioncable (5.0.6)
       actionpack (= 5.0.6)
       nio4r (>= 1.2, < 3.0)
@@ -50,7 +49,6 @@ GEM
       babel-source (>= 4.0, < 6)
       execjs (~> 2.0)
     bindex (0.5.0)
-    bio (1.5.1)
     builder (3.2.3)
     byebug (10.0.0)
     capybara (2.7.1)
@@ -69,7 +67,6 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.12.2)
-    color (1.8)
     concurrent-ruby (1.0.5)
     crass (1.0.3)
     delayed_job (4.1.4)
@@ -86,7 +83,7 @@ GEM
     execjs (2.7.0)
     ffi (1.9.23)
     formatador (0.2.5)
-    foundation-rails (6.2.4.0)
+    foundation-rails (6.2.3.0)
       railties (>= 3.1.0)
       sass (>= 3.3.0, < 3.5)
       sprockets-es6 (>= 0.9.0)
@@ -108,11 +105,6 @@ GEM
       rspec (>= 2.99.0, < 4.0)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    iroki (0.0.36)
-      abort_if (~> 0.1.0)
-      bio (~> 1.5)
-      color (~> 1.8)
-      trollop (~> 2.1, >= 2.1.2)
     jbuilder (2.7.0)
       activesupport (>= 4.2.0)
       multi_json (>= 1.2)
@@ -255,7 +247,6 @@ GEM
     thor (0.20.0)
     thread_safe (0.3.6)
     tilt (2.0.8)
-    trollop (2.1.2)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     uglifier (4.1.6)
@@ -283,9 +274,8 @@ DEPENDENCIES
   coffee-rails (~> 4.2)
   delayed_job_active_record
   dotenv-rails
-  foundation-rails (~> 6.2.3, >= 6.2.3.0)
+  foundation-rails (= 6.2.3)
   guard-rspec
-  iroki (~> 0.0.34)
   jbuilder (~> 2.5)
   jquery-rails
   listen (~> 3.0.5)
