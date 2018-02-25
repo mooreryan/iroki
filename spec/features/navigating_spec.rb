@@ -7,7 +7,6 @@ RSpec.describe "Navigating", :type => :feature do
       visit path
 
       expect(page).to have_link "Iroki",    href: root_path
-      expect(page).to have_link "About",    href: about_path
       expect(page).to have_link "Contact",  href: contact_path
       expect(page).to have_link "Citation", href: citation_path
     end
@@ -43,9 +42,9 @@ RSpec.describe "Navigating", :type => :feature do
     end
   end
 
-  describe "About page" do
-    let(:path) { about_path }
-    let(:page_title) { "About" }
+  describe "Biom page" do
+    let(:path) { contact_path }
+    let(:page_title) { "Contact" }
 
     include_examples "has the nav bar"
     include_examples "has the proper title"

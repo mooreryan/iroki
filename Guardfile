@@ -24,8 +24,22 @@
 #  * zeus: 'zeus rspec' (requires the server to be started separately)
 #  * 'just' rspec: 'rspec'
 
-guard :rspec, cmd: "bundle exec rspec" do
-  require "guard/rspec/dsl"
+# guard :rspec, cmd: "bundle exec rspec" do
+#
+#
+
+
+# See https://github.com/guard/guard-rspec/wiki/Warning:-no-environment
+rspec_options = {
+    results_file: File.join(__dir__, 'tmp', 'guard_rspec_results.txt'), # << add this option to match above path in custom_plan.rb
+    cmd: "zeus rspec",
+    all_after_pass: true,
+    failed_mode: :focus
+}
+
+guard :rspec, rspec_options do
+
+require "guard/rspec/dsl"
   dsl = Guard::RSpec::Dsl.new(self)
 
   # Feel free to open issues for suggestions and improvements

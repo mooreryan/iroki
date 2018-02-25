@@ -16,7 +16,7 @@ end
 
 RSpec.describe "nav_bar.html.slim" do
   it_has_link "Iroki"
-  it_has_link "About"
+  it_has_link "Biom"
   it_has_link "Contact"
   it_has_link "Citation"
 end

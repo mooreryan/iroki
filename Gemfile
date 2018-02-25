@@ -47,6 +47,8 @@ group :development, :test do
   gem 'magic_lamp', '~> 1.8', '>= 1.8.1'
 
   gem 'rb-readline', '~> 0.5.3'
+
+  gem 'zeus'
 end
 
 group :development do
