@@ -50,3 +50,4 @@ geometry.r
 lala.rb
 
 coverage
+bin/code_climate_test.sh
