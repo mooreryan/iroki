@@ -9,23 +9,35 @@ fn.pt          = {}; // point
 fn.str         = {};
 fn.utils       = {};
 
+fn.ary._throw_if_empty = function (ary) {
+  if (ary.length === 0) {
+    throw Error("Can't take max of empty array.");
+  }
+};
+
 fn.ary.deep_copy = function (ary) {
   return JSON.parse(JSON.stringify(ary));
 };
 
 fn.ary.max = function (ary) {
+  fn.ary._throw_if_empty(ary);
+
   return ary.reduce(function (a, b) {
     return Math.max(a, b);
   });
 };
 
 fn.ary.min = function (ary) {
+  fn.ary._throw_if_empty(ary);
+
   return ary.reduce(function (a, b) {
     return Math.min(a, b);
   });
 };
 
 fn.ary.sum = function (ary) {
+  fn.ary._throw_if_empty(ary);
+
   return ary.reduce(function (a, b) {
     return a + b;
   }, 0);
@@ -202,7 +214,7 @@ fn.parsed_biom.sample_color_legend = function (parsed_biom, angle_offset) {
   var sample_names                  = sample_angle_ret_val[0];
   var sample_angles                 = sample_angle_ret_val[1];
   var sample_approx_starting_colors = sample_angles.map(function (hue_angle) {
-    return fn.color.approx_starting_color(hue_angle)
+    return fn.color.approx_starting_color(hue_angle);
   });
 
   var sample_legend_str = "name\tappoximate starting color\n";
@@ -242,11 +254,11 @@ fn.parsed_biom.sample_color_legend_html = function (parsed_biom, angle_offset) {
     "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
     ".thick-right-border {border-right: 3px solid #2d2d2d}" +
     ".thick-left-border {border-left: 3px solid #2d2d2d}" +
-    "</style>"
+    "</style>";
 
   var table = fn.html.tag("table", rows);
-  var body = fn.html.tag("body", table);
-  var head = fn.html.tag("head", style_str + fn.html.tag("title", "Sample legend"));
+  var body  = fn.html.tag("body", table);
+  var head  = fn.html.tag("head", style_str + fn.html.tag("title", "Sample legend"));
 
   return "<!DOCTYPE html>" + head + body + "</html>";
 };
