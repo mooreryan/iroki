@@ -38,7 +38,6 @@ group :development, :test do
   gem 'rspec-rails', '~> 3.5'
   gem 'rails-controller-testing'
   gem 'capybara', '2.7.1'
-  gem 'capybara-webkit', '~> 1.11', '>= 1.11.1'
   gem 'shoulda'
 
   # For js testing
