@@ -55,11 +55,32 @@ describe("fn", function () {
         }).to.throw();
       });
 
-      it("returns the sum of the ary", function() {
+      it("returns the sum of the ary", function () {
         var ary = [1, 2, 3];
 
         expect(fn.ary.sum(ary)).to.equal(6);
-      })
+      });
+    });
+  });
+
+  describe("html", function () {
+    describe("tag", function () {
+      var tag = "th";
+      var str = "apple";
+
+      it("wraps the str in a tag", function () {
+        expect(fn.html.tag(tag, str)).to.equal("<th>apple</th>");
+      });
+
+      it("will add whatever attr you pass in", function () {
+        var attr = "class='silly-thing'";
+
+        expect(fn.html.tag(tag, str, attr)).to.equal("<th class='silly-thing'>apple</th>");
+      });
+
+      it("gives an empty tag with empty string", function () {
+        expect(fn.html.tag(tag, "")).to.equal("<th></th>");
+      });
     });
   });
 
