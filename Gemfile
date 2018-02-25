@@ -40,6 +40,11 @@ group :development, :test do
   gem 'capybara', '2.7.1'
   gem 'capybara-webkit', '~> 1.11', '>= 1.11.1'
   gem 'shoulda'
+
+  # For js testing
+  gem 'teaspoon-mocha', '~> 2.3', '>= 2.3.3'
+  gem 'phantomjs', '~> 2.1', '>= 2.1.1.0'
+  gem 'magic_lamp', '~> 1.8', '>= 1.8.1'
 end
 
 group :development do

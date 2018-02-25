@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # For testing JS
+  mount MagicLamp::Genie, at: "/magic_lamp" if defined?(MagicLamp)
+
   # resources :iroki_inputs
   # resources :iroki_outputs
   root 'pages#home'
@@ -10,6 +13,7 @@ Rails.application.routes.draw do
   get 'docs' => 'pages#docs', as: :docs
 
   get 'biom' => 'pages#biom', as: :biom
+
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
