@@ -56,6 +56,8 @@ group :development, :test do
   gem "guard-teaspoon"
 
   gem 'simplecov', require: false
+  gem 'simplecov-cobertura'
+
 end
 
 group :development do

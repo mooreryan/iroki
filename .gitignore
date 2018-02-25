@@ -51,3 +51,6 @@ lala.rb
 
 coverage
 bin/code_climate_test.sh
+
+coverage_code_climate
+coverage_teaspoon

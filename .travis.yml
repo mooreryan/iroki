@@ -1,0 +1,35 @@
+language: ruby
+rvm:
+  - 2.3.1
+
+env:
+  global:
+    CC_TEST_REPORTER_ID=0e2d8bcc6b4b9943c02f08bd1dc4d56af73c80b8ed997edc296fee0cb84b3a54
+
+addons:
+  chrome: stable
+  #firefox: latest
+
+before_install:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  #- export DISPLAY=:99.0                # Display number for xvfb (for headless browser testing)
+  #- sh -e /etc/init.d/xvfb start        # Start xvfb (for headless browser testing)
+
+install:
+  - bundle install
+
+# Setup the database
+before_script: bundle exec rake db:create db:migrate
+
+# Run the test suites
+script:
+  - bundle exec teaspoon --coverage=default
+  - bundle exec rake
+
+# Pipe the coverage data to Code Climate
+after_script:
+  - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/backend/.resultset.json # Format backend coverage
+  - ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json coverage/frontend/lcov.info  # Format frontend coverage
+  - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
+  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json

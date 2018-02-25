@@ -12,8 +12,10 @@ class CustomPlan < Zeus::Rails
   def test(*args)
     # To get simple cov to work with zeus (see https://github.com/burke/zeus/wiki/SimpleCov)
     require 'simplecov'
-    SimpleCov.start 'rails'
-    # SimpleCov.start 'rails' if using RoR
+    SimpleCov.start 'rails' do
+      SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
+      SimpleCov.coverage_dir "simple_cov_output"
+    end
 
     # require all ruby files
     Dir["#{Rails.root}/app/**/*.rb"].each { |f| load f }

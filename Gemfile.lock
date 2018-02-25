@@ -230,6 +230,8 @@ GEM
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
+    simplecov-cobertura (1.3.0)
+      simplecov (~> 0.8)
     simplecov-html (0.10.2)
     slim (3.0.9)
       temple (>= 0.7.6, < 0.9)
@@ -302,6 +304,7 @@ DEPENDENCIES
   sass-rails (~> 5.0)
   shoulda
   simplecov
+  simplecov-cobertura
   slim-rails
   teaspoon-mocha (~> 2.3, >= 2.3.3)
   tzinfo-data
