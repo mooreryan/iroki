@@ -10,6 +10,14 @@ class CustomPlan < Zeus::Rails
   #
   # Need the .to_s to convert the Pathname to string explicitly.
   def test(*args)
+    # To get simple cov to work with zeus (see https://github.com/burke/zeus/wiki/SimpleCov)
+    require 'simplecov'
+    SimpleCov.start 'rails'
+    # SimpleCov.start 'rails' if using RoR
+
+    # require all ruby files
+    Dir["#{Rails.root}/app/**/*.rb"].each { |f| load f }
+
     ENV['GUARD_RSPEC_RESULTS_FILE'] = Rails.root.join('tmp', 'guard_rspec_results.txt').to_s # can be anything matching Guard::RSpec :results_file option in the Guardfile
     super
   end

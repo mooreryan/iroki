@@ -166,15 +166,17 @@ Teaspoon.configure do |config|
     # Which coverage reports Istanbul should generate. Correlates directly to what Istanbul supports.
     #
     # Available: text-summary, text, html, lcov, lcovonly, cobertura, teamcity
-    #coverage.reports = ["text-summary", "html"]
+    coverage.reports = ["text-summary", "html"]
 
     # The path that the coverage should be written to - when there's an artifact to write to disk.
     # Note: Relative to `config.root`.
-    #coverage.output_path = "coverage"
+    coverage.output_path = "coverage"
 
     # Assets to be ignored when generating coverage reports. Accepts an array of filenames or regular expressions. The
     # default excludes assets from vendor, gems and support libraries.
-    #coverage.ignore = [%r{/lib/ruby/gems/}, %r{/vendor/assets/}, %r{/support/}, %r{/(.+)_helper.}]
+    coverage.ignore = [%r{/lib/ruby/gems/}, %r{/vendor/assets/}, %r{/support/}, %r{/(.+)_helper.},
+                       # I've added these.
+                       "app/assets/javascripts/Blob.js", "app/assets/javascripts/FileSaver.js", "app/assets/javascripts/cable.js", "app/assets/javascripts/canvas-toBlob.js", "app/assets/javascripts/canvg.js", "app/assets/javascripts/chroma.js", "app/assets/javascripts/d3.js", "app/assets/javascripts/jszip.js", "app/assets/javascripts/papaparse.js", "app/assets/javascripts/verge.js", "app/assets/javascripts/google_analytics.js", "app/assets/javascripts/application.js", %r{/.rvm/gems/ruby-2.3.1@IrokiRails5/gems/}]
 
     # Various thresholds requirements can be defined, and those thresholds will be checked at the end of a run. If any
     # aren't met the run will fail with a message. Thresholds can be defined as a percentage (0-100), or nil.

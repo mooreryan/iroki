@@ -1,3 +1,16 @@
+# SimpleCov has to be at the very top.
+# it gets SimpleCov working when running
+# specs without zeus (as long as zeus is not running)
+def zeus_running?
+  File.exists? '.zeus.sock'
+end
+
+if !zeus_running?
+  require 'simplecov'
+  SimpleCov.start 'rails'
+end
+
+
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 # Force test environment for Zeus
 ENV['RAILS_ENV'] = 'test'

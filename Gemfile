@@ -52,6 +52,10 @@ group :development, :test do
   gem 'rb-readline', '~> 0.5.3'
 
   gem 'zeus'
+
+  gem "guard-teaspoon"
+
+  gem 'simplecov', require: false
 end
 
 group :development do

@@ -82,3 +82,11 @@ require "guard/rspec/dsl"
     Dir[File.join("**/#{m[1]}.feature")][0] || "spec/acceptance"
   end
 end
+
+guard :teaspoon, cmd: "teaspoon --coverage=default" do
+  # Implementation files
+  watch(%r{^app/assets/javascripts/(.+).js}) { |m| "#{m[1]}_spec" }
+
+  # Specs / Helpers
+  watch(%r{^spec/javascripts/(.*)})
+end
