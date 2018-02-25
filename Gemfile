@@ -72,3 +72,6 @@ gem 'iroki', '~> 0.0.34'
 gem 'delayed_job_active_record'
 gem 'slim-rails'
 gem 'annotate', '~> 2.7', '>= 2.7.1'
+
+# Specify this version of nokogiri to address security vulnerability.
+gem 'nokogiri', '~> 1.8', '>= 1.8.2'
