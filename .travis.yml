@@ -6,10 +6,6 @@ env:
   global:
     CC_TEST_REPORTER_ID=0e2d8bcc6b4b9943c02f08bd1dc4d56af73c80b8ed997edc296fee0cb84b3a54
 
-addons:
-  chrome: stable
-  #firefox: latest
-
 before_install:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
@@ -20,16 +16,24 @@ install:
   - bundle install
 
 # Setup the database
-before_script: bundle exec rake db:create db:migrate
+before_script:
+  - bundle exec rake db:create --all
+  - bundle exec rake db:migrate
 
-# Run the test suites
+# Run the test suites.  These are set up to make the files used in the after script.
 script:
   - bundle exec teaspoon --coverage=default
-  - bundle exec rake
+  - bundle exec rspec
+
+services:
+  - postgresql
+notifications:
+  email: false
+
 
 # Pipe the coverage data to Code Climate
 after_script:
-  - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/backend/.resultset.json # Format backend coverage
-  - ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json coverage/frontend/lcov.info  # Format frontend coverage
-  - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
-  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
+  - ./cc-test-reporter format-coverage -t cobertura -o coverage_code_climate/part_teaspoon.json coverage_teaspoon/default/cobertura-coverage.xml # convert the teaspoon
+  - ./cc-test-reporter format-coverage -t simplecov -o coverage_code_climate/part_simplecov.json simple_cov_output/coverage.xml # and the simplecov
+  - ./cc-test-reporter sum-coverage coverage_code_climate/part_*.json -p 2 -o coverage_code_climate/codeclimate.json # sum up the coverage output
+  - ./cc-test-reporter upload-coverage -i coverage_code_climate/codeclimate.json # upload the results
