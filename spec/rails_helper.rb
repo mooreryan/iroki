@@ -1,6 +1,3 @@
-# This one REALLY needs to be at the very top.
-require 'coveralls'
-Coveralls.wear!
 
 # SimpleCov has to be at the very top.
 # it gets SimpleCov working when running
@@ -15,6 +12,9 @@ if !zeus_running?
   SimpleCov.start 'rails' do
     SimpleCov.coverage_dir "simple_cov_output"
   end
+
+  require 'coveralls'
+  Coveralls.wear!
 end
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'

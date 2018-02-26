@@ -17,6 +17,9 @@ class CustomPlan < Zeus::Rails
       SimpleCov.coverage_dir "simple_cov_output"
     end
 
+    require 'coveralls'
+    Coveralls.wear!
+
     # require all ruby files
     Dir["#{Rails.root}/app/**/*.rb"].each { |f| load f }
 
