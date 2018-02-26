@@ -221,6 +221,19 @@ describe("fn", function () {
 
         expect(actual).to.equal(expected);
       });
+
+      it("scales the val", function () {
+        var val     = 15,
+            old_min = 10,
+            old_max = 20,
+            new_min = 100,
+            new_max = 200;
+
+        var expected = 150,
+            actual   = fn.math.scale(val, old_min, old_max, new_min, new_max);
+
+        expect(actual).to.equal(expected);
+      });
     });
   });
 });
