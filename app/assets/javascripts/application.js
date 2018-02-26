@@ -13,6 +13,12 @@
 //= require jquery
 //= require jquery_ujs
 //= require foundation
+
+// This is all of the vendor things.
+//= require_directory ../../../vendor/assets/javascripts
+
+// Require functions first so that they are available to everything else.
+//= require functions
 //= require_tree .
 
 $(function(){ $(document).foundation(); });
