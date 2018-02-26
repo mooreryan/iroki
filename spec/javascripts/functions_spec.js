@@ -1,4 +1,6 @@
 describe("fn", function () {
+  var fn_spec_globals = { tolerance : 1e-3 };
+
   describe("ary", function () {
     describe("deep_copy", function () {
       it("makes a new copy not a reference", function () {
@@ -59,6 +61,50 @@ describe("fn", function () {
         var ary = [1, 2, 3];
 
         expect(fn.ary.sum(ary)).to.equal(6);
+      });
+    });
+  });
+
+  describe("color", function () {
+    describe("correct_luminance", function () {
+      var hex       = "#4682e6";
+      var lightness = 50;
+      var old_min   = 0;
+      var old_max   = 100;
+      var new_min   = 0;
+      var new_max   = 1;
+
+      it("returns a chroma rgb");
+
+      it("throws if lightness is a bad value", function () {
+        expect(function () {
+          fn.color.correct_luminance(hex, -100, old_min, old_max, new_min, new_max);
+        }).to.throw();
+      });
+
+      it("makes luminance proportional to lightness", function () {
+        var expected_luminance = 0.5;
+        var actual_luminance   = fn.color.correct_luminance(hex, lightness, old_min, old_max, new_min, new_max).luminance();
+
+        expect(actual_luminance).to.closeTo(expected_luminance, fn_spec_globals.tolerance);
+      });
+
+      it("scales lightness first to the new luminance scale", function () {
+        var expected_luminance = 0.25;
+        var actual_luminance   = fn.color.correct_luminance(hex, lightness, old_min, old_max, new_min, 0.5).luminance();
+
+        expect(actual_luminance).to.closeTo(actual_luminance, fn_spec_globals.tolerance);
+      });
+    });
+
+    describe("approximate_starting_color", function () {
+      it("takes a hue angle and returns the approx starting hex code", function () {
+        var starting_hue = 0;
+
+        var expected = chroma.hcl(starting_hue, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex();
+        var actual = fn.color.approx_starting_color(starting_hue);
+
+        expect(actual).to.equal(expected);
       });
     });
   });
