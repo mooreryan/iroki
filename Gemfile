@@ -58,6 +58,7 @@ group :development, :test do
   gem 'simplecov', require: false
   gem 'simplecov-cobertura'
 
+  gem 'coveralls', require: false
 end
 
 group :development do

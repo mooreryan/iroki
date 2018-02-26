@@ -15,6 +15,8 @@ if !zeus_running?
   end
 end
 
+require 'coveralls'
+Coveralls.wear!
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 # Force test environment for Zeus
