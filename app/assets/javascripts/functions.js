@@ -179,7 +179,7 @@ fn.parsed_biom.num_real_samples = function (parsed_biom) {
   return parsed_biom.meta.fields.length - num_fake_samples;
 };
 
-fn.parsed_biom.rel_abundance = function (parsed_biom, avg_method) {
+fn.parsed_biom.abundance_across = function (parsed_biom, avg_method) {
   var abundance      = {};
   var abundance_vals = [];
 
@@ -203,6 +203,7 @@ fn.parsed_biom.rel_abundance = function (parsed_biom, avg_method) {
       }
     });
 
+    // TODO when does this happen, when a leaf has all zero counts?
     if (counted_samples > 0) {
       abundance[leaf] /= counted_samples;
     } // else it will still be 0

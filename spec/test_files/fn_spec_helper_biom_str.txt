@@ -1,0 +1,4 @@
+name	s1	s2
+apple	10	0
+pie	0	10
+

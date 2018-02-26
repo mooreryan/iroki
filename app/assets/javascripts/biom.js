@@ -348,7 +348,7 @@ function colors_from_centroids(centroids, parsed_biom) {
   }
 
   // Read: return value
-  var ret_val       = fn.parsed_biom.rel_abundance(parsed_biom, g_val_avg_method);
+  var ret_val       = fn.parsed_biom.abundance_across(parsed_biom, g_val_avg_method);
   var avg_counts    = ret_val.abundance;
   var min_avg_count = ret_val.min_val;
   var max_avg_count = ret_val.max_val;
@@ -512,7 +512,7 @@ function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_de
   var evenness = inverse_evenness(parsed_biom);
 
   // This is on the "new" biom string, i.e. it will us PC columns rather than original if the thing has been dimension reduced.
-  var abundance = fn.parsed_biom.rel_abundance(parsed_biom, g_val_avg_method).abundance;
+  var abundance = fn.parsed_biom.abundance_across(parsed_biom, g_val_avg_method).abundance;
 
   var parsed_orig_biom = null;
   if (orig_biom_str) {
