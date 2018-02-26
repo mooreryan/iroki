@@ -83,10 +83,10 @@ require "guard/rspec/dsl"
   end
 end
 
-guard :teaspoon, cmd: "teaspoon --coverage=default" do
-  # Implementation files
-  watch(%r{^app/assets/javascripts/(.+).js}) { |m| "#{m[1]}_spec" }
-
-  # Specs / Helpers
-  watch(%r{^spec/javascripts/(.*)})
-end
+# guard :teaspoon, cmd: "teaspoon --coverage=default" do
+#   # Implementation files
+#   watch(%r{^app/assets/javascripts/(.+).js}) { |m| "#{m[1]}_spec" }
+#
+#   # Specs / Helpers
+#   watch(%r{^spec/javascripts/(.*)})
+# end
