@@ -657,6 +657,7 @@ function make_tsv_string(json) {
   return header + strings.join("\n");
 }
 
+// The "main" function
 function biom__save_abundance_colors(biom_str) {
   var str;
   switch (g_val_reduce_dimension) {

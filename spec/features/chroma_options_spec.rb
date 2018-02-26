@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe "layouts/biom/_chroma_options.html.slim", js: true do
-  it "corrects bad values for chroma min }" do
+  it "corrects bad values for chroma min" do
     visit biom_path
 
     click_link "Chroma (saturation) options"
