@@ -78,7 +78,7 @@ fn.diversity.shannon_entropy = function (counts) {
     else {
       var proportion = val / ary_sum;
 
-      return proportion * Math.log2(proportion);
+      return proportion * fn.math.log2(proportion);
     }
   }));
 };
@@ -92,7 +92,7 @@ fn.diversity.evenness_entropy = function (counts) {
     return 1;
   }
   else {
-    var shannon_max = Math.log2(counts.length);
+    var shannon_max = fn.math.log2(counts.length);
 
     return fn.diversity.shannon_entropy(counts) / shannon_max;
   }
@@ -108,14 +108,6 @@ fn.diversity.evenness_entropy = function (counts) {
 //   return fn.diversity.shannon_diversity(counts) / shannon_max;
 // };
 
-// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
-fn.math.round = function (number, precision) {
-  var factor            = Math.pow(10, precision);
-  var tempNumber        = number * factor;
-  var roundedTempNumber = Math.round(tempNumber);
-  return roundedTempNumber / factor;
-};
-
 fn.html.tag = function (tag, str, attr) {
   if (attr !== undefined) {
     return "<" + tag + " " + attr + ">" + str + "</" + tag + ">";
@@ -123,6 +115,20 @@ fn.html.tag = function (tag, str, attr) {
   else {
     return "<" + tag + ">" + str + "</" + tag + ">";
   }
+};
+
+// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log2
+// See https://stackoverflow.com/questions/28296928/why-does-math-log10-work-on-some-systems-but-return-undefined-on-others
+fn.math.log2 = Math.log2 || function(x) {
+  return Math.log(x) * Math.LOG2E;
+};
+
+// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+fn.math.round = function (number, precision) {
+  var factor            = Math.pow(10, precision);
+  var tempNumber        = number * factor;
+  var roundedTempNumber = Math.round(tempNumber);
+  return roundedTempNumber / factor;
 };
 
 fn.math.scale = function (val, old_min, old_max, new_min, new_max) {

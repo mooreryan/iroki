@@ -130,20 +130,20 @@ describe("fn", function () {
 
       it("is with zero counts", function () {
         var expected = 1;
-        var actual = fn.diversity.shannon_entropy([10, 0, 10]);
+        var actual   = fn.diversity.shannon_entropy([10, 0, 10]);
 
         expect(actual).to.equal(expected);
-      })
+      });
 
-      it("is zero if all counts are zero", function() {
+      it("is zero if all counts are zero", function () {
         var expected = 0;
-        var actual = fn.diversity.shannon_entropy([0,0,0])
+        var actual   = fn.diversity.shannon_entropy([0, 0, 0]);
 
         expect(actual).to.equal(expected);
-      })
+      });
     });
 
-    describe("evenness_", function () {
+    describe("evenness_entropy", function () {
       it("throws if the ary is empty", function () {
         var func = function () {
           fn.diversity.evenness_entropy([]);
@@ -157,25 +157,25 @@ describe("fn", function () {
 
       it("counts with all even proportion equal 1", function () {
         var expected = 1;
-        var actual = fn.diversity.evenness_entropy([5, 5, 5]);
+        var actual   = fn.diversity.evenness_entropy([5, 5, 5]);
 
-        expect(actual).to.equal(expected);
+        expect(actual).to.be.closeTo(expected, fn_spec_globals.tolerance);
       });
 
       it("with proportion 1, evenness is 0", function () {
         var expected = 0;
-        var actual = fn.diversity.evenness_entropy([10, 0, 0]);
+        var actual   = fn.diversity.evenness_entropy([10, 0, 0]);
 
         expect(actual).to.equal(expected);
-      })
+      });
 
       // TODO not sure what the actual behavior here should be
-      it("is 0 if all counts are zero", function() {
+      it("is 0 if all counts are zero", function () {
         var expected = 0;
-        var actual = fn.diversity.evenness_entropy([0,0,0])
+        var actual   = fn.diversity.evenness_entropy([0, 0, 0]);
 
         expect(actual).to.equal(expected);
-      })
+      });
     });
 
   });
@@ -205,6 +205,21 @@ describe("fn", function () {
     describe("round", function () {
       it("rounds to a certain precesion", function () {
         expect(fn.math.round(4.41, 1)).to.equal(4.4);
+      });
+    });
+
+    describe("scale", function () {
+      it("returns avg of new_min and new_max if old_min and old_max are equal", function () {
+        var val     = 1,
+            old_min = 1,
+            old_max = 1,
+            new_min = 10,
+            new_max = 20;
+
+        var expected = 15,
+            actual   = fn.math.scale(val, old_min, old_max, new_min, new_max);
+
+        expect(actual).to.equal(expected);
       });
     });
   });
