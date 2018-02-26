@@ -7,6 +7,8 @@ end
 
 if !zeus_running?
   require 'simplecov'
+  require 'simplecov-cobertura'
+
   SimpleCov.start 'rails' do
     SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
     SimpleCov.coverage_dir "simple_cov_output"
