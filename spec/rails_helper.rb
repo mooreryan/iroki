@@ -1,3 +1,7 @@
+# This one REALLY needs to be at the very top.
+require 'coveralls'
+Coveralls.wear!
+
 # SimpleCov has to be at the very top.
 # it gets SimpleCov working when running
 # specs without zeus (as long as zeus is not running)
@@ -7,16 +11,11 @@ end
 
 if !zeus_running?
   require 'simplecov'
-  require 'simplecov-cobertura'
 
   SimpleCov.start 'rails' do
-    SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
     SimpleCov.coverage_dir "simple_cov_output"
   end
 end
-
-require 'coveralls'
-Coveralls.wear!
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 # Force test environment for Zeus
