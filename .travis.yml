@@ -19,6 +19,10 @@ install:
 before_script:
   - bundle exec rake db:create --all
   - bundle exec rake db:migrate
+  # Need to make a .env file because we read secret keys from there.
+  - echo "DEVELOPMENT_KEY=$(rake secret)" > .env
+  - echo "TEST_KEY=$(rake secret)" >> .env
+  - echo "SECRET_KEY_BASE=$(rake secret)" >> .env
 
 # Run the test suites.  These are set up to make the files used in the after script.
 script:
