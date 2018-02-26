@@ -2,6 +2,8 @@
 
 # Iroki #
 
+[![Build Status](https://travis-ci.org/mooreryan/iroki.svg?branch=master)](https://travis-ci.org/mooreryan/iroki)
+
 Rails 5 source for the [Iroki webapp](www.iroki.net), a viewer and customizer for phylogenetic trees.
 
 ## Citation ##
