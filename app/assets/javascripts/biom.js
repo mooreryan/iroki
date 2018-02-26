@@ -42,7 +42,7 @@ biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors
 
   var parsed_orig_biom = null;
   if (orig_biom_str) {
-    parsed_orig_biom = parse_biom_file_str(orig_biom_str);
+    parsed_orig_biom = biom.parse_biom_file_str(orig_biom_str);
   }
 
   var fields = fn.ary.deep_copy(parsed_biom.meta.fields);
@@ -162,7 +162,7 @@ biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors
 };
 
 
-function parse_biom_file_str(str) {
+biom.parse_biom_file_str = function (str) {
   // Parse mapping string.
   var csv = Papa.parse(chomp(str), PAPA_CONFIG);
 
@@ -209,7 +209,7 @@ function parse_biom_file_str(str) {
   });
 
   return csv;
-}
+};
 
 function round_to(x, place) {
   return Math.round(place * x) / place;
@@ -693,7 +693,7 @@ function biom__save_abundance_colors(biom_str) {
       break;
   }
 
-  var parsed_biom = parse_biom_file_str(str);
+  var parsed_biom = biom.parse_biom_file_str(str);
 
   var ret_val         = biom.colors_from_parsed_biom(parsed_biom);
   var colors          = ret_val[0];
@@ -871,7 +871,7 @@ function biom_to_ary(parsed_biom) {
 
 // This function takes biom_str rather than parsed biom string since it returns a new adjusted biom string.  TODO: We could take the parsed biom string and return an adjusted parsed biom string if the parsing is a bottleneck.
 function reduce_dimension(biom_str, type, cutoff) {
-  var biom_ary      = biom_to_ary(parse_biom_file_str(biom_str));
+  var biom_ary      = biom_to_ary(biom.parse_biom_file_str(biom_str));
   var leaves        = biom_ary[0];
   var counts        = biom_ary[1];
   var tmp           = project(counts, type, cutoff);

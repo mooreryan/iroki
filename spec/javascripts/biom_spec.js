@@ -52,5 +52,15 @@ describe("biom", function () {
         expect(actual).to.equal(expected);
       });
     });
+
+    describe("parse_biom_file_str", function () {
+      it("returns parsed_biom from a biom file string", function () {
+        var expected = '{"data":[{"name":"geode","sample_1":5},{"name":"clock","sample_1":1},{"name":"tire","sample_1":2},{"name":"banana","sample_1":9},{"name":"eggplant","sample_1":10}],"errors":[],"meta":{"delimiter":"\\t","linebreak":"\\n","aborted":false,"truncated":false,"cursor":57,"fields":["name","sample_1"]}}';
+
+        var actual = JSON.stringify(biom.parse_biom_file_str(biom_str));
+
+        expect(actual).to.equal(expected);
+      });
+    });
   });
 });
