@@ -1,3 +1,167 @@
+var biom = {};
+
+
+biom.colors_from_parsed_biom = function (parsed_biom) {
+  // TODO one of these functions modifies parsed_biom in place.
+  var centroids = centroids_of_samples(parsed_biom);
+
+  debug_biom_csv = parsed_biom;
+
+  return colors_from_centroids(centroids, parsed_biom);
+};
+
+biom.make_tsv_string = function (json) {
+  var header  = "name\tbranch_color\tleaf_label_color\tleaf_dot_color\n";
+  var strings = [];
+  json_each(json, function (key, val) {
+    var str = [key, val, val, val].join("\t");
+
+    strings.push(str);
+  });
+
+  return header + strings.join("\n");
+};
+
+// TODO make sure all color tags are hex codes
+// The orig_biom_str is for when the parsed_biom has the reduced dimensions so we can put the original dimensions onto the end of the file.
+biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors, color_details) {
+  // biom csv
+  // { data: [], errors: [], meta: {} }
+  // in data the entries are like this: { name: leaf_name, sample1: 12, sample2: 10.5 }
+
+  // colors
+  // { leaf_name: "#00ff00", leaf2_name: "#ff00ff" }
+
+
+  var centroids = centroids_of_samples(parsed_biom);
+
+  var evenness = inverse_evenness(parsed_biom);
+
+  // This is on the "new" biom string, i.e. it will us PC columns rather than original if the thing has been dimension reduced.
+  var abundance = fn.parsed_biom.abundance_across(parsed_biom, g_val_avg_method).abundance;
+
+  var parsed_orig_biom = null;
+  if (orig_biom_str) {
+    parsed_orig_biom = parse_biom_file_str(orig_biom_str);
+  }
+
+  var fields = fn.ary.deep_copy(parsed_biom.meta.fields);
+
+  // Make color the second field
+  fields.splice(1, 0, "color", "hue", "chroma/saturation", "lightness", "centroid", "evenness", "abundance");
+
+  var header_str = "<tr>\n";
+  fields.forEach(function (field) {
+    // Don't put the fake fields in the output.
+    if (!fn.utils.is_fake_field(field)) {
+      if (field === "color" || field === "lightness" || field === "abundance") {
+        header_str += "<th class='thick-right-border'>" + field + "</th>";
+      }
+      else {
+        header_str += th_tag(field);
+      }
+    }
+  });
+
+  if (parsed_orig_biom) {
+    // Add on the original header fields.
+    var original_fields = parsed_orig_biom.meta.fields;
+    // remove the name field
+    original_fields.shift();
+
+    original_fields.forEach(function (field, idx) {
+      if (idx === 0) {
+        header_str += "<th class='thick-left-border'>" + field + "</th>";
+      }
+      else {
+        header_str += th_tag(field);
+      }
+    });
+  }
+  header_str += "</tr>";
+
+  var table_rows = [];
+  parsed_biom.data.forEach(function (line_json, line_idx) {
+    var this_color     = null;
+    var this_leaf      = null;
+    var table_rows_str = "<tr>";
+
+    // Add on the parts from the biom file
+    json_each(line_json, function (field, value) {
+      if (!field.match(/iroki_fake_[12]/)) {
+        if (field === "name") {
+          this_leaf = value;
+          // Get the color with this name
+          // TODO set a default value if it is not in the hash
+
+          this_color = colors[value];
+
+          table_rows_str += td_tag(value);
+
+          // Put the color column right after the name.
+          table_rows_str += td_tag_with_background(this_color, this_color);
+
+          // Add on the parts from the color info
+          var hue        = color_details[value].hue;
+          var chroma_val = fn.math.round(color_details[value].chroma, 2);
+          var lightness  = fn.math.round(color_details[value].lightness, 2);
+
+          // Flip hue around the circle if the angle is negative.
+          hue = hue < 0 ? fn.math.round(hue + 360, 2) : fn.math.round(hue, 2);
+
+          table_rows_str += (td_tag(hue) + td_tag(chroma_val) + "<td class='thick-right-border'>" + lightness + "</td>");
+
+          // Add the centroid
+          table_rows_str += td_tag(fn.pt.to_s(centroids[this_leaf]));
+
+          // And now add in the evenness
+          table_rows_str += td_tag(fn.math.round(1 - evenness[value], 2));
+
+          // Finally the abundance.
+          table_rows_str += ("<td class='thick-right-border'>" + fn.math.round(abundance[value], 2) + "</td>");
+        }
+        else {
+          table_rows_str += td_tag(fn.math.round(value, 2));
+        }
+      }
+    });
+
+    if (parsed_orig_biom) {
+      var orig_data      = parsed_orig_biom.data[line_idx];
+      var orig_val_count = 0;
+      json_each(orig_data, function (field, value) {
+        if (field !== "name") {
+          if (orig_val_count === 0) {
+            table_rows_str += ("<td class='thick-left-border'>" + fn.math.round(value, 2) + "</td>");
+          }
+          else {
+            table_rows_str += td_tag(fn.math.round(value, 2));
+          }
+
+          orig_val_count += 1;
+        }
+      });
+    }
+
+    // Finish off the row
+    table_rows_str += "</tr>";
+    table_rows.push(table_rows_str);
+  });
+
+  var style_str = "<style>" +
+    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
+    "th, td {padding: 5px} " +
+    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
+    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
+    ".thick-left-border {border-left: 3px solid #2d2d2d}" +
+    "</style>";
+
+  var md_str = "<!DOCTYPE html><head>" + style_str + "<title>Color table</title></head>";
+
+  return md_str + "<body><table>" + header_str + table_rows.join("\n") + "</table></body></html>";
+};
+
+
 function parse_biom_file_str(str) {
   // Parse mapping string.
   var csv = Papa.parse(chomp(str), PAPA_CONFIG);
@@ -26,7 +190,7 @@ function parse_biom_file_str(str) {
   csv.data.map(function (line) {
     json_each(line, function (col_header, col_data) {
       column_info[col_header].push(col_data);
-    })
+    });
   });
 
   var scaled_counts = {};
@@ -496,166 +660,8 @@ function td_tag_with_background(str, color) {
   return "<td class='thick-right-border' style='background-color:" + color + "; " + text_style + "'>" + str + "</td>";
 }
 
-// TODO make sure all color tags are hex codes
-// The orig_biom_str is for when the parsed_biom has the reduced dimensions so we can put the original dimensions onto the end of the file.
-function make_biom_with_colors_html(parsed_biom, orig_biom_str, colors, color_details) {
-  // biom csv
-  // { data: [], errors: [], meta: {} }
-  // in data the entries are like this: { name: leaf_name, sample1: 12, sample2: 10.5 }
-
-  // colors
-  // { leaf_name: "#00ff00", leaf2_name: "#ff00ff" }
-
-
-  var centroids = centroids_of_samples(parsed_biom);
-
-  var evenness = inverse_evenness(parsed_biom);
-
-  // This is on the "new" biom string, i.e. it will us PC columns rather than original if the thing has been dimension reduced.
-  var abundance = fn.parsed_biom.abundance_across(parsed_biom, g_val_avg_method).abundance;
-
-  var parsed_orig_biom = null;
-  if (orig_biom_str) {
-    parsed_orig_biom = parse_biom_file_str(orig_biom_str);
-  }
-
-  var fields = fn.ary.deep_copy(parsed_biom.meta.fields);
-
-  // Make color the second field
-  fields.splice(1, 0, "color", "hue", "chroma/saturation", "lightness", "centroid", "evenness", "abundance");
-
-  var header_str = "<tr>\n";
-  fields.forEach(function (field) {
-    // Don't put the fake fields in the output.
-    if (!fn.utils.is_fake_field(field)) {
-      if (field === "color" || field === "lightness" || field === "abundance") {
-        header_str += "<th class='thick-right-border'>" + field + "</th>"
-      }
-      else {
-        header_str += th_tag(field);
-      }
-    }
-  });
-
-  if (parsed_orig_biom) {
-    // Add on the original header fields.
-    var original_fields = parsed_orig_biom.meta.fields;
-    // remove the name field
-    original_fields.shift();
-
-    original_fields.forEach(function (field, idx) {
-      if (idx === 0) {
-        header_str += "<th class='thick-left-border'>" + field + "</th>"
-      }
-      else {
-        header_str += th_tag(field);
-      }
-    });
-  }
-  header_str += "</tr>";
-
-  var table_rows = [];
-  parsed_biom.data.forEach(function (line_json, line_idx) {
-    var this_color     = null;
-    var this_leaf      = null;
-    var table_rows_str = "<tr>";
-
-    // Add on the parts from the biom file
-    json_each(line_json, function (field, value) {
-      if (!field.match(/iroki_fake_[12]/)) {
-        if (field === "name") {
-          this_leaf = value;
-          // Get the color with this name
-          // TODO set a default value if it is not in the hash
-
-          this_color = colors[value];
-
-          table_rows_str += td_tag(value);
-
-          // Put the color column right after the name.
-          table_rows_str += td_tag_with_background(this_color, this_color);
-
-          // Add on the parts from the color info
-          var hue        = color_details[value].hue
-          var chroma_val = fn.math.round(color_details[value].chroma, 2);
-          var lightness  = fn.math.round(color_details[value].lightness, 2);
-
-          // Flip hue around the circle if the angle is negative.
-          hue = hue < 0 ? fn.math.round(hue + 360, 2) : fn.math.round(hue, 2);
-
-          table_rows_str += (td_tag(hue) + td_tag(chroma_val) + "<td class='thick-right-border'>" + lightness + "</td>");
-
-          // Add the centroid
-          table_rows_str += td_tag(fn.pt.to_s(centroids[this_leaf]));
-
-          // And now add in the evenness
-          table_rows_str += td_tag(fn.math.round(1 - evenness[value], 2));
-
-          // Finally the abundance.
-          table_rows_str += ("<td class='thick-right-border'>" + fn.math.round(abundance[value], 2) + "</td>");
-        }
-        else {
-          table_rows_str += td_tag(fn.math.round(value, 2));
-        }
-      }
-    });
-
-    if (parsed_orig_biom) {
-      var orig_data      = parsed_orig_biom.data[line_idx];
-      var orig_val_count = 0;
-      json_each(orig_data, function (field, value) {
-        if (field !== "name") {
-          if (orig_val_count === 0) {
-            table_rows_str += ("<td class='thick-left-border'>" + fn.math.round(value, 2) + "</td>");
-          }
-          else {
-            table_rows_str += td_tag(fn.math.round(value, 2));
-          }
-
-          orig_val_count += 1;
-        }
-      });
-    }
-
-    // Finish off the row
-    table_rows_str += "</tr>";
-    table_rows.push(table_rows_str);
-  });
-
-  var style_str = "<style>" +
-    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
-    "th, td {padding: 5px} " +
-    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
-    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
-    ".thick-left-border {border-left: 3px solid #2d2d2d}" +
-    "</style>"
-
-  var md_str = "<!DOCTYPE html><head>" + style_str + "<title>Color table</title></head>";
-
-  return md_str + "<body><table>" + header_str + table_rows.join("\n") + "</table></body></html>";
-}
 
 var debug_biom_csv, debug_colors_json, debug_color_details;
-
-function biom__colors_from_biom_str(parsed_biom) {
-  var centroids = centroids_of_samples(parsed_biom);
-
-  debug_biom_csv = parsed_biom;
-
-  return colors_from_centroids(centroids, parsed_biom);
-}
-
-function make_tsv_string(json) {
-  var header  = "name\tbranch_color\tleaf_label_color\tleaf_dot_color\n";
-  var strings = [];
-  json_each(json, function (key, val) {
-    var str = [key, val, val, val].join("\t");
-
-    strings.push(str);
-  });
-
-  return header + strings.join("\n");
-}
 
 // The "main" function
 function biom__save_abundance_colors(biom_str) {
@@ -689,26 +695,26 @@ function biom__save_abundance_colors(biom_str) {
 
   var parsed_biom = parse_biom_file_str(str);
 
-  var ret_val         = biom__colors_from_biom_str(parsed_biom);
+  var ret_val         = biom.colors_from_parsed_biom(parsed_biom);
   var colors          = ret_val[0];
   var color_details   = ret_val[1];
   debug_colors_json   = colors;
   debug_color_details = color_details;
-  var tsv_str         = make_tsv_string(colors);
+  var tsv_str         = biom.make_tsv_string(colors);
 
   if (g_val_download_legend) {
     // TODO don't call parse_biom_file again, have a single function do it and pass that around.
 
     if (g_val_reduce_dimension === "reduce-dimension-none") {
-      var html_str = make_biom_with_colors_html(parsed_biom, false, colors, color_details);
+      var html_str = biom.make_counts_with_colors_html(parsed_biom, false, colors, color_details);
     }
     else {
-      var html_str = make_biom_with_colors_html(parsed_biom, biom_str, colors, color_details);
+      var html_str = biom.make_counts_with_colors_html(parsed_biom, biom_str, colors, color_details);
 
     }
 
     // Make the tsv for sample legend.
-    var sample_color_legend_tsv_str = fn.parsed_biom.sample_color_legend(parsed_biom, g_val_hue_angle_offset);
+    var sample_color_legend_tsv_str  = fn.parsed_biom.sample_color_legend(parsed_biom, g_val_hue_angle_offset);
     var sample_color_legend_html_str = fn.parsed_biom.sample_color_legend_html(parsed_biom, g_val_hue_angle_offset);
 
     var zip = new JSZip();
@@ -816,7 +822,7 @@ function project(ary, type, cutoff) {
   if (num_sing_vals === 1) {
     var abs_min_val   = Math.abs(min(scores));
     var scaled_scores = scores.map(function (score) {
-      return score + abs_min_val + 1
+      return score + abs_min_val + 1;
     });
     return [num_sing_vals, scaled_scores];
   }
@@ -849,7 +855,7 @@ function apply_to_cols(M, fn) {
 function biom_to_ary(parsed_biom) {
   var biom         = parsed_biom;
   var leaf_names   = biom.data.map(function (obj) {
-    return obj[biom.meta.fields[0]]
+    return obj[biom.meta.fields[0]];
   });
   var sample_names = biom.meta.fields;
   sample_names.shift(); // remove the first field, it is 'name'
@@ -908,22 +914,23 @@ function reduce_dimension(biom_str, type, cutoff) {
   }).join("\n");
 }
 
+// TODO need to make sure the defaults match up with the actual forms.
 var g_COLOR_IS_DARK = 0.25;
 
 var g_ID_COLOR_SPACE     = "color-space",
     g_ID_COLOR_SPACE_HCL = "color-space-hcl",
     g_ID_COLOR_SPACE_HSL = "color-space-hsl",
-    g_val_color_space;
+    g_val_color_space    = g_ID_COLOR_SPACE_HCL;
 
 var g_ID_AVG_METHOD                        = "avg-method",
     g_ID_AVG_METHOD_ALL_SAMPLES_MEAN       = "avg-method-all-samples-mean",
     g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN   = "avg-method-nonzero-samples-mean",
     g_ID_AVG_METHOD_ALL_SAMPLES_MEDIAN     = "avg-method-all-samples-median",
     g_ID_AVG_METHOD_NONZERO_SAMPLES_MEDIAN = "avg-method-nonzero-samples-median",
-    g_val_avg_method;
+    g_val_avg_method                       = g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN;
 
-var g_ID_HUE_ANGLE_OFFSET = "hue-angle-offset",
-    g_val_hue_angle_offset;
+var g_ID_HUE_ANGLE_OFFSET  = "hue-angle-offset",
+    g_val_hue_angle_offset = 0;
 
 var g_ID_REDUCE_DIMENSION         = "reduce-dimension",
     g_ID_REDUCE_DIMENSION_NONE    = "reduce-dimension-none",
@@ -933,44 +940,44 @@ var g_ID_REDUCE_DIMENSION         = "reduce-dimension",
     g_ID_REDUCE_DIMENSION_1_PC    = "reduce-dimension-1-pc",
     g_ID_REDUCE_DIMENSION_2_PC    = "reduce-dimension-2-pc",
     g_ID_REDUCE_DIMENSION_3_PC    = "reduce-dimension-3-pc",
-    g_val_reduce_dimension;
+    g_val_reduce_dimension        = g_ID_REDUCE_DIMENSION_NONE;
 
 var g_ID_ABUNDANT_SAMPLES_ARE       = "abundant-samples-are",
     g_ID_ABUNDANT_SAMPLES_ARE_LIGHT = "abundant-samples-are-light",
     g_ID_ABUNDANT_SAMPLES_ARE_DARK  = "abundant-samples-are-dark",
-    g_val_abundant_samples_are;
+    g_val_abundant_samples_are      = g_ID_ABUNDANT_SAMPLES_ARE_LIGHT;
 
-var g_ID_DOWNLOAD_LEGEND = "download-legend",
-    g_val_download_legend;
+var g_ID_DOWNLOAD_LEGEND  = "download-legend",
+    g_val_download_legend = true;
 
 var g_ID_LIGHTNESS_MIN      = "lightness-min",
     g_ID_LIGHTNESS_MAX      = "lightness-max",
     g_DEFAULT_LIGHTNESS_MIN = 30,
     g_DEFAULT_LIGHTNESS_MAX = 90,
-    g_val_lightness_min,
-    g_val_lightness_max;
+    g_val_lightness_min     = g_DEFAULT_LIGHTNESS_MIN,
+    g_val_lightness_max     = g_DEFAULT_LIGHTNESS_MAX;
 
 var g_ID_CHROMA_MIN      = "chroma-min",
     g_ID_CHROMA_MAX      = "chroma-max",
     g_DEFAULT_CHROMA_MIN = 0,
     g_DEFAULT_CHROMA_MAX = 100,
-    g_val_chroma_min,
-    g_val_chroma_max;
+    g_val_chroma_min     = g_DEFAULT_CHROMA_MIN,
+    g_val_chroma_max     = g_DEFAULT_CHROMA_MAX;
 
 
 var g_ID_CHROMA_METHOD                   = "chroma-method",
     g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE = "chroma-method-evenness-absolute",
     g_ID_CHROMA_METHOD_EVENNESS_RELATIVE = "chroma-method-evenness-relative",
-    g_val_chroma_method;
+    g_val_chroma_method                  = g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE;
 
 var g_ID_EVEN_LEAVES_ARE                = "even-leaves-are",
     g_ID_EVEN_LEAVES_ARE_LESS_SATURATED = "even-leaves-are-less-saturated",
     g_ID_EVEN_LEAVES_ARE_MORE_SATURATED = "even-leaves-are-more-saturated",
-    g_val_even_leaves_are;
+    g_val_even_leaves_are               = g_ID_EVEN_LEAVES_ARE_LESS_SATURATED;
 
 
-var g_ID_CORRECT_LUMINANCE = "correct-luminance",
-    g_val_correct_luminance;
+var g_ID_CORRECT_LUMINANCE  = "correct-luminance",
+    g_val_correct_luminance = true;
 
 function update_form_vals() {
 
@@ -980,11 +987,11 @@ function update_form_vals() {
   g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
   if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
     g_val_hue_angle_offset = 0;
-    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset);
   }
   else if (g_val_hue_angle_offset >= 360) {
     g_val_hue_angle_offset = 359;
-    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset)
+    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset);
   }
   var display_color = fn.color.approx_starting_color(g_val_hue_angle_offset);
   jq("hue-angle-offset-label").css("color", display_color);
