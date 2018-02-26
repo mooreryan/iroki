@@ -67,11 +67,11 @@ fn.color.approx_starting_color = function (hue) {
   return chroma.hcl(hue, chroma_val, lightness).hex();
 };
 
-fn.diversity.shannon_entropy = function (ary) {
+fn.diversity.shannon_entropy = function (counts) {
   // First convert counts to proportions
-  var ary_sum = fn.ary.sum(ary);
+  var ary_sum = fn.ary.sum(counts);
 
-  return -fn.ary.sum(ary.map(function (val) {
+  return -fn.ary.sum(counts.map(function (val) {
     if (val === 0) {
       return 0;
     }
@@ -83,12 +83,8 @@ fn.diversity.shannon_entropy = function (ary) {
   }));
 };
 
-fn.diversity.shannon_diversity = function (ary) {
-  return Math.pow(2, fn.diversity.shannon_entropy(ary));
-};
-
-fn.diversity.evenness_entropy = function (ary) {
-  var ary_len = ary.length;
+fn.diversity.evenness_entropy = function (counts) {
+  var ary_len = counts.length;
   if (ary_len === 0) {
     throw Error("ary len must be > 0");
   }
@@ -96,17 +92,21 @@ fn.diversity.evenness_entropy = function (ary) {
     return 1;
   }
   else {
-    var shannon_max = Math.log2(ary.length);
+    var shannon_max = Math.log2(counts.length);
 
-    return fn.diversity.shannon_entropy(ary) / shannon_max;
+    return fn.diversity.shannon_entropy(counts) / shannon_max;
   }
 };
 
-fn.diversity.evenness_diversity = function (ary) {
-  var shannon_max = ary.length;
+// fn.diversity.shannon_diversity = function (counts) {
+//   return Math.pow(2, fn.diversity.shannon_entropy(counts));
+// };
 
-  return fn.diversity.shannon_diversity(ary) / shannon_max;
-};
+// fn.diversity.evenness_diversity = function (counts) {
+//   var shannon_max = counts.length;
+//
+//   return fn.diversity.shannon_diversity(counts) / shannon_max;
+// };
 
 // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
 fn.math.round = function (number, precision) {

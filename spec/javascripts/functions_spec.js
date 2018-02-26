@@ -102,11 +102,82 @@ describe("fn", function () {
         var starting_hue = 0;
 
         var expected = chroma.hcl(starting_hue, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex();
-        var actual = fn.color.approx_starting_color(starting_hue);
+        var actual   = fn.color.approx_starting_color(starting_hue);
 
         expect(actual).to.equal(expected);
       });
     });
+  });
+
+  describe("diversity", function () {
+    describe("shannon_entropy", function () {
+      it("throws if the ary is empty", function () {
+        var func = function () {
+          fn.diversity.shannon_entropy([]);
+        };
+        expect(func).to.throw();
+      });
+
+      it("counts with one elem return 0", function () {
+        expect(fn.diversity.shannon_entropy([1])).to.equal(0);
+      });
+
+      it("returns shannon entropy with base 2", function () {
+        var expected = 1.485;
+        var actual   = fn.math.round(fn.diversity.shannon_entropy([5, 3, 2]), 3);
+        expect(actual).to.equal(expected);
+      });
+
+      it("is with zero counts", function () {
+        var expected = 1;
+        var actual = fn.diversity.shannon_entropy([10, 0, 10]);
+
+        expect(actual).to.equal(expected);
+      })
+
+      it("is zero if all counts are zero", function() {
+        var expected = 0;
+        var actual = fn.diversity.shannon_entropy([0,0,0])
+
+        expect(actual).to.equal(expected);
+      })
+    });
+
+    describe("evenness_", function () {
+      it("throws if the ary is empty", function () {
+        var func = function () {
+          fn.diversity.evenness_entropy([]);
+        };
+        expect(func).to.throw();
+      });
+
+      it("counts with one elem return 1", function () {
+        expect(fn.diversity.evenness_entropy([1])).to.equal(1);
+      });
+
+      it("counts with all even proportion equal 1", function () {
+        var expected = 1;
+        var actual = fn.diversity.evenness_entropy([5, 5, 5]);
+
+        expect(actual).to.equal(expected);
+      });
+
+      it("with proportion 1, evenness is 0", function () {
+        var expected = 0;
+        var actual = fn.diversity.evenness_entropy([10, 0, 0]);
+
+        expect(actual).to.equal(expected);
+      })
+
+      // TODO not sure what the actual behavior here should be
+      it("is 0 if all counts are zero", function() {
+        var expected = 0;
+        var actual = fn.diversity.evenness_entropy([0,0,0])
+
+        expect(actual).to.equal(expected);
+      })
+    });
+
   });
 
   describe("html", function () {
