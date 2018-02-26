@@ -13,8 +13,9 @@ before_install:
   #- sh -e /etc/init.d/xvfb start        # Start xvfb (for headless browser testing)
 
 install:
+  - npm i -g npm # update npm
+  - npm install -g istanbul # need this for teaspoon coverage metrics
   - bundle install
-  - npm install -g istanbul
 
 
 # Setup the database
@@ -25,6 +26,7 @@ before_script:
   - echo "DEVELOPMENT_KEY=$(rake secret)" > .env
   - echo "TEST_KEY=$(rake secret)" >> .env
   - echo "SECRET_KEY_BASE=$(rake secret)" >> .env
+  - mkdir coverage_teaspoon simple_cov_output coverage_code_climate
 
 # Run the test suites.  These are set up to make the files used in the after script.
 script:
