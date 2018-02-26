@@ -14,6 +14,8 @@ before_install:
 
 install:
   - bundle install
+  - npm install -g istanbul
+
 
 # Setup the database
 before_script:
@@ -38,6 +40,6 @@ notifications:
 # Pipe the coverage data to Code Climate
 after_script:
   - ./cc-test-reporter format-coverage -t cobertura -o coverage_code_climate/part_teaspoon.json coverage_teaspoon/default/cobertura-coverage.xml # convert the teaspoon
-  - ./cc-test-reporter format-coverage -t simplecov -o coverage_code_climate/part_simplecov.json simple_cov_output/coverage.xml # and the simplecov
+  - ./cc-test-reporter format-coverage -t simplecov -o coverage_code_climate/part_simplecov.json simple_cov_output/.resultset.json # and the simplecov
   - ./cc-test-reporter sum-coverage coverage_code_climate/part_*.json -p 2 -o coverage_code_climate/codeclimate.json # sum up the coverage output
   - ./cc-test-reporter upload-coverage -i coverage_code_climate/codeclimate.json # upload the results
