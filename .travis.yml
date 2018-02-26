@@ -42,7 +42,7 @@ notifications:
 
 # Pipe the coverage data to Code Climate
 after_script:
-#  - cat coverage_teaspoon/default/lcov.info | coveralls # send the teaspoon/istanbul to coveralls.io
+  - cat coverage_teaspoon/default/lcov.info | /usr/local/lib/node_modules/coveralls/bin/coveralls.js # send the teaspoon/istanbul to coveralls.io
   - ./cc-test-reporter format-coverage -t cobertura -o coverage_code_climate/part_teaspoon.json coverage_teaspoon/default/cobertura-coverage.xml # convert the teaspoon
   - ./cc-test-reporter format-coverage -t simplecov -o coverage_code_climate/part_simplecov.json simple_cov_output/.resultset.json # and the simplecov
   - ./cc-test-reporter sum-coverage coverage_code_climate/part_*.json -p 2 -o coverage_code_climate/codeclimate.json # sum up the coverage output
