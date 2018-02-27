@@ -1,13 +1,143 @@
-var biom = {};
+var biom    = {};
+biom.helper = {};
+
+biom.helper.fake_samples = function (num_samples) {
+  // Need to add fake samples with zero counts to ensure we have at least a triangle to get the centroid of.
+  if (num_samples === 1) {
+    return ["iroki_fake_1", "iroki_fake_2"];
+  }
+  else if (num_samples === 2) {
+    return ["iroki_fake_1"];
+  }
+  else {
+    return [];
+  }
+};
+
+biom.helper.add_zero_count_samples = function (counts, samples) {
+  if (samples.length === 0) {
+    throw Error("samples array must not be empty");
+  }
+
+  counts.forEach(function (row) {
+    samples.forEach(function (sample) {
+      row[sample] = 0;
+    });
+  });
+};
+
+var C1, C2;
+
+biom.sample_counts_to_points = function(parsed_biom) {
+  var count_data = fn.obj.deep_copy(parsed_biom.data);
+  var samples    = fn.obj.deep_copy(parsed_biom.meta.fields);
+
+  // subtract 1 to account for the 'name' field
+  var num_samples  = samples.length - 1;
+  var fake_samples = biom.helper.fake_samples(num_samples);
+
+  if (fake_samples.length > 0) {
+    biom.helper.add_zero_count_samples(count_data, fake_samples);
+
+    samples = samples.concat(fake_samples);
+  }
+
+  // TODO check to see if the json keeps the order.
+  var points = {};
+
+  count_data.forEach(function (counts) {
+    var leaf_name = "";
+
+    // Get the actual sample names
+    var actual_sample_names  = fn.obj.vals(parsed_biom.meta.fields).filter(function (field) {
+      return field !== "name";
+    });
+    var actual_sample_counts = actual_sample_names.map(function (sample) {
+      return counts[sample];
+    });
+
+    // Need this to get the zero replacement value.
+    var min_count          = fn.ary.min(actual_sample_counts);
+    var max_count          = fn.ary.max(actual_sample_counts);
+    var min_non_zero_count = actual_sample_counts.filter(function (count) {
+      return count !== 0;
+    });
+
+    // If the smallest non-zero val is smaller than 1e-5 take a tenth of that or else just take 1e-5.  It should be small enoughnot to matter most of the time.
+    var zero_replacement_val = min_non_zero_count < 1e-5 ? min_non_zero_count * 0.1 : 1e-5;
+
+    leaf_name         = counts["name"];
+    points[leaf_name] = {};
+
+    actual_sample_names.forEach(function (sample_name, sample_idx) {
+      var count     = counts[sample_name];
+      var rel_count = max_count === 0 || count === 0 ? zero_replacement_val : count / max_count;
+
+      var angle = biom.sample_to_angle(sample_idx, num_samples, utils__deg_to_rad(g_val_hue_angle_offset));
+
+      points[leaf_name][sample_name] = fn.pt.on_circle(angle, rel_count);
+    });
+  });
+
+  return points;
+}
+
+// Sample idx starts at zero
+biom.sample_to_angle = function (sample_idx, num_samples, angle_offset) {
+  if (num_samples === 0) {
+    throw Error("num_samples must be > 0");
+  }
+  return ((2 * Math.PI / num_samples) * sample_idx) + angle_offset;
+};
+
+
+biom.centroids_of_samples = function (parsed_biom) {
+  var points                 = biom.sample_counts_to_points(parsed_biom);
+  var non_zero_count_samples = get_non_zero_count_samples(parsed_biom);
+
+  return centroids_of_points(points, non_zero_count_samples);
+};
+
+// Technically we want 1 - evenness to get it going the same way as chroma.
+biom.inverse_evenness = function (parsed_biom) {
+  var evenness_fn = function (counts) {
+    return 1 - fn.diversity.evenness_entropy(counts);
+  };
+  var evenness    = {};
+
+  parsed_biom.data.forEach(function (data_row) {
+    var leaf_name = null;
+    var counts    = [];
+
+    // Get all the counts into an ary
+    json_each(data_row, function (field, value) {
+      if (field === "name") {
+        leaf_name = value;
+      }
+      else if (!fn.utils.is_fake_field(field)) {
+        counts.push(value);
+      }
+    });
+
+    // Now calculate evenness
+    evenness[leaf_name] = evenness_fn(counts);
+  });
+
+  return evenness;
+};
 
 
 biom.colors_from_parsed_biom = function (parsed_biom) {
   // TODO one of these functions modifies parsed_biom in place.
-  var centroids = centroids_of_samples(parsed_biom);
+
+  var centroids = biom.centroids_of_samples(parsed_biom);
+  C1            = centroids;
 
   debug_biom_csv = parsed_biom;
 
-  return colors_from_centroids(centroids, parsed_biom);
+  var val = colors_from_centroids(centroids, parsed_biom);
+
+  return val;
 };
 
 biom.make_tsv_string = function (json) {
@@ -33,9 +163,10 @@ biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors
   // { leaf_name: "#00ff00", leaf2_name: "#ff00ff" }
 
 
-  var centroids = centroids_of_samples(parsed_biom);
+  var centroids = biom.centroids_of_samples(parsed_biom);
+  C2            = centroids;
 
-  var evenness = inverse_evenness(parsed_biom);
+  var evenness = biom.inverse_evenness(parsed_biom);
 
   // This is on the "new" biom string, i.e. it will us PC columns rather than original if the thing has been dimension reduced.
   var abundance = fn.parsed_biom.abundance_across(parsed_biom, g_val_avg_method).abundance;
@@ -45,12 +176,12 @@ biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors
     parsed_orig_biom = biom.parse_biom_file_str(orig_biom_str);
   }
 
-  var fields = fn.ary.deep_copy(parsed_biom.meta.fields);
+  var fields = fn.obj.deep_copy(parsed_biom.meta.fields);
 
   // Make color the second field
   fields.splice(1, 0, "color", "hue", "chroma/saturation", "lightness", "centroid", "evenness", "abundance");
 
-  var header_str = "<tr>\n";
+  var header_str = "<tr>";
   fields.forEach(function (field) {
     // Don't put the fake fields in the output.
     if (!fn.utils.is_fake_field(field)) {
@@ -158,7 +289,7 @@ biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors
 
   var md_str = "<!DOCTYPE html><head>" + style_str + "<title>Color table</title></head>";
 
-  return md_str + "<body><table>" + header_str + table_rows.join("\n") + "</table></body></html>";
+  return md_str + "<body><table>" + header_str + table_rows.join("") + "</table></body></html>";
 };
 
 
@@ -215,120 +346,13 @@ function round_to(x, place) {
   return Math.round(place * x) / place;
 }
 
-// TODO should this be multiplyed by two?
-function get_point(count, sample_idx, num_samples) {
-  var angle = sample_to_angle(sample_idx, num_samples, utils__deg_to_rad(g_val_hue_angle_offset));
-
-  var pt = {
-    x : count * Math.cos(angle),
-    y : count * Math.sin(angle)
-  };
-
-  return pt;
-}
-
-// Sample idx starts at zero
-function sample_to_angle(sample_idx, num_samples, angle_offset) {
-  return ((2 * Math.PI / num_samples) * sample_idx) + angle_offset;
-}
-
-// Count data is from the csv.data from Papa.
-// samples is from csv.meta.fields
-function sample_counts_to_points(csv) {
-  var count_data = csv.data;
-  var samples    = csv.meta.fields;
-
-  // subtract 1 to account for the 'name' field
-  var num_samples = samples.length - 1;
-
-  if (num_samples === 1) {
-    // Need to add fake samples with zero counts to ensure we have at least a triangle to get the centroid of.
-    var fake_samples = ["iroki_fake_1", "iroki_fake_2"];
-  }
-  else if (num_samples === 2) {
-    var fake_samples = ["iroki_fake_1"];
-  }
-  else {
-    var fake_samples = [];
-  }
-
-  if (fake_samples.length > 0) {
-    count_data.forEach(function (row) {
-      fake_samples.forEach(function (name) {
-        // TODO this will break if one of these sample names is used.
-        row[name] = 0;
-      });
-    });
-
-    fake_samples.forEach(function (name) {
-      samples.push(name);
-    });
-  }
-
-  // TODO check to see if the json keeps the order.
-  var points = {};
-
-  count_data.forEach(function (row) {
-    var leaf_name = "";
-
-    // First you need the max count.
-    var max_count          = 0;
-    var min_count          = null;
-    var min_non_zero_count = null;
-    json_each(row, function (sample_name, count) {
-      if (sample_name !== "name") {
-        if (max_count < count) {
-          max_count = count;
-        }
-
-        if (min_count === null || min_count > count) {
-          min_count = count;
-        }
-
-        if (count !== 0 && (min_non_zero_count === null || min_non_zero_count > count)) {
-          min_non_zero_count = count;
-        }
-      }
-    });
-
-    // If the smallest non-zero val is smaller than 1e-5 take a tenth of that or else just take 1e-5.  It should be small enoughnot to matter most of the time.
-    var zero_replacement_val = min_non_zero_count < 1e-5 ? min_non_zero_count * 0.1 : 1e-5;
-
-    samples.forEach(function (sample, sample_idx) {
-      // The first thing is 'name' not a sample.
-      var true_sample_idx = sample_idx - 1;
-
-
-      if (sample === "name") {  // It isn't a sample, but the name of the row/otu
-        leaf_name         = row[sample];
-        points[leaf_name] = {};
-      }
-      else { // it is a sample not the name of the row/otu
-        var count = null;
-        if (max_count === 0 || row[sample] === 0) {
-          // Set it to a tiny number that won't get rounded to zero.
-          count = zero_replacement_val;
-        }
-        else {
-          count = row[sample] / max_count;
-        }
-
-        var pt = get_point(count, true_sample_idx, num_samples);
-
-        points[leaf_name][sample] = pt;
-      }
-    });
-  });
-
-  return points;
-}
 
 function signed_area_of_triangle(p1, p2, p3) {
   return ((p1.x * (p2.y - p3.y)) + (p2.x * (p3.y - p1.y)) + (p3.x * (p1.y - p2.y))) / 2;
 }
 
 function centroid_of_triangle(p1, p2, p3) {
-  return { x : (p1.x + p2.x + p3.x) / 3, y : (p1.y + p2.y + p3.y) / 3 };
+  return { x: (p1.x + p2.x + p3.x) / 3, y: (p1.y + p2.y + p3.y) / 3 };
 }
 
 // TODO instead of calculating all triangles, could save some steps by removing p2 from the points obj and rerunning.  (this would also required using signed area)
@@ -416,7 +440,9 @@ function centroids_of_points(all_points, non_zero_count_samples) {
         // It has a single sample with a non zero count.
         var non_zero_sample = non_zero_count_samples[leaf];
         var non_zero_point  = points[non_zero_sample];
-        centroids[leaf]     = fn.pt.new(non_zero_point.x / 2, non_zero_point.y / 2);
+
+        // Just take the point because we want it all the way out to the radius of the circle for that sample.
+        centroids[leaf]     = fn.pt.new(non_zero_point.x, non_zero_point.y);
         break;
     }
   });
@@ -455,40 +481,6 @@ function get_non_zero_count_samples(parsed_biom) {
   return obj;
 }
 
-function centroids_of_samples(parsed_biom) {
-  var points                 = sample_counts_to_points(parsed_biom);
-  var non_zero_count_samples = get_non_zero_count_samples(parsed_biom);
-
-  return centroids_of_points(points, non_zero_count_samples);
-}
-
-// Technically we want 1 - evenness to get it going the same way as chroma.
-function inverse_evenness(parsed_biom) {
-  var evenness_fn = function (counts) {
-    return 1 - fn.diversity.evenness_entropy(counts);
-  };
-  var evenness    = {};
-
-  parsed_biom.data.forEach(function (data_row) {
-    var leaf_name = null;
-    var counts    = [];
-
-    // Get all the counts into an ary
-    json_each(data_row, function (field, value) {
-      if (field === "name") {
-        leaf_name = value;
-      }
-      else if (!fn.utils.is_fake_field(field)) {
-        counts.push(value);
-      }
-    });
-
-    // Now calculate evenness
-    evenness[leaf_name] = evenness_fn(counts);
-  });
-
-  return evenness;
-}
 
 function colors_from_centroids(centroids, parsed_biom) {
   var num_samples  = fn.parsed_biom.num_real_samples(parsed_biom);
@@ -497,7 +489,7 @@ function colors_from_centroids(centroids, parsed_biom) {
   var max_evenness = null;
   if (g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE || g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS_RELATIVE) {
     // Need to calculate the evenness and pass it to the color space function.
-    evenness = inverse_evenness(parsed_biom);
+    evenness = biom.inverse_evenness(parsed_biom);
 
     // Set min and max evenness.
     json_each(evenness, function (leaf, val) {
@@ -522,15 +514,15 @@ function colors_from_centroids(centroids, parsed_biom) {
   var luminance_vals = [];
   json_each(centroids, function (leaf, pt) {
     var params     = {
-      leaf : leaf,
-      pt : pt,
-      avg_counts : avg_counts,
-      max_avg_count : max_avg_count,
-      min_avg_count : min_avg_count,
+      leaf: leaf,
+      pt: pt,
+      avg_counts: avg_counts,
+      max_avg_count: max_avg_count,
+      min_avg_count: min_avg_count,
       // It's inverse evenness (1 means completely uneven and maximum saturation).
-      evenness : num_samples === 1 ? 1 : evenness[leaf],
-      max_evenness : max_evenness,
-      min_evenness : min_evenness
+      evenness: num_samples === 1 ? 1 : evenness[leaf],
+      max_evenness: max_evenness,
+      min_evenness: min_evenness
     };
     var return_val = get_color(params);
 
@@ -694,8 +686,12 @@ function biom__save_abundance_colors(biom_str) {
   }
 
   var parsed_biom = biom.parse_biom_file_str(str);
+  console.log("right after parsing");
+  console.log(JSON.stringify(parsed_biom));
 
-  var ret_val         = biom.colors_from_parsed_biom(parsed_biom);
+  // TODO this value is incorrect in the context of actually using the website, but when yuo run it in the console, it works.
+  var ret_val = biom.colors_from_parsed_biom(parsed_biom);
+
   var colors          = ret_val[0];
   var color_details   = ret_val[1];
   debug_colors_json   = colors;
@@ -726,10 +722,10 @@ function biom__save_abundance_colors(biom_str) {
        .file("sample_approximate_starting_colors.html", sample_color_legend_html_str);
 
     zip.generateAsync({
-      type : "blob",
-      compression : "DEFLATE",
-      compressionOptions : {
-        level : 1
+      type: "blob",
+      compression: "DEFLATE",
+      compressionOptions: {
+        level: 1
       }
     })
        .then(function (blob) {
@@ -737,7 +733,7 @@ function biom__save_abundance_colors(biom_str) {
        });
   }
   else {
-    var blob = new Blob([tsv_str], { type : "text/plain;charset=utf-8" });
+    var blob = new Blob([tsv_str], { type: "text/plain;charset=utf-8" });
 
     // Unicode standard does not recommend using the BOM for UTF-8, so pass in true to NOT put it in.
     saveAs(blob, "mapping.txt", true);

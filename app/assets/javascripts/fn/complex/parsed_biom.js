@@ -1,4 +1,4 @@
-// Depends on fn.utils fn.color fn.str fn.html
+// Depends on fn.utils fn.color fn.str fn.html biom
 
 // Parsed biom
 fn.parsed_biom.sample_angles = function (parsed_biom, angle_offset) {
@@ -6,7 +6,7 @@ fn.parsed_biom.sample_angles = function (parsed_biom, angle_offset) {
   var num_samples = fields.length;
 
   var sample_angles = fields.map(function (field, idx) {
-    return rad_to_deg(sample_to_angle(idx, num_samples, angle_offset));
+    return rad_to_deg(biom.sample_to_angle(idx, num_samples, angle_offset));
   });
 
   // Don't use an object in case there are duplicated sample names in the biom file.

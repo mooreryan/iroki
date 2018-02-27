@@ -14,6 +14,9 @@
 //= require jquery_ujs
 //= require foundation
 
+// First the polyfills
+//= require polyfills
+
 // This is all of the vendor things.
 //= require_directory ../../../vendor/assets/javascripts
 

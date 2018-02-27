@@ -1,32 +1,27 @@
 describe("fn", function () {
-  var fn_spec_helper = {
-    TOLERANCE : 1e-3,
-    BIOM_STR : "name\ts1\ts2\napple\t10\t0\npie\t0\t10\n",
-    PAPA_CONFIG : {
-      delimiter : "\t",
-      header : true,
-      dynamicTyping : true,
-      skipEmptyLines : true
+  var helper = {
+    TOLERANCE: 1e-3,
+    BIOM_STR: "name\ts1\ts2\napple\t10\t0\npie\t0\t10\n",
+    PAPA_CONFIG: {
+      delimiter: "\t",
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true
     }
   };
 
-  fn_spec_helper.PARSED_BIOM = Papa.parse(fn_spec_helper.BIOM_STR, fn_spec_helper.PAPA_CONFIG);
+  helper.PARSED_BIOM = Papa.parse(helper.BIOM_STR, helper.PAPA_CONFIG);
 
-  fn_spec_helper.expect_stringify_equal = function (actual, expected) {
+  helper.expect_stringify_equal = function (actual, expected) {
     expect(JSON.stringify(expected)).to.equal(JSON.stringify(actual));
+  };
+
+  helper.expect_points_to_be_equal = function (pt1, pt2) {
+    expect(fn.pt.is_equal(pt1, pt2, 1e-6)).to.be.true;
   };
 
 
   describe("ary", function () {
-    describe("deep_copy", function () {
-      it("makes a new copy not a reference", function () {
-        var a = [1, 2, 3];
-        var b = fn.ary.deep_copy(a);
-        b[1]  = "apple";
-
-        expect(a).to.have.members([1, 2, 3]);
-      });
-    });
 
     describe("max", function () {
       it("returns the largest num in an array", function () {
@@ -102,14 +97,14 @@ describe("fn", function () {
         var expected_luminance = 0.5;
         var actual_luminance   = fn.color.correct_luminance(hex, lightness, old_min, old_max, new_min, new_max).luminance();
 
-        expect(actual_luminance).to.closeTo(expected_luminance, fn_spec_helper.TOLERANCE);
+        expect(actual_luminance).to.closeTo(expected_luminance, helper.TOLERANCE);
       });
 
       it("scales lightness first to the new luminance scale", function () {
         var expected_luminance = 0.25;
         var actual_luminance   = fn.color.correct_luminance(hex, lightness, old_min, old_max, new_min, 0.5).luminance();
 
-        expect(actual_luminance).to.closeTo(actual_luminance, fn_spec_helper.TOLERANCE);
+        expect(actual_luminance).to.closeTo(actual_luminance, helper.TOLERANCE);
       });
     });
 
@@ -175,7 +170,7 @@ describe("fn", function () {
         var expected = 1;
         var actual   = fn.diversity.evenness_entropy([5, 5, 5]);
 
-        expect(actual).to.be.closeTo(expected, fn_spec_helper.TOLERANCE);
+        expect(actual).to.be.closeTo(expected, helper.TOLERANCE);
       });
 
       it("with proportion 1, evenness is 0", function () {
@@ -253,6 +248,111 @@ describe("fn", function () {
     });
   });
 
+  describe("obj", function () {
+    describe("deep_copy", function () {
+      it("makes a new copy not a reference", function () {
+        var a = [1, 2, 3];
+        var b = fn.obj.deep_copy(a);
+        b[1]  = "apple";
+
+        expect(a).to.have.members([1, 2, 3]);
+      });
+    });
+
+    describe("each", function () {
+      it("applies the func for each key values pair", function () {
+        var obj      = { a: 1, b: 2 };
+        var ary      = [];
+        var expected = ["a", 1, "b", 2];
+
+        fn.obj.each(obj, function (key, val) {
+          ary.push(key);
+          ary.push(val);
+        });
+
+        helper.expect_stringify_equal(ary, expected);
+      });
+    });
+
+    describe("vals", function () {
+      it("gives the values of an obj", function () {
+        var actual   = fn.obj.vals({ a: 1, b: "apple" });
+        var expected = [1, "apple"];
+
+        helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("gives an empty array if there are no keys", function () {
+        helper.expect_stringify_equal(fn.obj.vals({}), []);
+      });
+    });
+
+    describe("min_val", function () {
+      it("returns NaN if there are non float parseable things", function () {
+        var obj    = { apple: "pie", peach: 234 };
+        var actual = fn.obj.min_val(obj);
+
+        expect(actual).to.be.NaN;
+      });
+
+      it("returns the min val", function () {
+        var obj      = { apple: -3, peach: 234 };
+        var expected = -3;
+        var actual   = fn.obj.min_val(obj);
+
+        expect(actual).to.equal(expected);
+
+      });
+    });
+
+    describe("max_val", function () {
+      it("returns NaN if there are non float parseable things", function () {
+        var obj    = { apple: "pie", peach: 234 };
+        var actual = fn.obj.max_val(obj);
+
+        expect(actual).to.be.NaN;
+      });
+
+      it("returns the max val", function () {
+        var obj      = { apple: -3, peach: 234 };
+        var expected = 234;
+        var actual   = fn.obj.max_val(obj);
+
+        expect(actual).to.equal(expected);
+      });
+    });
+
+    describe("min_numeric_val", function () {
+      it("returns the smallest thing that can be parsed into a float", function () {
+        var obj      = { apple: "pie", is: "3", good: -3, yay: 3.2 };
+        var expected = -3;
+        var actual   = fn.obj.min_numeric_val(obj);
+
+        expect(actual).to.equal(expected);
+      });
+    });
+
+    describe("max_numeric_val", function () {
+      it("returns the smallest thing that can be parsed into a float", function () {
+        var obj      = { apple: "pie", is: "3", good: -3, yay: 3.2 };
+        var expected = 3.2;
+        var actual   = fn.obj.max_numeric_val(obj);
+
+        expect(actual).to.equal(expected);
+      });
+    });
+
+    describe("numeric_vals", function () {
+      it("returns only numeric parseable vals", function () {
+        var obj      = { a: "apple", b: 2.3, c: "3" };
+        var expected = [2.3, "3"];
+        var actual = fn.obj.numeric_vals(obj);
+
+        helper.expect_stringify_equal(actual, expected);
+      });
+    });
+  });
+
   describe("parsed_biom", function () {
     describe("sample_angles", function () {
       it("returns the fields and angles", function () {
@@ -260,9 +360,9 @@ describe("fn", function () {
         var fields       = ["s1", "s2"];
         var angles       = [0, 180];
         var expected     = [fields, angles];
-        var actual       = fn.parsed_biom.sample_angles(fn_spec_helper.PARSED_BIOM, angle_offset);
+        var actual       = fn.parsed_biom.sample_angles(helper.PARSED_BIOM, angle_offset);
 
-        fn_spec_helper.expect_stringify_equal(actual, expected);
+        helper.expect_stringify_equal(actual, expected);
       });
 
       it("handles a single sample biom file");
@@ -273,19 +373,19 @@ describe("fn", function () {
     describe("sample_fields", function () {
       it("returns only the sample fields", function () {
         var biom        = "name\ts1\ts2\tiroki_fake_1\tiroki_fake_2\napple\t10\t20\t0\t0\npie\t20\t10\t0\t0";
-        var parsed_biom = Papa.parse(biom, fn_spec_helper.PAPA_CONFIG);
+        var parsed_biom = Papa.parse(biom, helper.PAPA_CONFIG);
 
         var expected = ["s1", "s2"];
         var actual   = fn.parsed_biom.sample_fields(parsed_biom);
 
-        fn_spec_helper.expect_stringify_equal(actual, expected);
+        helper.expect_stringify_equal(actual, expected);
       });
     });
 
     describe("num_real_samples", function () {
       it("counts the actual samples", function () {
         var biom        = "name\ts1\ts2\tiroki_fake_1\tiroki_fake_2\napple\t10\t20\t0\t0\npie\t20\t10\t0\t0";
-        var parsed_biom = Papa.parse(biom, fn_spec_helper.PAPA_CONFIG);
+        var parsed_biom = Papa.parse(biom, helper.PAPA_CONFIG);
 
         var expected = 2;
         var actual   = fn.parsed_biom.num_real_samples(parsed_biom);
@@ -297,26 +397,26 @@ describe("fn", function () {
     describe("abundance_across", function () {
       it("calculates relative abundance across all samples", function () {
         var expected = {
-          abundance : { apple: 5, pie: 5},
-          min_val : 5,
-          max_val : 5
+          abundance: { apple: 5, pie: 5 },
+          min_val: 5,
+          max_val: 5
         };
 
-        var actual = fn.parsed_biom.abundance_across(fn_spec_helper.PARSED_BIOM, g_ID_AVG_METHOD_ALL_SAMPLES_MEAN);
-        
-        fn_spec_helper.expect_stringify_equal(actual, expected)
+        var actual = fn.parsed_biom.abundance_across(helper.PARSED_BIOM, g_ID_AVG_METHOD_ALL_SAMPLES_MEAN);
+
+        helper.expect_stringify_equal(actual, expected);
       });
 
-      it("calculates relative abundance across non-zero samples", function() {
+      it("calculates relative abundance across non-zero samples", function () {
         var expected = {
-          abundance : { apple: 10, pie: 10},
-          min_val : 10,
-          max_val : 10
+          abundance: { apple: 10, pie: 10 },
+          min_val: 10,
+          max_val: 10
         };
 
-        var actual = fn.parsed_biom.abundance_across(fn_spec_helper.PARSED_BIOM, g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN);
+        var actual = fn.parsed_biom.abundance_across(helper.PARSED_BIOM, g_ID_AVG_METHOD_NONZERO_SAMPLES_MEAN);
 
-        fn_spec_helper.expect_stringify_equal(actual, expected)
+        helper.expect_stringify_equal(actual, expected);
       });
 
       it("handles leaves with all zero counts");
@@ -326,9 +426,9 @@ describe("fn", function () {
       it("handles an angle offset");
       it("gives the sample to starting color string", function () {
         var angle_offset = 0;
-        // Made with the inspect_file.rb program from fn_spec_helper.BIOM_STR
+        // Made with the inspect_file.rb program from helper.BIOM_STR
         var expected     = "name\tappoximate starting color\ns1\t#ed5e93\ns2\t#00a98f\n";
-        var actual       = fn.parsed_biom.sample_color_legend(fn_spec_helper.PARSED_BIOM, angle_offset);
+        var actual       = fn.parsed_biom.sample_color_legend(helper.PARSED_BIOM, angle_offset);
 
         expect(actual).to.equal(expected);
       });
@@ -337,12 +437,12 @@ describe("fn", function () {
     describe("sample_color_legend_html", function () {
       it("handles an angle offset");
       it("gives the sample to starting color html output", function () {
-        // Made with the inspect_file.rb program from fn_spec_helper.BIOM_STR
+        // Made with the inspect_file.rb program from helper.BIOM_STR
         var expected = "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}.thick-left-border {border-left: 3px solid #2d2d2d}</style><title>Sample legend</title></head><body><table><tr><th class='thick-right-border'>name</th><th>appoximate starting color</th></tr><tr><td class='thick-right-border'>s1</td><td style='background-color: #ed5e93;'>#ed5e93</td></tr><tr><td class='thick-right-border'>s2</td><td style='background-color: #00a98f;'>#00a98f</td></tr></table></body></html>";
 
         var angle_offset = 0;
 
-        var actual = fn.parsed_biom.sample_color_legend_html(fn_spec_helper.PARSED_BIOM, angle_offset);
+        var actual = fn.parsed_biom.sample_color_legend_html(helper.PARSED_BIOM, angle_offset);
 
         expect(actual).to.equal(expected);
       });
@@ -352,46 +452,67 @@ describe("fn", function () {
   describe("pt", function () {
     describe("is_zero", function () {
       it("is true if both x and y are 0", function () {
-        var pt = { x : 0, y : 0 };
+        var pt = { x: 0, y: 0 };
         expect(fn.pt.is_zero(pt)).to.be.true;
       });
 
       it("is false otherwise", function () {
-        var pt = { x : 0.01, y : 0 };
+        var pt = { x: 0.01, y: 0 };
 
         expect(fn.pt.is_zero(pt)).to.be.false;
       });
     });
 
+    describe("is_equal", function () {
+      it("is true if two points are within a certain tolerance", function () {
+        expect(fn.pt.is_equal(fn.pt.new(1, 1), fn.pt.new(1, 1.05), 0.1)).to.be.true;
+      });
+
+      it("is false if two points are outside the tolerance", function () {
+        expect(fn.pt.is_equal(fn.pt.new(1, 1), fn.pt.new(1, 1.05), 0.01)).to.be.false;
+      });
+    });
+
     describe("mag", function () {
       it("gives the magnitude of the vector from origin to pt", function () {
-        var pt       = { x : 3, y : 4 };
+        var pt       = { x: 3, y: 4 };
         var expected = 5;
 
         expect(fn.pt.mag(pt)).to.equal(5);
       });
 
       it("is zero if pt is the origin", function () {
-        expect(fn.pt.mag({ x : 0, y : 0 })).to.equal(0);
+        expect(fn.pt.mag({ x: 0, y: 0 })).to.equal(0);
       });
     });
 
     describe("new", function () {
       it("takes two vals and gives a pt", function () {
-        var expected = { x : 3, y : 4 };
+        var expected = { x: 3, y: 4 };
         var actual   = fn.pt.new(3, 4);
 
-        fn_spec_helper.expect_stringify_equal(actual, expected);
+        helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("on_circle", function () {
+      it("gives the point on the circle", function () {
+
+        helper.expect_points_to_be_equal(fn.pt.on_circle(0, 1), fn.pt.new(1, 0));
+        helper.expect_points_to_be_equal(fn.pt.on_circle(Math.PI / 2, 1), fn.pt.new(0, 1));
+        helper.expect_points_to_be_equal(fn.pt.on_circle(Math.PI, 1), fn.pt.new(-1, 0));
+        helper.expect_points_to_be_equal(fn.pt.on_circle(3 * Math.PI / 2, 1), fn.pt.new(0, -1));
+        helper.expect_points_to_be_equal(fn.pt.on_circle(2 * Math.PI, 1), fn.pt.new(1, 0));
       });
     });
 
     describe("to_s", function () {
       it("gives a pretty printed string", function () {
         var expected = "(3, 4)";
-        var pt       = { x : 3, y : 4 };
+        var pt       = { x: 3, y: 4 };
         var actual   = fn.pt.to_s(pt);
 
-        fn_spec_helper.expect_stringify_equal(actual, expected);
+        helper.expect_stringify_equal(actual, expected);
       });
     });
   });
