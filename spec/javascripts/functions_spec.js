@@ -7,7 +7,13 @@ describe("fn", function () {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true
-    }
+    },
+    SINGLE_SAMPLE_BIOM_STR: "name\tsample_1\ngeode\t5\nclock\t1\ntire\t2\nbanana\t9\neggplant\t10",
+    SINGLE_SAMPLE_APPROX_START_COLORS: "name\tappoximate starting color\nsample_1\t#ed5e93\n",
+    SINGLE_SAMPLE_APPROX_START_COLORS_HTML: "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}.thick-left-border {border-left: 3px solid #2d2d2d}</style><title>Sample legend</title></head><body><table><tr><th class='thick-right-border'>name</th><th>appoximate starting color</th></tr><tr><td class='thick-right-border'>sample_1</td><td style='background-color: #ed5e93;'>#ed5e93</td></tr></table></body></html>",
+
+    TWO_SAMPLE_BIOM_STR: "name\tsample_1\tsample_2\ngeode\t5\t5\nclock\t1\t10\ntire\t2\t9\nbanana\t9\t2\neggplant\t10\t1",
+    THREE_SAMPLE_BIOM_STR: "name\tsample_1\tsample_2\tsample_3\ngeode\t25\t40\t50\nclock\t10\t15\t94\ntire\t5\t8\t80\nbanana\t100\t140\t11\neggplant\t90\t130\t14"
   };
 
   helper.PARSED_BIOM = Papa.parse(helper.BIOM_STR, helper.PAPA_CONFIG);
@@ -246,6 +252,25 @@ describe("fn", function () {
         expect(actual).to.equal(expected);
       });
     });
+
+    describe("degrees_to_radians", function () {
+      it("converts degrees to radians", function () {
+        expect(fn.math.degrees_to_radians(0)).to.equal(0);
+        expect(fn.math.degrees_to_radians(90)).to.equal(Math.PI / 2);
+        expect(fn.math.degrees_to_radians(180)).to.equal(Math.PI);
+        expect(fn.math.degrees_to_radians(270)).to.equal(3 * Math.PI / 2);
+      });
+    });
+
+    describe("radians_to_degrees", function () {
+      it("converts radians to degrees", function () {
+        expect(fn.math.radians_to_degrees(0)).to.equal(0);
+        expect(fn.math.radians_to_degrees(Math.PI / 2)).to.equal(90);
+        expect(fn.math.radians_to_degrees(Math.PI)).to.equal(180);
+        expect(fn.math.radians_to_degrees(3 * Math.PI / 2)).to.equal(270);
+      });
+    });
+
   });
 
   describe("obj", function () {
@@ -346,7 +371,7 @@ describe("fn", function () {
       it("returns only numeric parseable vals", function () {
         var obj      = { a: "apple", b: 2.3, c: "3" };
         var expected = [2.3, "3"];
-        var actual = fn.obj.numeric_vals(obj);
+        var actual   = fn.obj.numeric_vals(obj);
 
         helper.expect_stringify_equal(actual, expected);
       });
@@ -432,6 +457,26 @@ describe("fn", function () {
 
         expect(actual).to.equal(expected);
       });
+
+      context("with single sample biom", function () {
+        it("gives sample starting color string", function () {
+          var angle_offset = 0;
+          var parsed_biom  = Papa.parse(helper.SINGLE_SAMPLE_BIOM_STR, helper.PAPA_CONFIG);
+          var actual       = fn.parsed_biom.sample_color_legend(parsed_biom, angle_offset);
+
+          expect(helper.SINGLE_SAMPLE_APPROX_START_COLORS).to.equal(actual);
+        });
+      });
+
+      // context("with two sample biom", function () {
+      //   it("gives sample starting color string", function () {
+      //     var angle_offset = 0;
+      //     var parsed_biom  = Papa.parse(helper.TWO_SAMPLE_BIOM_STR, helper.PAPA_CONFIG);
+      //     var actual       = fn.parsed_biom.sample_color_legend(parsed_biom, angle_offset);
+      //
+      //     expect(helper.TWO_SAMPLE_APPROX_START_COLORS).to.equal(actual);
+      //   });
+      // });
     });
 
     describe("sample_color_legend_html", function () {
@@ -445,6 +490,35 @@ describe("fn", function () {
         var actual = fn.parsed_biom.sample_color_legend_html(helper.PARSED_BIOM, angle_offset);
 
         expect(actual).to.equal(expected);
+      });
+    });
+
+    describe("non_zero_count_samples", function () {
+      it("returns 'none' if the leaf has zero counts across", function () {
+        var biom_str    = "name\ts1\ts2\napple\t0\t0";
+        var parsed_biom = Papa.parse(biom_str, helper.PAPA_CONFIG);
+        var expected    = { apple: "none" };
+        var actual      = fn.parsed_biom.non_zero_count_samples(parsed_biom);
+
+        helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("returns 'many' if the leaf has 2 or more non zero counts", function () {
+        var biom_str    = "name\ts1\ts2\napple\t1\t2";
+        var parsed_biom = Papa.parse(biom_str, helper.PAPA_CONFIG);
+        var expected    = { apple: "many" };
+        var actual      = fn.parsed_biom.non_zero_count_samples(parsed_biom);
+
+        helper.expect_stringify_equal(actual, expected);
+
+      });
+      it("returns the name of the sample if there is one non zero count sample", function () {
+        var biom_str    = "name\ts1\ts2\napple\t1\t0";
+        var parsed_biom = Papa.parse(biom_str, helper.PAPA_CONFIG);
+        var expected    = { apple: "s1" };
+        var actual      = fn.parsed_biom.non_zero_count_samples(parsed_biom);
+
+        helper.expect_stringify_equal(actual, expected);
       });
     });
   });

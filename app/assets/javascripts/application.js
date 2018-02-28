@@ -21,6 +21,7 @@
 //= require_directory ../../../vendor/assets/javascripts
 
 //= require fn
+//= require biom_helpers
 
 //= require_tree .
 

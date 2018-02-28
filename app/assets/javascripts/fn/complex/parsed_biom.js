@@ -133,3 +133,34 @@ fn.parsed_biom.sample_color_legend_html = function (parsed_biom, angle_offset) {
   return "<!DOCTYPE html>" + head + body + "</html>";
 };
 
+// Returns info on non zero samples.  If there is only one, return that sample name.
+fn.parsed_biom.non_zero_count_samples = function (parsed_biom) {
+  var obj = {};
+
+  parsed_biom.data.forEach(function (counts) {
+    var leaf_name              = "";
+    var non_zero_count_samples = [];
+    fn.obj.each(counts, function (field, count) {
+      if (field === "name") {
+        leaf_name = value;
+      }
+      else if (value !== 0) {
+        non_zero_count_samples.push(field);
+      }
+    });
+
+    switch (non_zero_count_samples.length) {
+      case 0:
+        obj[leaf_name] = "none";
+        break;
+      case 1:
+        obj[leaf_name] = non_zero_count_samples[0];
+        break;
+      default:
+        obj[leaf_name] = "many";
+        break;
+    }
+  });
+
+  return obj;
+};

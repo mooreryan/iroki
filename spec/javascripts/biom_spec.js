@@ -7,7 +7,7 @@ describe("biom", function () {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true
-    }
+    },
   };
 
   helper.it_doesnt_change_parsed_biom = function (fun, biom_str) {
@@ -120,6 +120,7 @@ describe("biom", function () {
       });
     });
 
+    // Also tests sample_counts_to_points and non_zero_count_samples.
     describe("centroids_of_samples", function () {
       it("returns the centroids of each leaf", function () {
         var pt = fn.pt.new(1, 0);

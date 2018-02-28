@@ -55,21 +55,6 @@ function utils__load_dataset(tree_file, mapping_file) {
 }
 
 
-// Some math functions
-
-function utils__deg_to_rad(deg) {
-  return deg / 180 * Math.PI;
-}
-
-function utils__rad_to_deg(rad) {
-  return rad * 180 / Math.PI;
-}
-
-function utils__round_to(x, place) {
-  return Math.round(place * x) / place;
-}
-
-
 // Some functions for dealing with arrays or vectors.
 
 function utils__ary_min_max(ary) {
