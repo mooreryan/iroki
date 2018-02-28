@@ -112,7 +112,7 @@ function upload_button(submit_id, uploader_id, callback) {
 var FORM_HEIGHT = 650;
 
 // Round to 100ths place.
-var ROUNDING_PLACE = 100;
+var ROUNDING_PRECISION = 2;
 
 var LAYOUT_CIRCLE, LAYOUT_STRAIGHT, LAYOUT_RADIAL;
 var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
@@ -2093,7 +2093,7 @@ function draw_scale_bar() {
 
 
     var rotated_rectangle = LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
-    mean_length           = utils__round_to(ary_mean(lengths), ROUNDING_PLACE);
+    mean_length           = fn.math.round(ary_mean(lengths), ROUNDING_PRECISION);
 
     var min_scale_bar_size;
     if (LAYOUT_CIRCLE) {
@@ -2124,12 +2124,12 @@ function draw_scale_bar() {
     // If the original scale bar is smaller than the min size, bump up the size.
     if (scale_bar_pixels < min_scale_bar_size) {
       scale_bar_pixels = min_scale_bar_size;
-      // scale_bar_label_text = utils__round_to(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PLACE);
+      // scale_bar_label_text = fn.math.round(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PRECISION);
     }
 
     // // Now that we have a minimum scale bar size, weight it by the slider value.
     // scale_bar_pixels *= SCALE_BAR_LENGTH;
-    var scale_bar_label_text = utils__round_to(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PLACE);
+    var scale_bar_label_text = fn.math.round(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PRECISION);
     jq(ID_SCALE_BAR_LENGTH).val(scale_bar_label_text);
 
 
