@@ -6,7 +6,7 @@ fn.parsed_biom.sample_angles = function (parsed_biom, angle_offset) {
   var num_samples = fields.length;
 
   var sample_angles = fields.map(function (field, idx) {
-    return rad_to_deg(biom.sample_to_angle(idx, num_samples, angle_offset));
+    return fn.math.radians_to_degrees(biom.sample_to_angle(idx, num_samples, angle_offset));
   });
 
   // Don't use an object in case there are duplicated sample names in the biom file.
@@ -142,9 +142,9 @@ fn.parsed_biom.non_zero_count_samples = function (parsed_biom) {
     var non_zero_count_samples = [];
     fn.obj.each(counts, function (field, count) {
       if (field === "name") {
-        leaf_name = value;
+        leaf_name = count;
       }
-      else if (value !== 0) {
+      else if (count !== 0) {
         non_zero_count_samples.push(field);
       }
     });
