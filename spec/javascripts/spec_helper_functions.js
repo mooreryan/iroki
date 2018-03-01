@@ -64,3 +64,51 @@ spec_helper.single_sample.CENTROIDS = {
   banana: fn.pt.new(1, 0),
   eggplant: fn.pt.new(1, 0)
 };
+
+//// TWO SAMPLES ////
+
+spec_helper.two_samples = {};
+
+spec_helper.two_samples.BIOM_STR = "name\tsample_1\tsample_2\ngeode\t5\t5\nclock\t1\t10\ntire\t2\t9\nbanana\t9\t2\neggplant\t10\t1\n";
+
+spec_helper.two_samples.PARSED_BIOM = Papa.parse(spec_helper.two_samples.BIOM_STR, spec_helper.PAPA_CONFIG);
+
+spec_helper.two_samples.NON_ZERO_COUNT_SAMPLES = {
+  geode: "many",
+  clock: "many",
+  tire: "many",
+  banana: "many",
+  eggplant: "many"
+};
+
+spec_helper.two_samples.POINTS = {
+  geode: {
+    sample_1: fn.pt.new(0.5, 0),
+    sample_2: fn.pt.new(-0.5, 0)
+  },
+  clock: {
+    sample_1: fn.pt.new(0.1, 0),
+    sample_2: fn.pt.new(-1, 0)
+  },
+  tire: {
+    sample_1: fn.pt.new(0.2, 0),
+    sample_2: fn.pt.new(-0.9, 0)
+  },
+  banana: {
+    sample_1: fn.pt.new(0.9, 0),
+    sample_2: fn.pt.new(-0.2, 0)
+  },
+  eggplant: {
+    sample_1: fn.pt.new(1, 0),
+    sample_2: fn.pt.new(-0.1, 0)
+  }
+};
+
+spec_helper.two_samples.CENTROIDS = {
+  geode: fn.pt.new(0, 0),
+  clock: fn.pt.new(-0.45, 0),
+  tire: fn.pt.new(-0.35, 0),
+  banana: fn.pt.new(0.35, 0),
+  eggplant: fn.pt.new(0.45, 0)
+};
+

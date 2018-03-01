@@ -1,4 +1,3 @@
-// Depends on fn.utils fn.color fn.str fn.html biom
 
 fn.parsed_biom.abundance_across = function (parsed_biom, avg_method) {
   var abundance      = {};
@@ -10,7 +9,7 @@ fn.parsed_biom.abundance_across = function (parsed_biom, avg_method) {
     var count           = null;
 
     // Fields will be name, sample 1, sample 2, ...
-    json_each(leaf_row, function (field, val) {
+    fn.obj.each(leaf_row, function (field, val) {
       var count_this_value = val > 0 || avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
 
       if (field === "name") {

@@ -10,12 +10,16 @@ function centroid_of_triangle(p1, p2, p3) {
 biom.centroids_from_points = function (all_points, non_zero_count_samples) {
   var centroids = {};
 
-  json_each(all_points, function (leaf, points) {
+
+  fn.obj.each(all_points, function (leaf, points) {
     var samples     = json_keys(points);
     var sum_x_numer = 0;
     var sum_y_numer = 0;
     var sum_denom   = 0;
 
+    if (non_zero_count_samples[leaf] === "none") {
+
+    }
 
     switch (non_zero_count_samples[leaf]) {
       case "none":
@@ -23,10 +27,16 @@ biom.centroids_from_points = function (all_points, non_zero_count_samples) {
         centroids[leaf] = fn.pt.new(0, 0);
         break;
       case "many":
-        // Just do the regular stuff
-        if (samples.length < 3) {
-          // This should never happen as fake samples get added on to make sure there are at least 3.
-          throw Error("Leaf " + leaf + " had less than 3 samples.  Got " + samples.length);
+        if (samples.length === 2) {
+          // Just set it to the midpoint of the line segment.
+          var p1 = points[samples[0]];
+          var p2 = points[samples[1]];
+
+          var new_x = (p1.x + p2.x) / 2;
+          var new_y = (p1.y + p2.y) / 2;
+
+          centroids[leaf] = fn.pt.new(new_x, new_y);
+          break;
         }
         else if (samples.length === 3) {
           // There is only one triangle to do

@@ -89,12 +89,26 @@ describe("biom", function () {
   });
 
 
-  // These have one fake field
-  context("with single sample biom file", function () {
-
-    describe("centroids_from_points", function () {
+  describe("centroids_from_points", function () {
+    context("with single sample biom file", function () {
       test_centroids_from_points(spec_helper.single_sample.POINTS, spec_helper.single_sample.NON_ZERO_COUNT_SAMPLES, spec_helper.single_sample.CENTROIDS);
     });
+
+    context("with two sample biom file", function () {
+      it("does some stuff", function () {
+        var expected = spec_helper.two_samples.CENTROIDS;
+        var actual   = biom.centroids_from_points(spec_helper.two_samples.POINTS, spec_helper.two_samples.NON_ZERO_COUNT_SAMPLES);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+  });
+
+
+  // These have one fake field
+
+
+  context("with single sample biom file", function () {
 
 
     describe("inverse_evenness", function () {
