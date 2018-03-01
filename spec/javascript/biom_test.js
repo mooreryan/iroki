@@ -14,7 +14,7 @@ test('sample_to_angle() converts sample idx to an angle theta', function () {
   expect(sample_to_angle(1, 4, 0)).toEqual(Math.PI / 2);
 });
 
-test('sample_counts_to_points() takes csv and return points', function () {
+test('leaf_sample_points() takes csv and return points', function () {
   var csv = parse_biom_file_str(biom_str);
 
   var expected_points = {

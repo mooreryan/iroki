@@ -96,37 +96,6 @@ describe("biom", function () {
       test_centroids_from_points(spec_helper.single_sample.POINTS, spec_helper.single_sample.NON_ZERO_COUNT_SAMPLES, spec_helper.single_sample.CENTROIDS);
     });
 
-    describe("biom.sample_counts_to_points", function () {
-      it("gives points for each leaf for each sample", function () {
-        var pt       = fn.pt.new(1, 0);
-        var expected = {
-          geode: {
-            sample_1: pt
-          },
-          clock: {
-            sample_1: pt
-          },
-          tire: {
-            sample_1: pt
-          },
-          banana: {
-            sample_1: pt
-          },
-          eggplant: {
-            sample_1: pt
-          }
-        };
-
-        var parsed_biom = biom.parse_biom_file_str(spec_helper.single_sample.BIOM_STR);
-        var actual      = biom.sample_counts_to_points(parsed_biom);
-
-        spec_helper.expect_stringify_equal(actual, expected);
-      });
-
-      it("doesn't change parsed_biom", function () {
-        spec_helper.it_doesnt_change_parsed_biom(biom.sample_counts_to_points, spec_helper.single_sample.BIOM_STR);
-      });
-    });
 
     describe("inverse_evenness", function () {
       var parsed_biom = Papa.parse(spec_helper.single_sample.BIOM_STR, spec_helper.PAPA_CONFIG);
@@ -156,7 +125,7 @@ describe("biom", function () {
 
       it("makes the color map string", function () {
         var parsed_biom            = Papa.parse(spec_helper.single_sample.BIOM_STR, spec_helper.PAPA_CONFIG);
-        var points                 = biom.sample_counts_to_points(parsed_biom);
+        var points                 = fn.parsed_biom.leaf_sample_points(parsed_biom);
         var non_zero_count_samples = fn.parsed_biom.non_zero_count_samples(parsed_biom);
         var centroids              = biom.centroids_from_points(points, non_zero_count_samples);
         var ret_val                = colors_from_centroids(centroids, parsed_biom);
@@ -173,7 +142,7 @@ describe("biom", function () {
     describe("make_biom_with_colors_hmtl", function () {
       it("makes the counts_with_colors.html file", function () {
         var parsed_biom            = Papa.parse(spec_helper.single_sample.BIOM_STR, spec_helper.PAPA_CONFIG);
-        var points                 = biom.sample_counts_to_points(parsed_biom);
+        var points                 = fn.parsed_biom.leaf_sample_points(parsed_biom);
         var non_zero_count_samples = fn.parsed_biom.non_zero_count_samples(parsed_biom);
         var centroids              = biom.centroids_from_points(points, non_zero_count_samples);
 
