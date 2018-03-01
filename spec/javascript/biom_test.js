@@ -130,7 +130,7 @@ test('sample_counts_to_points() takes csv and return points', function () {
 //   expect(get_signed_area(points)).toEqual(result);
 // });
 
-test('centroids_of_points() takes points and gives the centroids for each shape', function () {
+test('centroids_from_points() takes points and gives the centroids for each shape', function () {
   var points = {
     leaf1 : {
       sample1 : {
@@ -167,7 +167,7 @@ test('centroids_of_points() takes points and gives the centroids for each shape'
     leaf2 : { x : 0, y : 0 }
   };
 
-  expect(centroids_of_points(points)).toEqual(result);
+  expect(centroids_from_points(points)).toEqual(result);
 });
 
 // TODO Chroma doesn't work in the context of jest.  You need to set the chroma function in a global variable so that is accesible, but then you need to change the iroki code that uses it.

@@ -6,17 +6,20 @@
   h1 Biom to color map converter
 
 .row
-  p Hi, I'm the biom file to color map converter!  I take your #{link_to "tab separated biom file", "http://biom-format.org/documentation/biom_conversion.html#general-usage-examples"} biom file and give each OTU a color based on its abundance profile.
+  p This page is currently under construction.  Check back soon!
 
-  p I'll spit out a mapping file to use on the #{link_to "viewer page", root_path}, but you might want to edit it first and remove any style attributes that you don't want on your tree.
-
-  p I'm still in beta, so if something goes wrong or looks icky, please #{mail_to "admin@iroki.net", "send us an email", cc: "IrokiHelp@gmail.com", subject: "Iroki help", target: "blank"}!
-
-.row.thick-border
-  .small-12.columns#outer-container
-    .row.expanded.upload-form
-      = render "layouts/biom_form"
-
-javascript:
-  // biom__save_abundance_colors is a function that takes a single arg, the biom file as a string.
-  biom__upload_button();
+/.row
+/  p Hi, I'm the biom file to color map converter!  I take your #{link_to "tab separated biom file", "http://biom-format.org/documentation/biom_conversion.html#general-usage-examples"} biom file and give each OTU a color based on its abundance profile.
+/
+/  p I'll spit out a mapping file to use on the #{link_to "viewer page", root_path}, but you might want to edit it first and remove any style attributes that you don't want on your tree.
+/
+/  p I'm still in beta, so if something goes wrong or looks icky, please #{mail_to "admin@iroki.net", "send us an email", cc: "IrokiHelp@gmail.com", subject: "Iroki help", target: "blank"}!
+/
+/.row.thick-border
+/  .small-12.columns#outer-container
+/    .row.expanded.upload-form
+/      = render "layouts/biom_form"
+/
+//javascript:
+//  // biom__save_abundance_colors is a function that takes a single arg, the biom file as a string.
+//  biom__upload_button();
