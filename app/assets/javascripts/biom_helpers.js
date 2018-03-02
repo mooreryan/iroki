@@ -1,19 +1,6 @@
 var biom    = {};
 biom.helper = {};
 
-biom.helper.fake_samples = function (num_samples) {
-  // Need to add fake samples with zero counts to ensure we have at least a triangle to get the centroid of.
-  if (num_samples === 1) {
-    return ["iroki_fake_1", "iroki_fake_2"];
-  }
-  else if (num_samples === 2) {
-    return ["iroki_fake_1"];
-  }
-  else {
-    return [];
-  }
-};
-
 biom.helper.add_zero_count_samples = function (counts, samples) {
   if (samples.length === 0) {
     throw Error("samples array must not be empty");
@@ -26,15 +13,110 @@ biom.helper.add_zero_count_samples = function (counts, samples) {
   });
 };
 
-var C1, C2;
+// TODO instead of calculating all triangles, could save some steps by removing p2 from the points obj and rerunning.  (this would also required using signed area)
+biom.centroids_from_points = function (all_points, non_zero_count_samples) {
+  var centroids = {};
 
 
-// Sample idx starts at zero
-biom.sample_to_angle = function (sample_idx, num_samples, angle_offset) {
-  if (num_samples === 0) {
-    throw Error("num_samples must be > 0");
+  fn.obj.each(all_points, function (leaf, points) {
+    var samples     = json_keys(points);
+    var sum_x_numer = 0;
+    var sum_y_numer = 0;
+    var sum_denom   = 0;
+
+    if (non_zero_count_samples[leaf] === "none") {
+
+    }
+
+    switch (non_zero_count_samples[leaf]) {
+      case "none":
+        // It has a zero count in every sample
+        centroids[leaf] = fn.pt.new(0, 0);
+        break;
+      case "many":
+        if (samples.length === 2) {
+          // Just set it to the midpoint of the line segment.
+          var p1 = points[samples[0]];
+          var p2 = points[samples[1]];
+
+          var new_x = (p1.x + p2.x) / 2;
+          var new_y = (p1.y + p2.y) / 2;
+
+          centroids[leaf] = fn.pt.new(new_x, new_y);
+          break;
+        }
+        else if (samples.length === 3) {
+          // There is only one triangle to do
+          var p1 = points[samples[0]];
+          var p2 = points[samples[1]];
+          var p3 = points[samples[2]];
+
+
+          var signed_area = signed_area_of_triangle(p1, p2, p3);
+          var area        = Math.abs(signed_area);
+          var centroid    = centroid_of_triangle(p1, p2, p3);
+
+          sum_x_numer += area * centroid.x;
+          sum_y_numer += area * centroid.y;
+          sum_denom += area;
+        }
+        else {
+          // There are at least 4 triangles.
+          // For each triangle...
+          for (var i = 0; i < samples.length; ++i) {
+            if (i < samples.length - 2) {
+              var p1 = points[samples[i]];
+              var p2 = points[samples[i + 1]];
+              var p3 = points[samples[i + 2]];
+            }
+            else if (i < samples.length - 1) {
+              var p1 = points[samples[i]];
+              var p2 = points[samples[i + 1]];
+              var p3 = points[samples[0]];
+            }
+            else {
+              var p1 = points[samples[i]];
+              var p2 = points[samples[0]];
+              var p3 = points[samples[1]];
+            }
+
+            var signed_area = signed_area_of_triangle(p1, p2, p3);
+            var area        = Math.abs(signed_area);
+            var centroid    = centroid_of_triangle(p1, p2, p3);
+
+            sum_x_numer += area * centroid.x;
+            sum_y_numer += area * centroid.y;
+            sum_denom += area;
+          }
+        }
+
+        centroids[leaf] = fn.pt.new(sum_x_numer / sum_denom, sum_y_numer / sum_denom);
+        break;
+      default:
+        // It has a single sample with a non zero count.
+        var non_zero_sample = non_zero_count_samples[leaf];
+        var non_zero_point  = points[non_zero_sample];
+
+        // Just take the point because we want it all the way out to the radius of the circle for that sample.
+        centroids[leaf] = fn.pt.new(non_zero_point.x, non_zero_point.y);
+        break;
+    }
+  });
+
+  return centroids;
+};
+
+biom.helper.fake_samples = function (num_samples) {
+  // Need to add fake samples with zero counts to ensure we have at least a triangle to get the centroid of.
+  if (num_samples === 1) {
+    return ["iroki_fake_1", "iroki_fake_2"];
   }
-  return ((2 * Math.PI / num_samples) * sample_idx) + angle_offset;
+  else if (num_samples === 2) {
+    return ["iroki_fake_1"];
+  }
+  else {
+    return [];
+  }
 };
 
 // Technically we want 1 - evenness to get it going the same way as chroma.
@@ -65,19 +147,6 @@ biom.inverse_evenness = function (parsed_biom) {
   return evenness;
 };
 
-
-biom.make_tsv_string = function (json) {
-  var header  = "name\tbranch_color\tleaf_label_color\tleaf_dot_color\n";
-  var strings = [];
-  json_each(json, function (key, val) {
-    var str = [key, val, val, val].join("\t");
-
-    strings.push(str);
-  });
-
-  return header + strings.join("\n");
-};
-
 // TODO make sure all color tags are hex codes
 // The orig_biom_str is for when the parsed_biom has the reduced dimensions so we can put the original dimensions onto the end of the file.
 biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors, color_details) {
@@ -92,8 +161,6 @@ biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors
   var points                 = fn.parsed_biom.leaf_sample_points(parsed_biom);
   var non_zero_count_samples = fn.parsed_biom.non_zero_count_samples(parsed_biom);
   var centroids              = biom.centroids_from_points(points, non_zero_count_samples);
-
-  C2 = centroids;
 
   var evenness = biom.inverse_evenness(parsed_biom);
 
@@ -221,6 +288,18 @@ biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors
   return md_str + "<body><table>" + header_str + table_rows.join("") + "</table></body></html>";
 };
 
+biom.make_tsv_string = function (json) {
+  var header  = "name\tbranch_color\tleaf_label_color\tleaf_dot_color\n";
+  var strings = [];
+  json_each(json, function (key, val) {
+    var str = [key, val, val, val].join("\t");
+
+    strings.push(str);
+  });
+
+  return header + strings.join("\n");
+};
+
 
 biom.parse_biom_file_str = function (str) {
   // Parse mapping string.
@@ -269,4 +348,12 @@ biom.parse_biom_file_str = function (str) {
   });
 
   return csv;
+};
+
+// Sample idx starts at zero
+biom.sample_to_angle = function (sample_idx, num_samples, angle_offset) {
+  if (num_samples === 0) {
+    throw Error("num_samples must be > 0");
+  }
+  return ((2 * Math.PI / num_samples) * sample_idx) + angle_offset;
 };

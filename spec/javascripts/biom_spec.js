@@ -95,13 +95,26 @@ describe("biom", function () {
     });
 
     context("with two sample biom file", function () {
-      it("does some stuff", function () {
+      it("it gives centroids", function () {
         var expected = spec_helper.two_samples.CENTROIDS;
         var actual   = biom.centroids_from_points(spec_helper.two_samples.POINTS, spec_helper.two_samples.NON_ZERO_COUNT_SAMPLES);
 
         spec_helper.expect_stringify_equal(actual, expected);
       });
     });
+
+    context("with three sample biom file", function () {
+      it("gives centroids", function () {
+        var expected = spec_helper.three_samples.CENTROIDS;
+        var actual   = biom.centroids_from_points(spec_helper.three_samples.POINTS, spec_helper.three_samples.NON_ZERO_COUNT_SAMPLES);
+
+        fn.obj.each(actual, function (leaf, pt) {
+          spec_helper.expect_points_to_be_equal(pt, expected[leaf]);
+        });
+      });
+    });
+
+    // TODO biom file with zeros
   });
 
 

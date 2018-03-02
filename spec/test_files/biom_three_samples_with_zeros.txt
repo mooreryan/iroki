@@ -1,0 +1,6 @@
+name	sample_1	sample_2	sample_3
+geode	5	5	5
+clock	0	5	10
+tire	5	0	10
+banana	10	0	5
+eggplant	10	5	0

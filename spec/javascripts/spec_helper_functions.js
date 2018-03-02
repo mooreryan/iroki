@@ -112,3 +112,71 @@ spec_helper.two_samples.CENTROIDS = {
   eggplant: fn.pt.new(0.45, 0)
 };
 
+//// THREE SAMPLES ////
+spec_helper.three_samples = {};
+
+spec_helper.three_samples.BIOM_STR = "name\tsample_1\tsample_2\tsample_3\ngeode\t5\t5\t5\nclock\t1\t5\t10\ntire\t5\t1\t10\nbanana\t10\t1\t5\neggplant\t10\t5\t1\n";
+
+spec_helper.three_samples.PARSED_BIOM = Papa.parse(spec_helper.three_samples.BIOM_STR, spec_helper.PAPA_CONFIG);
+
+spec_helper.three_samples.NON_ZERO_COUNT_SAMPLES = {
+  geode: "many",
+  clock: "many",
+  tire: "many",
+  banana: "many",
+  eggplant: "many"
+};
+
+spec_helper.three_samples.SAMPLE_ANGLES = {
+  sample_1: 0,
+  sample_2: 2 * Math.PI / 3, // 120 deg
+  sample_3: 4 * Math.PI / 3  // 240 deg
+};
+
+spec_helper.three_samples.REL_ABUND_ACROSS_SAMPLES = {
+  geode: {
+    sample_1: 1,
+    sample_2: 1,
+    sample_3: 1
+  },
+  clock: {
+    sample_1: 0.1,
+    sample_2: 0.5,
+    sample_3: 1
+  },
+  tire: {
+    sample_1: 0.5,
+    sample_2: 0.1,
+    sample_3: 1
+  },
+  banana: {
+    sample_1: 1,
+    sample_2: 0.1,
+    sample_3: 0.5
+  },
+  eggplant: {
+    sample_1: 1,
+    sample_2: 0.5,
+    sample_3: 0.1
+  }
+};
+
+spec_helper.three_samples.POINTS = {};
+
+fn.obj.each(spec_helper.three_samples.REL_ABUND_ACROSS_SAMPLES, function (leaf, rel_counts) {
+  spec_helper.three_samples.POINTS[leaf] = {};
+
+  fn.obj.each(rel_counts, function (sample, rel_count) {
+    var angle = spec_helper.three_samples.SAMPLE_ANGLES[sample];
+
+    spec_helper.three_samples.POINTS[leaf][sample] = fn.pt.on_circle(angle, rel_count);
+  });
+});
+
+spec_helper.three_samples.CENTROIDS = {
+  geode: centroid_of_triangle(spec_helper.three_samples.POINTS.geode.sample_1, spec_helper.three_samples.POINTS.geode.sample_2, spec_helper.three_samples.POINTS.geode.sample_3),
+  clock: centroid_of_triangle(spec_helper.three_samples.POINTS.clock.sample_1, spec_helper.three_samples.POINTS.clock.sample_2, spec_helper.three_samples.POINTS.clock.sample_3),
+  tire: centroid_of_triangle(spec_helper.three_samples.POINTS.tire.sample_1, spec_helper.three_samples.POINTS.tire.sample_2, spec_helper.three_samples.POINTS.tire.sample_3),
+  banana: centroid_of_triangle(spec_helper.three_samples.POINTS.banana.sample_1, spec_helper.three_samples.POINTS.banana.sample_2, spec_helper.three_samples.POINTS.banana.sample_3),
+  eggplant: centroid_of_triangle(spec_helper.three_samples.POINTS.eggplant.sample_1, spec_helper.three_samples.POINTS.eggplant.sample_2, spec_helper.three_samples.POINTS.eggplant.sample_3)
+};
