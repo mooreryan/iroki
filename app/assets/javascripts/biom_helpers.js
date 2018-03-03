@@ -398,54 +398,6 @@ biom.make_tsv_string = function (json) {
 };
 
 
-biom.parse_biom_file_str = function (str) {
-  // Parse mapping string.
-  var csv = Papa.parse(chomp(str), PAPA_CONFIG);
-
-  // TODO test
-  // Check for erros
-  if (has_papa_errors(csv)) {
-    return null;
-  }
-
-  // TODO test
-  if (csv.meta.fields.indexOf("name") === -1) {
-    alert("ERROR -- Missing the 'name' column header in the biom file.");
-    return null;
-  }
-
-  // TODO check for duplicated sample name headers.
-
-  var column_info = {};
-
-
-  csv.meta.fields.forEach(function (field) {
-    column_info[field] = [];
-  });
-
-  csv.data.map(function (line) {
-    json_each(line, function (col_header, col_data) {
-      column_info[col_header].push(col_data);
-    });
-  });
-
-  var scaled_counts = {};
-
-  json_each(column_info, function (sample_name, ary) {
-    if (sample_name !== "name") {
-      // Key is one of the samples with the counts.
-      var min_max       = utils__ary_min_max(ary);
-      var min           = min_max.min;
-      var max_minus_min = min_max.max - min;
-
-      scaled_counts[sample_name] = ary.map(function (count) {
-        return (count - min) / max_minus_min;
-      });
-    }
-  });
-
-  return csv;
-};
 
 // Sample idx starts at zero
 biom.sample_to_angle = function (sample_idx, num_samples, angle_offset) {

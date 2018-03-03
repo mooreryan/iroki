@@ -1,5 +1,6 @@
 //= require spec_helper_functions
 
+/*
 describe("fn", function () {
   describe("fn.parsed_biom", function () {
     describe("fn.parsed_biom.abundance_across", function () {
@@ -165,6 +166,100 @@ describe("fn", function () {
         var actual   = fn.parsed_biom.sample_fields(parsed_biom);
 
         spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+  });
+});
+*/
+
+describe("fn", function () {
+  describe("fn.parsed_biom", function () {
+    describe("fn.parsed_biom.parse_biom_file_str", function () {
+      it("returns parsed_biom from a biom file string", function () {
+        var expected = '{"data":[{"name":"geode","sample_1":5},{"name":"clock","sample_1":1},{"name":"tire","sample_1":2},{"name":"banana","sample_1":9},{"name":"eggplant","sample_1":10}],"errors":[],"meta":{"delimiter":"\\t","linebreak":"\\n","aborted":false,"truncated":false,"cursor":57,"fields":["name","sample_1"]}}';
+
+        var actual = JSON.stringify(fn.parsed_biom.parse_biom_file_str(spec_helper.single_sample.BIOM_STR));
+
+        expect(actual).to.equal(expected);
+      });
+
+      it("throws if 'name' is not the first column header", function () {
+        var str = "apple\tpie\ngood\t1\n";
+
+        expect(function () {
+          fn.parsed_biom.parse_biom_file_str(str);
+        }).to.throw();
+      });
+
+      it("throws if there are no samples");
+      it("handles negative counts");
+    });
+
+    describe("fn.parsed_biom.num_samples", function () {
+      it("gives the number of samples", function () {
+        var expected = spec_helper.test_case.NUM_SAMPLES;
+        var actual   = fn.parsed_biom.num_samples(spec_helper.test_case.PARSED_BIOM);
+
+        expect(actual).to.equal(expected);
+      });
+    });
+
+    describe("fn.parsed_biom.sample_names", function () {
+      it("returns the names of the samples", function () {
+        var expected = spec_helper.test_case.SAMPLE_NAMES;
+        var actual   = fn.parsed_biom.sample_names(spec_helper.test_case.PARSED_BIOM);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.parsed_biom.counts_for_each_leaf", function () {
+      context("raw counts", function () {
+        it("returns the counts for each leaf", function () {
+          var expected = spec_helper.test_case.COUNTS;
+          var actual   = fn.parsed_biom.counts_for_each_leaf(spec_helper.test_case.PARSED_BIOM);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+
+      context("with zero replacements", function () {
+        it("returns counts with zeros replaced", function () {
+          var expected = spec_helper.test_case.COUNTS_WITH_ZEROS_REPLACED;
+
+          var actual = fn.parsed_biom.counts_for_each_leaf(spec_helper.test_case.PARSED_BIOM, true);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+    });
+
+    describe("fn.parsed_biom.non_zero_samples_for_each_leaf", function () {
+      it("returns non zero samples for each leaf", function () {
+        var expected = spec_helper.test_case.NON_ZERO_SAMPLES_FOR_EACH_LEAF;
+        var actual   = fn.parsed_biom.non_zero_samples_for_each_leaf(spec_helper.test_case.PARSED_BIOM);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.parsed_biom.abundance_across_samples_for_each_leaf", function () {
+      context("keep zero counts", function () {
+        it("returns mean abundance across all samples", function () {
+          var expected = spec_helper.test_case.ABUNDANCE_ACROSS_ALL_SAMPLES;
+          var actual   = fn.parsed_biom.abundance_across_samples_for_each_leaf(spec_helper.test_case.PARSED_BIOM, true);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+
+      context("do not keep zero counts", function () {
+        it("returns mean abundance across non zero samples", function () {
+          var expected = spec_helper.test_case.ABUNDANCE_ACROSS_NONZERO_SAMPLES;
+          var actual   = fn.parsed_biom.abundance_across_samples_for_each_leaf(spec_helper.test_case.PARSED_BIOM, false);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
       });
     });
   });

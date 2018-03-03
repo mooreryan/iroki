@@ -71,6 +71,14 @@ spec_helper.two_samples = {};
 
 spec_helper.two_samples.BIOM_STR = "name\tsample_1\tsample_2\ngeode\t5\t5\nclock\t1\t10\ntire\t2\t9\nbanana\t9\t2\neggplant\t10\t1\n";
 
+spec_helper.two_samples.NUM_SAMPLES  = 2;
+spec_helper.two_samples.SAMPLE_NAMES = ["sample_1", "sample_2"];
+spec_helper.two_samples.LEAF_NAMES   = ["geode", "clock", "tire", "banana", "eggplant"];
+spec_helper.two_samples.COUNTS       = {
+  geode: [5, 5],
+  clock: [1, 10]
+};
+
 spec_helper.two_samples.PARSED_BIOM = Papa.parse(spec_helper.two_samples.BIOM_STR, spec_helper.PAPA_CONFIG);
 
 spec_helper.two_samples.NON_ZERO_COUNT_SAMPLES = {
@@ -407,4 +415,38 @@ var a = {
 var b = {
   "4___13": { "x": 0.16667, "y": -0.28867513459481287 },
   "4___5": { "x": 0.5, "y": -0.28867513459481287 }
+};
+
+//// General test ////
+spec_helper.test_case = {};
+
+spec_helper.test_case.BIOM_STR    = "name\ts1\ts2\ts3\ts4\ts5\ts6\napple\t0\t1\t2\t0\t3\t4\npie\t1\t2\t0\t3\t0\t4\n";
+spec_helper.test_case.PARSED_BIOM = Papa.parse(spec_helper.test_case.BIOM_STR, spec_helper.PAPA_CONFIG);
+
+spec_helper.test_case.NUM_SAMPLES  = 6;
+spec_helper.test_case.SAMPLE_NAMES = ["s1", "s2", "s3", "s4", "s5", "s6"];
+spec_helper.test_case.LEAF_NAMES   = ["apple", "pie"];
+spec_helper.test_case.COUNTS       = {
+  apple: [0, 1, 2, 0, 3, 4],
+  pie: [1, 2, 0, 3, 0, 4]
+};
+
+spec_helper.test_case.COUNTS_WITH_ZEROS_REPLACED = {
+  apple: [global.ZERO_REPLACEMENT_VAL, 1, 2, global.ZERO_REPLACEMENT_VAL, 3, 4],
+  pie: [1, 2, global.ZERO_REPLACEMENT_VAL, 3, global.ZERO_REPLACEMENT_VAL, 4]
+};
+
+spec_helper.test_case.NON_ZERO_SAMPLES_FOR_EACH_LEAF = {
+  apple: ["s2", "s3", "s5", "s6"],
+  pie: ["s1", "s2", "s4", "s6"]
+};
+
+spec_helper.test_case.ABUNDANCE_ACROSS_ALL_SAMPLES = {
+  apple: (1 + 2 + 3 + 4) / 6,
+  pie: (1 + 2 + 3 + 4) / 6
+};
+
+spec_helper.test_case.ABUNDANCE_ACROSS_NONZERO_SAMPLES = {
+  apple: (1 + 2 + 3 + 4) / 4,
+  pie: (1 + 2 + 3 + 4) / 4
 };

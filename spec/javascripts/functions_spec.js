@@ -54,6 +54,16 @@ describe("fn", function () {
         expect(fn.ary.sum(ary)).to.equal(6);
       });
     });
+
+    describe("mean", function() {
+      it("takes the mean of the array", function() {
+        expect(fn.ary.mean([1, 0, -1])).to.equal(0);
+        expect(fn.ary.mean([1])).to.equal(1);
+      });
+
+      it("handles arrays that aren't all numbers");
+      it("handles zero length arrays");
+    })
   });
 
   describe("color", function () {

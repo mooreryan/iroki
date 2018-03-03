@@ -78,3 +78,7 @@ fn.ary.sum = function (ary) {
     return a + b;
   }, 0);
 };
+
+fn.ary.mean = function (ary) {
+  return fn.ary.sum(ary) / ary.length;
+};

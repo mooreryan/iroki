@@ -1,4 +1,4 @@
-
+/*
 fn.parsed_biom.abundance_across = function (parsed_biom, avg_method) {
   var abundance      = {};
   var abundance_vals = [];
@@ -214,4 +214,171 @@ fn.parsed_biom.sample_fields = function (parsed_biom) {
   });
 
   return fields;
+};
+*/
+
+// All these functions assume that you have a good parsed biom with the proper field set up.
+
+/**
+ * Parses the biom file string with Papa.parse.
+ *
+ * @param {String} str The biom file string.
+ * @return {Object} a Papa parsed object.
+ * @throws {Error} if the first column field is not 'name'
+ */
+fn.parsed_biom.parse_biom_file_str = function (str) {
+  // Parse mapping string.
+  var csv = Papa.parse(chomp(str), PAPA_CONFIG);
+
+  // TODO test
+  // Check for erros
+  if (has_papa_errors(csv)) {
+    return null;
+  }
+
+  // TODO test
+  if (csv.meta.fields.indexOf("name") === -1) {
+    throw Error("'name' must be the header value for the first column");
+  }
+
+  // TODO check for duplicated sample name headers.
+
+  var column_info = {};
+
+
+  csv.meta.fields.forEach(function (field) {
+    column_info[field] = [];
+  });
+
+  csv.data.map(function (line) {
+    json_each(line, function (col_header, col_data) {
+      column_info[col_header].push(col_data);
+    });
+  });
+
+  var scaled_counts = {};
+
+  json_each(column_info, function (sample_name, ary) {
+    if (sample_name !== "name") {
+      // Key is one of the samples with the counts.
+      var min_max       = utils__ary_min_max(ary);
+      var min           = min_max.min;
+      var max_minus_min = min_max.max - min;
+
+      scaled_counts[sample_name] = ary.map(function (count) {
+        return (count - min) / max_minus_min;
+      });
+    }
+  });
+
+  return csv;
+};
+
+/**
+ * Returns the number of samples in a biom file.
+ *
+ * @param parsed_biom
+ * @return {number} The number of samples in the biom file.
+ */
+fn.parsed_biom.num_samples = function (parsed_biom) {
+  return parsed_biom.meta.fields.length - 1;
+};
+
+/**
+ * Returns the names of the samples in the biom file.
+ *
+ * @param parsed_biom
+ * @return {Array} names of fields
+ */
+fn.parsed_biom.sample_names = function (parsed_biom) {
+  var fields = fn.obj.deep_copy(parsed_biom.meta.fields);
+  fields.shift();
+
+  return fields;
+};
+
+/**
+ * For each leaf, returns an array of counts across all samples.
+ *
+ * @param parsed_biom
+ * @return {Object} "leaf name" => [s1_count, s2_count, ...]
+ */
+fn.parsed_biom.counts_for_each_leaf = function (parsed_biom, replace_zeros) {
+  var counts = {};
+
+  parsed_biom.data.forEach(function (count_data) {
+    var leaf_name = null;
+    fn.obj.each(count_data, function (field, value) {
+      if (field === "name") {
+        leaf_name         = value;
+        counts[leaf_name] = [];
+      }
+      else {
+        if (replace_zeros && value === 0) {
+          counts[leaf_name].push(global.ZERO_REPLACEMENT_VAL);
+        }
+        else {
+          counts[leaf_name].push(value);
+        }
+      }
+    });
+  });
+
+  return counts;
+};
+
+/**
+ * Gives the names of each non-zero count sample for each leaf.
+ *
+ * @param parsed_biom
+ * @return {Object}
+ */
+fn.parsed_biom.non_zero_samples_for_each_leaf = function (parsed_biom) {
+  var obj = {};
+
+  parsed_biom.data.forEach(function (count_data) {
+    var leaf_name = null;
+    fn.obj.each(count_data, function (field, value) {
+      if (field === "name") {
+        leaf_name      = value;
+        obj[leaf_name] = [];
+      }
+      else if (value !== 0) {
+        obj[leaf_name].push(field);
+      }
+    });
+  });
+
+  return obj;
+};
+
+/**
+ * It gives mean abundance across samples for each leaf.
+ *
+ * @param parsed_biom
+ * @param keep_zero_counts Pass true if you want mean across all samples.  Pass false if you want mean across samples with count > 0.
+ * @return {Object}
+ */
+fn.parsed_biom.abundance_across_samples_for_each_leaf = function (parsed_biom, keep_zero_counts) {
+  var counts = {};
+  var abundance = {};
+
+  parsed_biom.data.forEach(function (count_data) {
+    var leaf_name = null;
+    fn.obj.each(count_data, function (field, value) {
+      if (field === "name") {
+        leaf_name      = value;
+        counts[leaf_name] = [];
+      }
+      else if (keep_zero_counts || value > 0) {
+        counts[leaf_name].push(value);
+      }
+    });
+
+    fn.obj.each(counts, function(leaf, counts) {
+      abundance[leaf] = fn.ary.mean(counts);
+    })
+  });
+
+  return abundance;
 };
