@@ -460,7 +460,6 @@ fn.parsed_biom.replace_zeros = function (counts_for_each_leaf) {
 };
 
 
-
 /**
  * Returns an array of sample angles for each sample in the biom file.
  *
@@ -491,13 +490,31 @@ fn.parsed_biom.points = function (counts_for_each_leaf, num_samples) {
   var obj = {};
 
   fn.obj.each(new_counts, function (leaf, counts) {
-    var max_count        = fn.ary.max(counts);
-    obj[leaf] = counts.map(function (count, sample_idx) {
-      var angle = sample_angles[sample_idx];
+    var max_count = fn.ary.max(counts);
+    obj[leaf]     = counts.map(function (count, sample_idx) {
+      var angle     = sample_angles[sample_idx];
       var rel_count = count / max_count;
 
       return fn.pt.on_circle(angle, rel_count);
     });
+  });
+
+  return obj;
+};
+
+/**
+ * Returns all origin triangles for each leaf given pints_for_each_leaf.
+ *
+ * An origin triangle is just two points because the origin is implicit.
+ *
+ * @param points_for_each_leaf
+ * @returns {Object} e.g., leaf_name => [[p1, p2], [p2, p3], [p3, p1]]
+ */
+fn.parsed_biom.origin_triangles_for_each_leaf = function (points_for_each_leaf) {
+  var obj = {};
+
+  fn.obj.each(points_for_each_leaf, function (leaf, pts) {
+    obj[leaf] = fn.pt.origin_triangles(pts);
   });
 
   return obj;

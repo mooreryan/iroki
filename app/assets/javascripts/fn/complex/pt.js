@@ -42,10 +42,10 @@ fn.pt.signed_area_of_triangle = function (p1, p2, p3) {
 
   // Embed the triangle in 3D space
   var ary    = [[p1.x, p2.x, p3.x], [p1.y, p2.y, p3.y], [z, z, z]];
-  var matrix = array2mat(ary);
+  var matrix = lalolib.array2mat(ary);
 
   // The signed area of a triangle is 1/2 the determinant of the above matrix.
-  return 0.5 * det(matrix);
+  return 0.5 * lalolib.det(matrix);
 };
 
 // Take a triangle through two points and the origin.  Get the signed area of that triangle.  Based off of the determint formula above.
@@ -63,4 +63,29 @@ fn.pt.centroid_origin_triangle = function (p1, p2) {
   var y = (p1.y + p2.y) / 3;
 
   return fn.pt.new(x, y);
+};
+
+fn.pt.origin_triangles = function (pts) {
+  var num_points       = pts.length;
+  if (num_points < 2) {
+    throw Error("Not enough points.  Need at least two.");
+  }
+
+  var idx              = 0;
+  var origin_triangles = [];
+  var p1               = null, p2 = null;
+
+  for (idx = 0; idx < num_points - 1; ++idx) {
+    p1 = pts[idx];
+    p2 = pts[idx + 1];
+
+    origin_triangles.push([p1, p2]);
+  }
+
+  p1 = pts[idx];
+  p2 = pts[0];
+
+  origin_triangles.push([p1, p2]);
+
+  return origin_triangles;
 };

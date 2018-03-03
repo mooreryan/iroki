@@ -513,6 +513,32 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.pt.origin_triangles", function () {
+      it("returns each origin triangle for a set of points", function () {
+        var p1 = fn.pt.new(1, 0);
+        var p2 = fn.pt.new(0, 1);
+        var p3 = fn.pt.new(-1, 0);
+        var p4 = fn.pt.new(0, -1);
+
+        var points   = [p1, p2, p3, p4];
+        var expected = [[p1, p2], [p2, p3], [p3, p4], [p4, p1]];
+
+        var actual = fn.pt.origin_triangles(points);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+
+
+      });
+
+      context("it throws with less than two points", function () {
+        var points = [fn.pt.new(1, 0)];
+        var func   = function () {
+          fn.pt.origin_triangles(points);
+        };
+
+        expect(func).to.throw();
+      });
+    });
   });
 
   describe("str", function () {

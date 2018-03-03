@@ -345,6 +345,16 @@ describe("fn", function () {
       });
     });
 
+
+    describe("fn.parsed_biom.origin_triangles_for_each_leaf", function () {
+      it("gives origin triangles for each leaf", function () {
+        var expected = spec_helper.test_case.ORIGIN_TRIANGLES;
+        var actual   = fn.parsed_biom.origin_triangles_for_each_leaf(spec_helper.test_case.POINTS);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
     describe("sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;
