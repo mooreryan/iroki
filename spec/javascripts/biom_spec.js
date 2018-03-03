@@ -115,6 +115,20 @@ describe("biom", function () {
     });
 
     // TODO biom file with zeros
+    context("with six sample biom file with zeros", function () {
+      it("gives centroids", function () {
+        var expected = spec_helper.six_samples.CENTROIDS;
+        var actual   = biom.centroids_from_points(spec_helper.six_samples.POINTS, spec_helper.six_samples.NON_ZERO_COUNT_SAMPLES);
+
+        console.log(spec_helper.six_samples.POINTS)
+
+        spec_helper.expect_stringify_equal(actual, expected);
+
+        fn.obj.each(actual, function (leaf, pt) {
+          spec_helper.expect_points_to_be_equal(pt, expected[leaf]);
+        });
+      });
+    });
   });
 
 

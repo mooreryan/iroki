@@ -418,6 +418,81 @@ describe("fn", function () {
         spec_helper.expect_stringify_equal(actual, expected);
       });
     });
+
+    describe("fn.pt.signed_area_origin_triangle", function () {
+      it("gives signed area of the origin triangle", function () {
+        var p1       = fn.pt.new(1, 0);
+        var p2       = fn.pt.new(0, 1);
+        var expected = 0.5;
+        var actual   = fn.pt.signed_area_origin_triangle(p1, p2);
+
+        expect(actual).to.equal(expected);
+      });
+
+      it("handles weird triangles", function () {
+        var x1 = Math.cos(Math.PI / 3);
+        var y1 = Math.sin(Math.PI / 3);
+
+        var x2 = Math.cos(Math.PI / 4);
+        var y2 = Math.cos(Math.PI / 4);
+
+        var p1 = fn.pt.new(x1, y1);
+        var p2 = fn.pt.new(x2, y2);
+
+        var expected = (0.5 * (x1 * y2 - x2 * y1));
+        var actual   = fn.pt.signed_area_origin_triangle(p1, p2);
+
+        expect(actual).to.equal(expected);
+      });
+
+      it("throws if one of the points is zero", function () {
+        expect(function () {
+          fn.pt.signed_area_origin_triangle(fn.pt.new(0, 0), fn.pt.new(1, 0));
+        }).to.throw();
+
+        expect(function () {
+          fn.pt.signed_area_origin_triangle(fn.pt.new(1, 0), fn.pt.new(0, 0));
+        }).to.throw();
+      });
+    });
+
+    describe("fn.pt.centroid_origin_triangle", function () {
+      it("gives signed area of the origin triangle", function () {
+        var p1       = fn.pt.new(1, 0);
+        var p2       = fn.pt.new(0, 1);
+        var expected = fn.pt.new(1/3, 1/3);
+        var actual   = fn.pt.centroid_origin_triangle(p1, p2);
+
+        spec_helper.expect_points_to_be_equal(actual, expected);
+      });
+
+      it("handles weird triangles", function () {
+        var x1 = Math.cos(Math.PI / 3);
+        var y1 = Math.sin(Math.PI / 3);
+
+        var x2 = Math.cos(Math.PI / 4);
+        var y2 = Math.cos(Math.PI / 4);
+
+        var p1 = fn.pt.new(x1, y1);
+        var p2 = fn.pt.new(x2, y2);
+
+        var expected = fn.pt.new((x1 + x2) / 3, (y1 + y2) / 3);
+        var actual   = fn.pt.centroid_origin_triangle(p1, p2);
+
+        spec_helper.expect_points_to_be_equal(actual, expected);
+      });
+
+      it("throws if one of the points is zero", function () {
+        expect(function () {
+          fn.pt.centroid_origin_triangle(fn.pt.new(0, 0), fn.pt.new(1, 0));
+        }).to.throw();
+
+        expect(function () {
+          fn.pt.centroid_origin_triangle(fn.pt.new(1, 0), fn.pt.new(0, 0));
+        }).to.throw();
+      });
+    });
+
   });
 
   describe("str", function () {

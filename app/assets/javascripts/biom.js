@@ -1,6 +1,10 @@
+
+// If the sign is positive then the polygon vertices are ordered counter clockwise about the normal, otherwise clockwise
 function signed_area_of_triangle(p1, p2, p3) {
   return ((p1.x * (p2.y - p3.y)) + (p2.x * (p3.y - p1.y)) + (p3.x * (p1.y - p2.y))) / 2;
 }
+
+
 
 function centroid_of_triangle(p1, p2, p3) {
   return { x: (p1.x + p2.x + p3.x) / 3, y: (p1.y + p2.y + p3.y) / 3 };
@@ -274,9 +278,9 @@ function mat__elem_at(M, ridx, cidx) {
 */
 
 function project(ary, type, cutoff) {
-  var centered_mat = apply_to_cols(array2mat(ary), utils__vec_center);
+  var centered_mat = apply_to_cols(lalolib.array2mat(ary), utils__vec_center);
 
-  var svd_centered_mat = svd(centered_mat, "thinU");
+  var svd_centered_mat = lalolib.svd(centered_mat, "thinU");
 
   // Check if any of the singular values are basically 0.
   var i                  = 0;
@@ -329,13 +333,13 @@ function project(ary, type, cutoff) {
     take_these_cols = [0];
   }
   else {
-    sing_vals       = diag(non_zero_sing_vals.slice(0, num_sing_vals));
+    sing_vals       = lalolib.diag(non_zero_sing_vals.slice(0, num_sing_vals));
     take_these_cols = range(num_sing_vals);
   }
-  var u_component = getCols(svd_centered_mat.U, take_these_cols);
+  var u_component = lalolib.getCols(svd_centered_mat.U, take_these_cols);
 
 
-  scores = mul(u_component, sing_vals);
+  scores = lalolib.mul(u_component, sing_vals);
 
 
   if (num_sing_vals === 1) {
@@ -363,12 +367,12 @@ function apply_to_cols(M, fn) {
   var new_ary = [];
 
   for (cidx = 0; cidx < ncols; ++cidx) {
-    var col = getCols(M, [cidx]);
+    var col = lalolib.getCols(M, [cidx]);
 
     new_ary.push(fn(col));
   }
 
-  return transposeMatrix(array2mat(new_ary));
+  return lalolib.transposeMatrix(lalolib.array2mat(new_ary));
 }
 
 function biom_to_ary(parsed_biom) {
@@ -419,7 +423,7 @@ function reduce_dimension(biom_str, type, cutoff) {
     leaves.forEach(function (leaf, leaf_idx) {
       var row = [leaf];
 
-      getRows(proj, [leaf_idx]).forEach(function (row_count) {
+      lalolib.getRows(proj, [leaf_idx]).forEach(function (row_count) {
         row.push(row_count);
       });
 

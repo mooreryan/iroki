@@ -20,6 +20,7 @@
 // This is all of the vendor things.
 //= require_directory ../../../vendor/assets/javascripts
 
+//= require global
 //= require fn
 //= require biom_helpers
 

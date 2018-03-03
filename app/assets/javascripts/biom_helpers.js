@@ -13,8 +13,8 @@ biom.helper.add_zero_count_samples = function (counts, samples) {
   });
 };
 
-// TODO instead of calculating all triangles, could save some steps by removing p2 from the points obj and rerunning.  (this would also required using signed area)
-biom.centroids_from_points = function (all_points, non_zero_count_samples) {
+/*
+biom.centroids_from_points_old = function (all_points, non_zero_count_samples) {
   var centroids = {};
 
 
@@ -23,10 +23,6 @@ biom.centroids_from_points = function (all_points, non_zero_count_samples) {
     var sum_x_numer = 0;
     var sum_y_numer = 0;
     var sum_denom   = 0;
-
-    if (non_zero_count_samples[leaf] === "none") {
-
-    }
 
     switch (non_zero_count_samples[leaf]) {
       case "none":
@@ -61,6 +57,7 @@ biom.centroids_from_points = function (all_points, non_zero_count_samples) {
           sum_denom += area;
         }
         else {
+          // This will work even if the overall shape is concave.
           // There are at least 4 triangles.
           // For each triangle...
           for (var i = 0; i < samples.length; ++i) {
@@ -84,6 +81,9 @@ biom.centroids_from_points = function (all_points, non_zero_count_samples) {
             var area        = Math.abs(signed_area);
             var centroid    = centroid_of_triangle(p1, p2, p3);
 
+
+            console.log("leaf: " + leaf + ", pt1: " + fn.pt.to_s(p1) + ", pt2: " + fn.pt.to_s(p2) + ", pt3: " + fn.pt.to_s(p3) + ", signed_area: " + signed_area + ", area: " + area + ", centroid: " + fn.pt.to_s(centroid));
+
             sum_x_numer += area * centroid.x;
             sum_y_numer += area * centroid.y;
             sum_denom += area;
@@ -100,6 +100,103 @@ biom.centroids_from_points = function (all_points, non_zero_count_samples) {
         // Just take the point because we want it all the way out to the radius of the circle for that sample.
         centroids[leaf] = fn.pt.new(non_zero_point.x, non_zero_point.y);
         break;
+    }
+  });
+
+  return centroids;
+};
+*/
+
+
+// Will throw if any of the points are zero.
+biom.centroids_from_points = function (all_points, non_zero_count_samples) {
+  var centroids = {};
+
+
+  fn.obj.each(all_points, function (leaf, points) {
+    var samples     = json_keys(points);
+    var num_samples = samples.length;
+    var sum_x_numer = 0;
+    var sum_y_numer = 0;
+    var sum_denom   = 0;
+
+    var new_points    = {};
+    var sample_idx    = 0;
+    var sample_angles = [];
+    var i             = 0;
+    var deg           = 360 / num_samples;
+    for (i = 0; i < num_samples; ++i) {
+      sample_angles.push(i * deg);
+    }
+
+    // Move zero points away from zero just a bit.
+    fn.obj.each(points, function (sample, point) {
+      if (fn.pt.is_zero(point)) {
+        var angle  = fn.math.degrees_to_radians(sample_angles[sample_idx]);
+        var radius = global.ZERO_REPLACEMENT_VAL;
+        var x      = radius * Math.cos(angle);
+        var y      = radius * Math.sin(angle);
+
+        new_points[sample] = fn.pt.new(x, y);
+      }
+      else {
+        new_points[sample] = fn.obj.deep_copy(point);
+      }
+
+      sample_idx += 1;
+    });
+
+    if (non_zero_count_samples[leaf] === "none") {
+      // It has a zero count in every sample
+      centroids[leaf] = fn.pt.new(0, 0);
+    }
+    else if (non_zero_count_samples[leaf] === "many" && samples.length === 2) {
+      // Just set it to the midpoint of the line segment.
+      var p1 = new_points[samples[0]];
+      var p2 = new_points[samples[1]];
+
+      var new_x = (p1.x + p2.x) / 2;
+      var new_y = (p1.y + p2.y) / 2;
+
+      centroids[leaf] = fn.pt.new(new_x, new_y);
+    }
+    else if (non_zero_count_samples[leaf] === "many" && samples.length >= 3) {
+      var numerator   = { x: 0, y: 0 };
+      var denominator = 0;
+
+      var i = 0;
+      for (i = 0; i < samples.length - 1; ++i) {
+        var p1 = new_points[samples[i]];
+        var p2 = new_points[samples[i + 1]];
+
+        var area     = fn.pt.signed_area_origin_triangle(p1, p2);
+        var centroid = fn.pt.centroid_origin_triangle(p1, p2);
+
+        numerator.x += area * centroid.x;
+        numerator.y += area * centroid.y;
+        denominator += area;
+      }
+
+      // Catch the last point
+      var p1 = new_points[samples[i]];
+      var p2 = new_points[samples[0]];
+
+      var area     = fn.pt.signed_area_origin_triangle(p1, p2);
+      var centroid = fn.pt.centroid_origin_triangle(p1, p2);
+
+      numerator.x += area * centroid.x;
+      numerator.y += area * centroid.y;
+      denominator += area;
+
+      centroids[leaf] = fn.pt.new(numerator.x / denominator, numerator.y / denominator);
+    }
+    else {
+      // It has a single sample with a non zero count.
+      var non_zero_sample = non_zero_count_samples[leaf];
+      var non_zero_point  = new_points[non_zero_sample];
+
+      // Just take the point because we want it all the way out to the radius of the circle for that sample.
+      centroids[leaf] = fn.pt.new(non_zero_point.x, non_zero_point.y);
     }
   });
 

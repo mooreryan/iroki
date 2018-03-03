@@ -1,0 +1,2 @@
+name	s1	s2	s3	s4
+apple	1	1	0	0

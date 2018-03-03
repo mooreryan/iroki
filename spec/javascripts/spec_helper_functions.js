@@ -180,3 +180,231 @@ spec_helper.three_samples.CENTROIDS = {
   banana: centroid_of_triangle(spec_helper.three_samples.POINTS.banana.sample_1, spec_helper.three_samples.POINTS.banana.sample_2, spec_helper.three_samples.POINTS.banana.sample_3),
   eggplant: centroid_of_triangle(spec_helper.three_samples.POINTS.eggplant.sample_1, spec_helper.three_samples.POINTS.eggplant.sample_2, spec_helper.three_samples.POINTS.eggplant.sample_3)
 };
+
+//// SIX SAMPLES WITH ZEROS ////
+
+spec_helper.six_samples = {};
+
+spec_helper.six_samples.BIOM_STR = "name\ts1\ts2\ts3\ts4\ts5\ts6\n4___13\t0\t1\t1\t0\t1\t1\n4___5\t1\t1\t0\t1\t0\t1";
+
+spec_helper.six_samples.PARSED_BIOM = Papa.parse(spec_helper.six_samples.BIOM_STR, spec_helper.PAPA_CONFIG);
+
+spec_helper.six_samples.NON_ZERO_COUNT_SAMPLES = {
+  "4___13": "many",
+  "4___5": "many"
+};
+
+spec_helper.six_samples.SAMPLE_ANGLES = {
+  s1: 0,
+  s2: Math.PI / 3,     // 60 deg
+  s3: 2 * Math.PI / 3, // 120 deg
+  s4: Math.PI,         // 180 deg
+  s5: 4 * Math.PI / 3, // 240 deg
+  s6: 5 * Math.PI / 3  // 300 deg
+};
+
+spec_helper.six_samples.REL_ABUND_ACROSS_SAMPLES = {
+  "4___13": {
+    s1: 0,
+    s2: 1,
+    s3: 1,
+    s4: 0,
+    s5: 1,
+    s6: 1
+  },
+  "4___5": {
+    s1: 1,
+    s2: 1,
+    s3: 0,
+    s4: 1,
+    s5: 0,
+    s6: 1
+  }
+};
+
+spec_helper.six_samples.POINTS = {};
+
+fn.obj.each(spec_helper.six_samples.REL_ABUND_ACROSS_SAMPLES, function (leaf, rel_counts) {
+  spec_helper.six_samples.POINTS[leaf] = {};
+
+  fn.obj.each(rel_counts, function (sample, rel_count) {
+    var angle = spec_helper.six_samples.SAMPLE_ANGLES[sample];
+
+    spec_helper.six_samples.POINTS[leaf][sample] = fn.pt.on_circle(angle, rel_count);
+  });
+});
+
+
+spec_helper.six_samples.weights_4_13 = [global.ZERO_REPLACEMENT_VAL, 1, 1, global.ZERO_REPLACEMENT_VAL, 1, 1];
+spec_helper.six_samples.weights_4_5  = [1, 1, global.ZERO_REPLACEMENT_VAL, 1, global.ZERO_REPLACEMENT_VAL, 1];
+spec_helper.six_samples.THETAS       = [0, Math.PI / 3, 2 * Math.PI / 3, Math.PI, 4 * Math.PI / 3, 5 * Math.PI / 3];
+
+spec_helper.six_samples.POINTS_SIMPLE = {
+  "4___13": spec_helper.six_samples.weights_4_13.map(function (weight, idx) {
+    var theta = spec_helper.six_samples.THETAS[idx];
+    var x     = weight * Math.cos(theta);
+    var y     = weight * Math.sin(theta);
+
+    return fn.pt.new(x, y);
+  }),
+  "4___5": spec_helper.six_samples.weights_4_5.map(function (weight, idx) {
+    var theta = spec_helper.six_samples.THETAS[idx];
+    var x     = weight * Math.cos(theta);
+    var y     = weight * Math.sin(theta);
+
+    return fn.pt.new(x, y);
+  })
+};
+
+spec_helper.tmp = null;
+spec_helper.i   = 0;
+
+spec_helper.six_samples.SIGNED_AREAS = {
+  "4___13": [
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][0].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][1].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][1].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][0].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][1].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][2].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][2].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][1].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][2].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][3].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][3].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][2].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][3].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][4].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][4].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][3].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][4].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][5].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][5].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][4].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][5].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][0].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___13"][0].x * spec_helper.six_samples.POINTS_SIMPLE["4___13"][5].y)
+  ],
+  "4___5": [
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][0].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][1].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][1].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][0].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][1].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][2].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][2].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][1].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][2].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][3].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][3].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][2].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][3].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][4].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][4].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][3].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][4].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][5].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][5].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][4].y),
+    0.5 * (
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][5].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][0].y +
+      spec_helper.six_samples.POINTS_SIMPLE["4___5"][0].x * spec_helper.six_samples.POINTS_SIMPLE["4___5"][5].y)
+  ]
+};
+
+spec_helper.six_samples.TRIANGLE_CENTROIDS = {
+  "4___13": [
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][0].x + spec_helper.six_samples.POINTS_SIMPLE["4___13"][1].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][0].y + spec_helper.six_samples.POINTS_SIMPLE["4___13"][1].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][1].x + spec_helper.six_samples.POINTS_SIMPLE["4___13"][2].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][1].y + spec_helper.six_samples.POINTS_SIMPLE["4___13"][2].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][2].x + spec_helper.six_samples.POINTS_SIMPLE["4___13"][3].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][2].y + spec_helper.six_samples.POINTS_SIMPLE["4___13"][3].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][3].x + spec_helper.six_samples.POINTS_SIMPLE["4___13"][4].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][3].y + spec_helper.six_samples.POINTS_SIMPLE["4___13"][4].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][4].x + spec_helper.six_samples.POINTS_SIMPLE["4___13"][5].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][4].y + spec_helper.six_samples.POINTS_SIMPLE["4___13"][5].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][5].x + spec_helper.six_samples.POINTS_SIMPLE["4___13"][0].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___13"][5].y + spec_helper.six_samples.POINTS_SIMPLE["4___13"][0].y) / 3
+    )
+  ],
+  "4___5": [
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][0].x + spec_helper.six_samples.POINTS_SIMPLE["4___5"][1].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][0].y + spec_helper.six_samples.POINTS_SIMPLE["4___5"][1].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][1].x + spec_helper.six_samples.POINTS_SIMPLE["4___5"][2].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][1].y + spec_helper.six_samples.POINTS_SIMPLE["4___5"][2].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][2].x + spec_helper.six_samples.POINTS_SIMPLE["4___5"][3].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][2].y + spec_helper.six_samples.POINTS_SIMPLE["4___5"][3].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][3].x + spec_helper.six_samples.POINTS_SIMPLE["4___5"][4].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][3].y + spec_helper.six_samples.POINTS_SIMPLE["4___5"][4].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][4].x + spec_helper.six_samples.POINTS_SIMPLE["4___5"][5].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][4].y + spec_helper.six_samples.POINTS_SIMPLE["4___5"][5].y) / 3
+    ),
+    fn.pt.new(
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][5].x + spec_helper.six_samples.POINTS_SIMPLE["4___5"][0].x) / 3,
+      (spec_helper.six_samples.POINTS_SIMPLE["4___5"][5].y + spec_helper.six_samples.POINTS_SIMPLE["4___5"][0].y) / 3
+    )
+  ]
+
+};
+
+for (spec_helper.i = 0; spec_helper.i < 6; ++spec_helper.i) {
+  var sum_num_x_4_13 = 0,
+      sum_num_y_4_13 = 0,
+      sum_num_x_4_5  = 0,
+      sum_num_y_4_5  = 0,
+      sum_den_4_13   = 0,
+      sum_den_4_5    = 0;
+
+  var area_4_13 = spec_helper.six_samples.SIGNED_AREAS["4___13"][spec_helper.i];
+  var area_4_5  = spec_helper.six_samples.SIGNED_AREAS["4___5"][spec_helper.i];
+
+  var centroid_4_13 = spec_helper.six_samples.TRIANGLE_CENTROIDS["4___13"][spec_helper.i];
+  var centroid_4_5  = spec_helper.six_samples.TRIANGLE_CENTROIDS["4___5"][spec_helper.i];
+
+  sum_num_x_4_13 += area_4_13 * centroid_4_13.x;
+  sum_num_y_4_13 += area_4_13 * centroid_4_13.y;
+  sum_num_x_4_5 += area_4_5 * centroid_4_5.x;
+  sum_num_y_4_5 += area_4_5 * centroid_4_5.y;
+
+  sum_den_4_13 += area_4_13;
+  sum_den_4_5 += area_4_5;
+}
+
+spec_helper.six_samples.CENTROIDS = {
+  "4___13": fn.pt.new(sum_num_x_4_13 / sum_den_4_13, sum_num_y_4_13 / sum_den_4_13),
+  "4___5": fn.pt.new(sum_num_x_4_5 / sum_den_4_5, sum_num_y_4_5 / sum_den_4_5)
+};
+
+var a = {
+  "4___13": {
+    "x": -1.068312603546424e-17,
+    "y": -8.546500828371392e-17
+  }, "4___5": { "x": 0.2666666666666666, "y": 3.2049378106392736e-17 }
+};
+
+var b = {
+  "4___13": { "x": 0.16667, "y": -0.28867513459481287 },
+  "4___5": { "x": 0.5, "y": -0.28867513459481287 }
+};
+
+
+var a = {
+  "4___13": { "x": -1.2225622990284e-22, "y": -1.8283663694429529e-16 },
+  "4___5": { "x": 0.4999883335333293, "y": 0 }
+};
+
+var b = {
+  "4___13": { "x": 0.16667, "y": -0.28867513459481287 },
+  "4___5": { "x": 0.5, "y": -0.28867513459481287 }
+};

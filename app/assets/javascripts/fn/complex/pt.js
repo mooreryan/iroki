@@ -1,4 +1,14 @@
-// Depends on fn.math
+// Depends on fn.math, and lalolib
+
+fn.pt.helper = {};
+
+fn.pt.helper.throw_if_any_are_zero = function (pts) {
+  pts.forEach(function (pt) {
+    if (fn.pt.is_zero(pt)) {
+      throw Error("pt: " + fn.pt.to_s(pt) + " was zero.");
+    }
+  });
+};
 
 // Pt
 fn.pt.is_equal = function (pt1, pt2, tolerance) {
@@ -14,7 +24,7 @@ fn.pt.mag = function (pt) {
 };
 
 fn.pt.new = function (x, y) {
-  return { x : x, y : y };
+  return { x: x, y: y };
 };
 
 // Takes angle in radians.  Gives a point on the circle with given radius.
@@ -24,4 +34,33 @@ fn.pt.on_circle = function (angle, radius) {
 
 fn.pt.to_s = function (pt) {
   return "(" + fn.math.round(pt.x, 2) + ", " + fn.math.round(pt.y, 2) + ")";
+};
+
+fn.pt.signed_area_of_triangle = function (p1, p2, p3) {
+  // Let the triangle go through the plane at z = 1
+  var z = 1;
+
+  // Embed the triangle in 3D space
+  var ary    = [[p1.x, p2.x, p3.x], [p1.y, p2.y, p3.y], [z, z, z]];
+  var matrix = array2mat(ary);
+
+  // The signed area of a triangle is 1/2 the determinant of the above matrix.
+  return 0.5 * det(matrix);
+};
+
+// Take a triangle through two points and the origin.  Get the signed area of that triangle.  Based off of the determint formula above.
+fn.pt.signed_area_origin_triangle = function (p1, p2) {
+  fn.pt.helper.throw_if_any_are_zero([p1, p2]);
+
+  return 0.5 * (p1.x * p2.y - p2.x * p1.y);
+};
+
+// Given two points, draw a triangle through then and the origin.  Get the centroid of that.
+fn.pt.centroid_origin_triangle = function (p1, p2) {
+  fn.pt.helper.throw_if_any_are_zero([p1, p2]);
+
+  var x = (p1.x + p2.x) / 3;
+  var y = (p1.y + p2.y) / 3;
+
+  return fn.pt.new(x, y);
 };
