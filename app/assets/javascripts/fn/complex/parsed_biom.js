@@ -482,6 +482,13 @@ fn.parsed_biom.sample_angles = function (num_samples) {
   return angles;
 };
 
+/**
+ * Converts counts to points on the unit circle for each leaf.
+ *
+ * @param counts_for_each_leaf
+ * @param num_samples
+ * @returns {Object} e.g., leaf_name => [s1_point, s2_point, ...]
+ */
 fn.parsed_biom.points = function (counts_for_each_leaf, num_samples) {
   // First get an array where the zeros are replaced.
   var new_counts    = fn.parsed_biom.replace_zeros(counts_for_each_leaf);
@@ -495,7 +502,7 @@ fn.parsed_biom.points = function (counts_for_each_leaf, num_samples) {
       var angle     = sample_angles[sample_idx];
       var rel_count = count / max_count;
 
-      return fn.pt.on_circle(angle, rel_count);
+      return fn.pt.on_circle(fn.math.degrees_to_radians(angle), rel_count);
     });
   });
 
@@ -519,6 +526,38 @@ fn.parsed_biom.origin_triangles_for_each_leaf = function (points_for_each_leaf) 
 
   return obj;
 };
+
+/**
+ * Given an array of origin triangles, get the centroids.
+ *
+ * @param origin_tirangles e.g., [[p1, p2], [p2, p3], [p3, p1]]
+ * @return {Array} centroids e.g., [fn.pt.new(...), fn.pt.new(...), ...]
+ */
+fn.parsed_biom.centroids_of_origin_triangles = function (origin_tirangles) {
+  return origin_tirangles.map(function (origin_triangle) {
+    var p1 = origin_triangle[0];
+    var p2 = origin_triangle[1];
+
+    return fn.pt.centroid_origin_triangle(p1, p2);
+  });
+};
+
+/**
+ * Given origin triangles for each leaf, return the centroids of all origin triangles for each leaf.
+ *
+ * @param origin_triangles_for_each_leaf
+ * @return {Object} e.g., leaf_name => [centroid, centroid, ...]
+ */
+fn.parsed_biom.all_centroids = function (origin_triangles_for_each_leaf) {
+  var obj = {};
+
+  fn.obj.each(origin_triangles_for_each_leaf, function (leaf, triangles) {
+    obj[leaf] = fn.parsed_biom.centroids_of_origin_triangles(triangles);
+  });
+
+  return obj;
+};
+
 
 /**
  * Return an object with all the info you need for working with the parsed biom.

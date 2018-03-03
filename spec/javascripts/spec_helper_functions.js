@@ -467,19 +467,19 @@ spec_helper.test_case.EVENNESS_ACROSS_NONZERO_SAMPLES = {
 spec_helper.test_case.POINTS = {
   apple: [
     fn.pt.on_circle(0, global.ZERO_REPLACEMENT_VAL / 4),
-    fn.pt.on_circle(60, 0.25),
-    fn.pt.on_circle(120, 0.5),
-    fn.pt.on_circle(180, global.ZERO_REPLACEMENT_VAL / 4),
-    fn.pt.on_circle(240, 0.75),
-    fn.pt.on_circle(300, 1)
+    fn.pt.on_circle(Math.PI / 3, 0.25),
+    fn.pt.on_circle(2 * Math.PI / 3, 0.5),
+    fn.pt.on_circle(Math.PI, global.ZERO_REPLACEMENT_VAL / 4),
+    fn.pt.on_circle(4 * Math.PI / 3, 0.75),
+    fn.pt.on_circle(5 * Math.PI / 3, 1)
   ],
   pie: [
     fn.pt.on_circle(0, 0.25),
-    fn.pt.on_circle(60, 0.5),
-    fn.pt.on_circle(120, global.ZERO_REPLACEMENT_VAL / 4),
-    fn.pt.on_circle(180, 0.75),
-    fn.pt.on_circle(240, global.ZERO_REPLACEMENT_VAL / 4),
-    fn.pt.on_circle(300, 1)
+    fn.pt.on_circle(Math.PI / 3, 0.5),
+    fn.pt.on_circle(2 * Math.PI / 3, global.ZERO_REPLACEMENT_VAL / 4),
+    fn.pt.on_circle(Math.PI, 0.75),
+    fn.pt.on_circle(4 * Math.PI / 3, global.ZERO_REPLACEMENT_VAL / 4),
+    fn.pt.on_circle(5 * Math.PI / 3, 1)
   ]
 };
 
@@ -487,52 +487,72 @@ spec_helper.test_case.ORIGIN_TRIANGLES = {
   apple: [
     [
       fn.pt.on_circle(0, global.ZERO_REPLACEMENT_VAL / 4),
-      fn.pt.on_circle(60, 0.25),
+      fn.pt.on_circle(Math.PI / 3, 0.25),
     ],
     [
-      fn.pt.on_circle(60, 0.25),
-      fn.pt.on_circle(120, 0.5)
+      fn.pt.on_circle(Math.PI / 3, 0.25),
+      fn.pt.on_circle(2 * Math.PI / 3, 0.5)
     ],
     [
-      fn.pt.on_circle(120, 0.5),
-      fn.pt.on_circle(180, global.ZERO_REPLACEMENT_VAL / 4)
+      fn.pt.on_circle(2 * Math.PI / 3, 0.5),
+      fn.pt.on_circle(Math.PI, global.ZERO_REPLACEMENT_VAL / 4)
     ],
     [
-      fn.pt.on_circle(180, global.ZERO_REPLACEMENT_VAL / 4),
-      fn.pt.on_circle(240, 0.75)
+      fn.pt.on_circle(Math.PI, global.ZERO_REPLACEMENT_VAL / 4),
+      fn.pt.on_circle(4 * Math.PI / 3, 0.75)
     ],
     [
-      fn.pt.on_circle(240, 0.75),
-      fn.pt.on_circle(300, 1)
+      fn.pt.on_circle(4 * Math.PI / 3, 0.75),
+      fn.pt.on_circle(5 * Math.PI / 3, 1)
     ],
     [
-      fn.pt.on_circle(300, 1),
+      fn.pt.on_circle(5 * Math.PI / 3, 1),
       fn.pt.on_circle(0, global.ZERO_REPLACEMENT_VAL / 4)
     ]
   ],
   pie: [
     [
       fn.pt.on_circle(0, 0.25),
-      fn.pt.on_circle(60, 0.5)],
+      fn.pt.on_circle(Math.PI / 3, 0.5)],
     [
-      fn.pt.on_circle(60, 0.5),
-      fn.pt.on_circle(120, global.ZERO_REPLACEMENT_VAL / 4)
+      fn.pt.on_circle(Math.PI / 3, 0.5),
+      fn.pt.on_circle(2 * Math.PI / 3, global.ZERO_REPLACEMENT_VAL / 4)
     ],
     [
-      fn.pt.on_circle(120, global.ZERO_REPLACEMENT_VAL / 4),
-      fn.pt.on_circle(180, 0.75)
+      fn.pt.on_circle(2 * Math.PI / 3, global.ZERO_REPLACEMENT_VAL / 4),
+      fn.pt.on_circle(Math.PI, 0.75)
     ],
     [
-      fn.pt.on_circle(180, 0.75),
-      fn.pt.on_circle(240, global.ZERO_REPLACEMENT_VAL / 4)
+      fn.pt.on_circle(Math.PI, 0.75),
+      fn.pt.on_circle(4 * Math.PI / 3, global.ZERO_REPLACEMENT_VAL / 4)
     ],
     [
-      fn.pt.on_circle(240, global.ZERO_REPLACEMENT_VAL / 4),
-      fn.pt.on_circle(300, 1)
+      fn.pt.on_circle(4 * Math.PI / 3, global.ZERO_REPLACEMENT_VAL / 4),
+      fn.pt.on_circle(5 * Math.PI / 3, 1)
     ],
     [
-      fn.pt.on_circle(300, 1),
+      fn.pt.on_circle(5 * Math.PI / 3, 1),
       fn.pt.on_circle(0, 0.25)
     ]
+  ]
+};
+
+
+spec_helper.test_case.ALL_CENTROIDS = {
+  apple: [
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[0][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[0][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[1][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[1][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[2][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[2][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[3][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[3][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[4][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[4][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[5][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[5][1])
+  ],
+  pie: [
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[0][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[0][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[1][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[1][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[2][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[2][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[3][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[3][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[4][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[4][1]),
+    fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[5][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[5][1])
   ]
 };

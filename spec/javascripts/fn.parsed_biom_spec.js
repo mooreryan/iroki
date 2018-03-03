@@ -355,6 +355,43 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.parsed_biom.centroids_of_origin_triangles", function () {
+      it("gives the centroid for each origin triangle", function () {
+        var x1 = Math.cos(0);
+        var x2 = Math.cos(2 * Math.PI / 3);
+        var x3 = Math.cos(4 * Math.PI / 3);
+
+        var y1 = Math.sin(0);
+        var y2 = Math.sin(2 * Math.PI / 3);
+        var y3 = Math.sin(4 * Math.PI / 3);
+
+        var p1 = fn.pt.new(x1, y1);
+        var p2 = fn.pt.new(x2, y2);
+        var p3 = fn.pt.new(x3, y3);
+
+        var origin_triangles = [[p1, p2], [p2, p3], [p3, p1]];
+
+        var expected = [
+          fn.pt.new((x1 + x2) / 3, (y1 + y2) / 3),
+          fn.pt.new((x2 + x3) / 3, (y2 + y3) / 3),
+          fn.pt.new((x3 + x1) / 3, (y3 + y1) / 3)
+        ];
+
+        var actual = fn.parsed_biom.centroids_of_origin_triangles(origin_triangles);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.parsed_biom.all_centroids", function () {
+      it("returns centroids for each triangle for each leaf", function () {
+        var expected = spec_helper.test_case.ALL_CENTROIDS;
+        var actual   = fn.parsed_biom.all_centroids(spec_helper.test_case.ORIGIN_TRIANGLES);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
     describe("sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;
