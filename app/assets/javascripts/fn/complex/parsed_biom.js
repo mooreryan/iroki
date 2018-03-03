@@ -303,7 +303,7 @@ fn.parsed_biom.sample_names = function (parsed_biom) {
  * @param parsed_biom
  * @return {Object} "leaf name" => [s1_count, s2_count, ...]
  */
-fn.parsed_biom.counts_for_each_leaf = function (parsed_biom, replace_zeros) {
+fn.parsed_biom.counts_for_each_leaf = function (parsed_biom) {
   var counts = {};
 
   parsed_biom.data.forEach(function (count_data) {
@@ -314,12 +314,7 @@ fn.parsed_biom.counts_for_each_leaf = function (parsed_biom, replace_zeros) {
         counts[leaf_name] = [];
       }
       else {
-        if (replace_zeros && value === 0) {
-          counts[leaf_name].push(global.ZERO_REPLACEMENT_VAL);
-        }
-        else {
-          counts[leaf_name].push(value);
-        }
+        counts[leaf_name].push(value);
       }
     });
   });
@@ -360,14 +355,14 @@ fn.parsed_biom.non_zero_samples_for_each_leaf = function (parsed_biom) {
  * @return {Object}
  */
 fn.parsed_biom.abundance_across_samples_for_each_leaf = function (parsed_biom, keep_zero_counts) {
-  var counts = {};
+  var counts    = {};
   var abundance = {};
 
   parsed_biom.data.forEach(function (count_data) {
     var leaf_name = null;
     fn.obj.each(count_data, function (field, value) {
       if (field === "name") {
-        leaf_name      = value;
+        leaf_name         = value;
         counts[leaf_name] = [];
       }
       else if (keep_zero_counts || value > 0) {
@@ -375,10 +370,174 @@ fn.parsed_biom.abundance_across_samples_for_each_leaf = function (parsed_biom, k
       }
     });
 
-    fn.obj.each(counts, function(leaf, counts) {
+    fn.obj.each(counts, function (leaf, counts) {
       abundance[leaf] = fn.ary.mean(counts);
-    })
+    });
   });
 
   return abundance;
+};
+
+/**
+ * It gives evenness across samples for each leaf.
+ *
+ * @param {Object} counts_for_each_leaf (leaf_name => [s1_count, s2_count, ...)
+ * @param keep_zero_counts Pass true if you want evenness across all samples.  Pass false if you want evenness across samples with count > 0.
+ * @return {Object} an object like so: leaf_name => evenness
+ */
+fn.parsed_biom.evenness_across_samples_for_each_leaf = function (counts_for_each_leaf, keep_zero_counts) {
+  var obj = {};
+
+  fn.obj.each(counts_for_each_leaf, function (leaf, count_vals) {
+    var counts = null;
+    if (keep_zero_counts) {
+      counts = count_vals;
+    }
+    else {
+      counts = fn.ary.filter_out_zeros(count_vals);
+    }
+
+    obj[leaf] = fn.diversity.evenness_entropy(counts);
+  });
+
+  return obj;
+};
+
+/**
+ * Returns the zero replacement value for this data set.
+ *
+ * If there is a count that is less than global.ZERO_REPLACEMENT_VALUE, then return half of that count.  Else return global.ZERO_REPLACEMENT_VALUE.
+ *
+ * This is used to move zero counts slightly away from zero so that we can calculate area and centroid of all triangles later.
+ *
+ * @param counts_for_each_leaf
+ * @return {number} zero replacement value
+ */
+fn.parsed_biom.zero_replacement_val = function (counts_for_each_leaf) {
+  var zero_replacement_val = global.ZERO_REPLACEMENT_VAL;
+
+  fn.obj.each(counts_for_each_leaf, function (leaf, counts) {
+    counts.forEach(function (count) {
+      if (0 < count && count < zero_replacement_val) {
+        zero_replacement_val = count;
+      }
+    });
+  });
+
+  if (zero_replacement_val === global.ZERO_REPLACEMENT_VAL) {
+    return zero_replacement_val;
+  }
+  else {
+    return zero_replacement_val / 2;
+  }
+};
+
+/**
+ * Returns a new count obj with zeros replaced by appropiate non-zero replacement value.
+ *
+ * @param counts_for_each_leaf
+ * @returns {Object} e.g., leaf_name => [s1_count, s2_count]
+ */
+fn.parsed_biom.replace_zeros = function (counts_for_each_leaf) {
+  // First get the zero replacement value.
+  var zero_replacement_val = fn.parsed_biom.zero_replacement_val(counts_for_each_leaf);
+
+  var new_counts = {};
+
+  // Then replace the zeros
+  fn.obj.each(counts_for_each_leaf, function (leaf, counts) {
+    new_counts[leaf] = counts.map(function (count) {
+      if (count === 0) {
+        return zero_replacement_val;
+      }
+      else {
+        return count;
+      }
+    });
+  });
+
+  return new_counts;
+};
+
+
+
+/**
+ * Returns an array of sample angles for each sample in the biom file.
+ *
+ * @param num_samples
+ * @returns {Array} e.g., [0, 90, 180, 270] for 4 samples
+ * @throws {Error} if num_samples === 0
+ */
+fn.parsed_biom.sample_angles = function (num_samples) {
+  if (num_samples === 0) {
+    throw Error("num_samples cannot be zero");
+  }
+
+  var angle  = 360 / num_samples;
+  var angles = [];
+
+  for (var i = 0; i < num_samples; ++i) {
+    angles.push(i * angle);
+  }
+
+  return angles;
+};
+
+fn.parsed_biom.points = function (counts_for_each_leaf, num_samples) {
+  // First get an array where the zeros are replaced.
+  var new_counts    = fn.parsed_biom.replace_zeros(counts_for_each_leaf);
+  var sample_angles = fn.parsed_biom.sample_angles(num_samples);
+
+  var obj = {};
+
+  fn.obj.each(new_counts, function (leaf, counts) {
+    var max_count        = fn.ary.max(counts);
+    obj[leaf] = counts.map(function (count, sample_idx) {
+      var angle = sample_angles[sample_idx];
+      var rel_count = count / max_count;
+
+      return fn.pt.on_circle(angle, rel_count);
+    });
+  });
+
+  return obj;
+};
+
+/**
+ * Return an object with all the info you need for working with the parsed biom.
+ *
+ * @param params Object with keys: biom_str, replace_zeros (replace zero counts with small value), keep_zero_counts (mean across all samples).
+ * @return {Object}
+ */
+fn.parsed_biom.new = function (params) {
+  var biom_str         = params.biom_str;
+  var replace_zeros    = params.replace_zeros;
+  var keep_zero_counts = params.keep_zero_counts;
+
+  var obj = {};
+
+  // Include the params
+  obj.params = {
+    biom_str: biom_str,
+    replace_zeros: replace_zeros,
+    keep_zero_counts: keep_zero_counts
+  };
+
+  obj.parsed_biom = fn.parsed_biom.parse_biom_file_str(biom_str);
+
+  obj.num_samples   = fn.parsed_biom.num_samples(obj.parsed_biom);
+  obj.sample_names  = fn.parsed_biom.sample_names(obj.parsed_biom);
+  obj.sample_angles = fn.parsed_biom.sample_angles(obj.num_samples);
+
+  obj.counts_for_each_leaf                   = fn.parsed_biom.counts_for_each_leaf(obj.parsed_biom);
+  obj.non_zero_samples_for_each_leaf         = fn.parsed_biom.non_zero_samples_for_each_leaf(obj.parsed_biom);
+  obj.abundance_across_samples_for_each_leaf = fn.parsed_biom.abundance_across_samples_for_each_leaf(obj.parsed_biom, keep_zero_counts);
+
+  obj.evenness_across_samples_for_each_leaf = fn.parsed_biom.evenness_across_samples_for_each_leaf(obj.counts_for_each_leaf, keep_zero_counts);
+
+  obj.zero_replacement_val = fn.parsed_biom.zero_replacement_val(obj.counts_for_each_leaf);
+
+  obj.points = fn.parsed_biom.points(obj.counts_for_each_leaf, obj.num_samples);
+
+  return obj;
 };

@@ -1,6 +1,6 @@
 fn.ary._throw_if_empty = function (ary) {
   if (ary.length === 0) {
-    throw Error("Can't take max of empty array.");
+    throw Error("The array was empty.");
   }
 };
 
@@ -81,4 +81,16 @@ fn.ary.sum = function (ary) {
 
 fn.ary.mean = function (ary) {
   return fn.ary.sum(ary) / ary.length;
+};
+
+/**
+ * Returns a copy of the Array without any zero vals.
+ *
+ * @param {Array} ary
+ * @return {Array} an array without the zeros
+ */
+fn.ary.filter_out_zeros = function (ary) {
+  return ary.filter(function (count) {
+    return count !== 0;
+  });
 };

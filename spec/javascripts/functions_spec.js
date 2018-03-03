@@ -2,6 +2,15 @@
 
 describe("fn", function () {
   describe("ary", function () {
+    describe("filter_out_zeros", function () {
+      it("returns a copy without the zeros", function () {
+        var ary      = ["apple", 0, 1, 2, "pie", 0];
+        var expected = ["apple", 1, 2, "pie"];
+        var actual   = fn.ary.filter_out_zeros(ary);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
 
     describe("max", function () {
       it("returns the largest num in an array", function () {
@@ -55,15 +64,15 @@ describe("fn", function () {
       });
     });
 
-    describe("mean", function() {
-      it("takes the mean of the array", function() {
+    describe("mean", function () {
+      it("takes the mean of the array", function () {
         expect(fn.ary.mean([1, 0, -1])).to.equal(0);
         expect(fn.ary.mean([1])).to.equal(1);
       });
 
       it("handles arrays that aren't all numbers");
       it("handles zero length arrays");
-    })
+    });
   });
 
   describe("color", function () {
@@ -360,6 +369,7 @@ describe("fn", function () {
         spec_helper.expect_stringify_equal(actual, expected);
       });
     });
+
   });
 
   describe("pt", function () {
@@ -470,7 +480,7 @@ describe("fn", function () {
       it("gives signed area of the origin triangle", function () {
         var p1       = fn.pt.new(1, 0);
         var p2       = fn.pt.new(0, 1);
-        var expected = fn.pt.new(1/3, 1/3);
+        var expected = fn.pt.new(1 / 3, 1 / 3);
         var actual   = fn.pt.centroid_origin_triangle(p1, p2);
 
         spec_helper.expect_points_to_be_equal(actual, expected);

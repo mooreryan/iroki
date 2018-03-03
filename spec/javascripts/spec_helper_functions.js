@@ -423,10 +423,12 @@ spec_helper.test_case = {};
 spec_helper.test_case.BIOM_STR    = "name\ts1\ts2\ts3\ts4\ts5\ts6\napple\t0\t1\t2\t0\t3\t4\npie\t1\t2\t0\t3\t0\t4\n";
 spec_helper.test_case.PARSED_BIOM = Papa.parse(spec_helper.test_case.BIOM_STR, spec_helper.PAPA_CONFIG);
 
-spec_helper.test_case.NUM_SAMPLES  = 6;
-spec_helper.test_case.SAMPLE_NAMES = ["s1", "s2", "s3", "s4", "s5", "s6"];
-spec_helper.test_case.LEAF_NAMES   = ["apple", "pie"];
-spec_helper.test_case.COUNTS       = {
+spec_helper.test_case.NUM_SAMPLES   = 6;
+spec_helper.test_case.SAMPLE_NAMES  = ["s1", "s2", "s3", "s4", "s5", "s6"];
+spec_helper.test_case.LEAF_NAMES    = ["apple", "pie"];
+spec_helper.test_case.SAMPLE_ANGLES = [0, 60, 120, 180, 240, 300];
+
+spec_helper.test_case.COUNTS = {
   apple: [0, 1, 2, 0, 3, 4],
   pie: [1, 2, 0, 3, 0, 4]
 };
@@ -449,4 +451,92 @@ spec_helper.test_case.ABUNDANCE_ACROSS_ALL_SAMPLES = {
 spec_helper.test_case.ABUNDANCE_ACROSS_NONZERO_SAMPLES = {
   apple: (1 + 2 + 3 + 4) / 4,
   pie: (1 + 2 + 3 + 4) / 4
+};
+
+spec_helper.test_case.EVENNESS_ACROSS_ALL_SAMPLES = {
+  apple: 0.7143002438742897,
+  pie: 0.7143002438742897
+};
+
+spec_helper.test_case.EVENNESS_ACROSS_NONZERO_SAMPLES = {
+  apple: 0.9232196723355077,
+  pie: 0.9232196723355077
+};
+
+// The zeros get mapped to global.ZERO_REPLACEMENT_VAL, then all counts get divided by the max count (4).
+spec_helper.test_case.POINTS = {
+  apple: [
+    fn.pt.on_circle(0, global.ZERO_REPLACEMENT_VAL / 4),
+    fn.pt.on_circle(60, 0.25),
+    fn.pt.on_circle(120, 0.5),
+    fn.pt.on_circle(180, global.ZERO_REPLACEMENT_VAL / 4),
+    fn.pt.on_circle(240, 0.75),
+    fn.pt.on_circle(300, 1)
+  ],
+  pie: [
+    fn.pt.on_circle(0, 0.25),
+    fn.pt.on_circle(60, 0.5),
+    fn.pt.on_circle(120, global.ZERO_REPLACEMENT_VAL / 4),
+    fn.pt.on_circle(180, 0.75),
+    fn.pt.on_circle(240, global.ZERO_REPLACEMENT_VAL / 4),
+    fn.pt.on_circle(300, 1)
+  ]
+};
+
+var a = {
+  "apple": [{ "x": 0.0000025, "y": 0 }, {
+    "x": -0.23810324510378908,
+    "y": -0.07620265527555417
+  }, {
+    "x": 0.4070904852632809,
+    "y": 0.29030559210615714
+  }, {
+    "x": -0.0000014961501726446453,
+    "y": -0.0000020028815893345763
+  }, {
+    "x": 0.24433597915136104,
+    "y": 0.7090838661908376
+  }, { "x": -0.022096619278683942, "y": -0.9997558399011495 }],
+  "pie": [{ "x": 0.25, "y": 0 }, {
+    "x": -0.47620649020757816,
+    "y": -0.15240531055110834
+  }, {
+    "x": 0.0000020354524263164048,
+    "y": 0.0000014515279605307858
+  }, {
+    "x": -0.44884505179339357,
+    "y": -0.6008644768003728
+  }, {
+    "x": 8.144532638378702e-7,
+    "y": 0.0000023636128873027922
+  }, { "x": -0.022096619278683942, "y": -0.9997558399011495 }]
+};
+
+var b = {
+  "apple": [{ "x": 0.00001, "y": 0 }, {
+    "x": -0.23810324510378908,
+    "y": -0.07620265527555417
+  }, {
+    "x": 0.4070904852632809,
+    "y": 0.29030559210615714
+  }, {
+    "x": -0.000005984600690578581,
+    "y": -0.000008011526357338305
+  }, {
+    "x": 0.24433597915136104,
+    "y": 0.7090838661908376
+  }, { "x": -0.022096619278683942, "y": -0.9997558399011495 }],
+  "pie": [{ "x": 0.25, "y": 0 }, {
+    "x": -0.47620649020757816,
+    "y": -0.15240531055110834
+  }, {
+    "x": 0.000008141809705265619,
+    "y": 0.000005806111842123143
+  }, {
+    "x": -0.44884505179339357,
+    "y": -0.6008644768003728
+  }, {
+    "x": 0.000003257813055351481,
+    "y": 0.000009454451549211169
+  }, { "x": -0.022096619278683942, "y": -0.9997558399011495 }]
 };

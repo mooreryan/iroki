@@ -222,17 +222,8 @@ describe("fn", function () {
           spec_helper.expect_stringify_equal(actual, expected);
         });
       });
-
-      context("with zero replacements", function () {
-        it("returns counts with zeros replaced", function () {
-          var expected = spec_helper.test_case.COUNTS_WITH_ZEROS_REPLACED;
-
-          var actual = fn.parsed_biom.counts_for_each_leaf(spec_helper.test_case.PARSED_BIOM, true);
-
-          spec_helper.expect_stringify_equal(actual, expected);
-        });
-      });
     });
+
 
     describe("fn.parsed_biom.non_zero_samples_for_each_leaf", function () {
       it("returns non zero samples for each leaf", function () {
@@ -260,6 +251,114 @@ describe("fn", function () {
 
           spec_helper.expect_stringify_equal(actual, expected);
         });
+      });
+    });
+
+    describe("fn.parsed_biom.evenness_across_samples_for_each_leaf", function () {
+      context("keep zero counts", function () {
+        it("returns evenness across all samples", function () {
+          var expected = spec_helper.test_case.EVENNESS_ACROSS_ALL_SAMPLES;
+          var actual   = fn.parsed_biom.evenness_across_samples_for_each_leaf(spec_helper.test_case.COUNTS, true);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+
+      context("do not keep zero counts", function () {
+        it("returns evenness across non zero samples", function () {
+          var expected = spec_helper.test_case.EVENNESS_ACROSS_NONZERO_SAMPLES;
+          var actual   = fn.parsed_biom.evenness_across_samples_for_each_leaf(spec_helper.test_case.COUNTS, false);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+    });
+
+    describe("fn.parsed_biom.zero_replacement_val", function () {
+      context("with large minimum non-zero count", function () {
+        it("it gives the normal global zero replacement val", function () {
+          var counts = {
+            apple: [0, 1, 2],
+            pie: [1, 1, 1]
+          };
+
+          var expected = global.ZERO_REPLACEMENT_VAL;
+
+          var actual = fn.parsed_biom.zero_replacement_val(counts);
+
+          expect(actual).to.equal(expected);
+        });
+      });
+
+      context("with tiny minimum non-zero count", function () {
+        it("gives an even smaller val for zero replacement", function () {
+          var counts = {
+            apple: [0, global.ZERO_REPLACEMENT_VAL / 2, 2],
+            pie: [1, 1, 1]
+          };
+
+          var expected = global.ZERO_REPLACEMENT_VAL / 4;
+
+          var actual = fn.parsed_biom.zero_replacement_val(counts);
+
+          expect(actual).to.equal(expected);
+        });
+      });
+    });
+
+    describe("fn.parsed_biom.replace_zeros", function () {
+      context("with values > global.ZERO_REPLACEMENT_VAL", function () {
+        it("returns an array with the zeros replaced", function () {
+          var counts   = { apple: [0, 1, 2], pie: [0, 1, 2] };
+          var expected = {
+            apple: [global.ZERO_REPLACEMENT_VAL, 1, 2],
+            pie: [global.ZERO_REPLACEMENT_VAL, 1, 2]
+          };
+          var actual   = fn.parsed_biom.replace_zeros(counts);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+
+      context("with values <= global.ZERO_REPLACEMENT_VAL", function () {
+        it("returns an array with the zeros replaced", function () {
+          var tiny_val = global.ZERO_REPLACEMENT_VAL / 2;
+          var counts   = { apple: [0, tiny_val, 2], pie: [0, tiny_val, 2] };
+          var expected = {
+            apple: [tiny_val / 2, tiny_val, 2],
+            pie: [tiny_val / 2, tiny_val, 2]
+          };
+          var actual   = fn.parsed_biom.replace_zeros(counts);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+    });
+
+
+    describe("fn.parsed_biom.points", function () {
+      it("gives the points for each leaf for each sample", function () {
+        var expected = spec_helper.test_case.POINTS;
+        var actual   = fn.parsed_biom.points(spec_helper.test_case.COUNTS, spec_helper.test_case.NUM_SAMPLES);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("sample_angles", function () {
+      it("it gives the samples angles", function () {
+        var expected = spec_helper.test_case.SAMPLE_ANGLES;
+        var actual   = fn.parsed_biom.sample_angles(spec_helper.test_case.NUM_SAMPLES);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("throws if there are zero samples", function () {
+        var func = function () {
+          fn.parsed_biom.sample_angles(0);
+        };
+
+        expect(func).to.throw();
       });
     });
   });
