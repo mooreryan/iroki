@@ -608,11 +608,13 @@ spec_helper.test_case.CENTROIDS_OF_WHOLE_SHAPE = {
   pie: silly__pie_centroid
 };
 
-var a = {
-  "apple": { "x": 0.02976181122515786, "y": -0.4020813821583831 },
-  "pie": { "x": 0.22221666676944243, "y": -0.14433612395300596 }
-};
-var b = {
-  "apple": { "x": 0.02976181122515786, "y": -0.4020813821583831 },
-  "pie": { "x": 0.08749878751083735, "y": -0.3247571087922278 }
+var silly__val_apple = Math.atan2(silly__apple_centroid.y, silly__apple_centroid.x);
+silly__val_apple = silly__val_apple < 0 ? silly__val_apple + (2 * Math.PI) : silly__val_apple;
+
+var silly__val_pie = Math.atan2(silly__pie_centroid.y, silly__pie_centroid.x);
+silly__val_pie = silly__val_pie < 0 ? silly__val_pie + (2 * Math.PI) : silly__val_pie;
+
+spec_helper.test_case.ANGLES_FROM_ORIGIN_TO_CENTROIDS = {
+  apple: fn.math.radians_to_degrees(silly__val_apple),
+  pie: fn.math.radians_to_degrees(silly__val_pie)
 };

@@ -442,6 +442,19 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.parsed_biom.angles_from_origin_to_centroid", function () {
+      it("gives the angle to the centroid", function () {
+        var expected = spec_helper.test_case.ANGLES_FROM_ORIGIN_TO_CENTROIDS;
+        var actual   = fn.parsed_biom.angles_from_origin_to_centroid(spec_helper.test_case.CENTROIDS_OF_WHOLE_SHAPE);
+
+        fn.obj.each(actual, function (leaf, actual_centroid) {
+          var expected_centroid = expected[leaf];
+
+          expect(actual_centroid).to.be.closeTo(expected_centroid, spec_helper.TOLERANCE);
+        });
+      });
+    });
+
     describe("sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;

@@ -436,7 +436,7 @@ fn.parsed_biom.zero_replacement_val = function (counts_for_each_leaf) {
  * Returns a new count obj with zeros replaced by appropiate non-zero replacement value.
  *
  * @param counts_for_each_leaf
- * @returns {Object} e.g., leaf_name => [s1_count, s2_count]
+ * @return {Object} e.g., leaf_name => [s1_count, s2_count]
  */
 fn.parsed_biom.replace_zeros = function (counts_for_each_leaf) {
   // First get the zero replacement value.
@@ -464,7 +464,7 @@ fn.parsed_biom.replace_zeros = function (counts_for_each_leaf) {
  * Returns an array of sample angles for each sample in the biom file.
  *
  * @param num_samples
- * @returns {Array} e.g., [0, 90, 180, 270] for 4 samples
+ * @return {Array} e.g., [0, 90, 180, 270] for 4 samples
  * @throws {Error} if num_samples === 0
  */
 fn.parsed_biom.sample_angles = function (num_samples) {
@@ -487,7 +487,7 @@ fn.parsed_biom.sample_angles = function (num_samples) {
  *
  * @param counts_for_each_leaf
  * @param num_samples
- * @returns {Object} e.g., leaf_name => [s1_point, s2_point, ...]
+ * @return {Object} e.g., leaf_name => [s1_point, s2_point, ...]
  */
 fn.parsed_biom.points = function (counts_for_each_leaf, num_samples) {
   // First get an array where the zeros are replaced.
@@ -515,7 +515,7 @@ fn.parsed_biom.points = function (counts_for_each_leaf, num_samples) {
  * An origin triangle is just two points because the origin is implicit.
  *
  * @param points_for_each_leaf
- * @returns {Object} e.g., leaf_name => [[p1, p2], [p2, p3], [p3, p1]]
+ * @return {Object} e.g., leaf_name => [[p1, p2], [p2, p3], [p3, p1]]
  */
 fn.parsed_biom.origin_triangles_for_each_leaf = function (points_for_each_leaf) {
   var obj = {};
@@ -589,6 +589,15 @@ fn.parsed_biom.all_areas = function (origin_triangles_for_each_leaf) {
   return obj;
 };
 
+/**
+ * Gives the centroid off the whole abundance shape.
+ *
+ * Weights the centroid of each individual origin triangle by the area, adds all that up then divideds by the total area.
+ *
+ * @param all_areas
+ * @param all_centroids
+ * @return {Object} leaf_name => centroid
+ */
 fn.parsed_biom.centroids_of_whole_shape = function (all_areas, all_centroids) {
   var obj = {};
 
@@ -621,6 +630,29 @@ fn.parsed_biom.centroids_of_whole_shape = function (all_areas, all_centroids) {
   return obj;
 };
 
+/**
+ * Return the angle from the origin to the centroid for each leaf.
+ * 
+ * @param centroids_of_whole_shape
+ * @return {Object} leaf_name => angle (in degrees, can be negative)
+ */
+fn.parsed_biom.angles_from_origin_to_centroid = function (centroids_of_whole_shape) {
+  var obj = {};
+
+  fn.obj.each(centroids_of_whole_shape, function(leaf, centroid){
+    var angle = fn.math.radians_to_degrees(Math.atan2(centroid.y, centroid.x));
+
+    if (angle < 0) {
+      // If the angle is negative, flip it around the circle to get a positive angle.
+      obj[leaf] = angle + 360;
+    }
+    else {
+      obj[leaf] = angle;
+    }
+  });
+
+  return obj;
+};
 
 /**
  * Return an object with all the info you need for working with the parsed biom.
@@ -664,6 +696,8 @@ fn.parsed_biom.new = function (params) {
   obj.all_centroids = fn.parsed_biom.all_centroids(obj.origin_triangles_for_each_leaf);
 
   obj.centroids_of_whole_shape = fn.parsed_biom.centroids_of_whole_shape(obj.all_areas, obj.all_centroids);
+
+  obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_origin_to_centroid(obj.centroids_of_whole_shape);
 
   return obj;
 };
