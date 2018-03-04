@@ -54,9 +54,24 @@ fn.parsed_biom.parse_biom_file_str = function (str) {
 };
 
 /**
+ * Gives the names of all leaves in the biom file.
+ *
+ * @param parsed_biom The output from parse_biom_file_str
+ * @return {Array}
+ */
+fn.parsed_biom.leaf_names = function (parsed_biom) {
+  var leaf_names = [];
+  parsed_biom.data.forEach(function (data_row) {
+    leaf_names.push(data_row.name);
+  });
+
+  return leaf_names;
+};
+
+/**
  * Returns the number of samples in a biom file.
  *
- * @param parsed_biom
+ * @param parsed_biom The output from parse_biom_file_str
  * @return {number} The number of samples in the biom file.
  */
 fn.parsed_biom.num_samples = function (parsed_biom) {
@@ -443,11 +458,74 @@ fn.parsed_biom.angles_from_origin_to_centroid = function (centroids_of_whole_sha
 };
 
 /**
+ * Gives the angle for each leaf when there is only a single sample in the biom file.
+ *
+ * It's meant to be used for hue angles.  It is analagous to angles_from_origin_to_centroid for when the biom file has only a single sample.
+ *
+ * @param leaf_names
+ * @param sample_angles In this case the length should be one.
+ * @return {Object} leaf_name => angle
+ * @throws {Error} if the length of sample angles > 1
+ */
+fn.parsed_biom.angles_from_single_sample_biom = function (leaf_names, sample_angles) {
+  if (sample_angles.length > 1) {
+    throw Error("samples_angles.length > 1");
+  }
+
+  var obj = {};
+
+  leaf_names.forEach(function (leaf_name) {
+    obj[leaf_name] = sample_angles[0];
+  });
+
+  return obj;
+};
+
+/**
+ * Gives sample angles for each leaf in a two sample biom file.
+ * 
+ * @param sample_angles
+ * @param counts_for_each_leaf
+ * @return {Object} leaf_name => sample_angle
+ */
+fn.parsed_biom.angles_from_two_sample_biom = function (sample_angles, counts_for_each_leaf) {
+  if (sample_angles.length !== 2) {
+    throw Error("samples_angles.length !== 2");
+  }
+
+  fn.obj.each(counts_for_each_leaf, function (leaf, sample_counts) {
+    if (sample_counts.length !== 2) {
+      throw Error("leaf " + leaf + " did not have two sample counts");
+    }
+  });
+
+  var angles = {};
+
+  fn.obj.each(counts_for_each_leaf, function (leaf_name, counts) {
+    var s1_count = counts[0];
+    var s2_count = counts[1];
+
+    var s1_angle = sample_angles[0];
+    var s2_angle = sample_angles[1];
+
+    if (s1_count >= s2_count) {
+      angles[leaf_name] = s1_angle;
+    }
+    else {
+      angles[leaf_name] = s2_angle;
+    }
+  });
+
+  return angles;
+};
+
+
+/**
  * Gives approximate starting colors based on average values for chroma and lightness for each sample.
  *
  * @param sample_names
  * @param sample_angles
- * @returns {Object} sample_name => color_hex_code
+ * @return {Object} sample_name => color_hex_code
  */
 fn.parsed_biom.approx_starting_colors = function (sample_names, sample_angles) {
   var obj = {};
@@ -463,6 +541,12 @@ fn.parsed_biom.approx_starting_colors = function (sample_names, sample_angles) {
   return obj;
 };
 
+/**
+ * Makes the sample color legend tsv.
+ *
+ * @param approx_starting_colors
+ * @return {string} tsv sample legend
+ */
 fn.parsed_biom.sample_color_legend_tsv = function (approx_starting_colors) {
   var sample_legend = ["name\tappoximate starting color"];
 
@@ -473,25 +557,17 @@ fn.parsed_biom.sample_color_legend_tsv = function (approx_starting_colors) {
   return sample_legend.join("\n");
 };
 
-fn.parsed_biom.sample_color_legend = function (parsed_biom, angle_offset) {
-  var sample_angle_ret_val          = fn.parsed_biom.sample_angles(parsed_biom, angle_offset);
-  var sample_names                  = sample_angle_ret_val[0];
-  var sample_angles                 = sample_angle_ret_val[1];
-  var sample_approx_starting_colors = sample_angles.map(function (hue_angle) {
-    return fn.color.approx_starting_color(hue_angle);
-  });
-
-  var sample_legend_str = "name\tappoximate starting color\n";
-  sample_names.forEach(function (name, idx) {
-    sample_legend_str += [name, sample_approx_starting_colors[idx]].join("\t") + "\n";
-  });
-
-  return sample_legend_str;
-};
-
+/**
+ * Makes the sample color legend html string.
+ *
+ * @param sample_color_legend_tsv
+ * @return {string} an html string of the sample starting color legend
+ */
 fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
   var rows = fn.str.chomp(sample_color_legend_tsv).split("\n").map(function (row, row_idx) {
-    function is_header_row(row_idx) { return row_idx === 0; }
+    function is_header_row(row_idx) {
+      return row_idx === 0;
+    }
 
     var fields = row.split("\t");
 
@@ -526,45 +602,7 @@ fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
   return "<!DOCTYPE html>" + head + body + "</html>";
 };
 
-fn.parsed_biom.sample_color_legend_html2 = function (parsed_biom, angle_offset) {
-  var sample_color_legend_tsv = fn.parsed_biom.sample_color_legend(parsed_biom, angle_offset);
-
-  var rows = fn.str.chomp(sample_color_legend_tsv).split("\n").map(function (row, row_idx) {
-    var fields = row.split("\t");
-
-    var tag = row_idx === 0 ? "th" : "td";
-
-    var row_str = fields.map(function (field, col_idx) {
-      if (col_idx === 0) {
-        return fn.html.tag(tag, field, "class='thick-right-border'");
-      }
-      else if (row_idx >= 1 && col_idx === 1) {
-        return fn.html.tag(tag, field, "style='background-color: " + field + ";'");
-      }
-      else {
-        return fn.html.tag(tag, field);
-      }
-    }).join("");
-
-    return fn.html.tag("tr", row_str);
-  }).join("");
-
-  var style_str = "<style>" +
-    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
-    "th, td {padding: 5px} " +
-    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
-    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
-    ".thick-left-border {border-left: 3px solid #2d2d2d}" +
-    "</style>";
-
-  var table = fn.html.tag("table", rows);
-  var body  = fn.html.tag("body", table);
-  var head  = fn.html.tag("head", style_str + fn.html.tag("title", "Sample legend"));
-
-  return "<!DOCTYPE html>" + head + body + "</html>";
-};
-
-
+// TODO write specs
 /**
  * Return an object with all the info you need for working with the parsed biom.
  *
@@ -573,7 +611,6 @@ fn.parsed_biom.sample_color_legend_html2 = function (parsed_biom, angle_offset) 
  */
 fn.parsed_biom.new = function (params) {
   var biom_str         = params.biom_str;
-  var replace_zeros    = params.replace_zeros;
   var keep_zero_counts = params.keep_zero_counts;
   var angle_offset     = params.angle_offset;
 
@@ -582,16 +619,21 @@ fn.parsed_biom.new = function (params) {
   // Include the params
   obj.params = {
     biom_str: biom_str,
-    replace_zeros: replace_zeros,
     keep_zero_counts: keep_zero_counts,
     angle_offset: angle_offset
   };
 
   obj.parsed_biom = fn.parsed_biom.parse_biom_file_str(biom_str);
 
+  obj.leaf_names = fn.parsed_biom.leaf_names(obj.parsed_biom);
+
   obj.num_samples   = fn.parsed_biom.num_samples(obj.parsed_biom);
   obj.sample_names  = fn.parsed_biom.sample_names(obj.parsed_biom);
   obj.sample_angles = fn.parsed_biom.sample_angles(obj.num_samples, angle_offset);
+
+  obj.approx_starting_colors   = fn.parsed_biom.approx_starting_colors(obj.sample_names, obj.sample_angles);
+  obj.sample_color_legend_tsv  = fn.parsed_biom.sample_color_legend_tsv(obj.approx_starting_colors);
+  obj.sample_color_legend_html = fn.parsed_biom.sample_color_legend_html(obj.sample_color_legend_tsv);
 
   obj.counts_for_each_leaf                   = fn.parsed_biom.counts_for_each_leaf(obj.parsed_biom);
   obj.non_zero_samples_for_each_leaf         = fn.parsed_biom.non_zero_samples_for_each_leaf(obj.parsed_biom);
@@ -603,14 +645,22 @@ fn.parsed_biom.new = function (params) {
 
   obj.points = fn.parsed_biom.points(obj.counts_for_each_leaf, obj.num_samples);
 
-  obj.origin_triangles_for_each_leaf = fn.parsed_biom.origin_triangles_for_each_leaf(obj.points);
+  if (obj.num_samples === 1) {
+    obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_single_sample_biom(obj.leaf_names, obj.sample_angles);
+  }
+  else if (obj.num_samples === 2) {
+    obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_two_sample_biom(obj.leaf_names, obj.sample_angles);
+  }
+  else {
+    obj.origin_triangles_for_each_leaf = fn.parsed_biom.origin_triangles_for_each_leaf(obj.points);
 
-  obj.all_areas     = fn.parsed_biom.all_areas(obj.origin_triangles_for_each_leaf);
-  obj.all_centroids = fn.parsed_biom.all_centroids(obj.origin_triangles_for_each_leaf);
+    obj.all_areas     = fn.parsed_biom.all_areas(obj.origin_triangles_for_each_leaf);
+    obj.all_centroids = fn.parsed_biom.all_centroids(obj.origin_triangles_for_each_leaf);
 
-  obj.centroids_of_whole_shape = fn.parsed_biom.centroids_of_whole_shape(obj.all_areas, obj.all_centroids);
+    obj.centroids_of_whole_shape = fn.parsed_biom.centroids_of_whole_shape(obj.all_areas, obj.all_centroids);
 
-  obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_origin_to_centroid(obj.centroids_of_whole_shape);
+    obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_origin_to_centroid(obj.centroids_of_whole_shape);
+  }
 
   return obj;
 };

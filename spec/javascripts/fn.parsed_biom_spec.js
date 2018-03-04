@@ -483,6 +483,73 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.parsed_biom.leaf_names", function () {
+      it("returns names of all leaves in the biom file", function () {
+        var expected = spec_helper.test_case.LEAF_NAMES;
+        var actual   = fn.parsed_biom.leaf_names(spec_helper.test_case.PARSED_BIOM);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.parsed_biom.angles_from_single_sample_biom", function () {
+      it("throws if there is more than one sample angle", function () {
+        var leaf_names    = ["apple", "pie"];
+        var sample_angles = [0, 180];
+
+        var func = function () {
+          fn.parsed_biom.angles_from_single_sample_biom(leaf_names, sample_angles);
+        };
+
+        expect(func).to.throw();
+      });
+
+      it("returns sample angle for each leaf", function () {
+        var leaf_names    = ["apple", "pie"];
+        var sample_angles = [0];
+        var expected      = { "apple": 0, "pie": 0 };
+
+        var actual = fn.parsed_biom.angles_from_single_sample_biom(leaf_names, sample_angles);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.parsed_biom.angles_from_two_sample_biom", function () {
+      it("throws if there are not two sample angles", function () {
+        var sample_angles = [0];
+        var counts_for_each_leaf = { apple: [10, 20], pie: [20, 10] };
+
+        var func = function () {
+          fn.parsed_biom.angles_from_two_sample_biom(sample_angles, counts_for_each_leaf);
+        };
+
+        expect(func).to.throw();
+      });
+
+      it("throws if there are not two sample counts", function () {
+        var sample_angles = [0, 180];
+        var counts_for_each_leaf = { apple: [10], pie: [20, 10, 30] };
+
+        var func = function () {
+          fn.parsed_biom.angles_from_two_sample_biom(sample_angles, counts_for_each_leaf);
+        };
+
+        expect(func).to.throw();
+      });
+
+      it("gives sample angles for each leaf", function() {
+        var sample_angles = [0, 180];
+        var counts_for_each_leaf = { "apple" : [10, 20], "pie": [20, 10], "lala": [0, 0] };
+
+        var expected = { "apple": 180, "pie": 0, "lala": 0 };
+
+        var actual = fn.parsed_biom.angles_from_two_sample_biom(sample_angles, counts_for_each_leaf);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      })
+    });
+
     describe("sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;
