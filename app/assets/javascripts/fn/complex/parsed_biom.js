@@ -490,7 +490,7 @@ fn.parsed_biom.angles_from_single_sample_biom = function (leaf_names, sample_ang
  */
 fn.parsed_biom.angles_from_two_sample_biom = function (sample_angles, counts_for_each_leaf) {
   if (sample_angles.length !== 2) {
-    throw Error("samples_angles.length !== 2");
+    throw Error("samples_angles.length !== 2 (was " + sample_angles.length + ")");
   }
 
   fn.obj.each(counts_for_each_leaf, function (leaf, sample_counts) {
@@ -649,7 +649,7 @@ fn.parsed_biom.new = function (params) {
     obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_single_sample_biom(obj.leaf_names, obj.sample_angles);
   }
   else if (obj.num_samples === 2) {
-    obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_two_sample_biom(obj.leaf_names, obj.sample_angles);
+    obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_two_sample_biom(obj.sample_angles, obj.counts_for_each_leaf);
   }
   else {
     obj.origin_triangles_for_each_leaf = fn.parsed_biom.origin_triangles_for_each_leaf(obj.points);
