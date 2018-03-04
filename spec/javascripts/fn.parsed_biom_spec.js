@@ -474,6 +474,15 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.parsed_biom.sample_color_legend_html", function () {
+      it("returns a sample legend html string", function () {
+        var expected = spec_helper.test_case.SAMPLE_COLOR_LEGEND_HTML;
+        var actual   = fn.parsed_biom.sample_color_legend_html(spec_helper.test_case.SAMPLE_COLOR_LEGEND_TSV);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
     describe("sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;

@@ -1,60 +1,3 @@
-/*
-
-fn.parsed_biom.sample_color_legend = function (parsed_biom, angle_offset) {
-  var sample_angle_ret_val          = fn.parsed_biom.sample_angles(parsed_biom, angle_offset);
-  var sample_names                  = sample_angle_ret_val[0];
-  var sample_angles                 = sample_angle_ret_val[1];
-  var sample_approx_starting_colors = sample_angles.map(function (hue_angle) {
-    return fn.color.approx_starting_color(hue_angle);
-  });
-
-  var sample_legend_str = "name\tappoximate starting color\n";
-  sample_names.forEach(function (name, idx) {
-    sample_legend_str += [name, sample_approx_starting_colors[idx]].join("\t") + "\n";
-  });
-
-  return sample_legend_str;
-};
-
-fn.parsed_biom.sample_color_legend_html = function (parsed_biom, angle_offset) {
-  var tsv = fn.parsed_biom.sample_color_legend(parsed_biom, angle_offset);
-
-  var rows = fn.str.chomp(tsv).split("\n").map(function (row, row_idx) {
-    var fields = row.split("\t");
-
-    var tag = row_idx === 0 ? "th" : "td";
-
-    var row_str = fields.map(function (field, col_idx) {
-      if (col_idx === 0) {
-        return fn.html.tag(tag, field, "class='thick-right-border'");
-      }
-      else if (row_idx >= 1 && col_idx === 1) {
-        return fn.html.tag(tag, field, "style='background-color: " + field + ";'");
-      }
-      else {
-        return fn.html.tag(tag, field);
-      }
-    }).join("");
-
-    return fn.html.tag("tr", row_str);
-  }).join("");
-
-  var style_str = "<style>" +
-    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
-    "th, td {padding: 5px} " +
-    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
-    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
-    ".thick-left-border {border-left: 3px solid #2d2d2d}" +
-    "</style>";
-
-  var table = fn.html.tag("table", rows);
-  var body  = fn.html.tag("body", table);
-  var head  = fn.html.tag("head", style_str + fn.html.tag("title", "Sample legend"));
-
-  return "<!DOCTYPE html>" + head + body + "</html>";
-};
-*/
-
 /**
  * Parses the biom file string with Papa.parse.
  *
@@ -529,6 +472,98 @@ fn.parsed_biom.sample_color_legend_tsv = function (approx_starting_colors) {
 
   return sample_legend.join("\n");
 };
+
+fn.parsed_biom.sample_color_legend = function (parsed_biom, angle_offset) {
+  var sample_angle_ret_val          = fn.parsed_biom.sample_angles(parsed_biom, angle_offset);
+  var sample_names                  = sample_angle_ret_val[0];
+  var sample_angles                 = sample_angle_ret_val[1];
+  var sample_approx_starting_colors = sample_angles.map(function (hue_angle) {
+    return fn.color.approx_starting_color(hue_angle);
+  });
+
+  var sample_legend_str = "name\tappoximate starting color\n";
+  sample_names.forEach(function (name, idx) {
+    sample_legend_str += [name, sample_approx_starting_colors[idx]].join("\t") + "\n";
+  });
+
+  return sample_legend_str;
+};
+
+fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
+  var rows = fn.str.chomp(sample_color_legend_tsv).split("\n").map(function (row, row_idx) {
+    function is_header_row(row_idx) { return row_idx === 0; }
+
+    var fields = row.split("\t");
+
+    var tag = is_header_row(row_idx) ? "th" : "td";
+
+    var row_str = fields.map(function (field, col_idx) {
+      if (col_idx === 0) {
+        return fn.html.tag(tag, field, "class='thick-right-border'");
+      }
+      else if (row_idx >= 1 && col_idx === 1) {
+        return fn.html.tag(tag, field, "style='background-color: " + field + ";'");
+      }
+      else {
+        return fn.html.tag(tag, field);
+      }
+    }).join("");
+
+    return fn.html.tag("tr", row_str);
+  }).join("");
+
+  var style_str = "<style>" +
+    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
+    "th, td {padding: 5px} " +
+    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
+    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
+    "</style>";
+
+  var table = fn.html.tag("table", rows);
+  var body  = fn.html.tag("body", table);
+  var head  = fn.html.tag("head", style_str + fn.html.tag("title", "Sample legend"));
+
+  return "<!DOCTYPE html>" + head + body + "</html>";
+};
+
+fn.parsed_biom.sample_color_legend_html2 = function (parsed_biom, angle_offset) {
+  var sample_color_legend_tsv = fn.parsed_biom.sample_color_legend(parsed_biom, angle_offset);
+
+  var rows = fn.str.chomp(sample_color_legend_tsv).split("\n").map(function (row, row_idx) {
+    var fields = row.split("\t");
+
+    var tag = row_idx === 0 ? "th" : "td";
+
+    var row_str = fields.map(function (field, col_idx) {
+      if (col_idx === 0) {
+        return fn.html.tag(tag, field, "class='thick-right-border'");
+      }
+      else if (row_idx >= 1 && col_idx === 1) {
+        return fn.html.tag(tag, field, "style='background-color: " + field + ";'");
+      }
+      else {
+        return fn.html.tag(tag, field);
+      }
+    }).join("");
+
+    return fn.html.tag("tr", row_str);
+  }).join("");
+
+  var style_str = "<style>" +
+    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
+    "th, td {padding: 5px} " +
+    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
+    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
+    ".thick-left-border {border-left: 3px solid #2d2d2d}" +
+    "</style>";
+
+  var table = fn.html.tag("table", rows);
+  var body  = fn.html.tag("body", table);
+  var head  = fn.html.tag("head", style_str + fn.html.tag("title", "Sample legend"));
+
+  return "<!DOCTYPE html>" + head + body + "</html>";
+};
+
 
 /**
  * Return an object with all the info you need for working with the parsed biom.

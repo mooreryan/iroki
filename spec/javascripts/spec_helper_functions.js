@@ -416,6 +416,8 @@ spec_helper.test_case.APPROX_STARTING_COLORS = {
 
 spec_helper.test_case.SAMPLE_COLOR_LEGEND_TSV = "name\tappoximate starting color\ns1\t#ed5e93\ns2\t#d47a33\ns3\t#779d2c\ns4\t#00a98f\ns5\t#00a3ec\ns6\t#9083ed";
 
+spec_helper.test_case.SAMPLE_COLOR_LEGEND_HTML = "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}</style><title>Sample legend</title></head><body><table><tr><th class='thick-right-border'>name</th><th>appoximate starting color</th></tr><tr><td class='thick-right-border'>s1</td><td style='background-color: #ed5e93;'>#ed5e93</td></tr><tr><td class='thick-right-border'>s2</td><td style='background-color: #d47a33;'>#d47a33</td></tr><tr><td class='thick-right-border'>s3</td><td style='background-color: #779d2c;'>#779d2c</td></tr><tr><td class='thick-right-border'>s4</td><td style='background-color: #00a98f;'>#00a98f</td></tr><tr><td class='thick-right-border'>s5</td><td style='background-color: #00a3ec;'>#00a3ec</td></tr><tr><td class='thick-right-border'>s6</td><td style='background-color: #9083ed;'>#9083ed</td></tr></table></body></html>";
+
 spec_helper.test_case.COUNTS = {
   apple: [0, 1, 2, 0, 3, 4],
   pie: [1, 2, 0, 3, 0, 4]
