@@ -394,29 +394,6 @@ spec_helper.six_samples.CENTROIDS = {
   "4___5": fn.pt.new(sum_num_x_4_5 / sum_den_4_5, sum_num_y_4_5 / sum_den_4_5)
 };
 
-var a = {
-  "4___13": {
-    "x": -1.068312603546424e-17,
-    "y": -8.546500828371392e-17
-  }, "4___5": { "x": 0.2666666666666666, "y": 3.2049378106392736e-17 }
-};
-
-var b = {
-  "4___13": { "x": 0.16667, "y": -0.28867513459481287 },
-  "4___5": { "x": 0.5, "y": -0.28867513459481287 }
-};
-
-
-var a = {
-  "4___13": { "x": -1.2225622990284e-22, "y": -1.8283663694429529e-16 },
-  "4___5": { "x": 0.4999883335333293, "y": 0 }
-};
-
-var b = {
-  "4___13": { "x": 0.16667, "y": -0.28867513459481287 },
-  "4___5": { "x": 0.5, "y": -0.28867513459481287 }
-};
-
 //// General test ////
 spec_helper.test_case = {};
 
@@ -436,6 +413,8 @@ spec_helper.test_case.APPROX_STARTING_COLORS = {
   s5: chroma.hcl(240, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex(),
   s6: chroma.hcl(300, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex()
 };
+
+spec_helper.test_case.SAMPLE_COLOR_LEGEND_TSV = "name\tappoximate starting color\ns1\t#ed5e93\ns2\t#d47a33\ns3\t#779d2c\ns4\t#00a98f\ns5\t#00a3ec\ns6\t#9083ed";
 
 spec_helper.test_case.COUNTS = {
   apple: [0, 1, 2, 0, 3, 4],

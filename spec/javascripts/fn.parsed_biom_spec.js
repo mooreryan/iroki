@@ -465,6 +465,15 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.parsed_biom.sample_color_legend_tsv", function () {
+      it("returns a sample legend tsv string", function () {
+        var expected = spec_helper.test_case.SAMPLE_COLOR_LEGEND_TSV;
+        var actual   = fn.parsed_biom.sample_color_legend_tsv(spec_helper.test_case.APPROX_STARTING_COLORS);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
     describe("sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;

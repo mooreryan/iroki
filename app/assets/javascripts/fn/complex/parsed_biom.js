@@ -499,6 +499,13 @@ fn.parsed_biom.angles_from_origin_to_centroid = function (centroids_of_whole_sha
   return obj;
 };
 
+/**
+ * Gives approximate starting colors based on average values for chroma and lightness for each sample.
+ *
+ * @param sample_names
+ * @param sample_angles
+ * @returns {Object} sample_name => color_hex_code
+ */
 fn.parsed_biom.approx_starting_colors = function (sample_names, sample_angles) {
   var obj = {};
 
@@ -513,26 +520,15 @@ fn.parsed_biom.approx_starting_colors = function (sample_names, sample_angles) {
   return obj;
 };
 
+fn.parsed_biom.sample_color_legend_tsv = function (approx_starting_colors) {
+  var sample_legend = ["name\tappoximate starting color"];
 
-///
-
-fn.parsed_biom.sample_color_legend = function (parsed_biom, angle_offset) {
-  var sample_angle_ret_val          = fn.parsed_biom.sample_angles(parsed_biom, angle_offset);
-  var sample_names                  = sample_angle_ret_val[0];
-  var sample_angles                 = sample_angle_ret_val[1];
-  var sample_approx_starting_colors = sample_angles.map(function (hue_angle) {
-    return fn.color.approx_starting_color(hue_angle);
+  fn.obj.each(approx_starting_colors, function (sample, color) {
+    sample_legend.push([sample, color].join("\t"));
   });
 
-  var sample_legend_str = "name\tappoximate starting color\n";
-  sample_names.forEach(function (name, idx) {
-    sample_legend_str += [name, sample_approx_starting_colors[idx]].join("\t") + "\n";
-  });
-
-  return sample_legend_str;
+  return sample_legend.join("\n");
 };
-
-///
 
 /**
  * Return an object with all the info you need for working with the parsed biom.
