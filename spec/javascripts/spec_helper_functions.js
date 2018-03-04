@@ -428,6 +428,15 @@ spec_helper.test_case.SAMPLE_NAMES  = ["s1", "s2", "s3", "s4", "s5", "s6"];
 spec_helper.test_case.LEAF_NAMES    = ["apple", "pie"];
 spec_helper.test_case.SAMPLE_ANGLES = [0, 60, 120, 180, 240, 300];
 
+spec_helper.test_case.APPROX_STARTING_COLORS = {
+  s1: chroma.hcl(0, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex(),
+  s2: chroma.hcl(60, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex(),
+  s3: chroma.hcl(120, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex(),
+  s4: chroma.hcl(180, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex(),
+  s5: chroma.hcl(240, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex(),
+  s6: chroma.hcl(300, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex()
+};
+
 spec_helper.test_case.COUNTS = {
   apple: [0, 1, 2, 0, 3, 4],
   pie: [1, 2, 0, 3, 0, 4]
@@ -609,10 +618,10 @@ spec_helper.test_case.CENTROIDS_OF_WHOLE_SHAPE = {
 };
 
 var silly__val_apple = Math.atan2(silly__apple_centroid.y, silly__apple_centroid.x);
-silly__val_apple = silly__val_apple < 0 ? silly__val_apple + (2 * Math.PI) : silly__val_apple;
+silly__val_apple     = silly__val_apple < 0 ? silly__val_apple + (2 * Math.PI) : silly__val_apple;
 
 var silly__val_pie = Math.atan2(silly__pie_centroid.y, silly__pie_centroid.x);
-silly__val_pie = silly__val_pie < 0 ? silly__val_pie + (2 * Math.PI) : silly__val_pie;
+silly__val_pie     = silly__val_pie < 0 ? silly__val_pie + (2 * Math.PI) : silly__val_pie;
 
 spec_helper.test_case.ANGLES_FROM_ORIGIN_TO_CENTROIDS = {
   apple: fn.math.radians_to_degrees(silly__val_apple),

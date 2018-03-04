@@ -455,6 +455,16 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.parsed_biom.approx_starting_colors", function () {
+      it("gives the approx starting color for each sample", function () {
+        var expected = spec_helper.test_case.APPROX_STARTING_COLORS;
+        var actual   = fn.parsed_biom.approx_starting_colors(spec_helper.test_case.SAMPLE_NAMES, spec_helper.test_case.SAMPLE_ANGLES);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+
+      });
+    });
+
     describe("sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;
@@ -469,6 +479,18 @@ describe("fn", function () {
         };
 
         expect(func).to.throw();
+      });
+
+      it("hangles an angle offset", function () {
+        var angle_offset = 100;
+
+        var expected = spec_helper.test_case.SAMPLE_ANGLES.map(function (angle) {
+          return (angle + angle_offset) % 360;
+        });
+
+        var actual = fn.parsed_biom.sample_angles(spec_helper.test_case.NUM_SAMPLES, angle_offset);
+
+        spec_helper.expect_stringify_equal(actual, expected);
       });
     });
   });

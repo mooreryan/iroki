@@ -1,154 +1,4 @@
 /*
-fn.parsed_biom.abundance_across = function (parsed_biom, avg_method) {
-  var abundance      = {};
-  var abundance_vals = [];
-
-  parsed_biom.data.forEach(function (leaf_row) {
-    var counted_samples = 0;
-    var leaf            = null;
-    var count           = null;
-
-    // Fields will be name, sample 1, sample 2, ...
-    fn.obj.each(leaf_row, function (field, val) {
-      var count_this_value = val > 0 || avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
-
-      if (field === "name") {
-        leaf            = val;
-        abundance[leaf] = 0;
-      }
-      else if (count_this_value) {
-        count = val;
-        abundance[leaf] += count;
-        counted_samples += 1;
-      }
-    });
-
-    // TODO when does this happen, when a leaf has all zero counts?
-    if (counted_samples > 0) {
-      abundance[leaf] /= counted_samples;
-    } // else it will still be 0
-
-    abundance_vals.push(abundance[leaf]);
-  });
-
-  var min_abundance_val = fn.ary.min(abundance_vals);
-  var max_abundance_val = fn.ary.max(abundance_vals);
-
-  return {
-    abundance : abundance,
-    min_val : min_abundance_val,
-    max_val : max_abundance_val
-  };
-};
-
-fn.parsed_biom.leaf_sample_points = function (parsed_biom) {
-  var count_data = fn.obj.deep_copy(parsed_biom.data);
-  var samples    = fn.obj.deep_copy(parsed_biom.meta.fields);
-
-  // subtract 1 to account for the 'name' field
-  var num_samples  = samples.length - 1;
-  var fake_samples = biom.helper.fake_samples(num_samples);
-
-  if (fake_samples.length > 0) {
-    biom.helper.add_zero_count_samples(count_data, fake_samples);
-
-    samples = samples.concat(fake_samples);
-  }
-
-  // TODO check to see if the json keeps the order.
-  var points = {};
-
-  count_data.forEach(function (counts) {
-    var leaf_name = "";
-
-    // Get the actual sample names
-    var actual_sample_names  = fn.obj.vals(parsed_biom.meta.fields).filter(function (field) {
-      return field !== "name";
-    });
-    var actual_sample_counts = actual_sample_names.map(function (sample) {
-      return counts[sample];
-    });
-
-    // Need this to get the zero replacement value.
-    var min_count          = fn.ary.min(actual_sample_counts);
-    var max_count          = fn.ary.max(actual_sample_counts);
-    var min_non_zero_count = actual_sample_counts.filter(function (count) {
-      return count !== 0;
-    });
-
-    // If the smallest non-zero val is smaller than 1e-5 take a tenth of that or else just take 1e-5.  It should be small enoughnot to matter most of the time.
-    var zero_replacement_val = min_non_zero_count < 1e-5 ? min_non_zero_count * 0.1 : 1e-5;
-
-    leaf_name         = counts["name"];
-    points[leaf_name] = {};
-
-    actual_sample_names.forEach(function (sample_name, sample_idx) {
-      var count     = counts[sample_name];
-      var rel_count = max_count === 0 || count === 0 ? zero_replacement_val : count / max_count;
-
-      var angle = biom.sample_to_angle(sample_idx, num_samples, utils__deg_to_rad(g_val_hue_angle_offset));
-
-      points[leaf_name][sample_name] = fn.pt.on_circle(angle, rel_count);
-    });
-  });
-
-  return points;
-};
-
-// Returns info on non zero samples.  If there is only one, return that sample name.
-fn.parsed_biom.non_zero_count_samples = function (parsed_biom) {
-  var obj = {};
-
-  parsed_biom.data.forEach(function (counts) {
-    var leaf_name              = "";
-    var non_zero_count_samples = [];
-    fn.obj.each(counts, function (field, count) {
-      if (field === "name") {
-        leaf_name = count;
-      }
-      else if (count !== 0) {
-        non_zero_count_samples.push(field);
-      }
-    });
-
-    switch (non_zero_count_samples.length) {
-      case 0:
-        obj[leaf_name] = "none";
-        break;
-      case 1:
-        obj[leaf_name] = non_zero_count_samples[0];
-        break;
-      default:
-        obj[leaf_name] = "many";
-        break;
-    }
-  });
-
-  return obj;
-};
-
-fn.parsed_biom.num_real_samples = function (parsed_biom) {
-  var num_fake_samples = 0;
-  parsed_biom.meta.fields.forEach(function (field) {
-    if (field === "name" || fn.utils.is_fake_field(field)) {
-      num_fake_samples += 1;
-    }
-  });
-
-  return parsed_biom.meta.fields.length - num_fake_samples;
-};
-
-fn.parsed_biom.sample_angles = function (parsed_biom, angle_offset) {
-  var fields      = fn.parsed_biom.sample_fields(parsed_biom);
-  var num_samples = fields.length;
-
-  var sample_angles = fields.map(function (field, idx) {
-    return fn.math.radians_to_degrees(biom.sample_to_angle(idx, num_samples, angle_offset));
-  });
-
-  // Don't use an object in case there are duplicated sample names in the biom file.
-  return [fields, sample_angles];
-};
 
 fn.parsed_biom.sample_color_legend = function (parsed_biom, angle_offset) {
   var sample_angle_ret_val          = fn.parsed_biom.sample_angles(parsed_biom, angle_offset);
@@ -203,21 +53,7 @@ fn.parsed_biom.sample_color_legend_html = function (parsed_biom, angle_offset) {
 
   return "<!DOCTYPE html>" + head + body + "</html>";
 };
-
-fn.parsed_biom.sample_fields = function (parsed_biom) {
-  var fields = [];
-
-  parsed_biom.meta.fields.forEach(function (field) {
-    if (fn.utils.is_sample_field(field)) {
-      fields.push(field);
-    }
-  });
-
-  return fields;
-};
 */
-
-// All these functions assume that you have a good parsed biom with the proper field set up.
 
 /**
  * Parses the biom file string with Papa.parse.
@@ -461,22 +297,31 @@ fn.parsed_biom.replace_zeros = function (counts_for_each_leaf) {
 
 
 /**
- * Returns an array of sample angles for each sample in the biom file.
+ * Returns an array of sample angles (in degrees) for each sample in the biom file.
+ *
+ * If the angle offset makes the last angles go over 360, they will be modulo 360 to get back under 360.
  *
  * @param num_samples
+ * @param angle_offset offset the starting angle by this number of degrees
  * @return {Array} e.g., [0, 90, 180, 270] for 4 samples
  * @throws {Error} if num_samples === 0
  */
-fn.parsed_biom.sample_angles = function (num_samples) {
+fn.parsed_biom.sample_angles = function (num_samples, angle_offset) {
   if (num_samples === 0) {
     throw Error("num_samples cannot be zero");
+  }
+
+  if (angle_offset === undefined) {
+    angle_offset = 0;
   }
 
   var angle  = 360 / num_samples;
   var angles = [];
 
   for (var i = 0; i < num_samples; ++i) {
-    angles.push(i * angle);
+    var new_angle = (i * angle + angle_offset) % 360;
+
+    angles.push(new_angle);
   }
 
   return angles;
@@ -632,14 +477,14 @@ fn.parsed_biom.centroids_of_whole_shape = function (all_areas, all_centroids) {
 
 /**
  * Return the angle from the origin to the centroid for each leaf.
- * 
+ *
  * @param centroids_of_whole_shape
  * @return {Object} leaf_name => angle (in degrees, can be negative)
  */
 fn.parsed_biom.angles_from_origin_to_centroid = function (centroids_of_whole_shape) {
   var obj = {};
 
-  fn.obj.each(centroids_of_whole_shape, function(leaf, centroid){
+  fn.obj.each(centroids_of_whole_shape, function (leaf, centroid) {
     var angle = fn.math.radians_to_degrees(Math.atan2(centroid.y, centroid.x));
 
     if (angle < 0) {
@@ -654,6 +499,41 @@ fn.parsed_biom.angles_from_origin_to_centroid = function (centroids_of_whole_sha
   return obj;
 };
 
+fn.parsed_biom.approx_starting_colors = function (sample_names, sample_angles) {
+  var obj = {};
+
+  sample_angles.map(function (angle, idx) {
+    var name = sample_names[idx];
+
+    var starting_color = fn.color.approx_starting_color(angle);
+
+    obj[name] = starting_color;
+  });
+
+  return obj;
+};
+
+
+///
+
+fn.parsed_biom.sample_color_legend = function (parsed_biom, angle_offset) {
+  var sample_angle_ret_val          = fn.parsed_biom.sample_angles(parsed_biom, angle_offset);
+  var sample_names                  = sample_angle_ret_val[0];
+  var sample_angles                 = sample_angle_ret_val[1];
+  var sample_approx_starting_colors = sample_angles.map(function (hue_angle) {
+    return fn.color.approx_starting_color(hue_angle);
+  });
+
+  var sample_legend_str = "name\tappoximate starting color\n";
+  sample_names.forEach(function (name, idx) {
+    sample_legend_str += [name, sample_approx_starting_colors[idx]].join("\t") + "\n";
+  });
+
+  return sample_legend_str;
+};
+
+///
+
 /**
  * Return an object with all the info you need for working with the parsed biom.
  *
@@ -664,6 +544,7 @@ fn.parsed_biom.new = function (params) {
   var biom_str         = params.biom_str;
   var replace_zeros    = params.replace_zeros;
   var keep_zero_counts = params.keep_zero_counts;
+  var angle_offset     = params.angle_offset;
 
   var obj = {};
 
@@ -671,14 +552,15 @@ fn.parsed_biom.new = function (params) {
   obj.params = {
     biom_str: biom_str,
     replace_zeros: replace_zeros,
-    keep_zero_counts: keep_zero_counts
+    keep_zero_counts: keep_zero_counts,
+    angle_offset: angle_offset
   };
 
   obj.parsed_biom = fn.parsed_biom.parse_biom_file_str(biom_str);
 
   obj.num_samples   = fn.parsed_biom.num_samples(obj.parsed_biom);
   obj.sample_names  = fn.parsed_biom.sample_names(obj.parsed_biom);
-  obj.sample_angles = fn.parsed_biom.sample_angles(obj.num_samples);
+  obj.sample_angles = fn.parsed_biom.sample_angles(obj.num_samples, angle_offset);
 
   obj.counts_for_each_leaf                   = fn.parsed_biom.counts_for_each_leaf(obj.parsed_biom);
   obj.non_zero_samples_for_each_leaf         = fn.parsed_biom.non_zero_samples_for_each_leaf(obj.parsed_biom);
