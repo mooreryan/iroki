@@ -483,7 +483,7 @@ fn.parsed_biom.angles_from_single_sample_biom = function (leaf_names, sample_ang
 
 /**
  * Gives sample angles for each leaf in a two sample biom file.
- * 
+ *
  * @param sample_angles
  * @param counts_for_each_leaf
  * @return {Object} leaf_name => sample_angle
@@ -635,11 +635,11 @@ fn.parsed_biom.new = function (params) {
   obj.sample_color_legend_tsv  = fn.parsed_biom.sample_color_legend_tsv(obj.approx_starting_colors);
   obj.sample_color_legend_html = fn.parsed_biom.sample_color_legend_html(obj.sample_color_legend_tsv);
 
-  obj.counts_for_each_leaf                   = fn.parsed_biom.counts_for_each_leaf(obj.parsed_biom);
-  obj.non_zero_samples_for_each_leaf         = fn.parsed_biom.non_zero_samples_for_each_leaf(obj.parsed_biom);
-  obj.abundance_across_samples_for_each_leaf = fn.parsed_biom.abundance_across_samples_for_each_leaf(obj.parsed_biom, keep_zero_counts);
+  obj.counts_for_each_leaf           = fn.parsed_biom.counts_for_each_leaf(obj.parsed_biom);
+  obj.non_zero_samples_for_each_leaf = fn.parsed_biom.non_zero_samples_for_each_leaf(obj.parsed_biom);
 
-  obj.evenness_across_samples_for_each_leaf = fn.parsed_biom.evenness_across_samples_for_each_leaf(obj.counts_for_each_leaf, keep_zero_counts);
+  obj.abundance_across_samples_for_each_leaf = fn.parsed_biom.abundance_across_samples_for_each_leaf(obj.parsed_biom, keep_zero_counts);
+  obj.evenness_across_samples_for_each_leaf  = fn.parsed_biom.evenness_across_samples_for_each_leaf(obj.counts_for_each_leaf, keep_zero_counts);
 
   obj.zero_replacement_val = fn.parsed_biom.zero_replacement_val(obj.counts_for_each_leaf);
 
