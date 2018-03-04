@@ -530,11 +530,11 @@ fn.parsed_biom.origin_triangles_for_each_leaf = function (points_for_each_leaf) 
 /**
  * Given an array of origin triangles, get the centroids.
  *
- * @param origin_tirangles e.g., [[p1, p2], [p2, p3], [p3, p1]]
+ * @param origin_triangles e.g., [[p1, p2], [p2, p3], [p3, p1]]
  * @return {Array} centroids e.g., [fn.pt.new(...), fn.pt.new(...), ...]
  */
-fn.parsed_biom.centroids_of_origin_triangles = function (origin_tirangles) {
-  return origin_tirangles.map(function (origin_triangle) {
+fn.parsed_biom.centroids_of_origin_triangles = function (origin_triangles) {
+  return origin_triangles.map(function (origin_triangle) {
     var p1 = origin_triangle[0];
     var p2 = origin_triangle[1];
 
@@ -553,6 +553,69 @@ fn.parsed_biom.all_centroids = function (origin_triangles_for_each_leaf) {
 
   fn.obj.each(origin_triangles_for_each_leaf, function (leaf, triangles) {
     obj[leaf] = fn.parsed_biom.centroids_of_origin_triangles(triangles);
+  });
+
+  return obj;
+};
+
+/**
+ * Takes an array of origin triangles and gives the area for each of them.
+ *
+ * @param origin_triangles e.g., [[p1, p2], [p2, p3], [p3, p1]]
+ * @return {number} area of triangle (abs val of signed area)
+ */
+fn.parsed_biom.areas_of_origin_triangles = function (origin_triangles) {
+  return origin_triangles.map(function (origin_triangle) {
+    var p1 = origin_triangle[0];
+    var p2 = origin_triangle[1];
+
+    return Math.abs(fn.pt.signed_area_origin_triangle(p1, p2));
+  });
+};
+
+/**
+ * Given origin triangles for each leaf, return the areas of all origin triangles for each leaf.
+ *
+ * @param origin_triangles_for_each_leaf
+ * @return {Object} e.g., leaf_name => [area, area, ...]
+ */
+fn.parsed_biom.all_areas = function (origin_triangles_for_each_leaf) {
+  var obj = {};
+
+  fn.obj.each(origin_triangles_for_each_leaf, function (leaf, triangles) {
+    obj[leaf] = fn.parsed_biom.areas_of_origin_triangles(triangles);
+  });
+
+  return obj;
+};
+
+fn.parsed_biom.centroids_of_whole_shape = function (all_areas, all_centroids) {
+  var obj = {};
+
+  fn.obj.each(all_areas, function (leaf, areas) {
+    var centroids = all_centroids[leaf];
+
+    if (areas.length !== centroids.length) {
+      throw Error("Length mismatch between areas and lengths.");
+    }
+
+    var weighted_centroid_x = 0;
+    var weighted_centroid_y = 0;
+    var total_area          = 0;
+
+    areas.forEach(function (area, idx) {
+      var centroid = centroids[idx];
+
+      weighted_centroid_x += area * centroid.x;
+      weighted_centroid_y += area * centroid.y;
+
+      total_area += area;
+    });
+
+    var new_centroid_x = weighted_centroid_x / total_area;
+    var new_centroid_y = weighted_centroid_y / total_area;
+
+    obj[leaf] = fn.pt.new(new_centroid_x, new_centroid_y);
   });
 
   return obj;
@@ -594,6 +657,13 @@ fn.parsed_biom.new = function (params) {
   obj.zero_replacement_val = fn.parsed_biom.zero_replacement_val(obj.counts_for_each_leaf);
 
   obj.points = fn.parsed_biom.points(obj.counts_for_each_leaf, obj.num_samples);
+
+  obj.origin_triangles_for_each_leaf = fn.parsed_biom.origin_triangles_for_each_leaf(obj.points);
+
+  obj.all_areas     = fn.parsed_biom.all_areas(obj.origin_triangles_for_each_leaf);
+  obj.all_centroids = fn.parsed_biom.all_centroids(obj.origin_triangles_for_each_leaf);
+
+  obj.centroids_of_whole_shape = fn.parsed_biom.centroids_of_whole_shape(obj.all_areas, obj.all_centroids);
 
   return obj;
 };

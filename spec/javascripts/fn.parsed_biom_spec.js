@@ -392,6 +392,56 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.parsed_biom.areas_of_origin_triangles", function () {
+      it("gives area of each origin triangle", function () {
+        var x1 = Math.cos(0);
+        var x2 = Math.cos(2 * Math.PI / 3);
+        var x3 = Math.cos(4 * Math.PI / 3);
+
+        var y1 = Math.sin(0);
+        var y2 = Math.sin(2 * Math.PI / 3);
+        var y3 = Math.sin(4 * Math.PI / 3);
+
+        var p1 = fn.pt.new(x1, y1);
+        var p2 = fn.pt.new(x2, y2);
+        var p3 = fn.pt.new(x3, y3);
+
+        var origin_triangles = [[p1, p2], [p2, p3], [p3, p1]];
+
+        var expected = [
+          Math.abs(0.5 * (x1 * y2 - x2 * y1)),
+          Math.abs(0.5 * (x2 * y3 - x3 * y2)),
+          Math.abs(0.5 * (x3 * y1 - x1 * y3))
+        ];
+
+        var actual = fn.parsed_biom.areas_of_origin_triangles(origin_triangles);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.parsed_biom.all_areas", function () {
+      it("returns areas for each triangle for each leaf", function () {
+        var expected = spec_helper.test_case.ALL_AREAS;
+        var actual   = fn.parsed_biom.all_areas(spec_helper.test_case.ORIGIN_TRIANGLES);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.parsed_biom.centriods_of_whole_shape", function () {
+      it("gives the centroid for the entire shape for each leaf", function () {
+        var all_areas     = spec_helper.test_case.ALL_AREAS;
+        var all_centroids = spec_helper.test_case.ALL_CENTROIDS;
+
+        var expected = spec_helper.test_case.CENTROIDS_OF_WHOLE_SHAPE;
+
+        var actual = fn.parsed_biom.centroids_of_whole_shape(all_areas, all_centroids);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
     describe("sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;

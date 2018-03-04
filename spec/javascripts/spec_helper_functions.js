@@ -556,3 +556,63 @@ spec_helper.test_case.ALL_CENTROIDS = {
     fn.pt.centroid_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[5][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[5][1])
   ]
 };
+
+spec_helper.test_case.ALL_AREAS = {
+  apple: [
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[0][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[0][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[1][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[1][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[2][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[2][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[3][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[3][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[4][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[4][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.apple[5][0], spec_helper.test_case.ORIGIN_TRIANGLES.apple[5][1]))
+  ],
+  pie: [
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[0][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[0][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[1][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[1][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[2][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[2][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[3][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[3][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[4][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[4][1])),
+    Math.abs(fn.pt.signed_area_origin_triangle(spec_helper.test_case.ORIGIN_TRIANGLES.pie[5][0], spec_helper.test_case.ORIGIN_TRIANGLES.pie[5][1]))
+  ]
+};
+
+var silly__nx    = 0;
+var silly__ny    = 0;
+var silly__denom = 0;
+
+for (var i = 0; i < 6; ++i) {
+  var centroid = spec_helper.test_case.ALL_CENTROIDS.apple[i];
+  var area     = spec_helper.test_case.ALL_AREAS.apple[i];
+
+  silly__nx += area * centroid.x;
+  silly__ny += area * centroid.y;
+  silly__denom += area;
+}
+var silly__apple_centroid = fn.pt.new(silly__nx / silly__denom, silly__ny / silly__denom);
+
+silly__nx    = 0;
+silly__ny    = 0;
+silly__denom = 0;
+for (var i = 0; i < 6; ++i) {
+  var centroid = spec_helper.test_case.ALL_CENTROIDS.pie[i];
+  var area     = spec_helper.test_case.ALL_AREAS.pie[i];
+
+  silly__nx += area * centroid.x;
+  silly__ny += area * centroid.y;
+  silly__denom += area;
+}
+var silly__pie_centroid = fn.pt.new(silly__nx / silly__denom, silly__ny / silly__denom);
+
+spec_helper.test_case.CENTROIDS_OF_WHOLE_SHAPE = {
+  apple: silly__apple_centroid,
+  pie: silly__pie_centroid
+};
+
+var a = {
+  "apple": { "x": 0.02976181122515786, "y": -0.4020813821583831 },
+  "pie": { "x": 0.22221666676944243, "y": -0.14433612395300596 }
+};
+var b = {
+  "apple": { "x": 0.02976181122515786, "y": -0.4020813821583831 },
+  "pie": { "x": 0.08749878751083735, "y": -0.3247571087922278 }
+};
