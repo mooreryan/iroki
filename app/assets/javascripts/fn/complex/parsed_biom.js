@@ -602,7 +602,8 @@ fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
   return "<!DOCTYPE html>" + head + body + "</html>";
 };
 
-// TODO write specs
+// TODO everything from here down needs specs
+
 /**
  * Return an object with all the info you need for working with the parsed biom.
  *
@@ -626,6 +627,7 @@ fn.parsed_biom.new = function (params) {
   obj.parsed_biom = fn.parsed_biom.parse_biom_file_str(biom_str);
 
   obj.leaf_names = fn.parsed_biom.leaf_names(obj.parsed_biom);
+  obj.num_leaves = obj.leaf_names.length;
 
   obj.num_samples   = fn.parsed_biom.num_samples(obj.parsed_biom);
   obj.sample_names  = fn.parsed_biom.sample_names(obj.parsed_biom);
@@ -662,5 +664,150 @@ fn.parsed_biom.new = function (params) {
     obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_origin_to_centroid(obj.centroids_of_whole_shape);
   }
 
+  var return_value  = fn.parsed_biom.colors("TODO");
+  obj.colors        = return_value.colors;
+  obj.color_details = return_value.color_details;
+
   return obj;
 };
+
+
+/**
+ * Thingy!
+ *
+ * @param fully_parsed_biom
+ * @param opts
+ * @return {{color_hex_codes: {}, color_details: {}}}
+ */
+fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
+  /**
+   * Return the passed in opt or the default if that opt was not passed in.
+   *
+   * @param opt The option you want, e.g., "lightness_min"
+   * @return Either the default for that opt or the passed in option.
+   * @throws {Error} if there is no default value for the requested option
+   */
+  function opt_or_default(opt) {
+    var defaults = {
+      lightness_min: 30,
+      lightness_max: 90,
+      lightness_reversed: false,
+
+      chroma_min: 0,
+      chroma_max: 100,
+      chroma_reversed: false,
+
+      evenness_absolute: false,
+
+      correct_luminance: false
+    };
+
+    if (defaults[opt] === undefined) {
+      throw Error("There is no defualt value for opt: " + opt);
+    }
+
+    return opts[opt] === undefined ? defaults[opt] : opts[opt];
+  }
+
+
+  var opt_lightness_min      = opt_or_default("lightness_min");
+  var opt_lightness_max      = opt_or_default("lightness_max");
+  var opt_lightness_reversed = opt_or_default("lightness_reversed");
+
+  var opt_chroma_min      = opt_or_default("chroma_min");
+  var opt_chroma_max      = opt_or_default("chroma_max");
+  var opt_chroma_reversed = opt_or_default("chroma_reversed");
+
+  var opt_evenness_absolute = opt_or_default("evenness_absolute");
+
+  var opt_correct_luminance = opt_or_default("correct_luminance");
+
+  // Get min and max evenness (for scaling)
+  if (opt_evenness_absolute) {
+    var evenness_min = 0;
+    var evenness_max = 1;
+  }
+  else {
+    var evenness_vals = fn.obj.vals(fully_parsed_biom.evenness_across_samples_for_each_leaf);
+    var evenness_min  = fn.ary.min(evenness_vals);
+    var evenness_max  = fn.ary.max(evenness_vals);
+  }
+
+  // Get min and max abundance vals (for scaling)
+  var abundance_vals = fn.obj.vals(fully_parsed_biom.abundance_across_samples_for_each_leaf);
+  var abundance_min  = fn.ary.min(abundance_vals);
+  var abundance_max  = fn.ary.max(abundance_vals);
+
+  var color_hex_codes    = {};
+  var color_details      = {};
+  var all_lightness_vals = [];
+  var all_luminance_vals = [];
+
+  obj.leaf_names.forEach(function (leaf_name, leaf_idx) {
+    var evenness_val  = obj.evenness_across_samples_for_each_leaf[leaf_name];
+    var abundance_val = obj.abundance_across_samples_for_each_leaf[leaf_name];
+    var hue_angle     = obj.angles_from_origin_to_centroid[leaf_name];
+
+    var hue_val = hue_angle;
+
+    if (opt_chroma_reversed) {
+      // Swap the new min and new max to reverse the scale
+      var chroma_val = fn.math.scale(evenness_val, evenness_min, evenness_max, opt_chroma_max, opt_chroma_min);
+    }
+    else {
+      var chroma_val = fn.math.scale(evenness_val, evenness_min, evenness_max, opt_chroma_min, opt_chroma_max);
+    }
+
+    if (opt_lightness_reversed) {
+      // Swap the new min and new max to reverse the scale
+      var lightness_val = fn.math.scale(abundance_val, abundance_min, abundance_max, opt_lightness_max, opt_lightness_min);
+    }
+    else {
+      var lightness_val = fn.math.scale(abundance_val, abundance_min, abundance_max, opt_lightness_min, opt_lightness_max);
+    }
+
+    color_details[leaf_name].hue       = hue_val;
+    color_details[leaf_name].chroma    = chroma_val;
+    color_details[leaf_name].lightness = lightness_val;
+    all_lightness_vals.push(lightness_val);
+
+    var hcl = chroma.hcl(hue_val, chroma_val, lightness_val);
+
+    all_luminance_vals.push(hcl.luminance());
+
+    color_hex_codes[leaf_name] = hcl.hex();
+  });
+
+  if (opt_correct_luminance) {
+    var corrected_color_hex_codes = {};
+
+    var luminance_min = fn.ary.min(all_luminance_vals);
+    var luminance_max = fn.ary.max(all_luminance_vals);
+
+    var lightness_min = fn.ary.min(all_lightness_vals);
+    var lightness_max = fn.ary.max(all_lightness_vals);
+
+    fn.obj.each(color_hex_codes, function (leaf_name, hex_code) {
+      var old_luminance = chroma.hex(hex_code).luminance();
+      var new_hex_code  = fn.math.scale(old_luminance, luminance_min, luminance_max, lightness_min, lightness_max);
+
+      corrected_color_hex_codes[leaf_name] = new_hex_code;
+    });
+
+    return { color_hex_codes: corrected_color_hex_codes, color_details: color_details };
+  }
+  else {
+    return { color_hex_codes: color_hex_codes, color_details: color_details };
+  }
+};
+
+// TODO needs to know if dimension reduction was done.
+fn.parsed_biom.leaf_color_legend_tsv = function (TODO) {
+  return TODO;
+};
+
+fn.parsed_biom.leaf_color_legend_html = function (leaf_color_legend_tsv) {
+  return leaf_color_legend_tsv;
+};
+
+
