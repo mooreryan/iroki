@@ -535,6 +535,25 @@ function biom__save_abundance_colors(params) {
   var biom_color_map_str = biom.mapping_file_str(fully_parsed_biom.color_hex_codes);
 
   if (g_val_download_legend) {
+    var zip = new JSZip();
+    zip.folder("iroki_mapping")
+       .file("mapping.tsv.txt", biom_color_map_str)
+       .file("biom_with_colors.tsv.txt", fully_parsed_biom.biom_with_colors_tsv);
+    // .file("sample_approximate_starting_colors.txt", sample_color_legend_tsv_str)
+    // .file("sample_approximate_starting_colors.html", sample_color_legend_html_str);
+
+    zip.generateAsync({
+      type: "blob",
+      compression: "DEFLATE",
+      compressionOptions: {
+        level: 1
+      }
+    })
+       .then(function (blob) {
+         saveAs(blob, "iroki_mapping.zip");
+       });
+
+
     // if (g_val_reduce_dimension === "reduce-dimension-none") {
     //   var html_str = biom.make_counts_with_colors_html(parsed_biom, false, colors, color_details);
     // }

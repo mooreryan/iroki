@@ -605,7 +605,6 @@ fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
 // TODO everything from here down needs specs
 
 
-
 /**
  * Thingy!
  *
@@ -739,7 +738,7 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
     // luminance to be correlated directly with lighness.
     fn.obj.each(color_hex_codes, function (leaf_name, hex_code) {
       var old_luminance = chroma.hex(hex_code).luminance();
-      var new_luminance  = fn.math.scale(old_luminance, luminance_min, luminance_max, lightness_min, lightness_max);
+      var new_luminance = fn.math.scale(old_luminance, luminance_min, luminance_max, lightness_min, lightness_max);
 
       corrected_color_hex_codes[leaf_name] = chroma.hex(hex_code).luminance(new_luminance).hex();
     });
@@ -761,6 +760,43 @@ fn.parsed_biom.leaf_color_legend_tsv = function (TODO) {
 
 fn.parsed_biom.leaf_color_legend_html = function (leaf_color_legend_tsv) {
   return leaf_color_legend_tsv;
+};
+
+
+fn.parsed_biom.biom_with_colors_tsv = function (fully_parsed_biom) {
+  var info_names = ["name", "color", "hue", "chroma/saturation", "lightness", "centroid", "evenness", "abundance"];
+
+  var header = info_names.concat(fully_parsed_biom.sample_names);
+  var data_rows = [header.join("\t")];
+
+  fully_parsed_biom.leaf_names.forEach(function (leaf_name, leaf_idx) {
+    var data_row = [];
+
+    data_row.push(leaf_name);
+
+    // TODO make sure that color_hex_codes has already been set.
+    data_row.push(fully_parsed_biom.color_hex_codes[leaf_name]);
+
+    // Add the color details
+    data_row.push(fn.math.round(fully_parsed_biom.color_details[leaf_name].hue, 2));
+    data_row.push(fn.math.round(fully_parsed_biom.color_details[leaf_name].chroma, 2));
+    data_row.push(fn.math.round(fully_parsed_biom.color_details[leaf_name].lightness, 2));
+
+    // Data characteristics
+    data_row.push(fn.pt.to_s(fully_parsed_biom.centroids_of_whole_shape[leaf_name]));
+    data_row.push(fn.math.round(fully_parsed_biom.evenness_across_samples_for_each_leaf[leaf_name], 2));
+    data_row.push(fn.math.round(fully_parsed_biom.abundance_across_samples_for_each_leaf[leaf_name], 2));
+
+    // Original sample counts
+
+    fully_parsed_biom.counts_for_each_leaf[leaf_name].forEach(function (count) {
+      data_row.push(fn.math.round(count, 2));
+    });
+
+    data_rows.push(data_row.join("\t"));
+  });
+
+  return data_rows.join("\n");
 };
 
 /**
@@ -821,9 +857,13 @@ fn.parsed_biom.new = function (params) {
     fully_parsed_biom.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_origin_to_centroid(fully_parsed_biom.centroids_of_whole_shape);
   }
 
+  // Add the colors
   var return_value                  = fn.parsed_biom.colors(fully_parsed_biom, params);
   fully_parsed_biom.color_hex_codes = return_value.color_hex_codes;
   fully_parsed_biom.color_details   = return_value.color_details;
+
+  // Add the modified biom with colors tsv.
+  fully_parsed_biom.biom_with_colors_tsv = fn.parsed_biom.biom_with_colors_tsv(fully_parsed_biom);
 
   return fully_parsed_biom;
 };

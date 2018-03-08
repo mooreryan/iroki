@@ -680,6 +680,10 @@ describe("fn", function () {
       it("sets zero_replacement_val", function () {
         spec_helper.expect_stringify_equal(actual.zero_replacement_val, expected.zero_replacement_val);
       });
+
+      it("sets biom_with_colors_tsv", function () {
+        expect(actual.biom_with_colors_tsv).to.equal(expected.biom_with_colors_tsv);
+      });
     });
   });
 });

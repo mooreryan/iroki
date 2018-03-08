@@ -622,6 +622,8 @@ spec_helper.test_case.PARAMS_FOR_NEW = {
   correct_luminance: true
 };
 
+spec_helper.test_case.BIOM_WITH_COLORS_TSV = "name\tcolor\thue\tchroma/saturation\tlightness\tcentroid\tevenness\tabundance\ts1\ts2\ts3\ts4\ts5\ts6\napple\t#94d3ff\t274.23\t71.43\t60\t(0.03, -0.4)\t0.71\t1.67\t0\t1\t2\t0\t3\t4\npie\t#edbced\t327\t71.43\t60\t(0.22, -0.14)\t0.71\t1.67\t1\t2\t0\t3\t0\t4";
+
 // This is used to test fn.parsed_biom.colors.  It only has just enough attrs to work with the default values need by that function.
 spec_helper.test_case.FULLY_PARSED_BIOM = {
   abundance_across_samples_for_each_leaf: spec_helper.test_case.ABUNDANCE_ACROSS_ALL_SAMPLES,
@@ -660,5 +662,7 @@ spec_helper.test_case.FULLY_PARSED_BIOM = {
   sample_color_legend_html: spec_helper.test_case.SAMPLE_COLOR_LEGEND_HTML,
   sample_color_legend_tsv: spec_helper.test_case.SAMPLE_COLOR_LEGEND_TSV,
   sample_names: spec_helper.test_case.SAMPLE_NAMES,
-  zero_replacement_val: spec_helper.test_case.ZERO_REPLACEMENT_VAL
+  zero_replacement_val: spec_helper.test_case.ZERO_REPLACEMENT_VAL,
+
+  biom_with_colors_tsv: spec_helper.test_case.BIOM_WITH_COLORS_TSV
 };
