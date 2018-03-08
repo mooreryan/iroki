@@ -107,6 +107,10 @@ function update_form_vals() {
 
 
 // Handle the biom upload form
+
+/**
+ * Calls biom__save_abundance_colors once the file is uploaded.  Sets up all the listeners and manages the form values.  It is called directly on the biom.html.slim page.
+ */
 function biom__upload_button() {
   function handleFiles() {
     submit_button.setAttribute("disabled", "");
@@ -126,8 +130,36 @@ function biom__upload_button() {
     update_form_vals();
   }
 
-  function listener(elem, action, fn) {
-    elem.addEventListener(action, fn);
+  /**
+   * Sets up the params needed for biom__save_abundance_colors (and fn.parsed_biom.new).
+   *
+   * @param biom_str
+   * @return {Object}
+   */
+  function set_params(biom_str) {
+    update_form_vals();
+
+    var keep_zeros = g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
+
+    return {
+      // These are required for fn.parsed_biom.new
+      biom_str: biom_str,
+      keep_zero_counts: keep_zeros,
+      angle_offset: g_val_hue_angle_offset,
+
+      // These are required for fn.parsed_biom.colors
+      lightness_min: g_val_lightness_min,
+      lightness_max: g_val_lightness_max,
+      lightness_reversed: g_val_abundant_samples_are === g_ID_ABUNDANT_SAMPLES_ARE_DARK,
+
+      chroma_min: g_val_chroma_min,
+      chroma_max: g_val_chroma_max,
+      chroma_reversed: g_val_even_leaves_are === g_ID_EVEN_LEAVES_ARE_MORE_SATURATED,
+
+      evenness_absolute: g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE,
+
+      correct_luminance: g_val_correct_luminance
+    };
   }
 
   disable("submit-button");
@@ -162,11 +194,8 @@ function biom__upload_button() {
 
   var biom_reader = new FileReader();
 
-  biom_reader.onload = function (event) {
-    var biom_str = event.target.result;
-    biom__save_abundance_colors(biom_str);
-  };
 
+  // Set up all the listeners.
   uploader.addEventListener("change", undisable_and_update);
   color_space_dropdown.addEventListener("change", undisable_and_update);
   avg_method_dropdown.addEventListener("change", undisable_and_update);
@@ -251,4 +280,13 @@ function biom__upload_button() {
 
     update_form_vals();
   });
+
+  // Process the biom file once it is finished loading.
+  biom_reader.onload = function (event) {
+    var biom_str = event.target.result;
+
+    var params = set_params(biom_str);
+
+    biom__save_abundance_colors(params);
+  };
 }

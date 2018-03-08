@@ -517,7 +517,7 @@ describe("fn", function () {
 
     describe("fn.parsed_biom.angles_from_two_sample_biom", function () {
       it("throws if there are not two sample angles", function () {
-        var sample_angles = [0];
+        var sample_angles        = [0];
         var counts_for_each_leaf = { apple: [10, 20], pie: [20, 10] };
 
         var func = function () {
@@ -528,7 +528,7 @@ describe("fn", function () {
       });
 
       it("throws if there are not two sample counts", function () {
-        var sample_angles = [0, 180];
+        var sample_angles        = [0, 180];
         var counts_for_each_leaf = { apple: [10], pie: [20, 10, 30] };
 
         var func = function () {
@@ -538,19 +538,23 @@ describe("fn", function () {
         expect(func).to.throw();
       });
 
-      it("gives sample angles for each leaf", function() {
-        var sample_angles = [0, 180];
-        var counts_for_each_leaf = { "apple" : [10, 20], "pie": [20, 10], "lala": [0, 0] };
+      it("gives sample angles for each leaf", function () {
+        var sample_angles        = [0, 180];
+        var counts_for_each_leaf = {
+          "apple": [10, 20],
+          "pie": [20, 10],
+          "lala": [0, 0]
+        };
 
         var expected = { "apple": 180, "pie": 0, "lala": 0 };
 
         var actual = fn.parsed_biom.angles_from_two_sample_biom(sample_angles, counts_for_each_leaf);
 
         spec_helper.expect_stringify_equal(actual, expected);
-      })
+      });
     });
 
-    describe("sample_angles", function () {
+    describe("fn.parsed_biom.sample_angles", function () {
       it("it gives the samples angles", function () {
         var expected = spec_helper.test_case.SAMPLE_ANGLES;
         var actual   = fn.parsed_biom.sample_angles(spec_helper.test_case.NUM_SAMPLES);
@@ -576,6 +580,105 @@ describe("fn", function () {
         var actual = fn.parsed_biom.sample_angles(spec_helper.test_case.NUM_SAMPLES, angle_offset);
 
         spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.parsed_biom.new", function () {
+      var expected = spec_helper.test_case.FULLY_PARSED_BIOM;
+      var actual   = fn.parsed_biom.new(spec_helper.test_case.PARAMS_FOR_NEW);
+
+      it("sets abundance_across_samples_for_each_leaf", function () {
+        spec_helper.expect_stringify_equal(actual.abundance_across_samples_for_each_leaf, expected.abundance_across_samples_for_each_leaf);
+      });
+
+      it("sets all_areas", function () {
+        spec_helper.expect_stringify_equal(actual.all_areas, expected.all_areas);
+      });
+
+      it("sets all_centroids", function () {
+        spec_helper.expect_stringify_equal(actual.all_centroids, expected.all_centroids);
+      });
+
+      it("sets angles_from_origin_to_centroid", function () {
+        fn.obj.each(actual.angles_from_origin_to_centroid, function (leaf, angle) {
+          expect(angle).to.be.closeTo(expected.angles_from_origin_to_centroid[leaf], spec_helper.TOLERANCE);
+        });
+      });
+
+      it("sets approx_starting_colors", function () {
+        spec_helper.expect_stringify_equal(actual.approx_starting_colors, expected.approx_starting_colors);
+      });
+
+      it("sets centroids_of_whole_shape", function () {
+        spec_helper.expect_stringify_equal(actual.centroids_of_whole_shape, expected.centroids_of_whole_shape);
+      });
+
+      // it("sets color_details", function () {
+      //   spec_helper.expect_stringify_equal(actual.color_details, expected.color_details);
+      // });
+      //
+      // it("sets color_hex_codes", function () {
+      //   spec_helper.expect_stringify_equal(actual.color_hex_codes, expected.color_hex_codes);
+      // });
+
+      it("sets counts_for_each_leaf", function () {
+        spec_helper.expect_stringify_equal(actual.counts_for_each_leaf, expected.counts_for_each_leaf);
+      });
+
+      it("sets evenness_across_samples_for_each_leaf", function () {
+        spec_helper.expect_stringify_equal(actual.evenness_across_samples_for_each_leaf, expected.evenness_across_samples_for_each_leaf);
+      });
+
+      it("sets leaf_names", function () {
+        spec_helper.expect_stringify_equal(actual.leaf_names, expected.leaf_names);
+      });
+
+      it("sets non_zero_samples_for_each_leaf", function () {
+        spec_helper.expect_stringify_equal(actual.non_zero_samples_for_each_leaf, expected.non_zero_samples_for_each_leaf);
+      });
+
+      it("sets num_leaves", function () {
+        spec_helper.expect_stringify_equal(actual.num_leaves, expected.num_leaves);
+      });
+
+      it("sets num_samples", function () {
+        spec_helper.expect_stringify_equal(actual.num_samples, expected.num_samples);
+      });
+
+      it("sets origin_triangles_for_each_leaf", function () {
+        spec_helper.expect_stringify_equal(actual.origin_triangles_for_each_leaf, expected.origin_triangles_for_each_leaf);
+      });
+
+      it("sets params", function () {
+        spec_helper.expect_stringify_equal(actual.params, expected.params);
+      });
+
+      it("sets parsed_biom", function () {
+        spec_helper.expect_stringify_equal(actual.parsed_biom, expected.parsed_biom);
+      });
+
+      it("sets points", function () {
+        spec_helper.expect_stringify_equal(actual.points, expected.points);
+      });
+
+      it("sets sample_angles", function () {
+        spec_helper.expect_stringify_equal(actual.sample_angles, expected.sample_angles);
+      });
+
+      it("sets sample_color_legend_html", function () {
+        spec_helper.expect_stringify_equal(actual.sample_color_legend_html, expected.sample_color_legend_html);
+      });
+
+      it("sets sample_color_legend_tsv", function () {
+        spec_helper.expect_stringify_equal(actual.sample_color_legend_tsv, expected.sample_color_legend_tsv);
+      });
+
+      it("sets sample_names", function () {
+        spec_helper.expect_stringify_equal(actual.sample_names, expected.sample_names);
+      });
+
+      it("sets zero_replacement_val", function () {
+        spec_helper.expect_stringify_equal(actual.zero_replacement_val, expected.zero_replacement_val);
       });
     });
   });

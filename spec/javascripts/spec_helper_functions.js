@@ -1,3 +1,5 @@
+var TODO = null;
+
 var spec_helper = {
   TOLERANCE: 1e-3,
   BIOM_STR: "name\ts1\ts2\napple\t10\t0\npie\t0\t10\n",
@@ -181,13 +183,13 @@ fn.obj.each(spec_helper.three_samples.REL_ABUND_ACROSS_SAMPLES, function (leaf, 
   });
 });
 
-spec_helper.three_samples.CENTROIDS = {
-  geode: centroid_of_triangle(spec_helper.three_samples.POINTS.geode.sample_1, spec_helper.three_samples.POINTS.geode.sample_2, spec_helper.three_samples.POINTS.geode.sample_3),
-  clock: centroid_of_triangle(spec_helper.three_samples.POINTS.clock.sample_1, spec_helper.three_samples.POINTS.clock.sample_2, spec_helper.three_samples.POINTS.clock.sample_3),
-  tire: centroid_of_triangle(spec_helper.three_samples.POINTS.tire.sample_1, spec_helper.three_samples.POINTS.tire.sample_2, spec_helper.three_samples.POINTS.tire.sample_3),
-  banana: centroid_of_triangle(spec_helper.three_samples.POINTS.banana.sample_1, spec_helper.three_samples.POINTS.banana.sample_2, spec_helper.three_samples.POINTS.banana.sample_3),
-  eggplant: centroid_of_triangle(spec_helper.three_samples.POINTS.eggplant.sample_1, spec_helper.three_samples.POINTS.eggplant.sample_2, spec_helper.three_samples.POINTS.eggplant.sample_3)
-};
+// spec_helper.three_samples.CENTROIDS = {
+//   geode: centroid_of_triangle(spec_helper.three_samples.POINTS.geode.sample_1, spec_helper.three_samples.POINTS.geode.sample_2, spec_helper.three_samples.POINTS.geode.sample_3),
+//   clock: centroid_of_triangle(spec_helper.three_samples.POINTS.clock.sample_1, spec_helper.three_samples.POINTS.clock.sample_2, spec_helper.three_samples.POINTS.clock.sample_3),
+//   tire: centroid_of_triangle(spec_helper.three_samples.POINTS.tire.sample_1, spec_helper.three_samples.POINTS.tire.sample_2, spec_helper.three_samples.POINTS.tire.sample_3),
+//   banana: centroid_of_triangle(spec_helper.three_samples.POINTS.banana.sample_1, spec_helper.three_samples.POINTS.banana.sample_2, spec_helper.three_samples.POINTS.banana.sample_3),
+//   eggplant: centroid_of_triangle(spec_helper.three_samples.POINTS.eggplant.sample_1, spec_helper.three_samples.POINTS.eggplant.sample_2, spec_helper.three_samples.POINTS.eggplant.sample_3)
+// };
 
 //// SIX SAMPLES WITH ZEROS ////
 
@@ -398,12 +400,14 @@ spec_helper.six_samples.CENTROIDS = {
 spec_helper.test_case = {};
 
 spec_helper.test_case.BIOM_STR    = "name\ts1\ts2\ts3\ts4\ts5\ts6\napple\t0\t1\t2\t0\t3\t4\npie\t1\t2\t0\t3\t0\t4\n";
-spec_helper.test_case.PARSED_BIOM = Papa.parse(spec_helper.test_case.BIOM_STR, spec_helper.PAPA_CONFIG);
+spec_helper.test_case.PARSED_BIOM = Papa.parse(fn.str.chomp(spec_helper.test_case.BIOM_STR), spec_helper.PAPA_CONFIG);
 
-spec_helper.test_case.NUM_SAMPLES   = 6;
-spec_helper.test_case.SAMPLE_NAMES  = ["s1", "s2", "s3", "s4", "s5", "s6"];
-spec_helper.test_case.LEAF_NAMES    = ["apple", "pie"];
-spec_helper.test_case.SAMPLE_ANGLES = [0, 60, 120, 180, 240, 300];
+spec_helper.test_case.NUM_SAMPLES          = 6;
+spec_helper.test_case.SAMPLE_NAMES         = ["s1", "s2", "s3", "s4", "s5", "s6"];
+spec_helper.test_case.LEAF_NAMES           = ["apple", "pie"];
+spec_helper.test_case.NUM_LEAVES            = 2;
+spec_helper.test_case.SAMPLE_ANGLES        = [0, 60, 120, 180, 240, 300];
+spec_helper.test_case.ZERO_REPLACEMENT_VAL = global.ZERO_REPLACEMENT_VAL;
 
 spec_helper.test_case.APPROX_STARTING_COLORS = {
   s1: chroma.hcl(0, fn.color.var.approx_starting_chroma, fn.color.var.approx_starting_lightness).hex(),
@@ -607,4 +611,38 @@ silly__val_pie     = silly__val_pie < 0 ? silly__val_pie + (2 * Math.PI) : silly
 spec_helper.test_case.ANGLES_FROM_ORIGIN_TO_CENTROIDS = {
   apple: fn.math.radians_to_degrees(silly__val_apple),
   pie: fn.math.radians_to_degrees(silly__val_pie)
+};
+
+
+spec_helper.test_case.PARAMS_FOR_NEW = {
+  biom_str: spec_helper.test_case.BIOM_STR,
+  keep_zero_counts: true,
+  angle_offset: 0
+};
+
+// This is used to test fn.parsed_biom.colors.  It only has just enough attrs to work with the default values need by that function.
+spec_helper.test_case.FULLY_PARSED_BIOM = {
+  abundance_across_samples_for_each_leaf: spec_helper.test_case.ABUNDANCE_ACROSS_ALL_SAMPLES,
+  all_areas: spec_helper.test_case.ALL_AREAS,
+  all_centroids: spec_helper.test_case.ALL_CENTROIDS,
+  angles_from_origin_to_centroid: spec_helper.test_case.ANGLES_FROM_ORIGIN_TO_CENTROIDS,
+  approx_starting_colors: spec_helper.test_case.APPROX_STARTING_COLORS,
+  centroids_of_whole_shape: spec_helper.test_case.CENTROIDS_OF_WHOLE_SHAPE,
+  color_details: TODO,
+  color_hex_codes: TODO,
+  counts_for_each_leaf: spec_helper.test_case.COUNTS,
+  evenness_across_samples_for_each_leaf: spec_helper.test_case.EVENNESS_ACROSS_ALL_SAMPLES,
+  leaf_names: spec_helper.test_case.LEAF_NAMES,
+  non_zero_samples_for_each_leaf: spec_helper.test_case.NON_ZERO_SAMPLES_FOR_EACH_LEAF,
+  num_leaves: spec_helper.test_case.NUM_LEAVES,
+  num_samples: spec_helper.test_case.NUM_SAMPLES,
+  origin_triangles_for_each_leaf: spec_helper.test_case.ORIGIN_TRIANGLES,
+  params: spec_helper.test_case.PARAMS_FOR_NEW,
+  parsed_biom: spec_helper.test_case.PARSED_BIOM,
+  points: spec_helper.test_case.POINTS,
+  sample_angles: spec_helper.test_case.SAMPLE_ANGLES,
+  sample_color_legend_html: spec_helper.test_case.SAMPLE_COLOR_LEGEND_HTML,
+  sample_color_legend_tsv: spec_helper.test_case.SAMPLE_COLOR_LEGEND_TSV,
+  sample_names: spec_helper.test_case.SAMPLE_NAMES,
+  zero_replacement_val: spec_helper.test_case.ZERO_REPLACEMENT_VAL
 };

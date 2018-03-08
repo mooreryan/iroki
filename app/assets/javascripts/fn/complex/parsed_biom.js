@@ -604,72 +604,6 @@ fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
 
 // TODO everything from here down needs specs
 
-/**
- * Return an object with all the info you need for working with the parsed biom.
- *
- * @param params Object with keys: biom_str, replace_zeros (replace zero counts with small value), keep_zero_counts (mean across all samples).
- * @return {Object}
- */
-fn.parsed_biom.new = function (params) {
-  var biom_str         = params.biom_str;
-  var keep_zero_counts = params.keep_zero_counts;
-  var angle_offset     = params.angle_offset;
-
-  var obj = {};
-
-  // Include the params
-  obj.params = {
-    biom_str: biom_str,
-    keep_zero_counts: keep_zero_counts,
-    angle_offset: angle_offset
-  };
-
-  obj.parsed_biom = fn.parsed_biom.parse_biom_file_str(biom_str);
-
-  obj.leaf_names = fn.parsed_biom.leaf_names(obj.parsed_biom);
-  obj.num_leaves = obj.leaf_names.length;
-
-  obj.num_samples   = fn.parsed_biom.num_samples(obj.parsed_biom);
-  obj.sample_names  = fn.parsed_biom.sample_names(obj.parsed_biom);
-  obj.sample_angles = fn.parsed_biom.sample_angles(obj.num_samples, angle_offset);
-
-  obj.approx_starting_colors   = fn.parsed_biom.approx_starting_colors(obj.sample_names, obj.sample_angles);
-  obj.sample_color_legend_tsv  = fn.parsed_biom.sample_color_legend_tsv(obj.approx_starting_colors);
-  obj.sample_color_legend_html = fn.parsed_biom.sample_color_legend_html(obj.sample_color_legend_tsv);
-
-  obj.counts_for_each_leaf           = fn.parsed_biom.counts_for_each_leaf(obj.parsed_biom);
-  obj.non_zero_samples_for_each_leaf = fn.parsed_biom.non_zero_samples_for_each_leaf(obj.parsed_biom);
-
-  obj.abundance_across_samples_for_each_leaf = fn.parsed_biom.abundance_across_samples_for_each_leaf(obj.parsed_biom, keep_zero_counts);
-  obj.evenness_across_samples_for_each_leaf  = fn.parsed_biom.evenness_across_samples_for_each_leaf(obj.counts_for_each_leaf, keep_zero_counts);
-
-  obj.zero_replacement_val = fn.parsed_biom.zero_replacement_val(obj.counts_for_each_leaf);
-
-  obj.points = fn.parsed_biom.points(obj.counts_for_each_leaf, obj.num_samples);
-
-  if (obj.num_samples === 1) {
-    obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_single_sample_biom(obj.leaf_names, obj.sample_angles);
-  }
-  else if (obj.num_samples === 2) {
-    obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_two_sample_biom(obj.sample_angles, obj.counts_for_each_leaf);
-  }
-  else {
-    obj.origin_triangles_for_each_leaf = fn.parsed_biom.origin_triangles_for_each_leaf(obj.points);
-
-    obj.all_areas     = fn.parsed_biom.all_areas(obj.origin_triangles_for_each_leaf);
-    obj.all_centroids = fn.parsed_biom.all_centroids(obj.origin_triangles_for_each_leaf);
-
-    obj.centroids_of_whole_shape = fn.parsed_biom.centroids_of_whole_shape(obj.all_areas, obj.all_centroids);
-
-    obj.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_origin_to_centroid(obj.centroids_of_whole_shape);
-  }
-
-  var return_value  = fn.parsed_biom.colors("TODO");
-  obj.colors        = return_value.colors;
-  obj.color_details = return_value.color_details;
-
-  return obj;
-};
 
 
 /**
@@ -683,11 +617,12 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
   /**
    * Return the passed in opt or the default if that opt was not passed in.
    *
+   * @param opts The options object.
    * @param opt The option you want, e.g., "lightness_min"
    * @return Either the default for that opt or the passed in option.
    * @throws {Error} if there is no default value for the requested option
    */
-  function opt_or_default(opt) {
+  function opt_or_default(opts, opt) {
     var defaults = {
       lightness_min: 30,
       lightness_max: 90,
@@ -710,17 +645,17 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
   }
 
 
-  var opt_lightness_min      = opt_or_default("lightness_min");
-  var opt_lightness_max      = opt_or_default("lightness_max");
-  var opt_lightness_reversed = opt_or_default("lightness_reversed");
+  var opt_lightness_min      = opt_or_default(opts, "lightness_min");
+  var opt_lightness_max      = opt_or_default(opts, "lightness_max");
+  var opt_lightness_reversed = opt_or_default(opts, "lightness_reversed");
 
-  var opt_chroma_min      = opt_or_default("chroma_min");
-  var opt_chroma_max      = opt_or_default("chroma_max");
-  var opt_chroma_reversed = opt_or_default("chroma_reversed");
+  var opt_chroma_min      = opt_or_default(opts, "chroma_min");
+  var opt_chroma_max      = opt_or_default(opts, "chroma_max");
+  var opt_chroma_reversed = opt_or_default(opts, "chroma_reversed");
 
-  var opt_evenness_absolute = opt_or_default("evenness_absolute");
+  var opt_evenness_absolute = opt_or_default(opts, "evenness_absolute");
 
-  var opt_correct_luminance = opt_or_default("correct_luminance");
+  var opt_correct_luminance = opt_or_default(opts, "correct_luminance");
 
   // Get min and max evenness (for scaling)
   if (opt_evenness_absolute) {
@@ -743,13 +678,19 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
   var all_lightness_vals = [];
   var all_luminance_vals = [];
 
-  obj.leaf_names.forEach(function (leaf_name, leaf_idx) {
-    var evenness_val  = obj.evenness_across_samples_for_each_leaf[leaf_name];
-    var abundance_val = obj.abundance_across_samples_for_each_leaf[leaf_name];
-    var hue_angle     = obj.angles_from_origin_to_centroid[leaf_name];
+  // We want to get the color for each leaf.
+  fully_parsed_biom.leaf_names.forEach(function (leaf_name, leaf_idx) {
+    color_details[leaf_name] = {};
+
+    var evenness_val  = fully_parsed_biom.evenness_across_samples_for_each_leaf[leaf_name];
+    var abundance_val = fully_parsed_biom.abundance_across_samples_for_each_leaf[leaf_name];
+
+    // Set the hue.
+    var hue_angle = fully_parsed_biom.angles_from_origin_to_centroid[leaf_name];
 
     var hue_val = hue_angle;
 
+    // Set the chroma.
     if (opt_chroma_reversed) {
       // Swap the new min and new max to reverse the scale
       var chroma_val = fn.math.scale(evenness_val, evenness_min, evenness_max, opt_chroma_max, opt_chroma_min);
@@ -758,6 +699,7 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
       var chroma_val = fn.math.scale(evenness_val, evenness_min, evenness_max, opt_chroma_min, opt_chroma_max);
     }
 
+    // Set the lightness.
     if (opt_lightness_reversed) {
       // Swap the new min and new max to reverse the scale
       var lightness_val = fn.math.scale(abundance_val, abundance_min, abundance_max, opt_lightness_max, opt_lightness_min);
@@ -781,20 +723,31 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
   if (opt_correct_luminance) {
     var corrected_color_hex_codes = {};
 
+    // On the original colors, first get min and max luminance.
     var luminance_min = fn.ary.min(all_luminance_vals);
     var luminance_max = fn.ary.max(all_luminance_vals);
 
+    // Then get the min and max lightness.
     var lightness_min = fn.ary.min(all_lightness_vals);
     var lightness_max = fn.ary.max(all_lightness_vals);
 
+
+    // We want to use the lightness values, becuase those come
+    // directly from the data.  Then we want to get the luminance
+    // values to match up with the lightness.  The luminance comes
+    // from an iteraction of hue, chroma and lightness, but we want
+    // luminance to be correlated directly with lighness.
     fn.obj.each(color_hex_codes, function (leaf_name, hex_code) {
       var old_luminance = chroma.hex(hex_code).luminance();
-      var new_hex_code  = fn.math.scale(old_luminance, luminance_min, luminance_max, lightness_min, lightness_max);
+      var new_luminance  = fn.math.scale(old_luminance, luminance_min, luminance_max, lightness_min, lightness_max);
 
-      corrected_color_hex_codes[leaf_name] = new_hex_code;
+      corrected_color_hex_codes[leaf_name] = chroma.hex(hex_code).luminance(new_luminance).hex();
     });
 
-    return { color_hex_codes: corrected_color_hex_codes, color_details: color_details };
+    return {
+      color_hex_codes: corrected_color_hex_codes,
+      color_details: color_details
+    };
   }
   else {
     return { color_hex_codes: color_hex_codes, color_details: color_details };
@@ -810,4 +763,68 @@ fn.parsed_biom.leaf_color_legend_html = function (leaf_color_legend_tsv) {
   return leaf_color_legend_tsv;
 };
 
+/**
+ * Return an object with all the info you need for working with the parsed biom.
+ *
+ * @param params Object with keys: biom_str, replace_zeros (replace zero counts with small value), keep_zero_counts (mean across all samples).  Also takes all the keys that fn.parsed_biom.color takes.
+ * @return {Object}
+ */
+fn.parsed_biom.new = function (params) {
+  var biom_str         = params.biom_str;
+  var keep_zero_counts = params.keep_zero_counts;
+  var angle_offset     = params.angle_offset;
+
+  var fully_parsed_biom = {};
+
+  fully_parsed_biom.params = {};
+  fn.obj.each(params, function (key, val) {
+    fully_parsed_biom.params[key] = val;
+  });
+
+  fully_parsed_biom.parsed_biom = fn.parsed_biom.parse_biom_file_str(biom_str);
+
+  fully_parsed_biom.leaf_names = fn.parsed_biom.leaf_names(fully_parsed_biom.parsed_biom);
+  fully_parsed_biom.num_leaves = fully_parsed_biom.leaf_names.length;
+
+  fully_parsed_biom.num_samples   = fn.parsed_biom.num_samples(fully_parsed_biom.parsed_biom);
+  fully_parsed_biom.sample_names  = fn.parsed_biom.sample_names(fully_parsed_biom.parsed_biom);
+  fully_parsed_biom.sample_angles = fn.parsed_biom.sample_angles(fully_parsed_biom.num_samples, angle_offset);
+
+  fully_parsed_biom.approx_starting_colors   = fn.parsed_biom.approx_starting_colors(fully_parsed_biom.sample_names, fully_parsed_biom.sample_angles);
+  fully_parsed_biom.sample_color_legend_tsv  = fn.parsed_biom.sample_color_legend_tsv(fully_parsed_biom.approx_starting_colors);
+  fully_parsed_biom.sample_color_legend_html = fn.parsed_biom.sample_color_legend_html(fully_parsed_biom.sample_color_legend_tsv);
+
+  fully_parsed_biom.counts_for_each_leaf           = fn.parsed_biom.counts_for_each_leaf(fully_parsed_biom.parsed_biom);
+  fully_parsed_biom.non_zero_samples_for_each_leaf = fn.parsed_biom.non_zero_samples_for_each_leaf(fully_parsed_biom.parsed_biom);
+
+  fully_parsed_biom.abundance_across_samples_for_each_leaf = fn.parsed_biom.abundance_across_samples_for_each_leaf(fully_parsed_biom.parsed_biom, keep_zero_counts);
+  fully_parsed_biom.evenness_across_samples_for_each_leaf  = fn.parsed_biom.evenness_across_samples_for_each_leaf(fully_parsed_biom.counts_for_each_leaf, keep_zero_counts);
+
+  fully_parsed_biom.zero_replacement_val = fn.parsed_biom.zero_replacement_val(fully_parsed_biom.counts_for_each_leaf);
+
+  fully_parsed_biom.points = fn.parsed_biom.points(fully_parsed_biom.counts_for_each_leaf, fully_parsed_biom.num_samples);
+
+  if (fully_parsed_biom.num_samples === 1) {
+    fully_parsed_biom.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_single_sample_biom(fully_parsed_biom.leaf_names, fully_parsed_biom.sample_angles);
+  }
+  else if (fully_parsed_biom.num_samples === 2) {
+    fully_parsed_biom.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_two_sample_biom(fully_parsed_biom.sample_angles, fully_parsed_biom.counts_for_each_leaf);
+  }
+  else {
+    fully_parsed_biom.origin_triangles_for_each_leaf = fn.parsed_biom.origin_triangles_for_each_leaf(fully_parsed_biom.points);
+
+    fully_parsed_biom.all_areas     = fn.parsed_biom.all_areas(fully_parsed_biom.origin_triangles_for_each_leaf);
+    fully_parsed_biom.all_centroids = fn.parsed_biom.all_centroids(fully_parsed_biom.origin_triangles_for_each_leaf);
+
+    fully_parsed_biom.centroids_of_whole_shape = fn.parsed_biom.centroids_of_whole_shape(fully_parsed_biom.all_areas, fully_parsed_biom.all_centroids);
+
+    fully_parsed_biom.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_origin_to_centroid(fully_parsed_biom.centroids_of_whole_shape);
+  }
+
+  var return_value                  = fn.parsed_biom.colors(fully_parsed_biom, params);
+  fully_parsed_biom.color_hex_codes = return_value.color_hex_codes;
+  fully_parsed_biom.color_details   = return_value.color_details;
+
+  return fully_parsed_biom;
+};
 

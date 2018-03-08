@@ -162,7 +162,7 @@ describe("biom", function () {
       });
     });
 
-    describe("make_tsv_string", function () {
+    describe("biom.mapping_file_str", function () {
 
       it("makes the color map string", function () {
         var parsed_biom            = Papa.parse(spec_helper.single_sample.BIOM_STR, spec_helper.PAPA_CONFIG);
@@ -174,7 +174,7 @@ describe("biom", function () {
 
         var expected = "name\tbranch_color\tleaf_label_color\tleaf_dot_color\ngeode\t#ff219b\t#ff219b\t#ff219b\nclock\t#c0004b\t#c0004b\t#c0004b\ntire\t#d5015c\t#d5015c\t#d5015c\nbanana\t#ff70d8\t#ff70d8\t#ff70d8\neggplant\t#ff7ae7\t#ff7ae7\t#ff7ae7";
 
-        var actual = biom.make_tsv_string(colors);
+        var actual = biom.mapping_file_str(colors);
 
         expect(actual).to.equal(expected);
       });

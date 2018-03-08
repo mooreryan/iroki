@@ -301,11 +301,17 @@ biom.make_counts_with_colors_html = function (parsed_biom, orig_biom_str, colors
   return md_str + "<body><table>" + header_str + table_rows.join("") + "</table></body></html>";
 };
 
-biom.make_tsv_string = function (json) {
+/**
+ * Makes the mapping file string from the leaf name to colors obj.
+ *
+ * @param colors leaf_name => color_hex_code
+ * @return {string} The mapping file string.  It will be passed in to the saveAs function.
+ */
+biom.mapping_file_str = function (colors) {
   var header  = "name\tbranch_color\tleaf_label_color\tleaf_dot_color\n";
   var strings = [];
-  json_each(json, function (key, val) {
-    var str = [key, val, val, val].join("\t");
+  json_each(colors, function (leaf_name, color_hex_code) {
+    var str = [leaf_name, color_hex_code, color_hex_code, color_hex_code].join("\t");
 
     strings.push(str);
   });
@@ -523,54 +529,49 @@ function biom__save_abundance_colors(params) {
   //     break;
   // }
 
+
   var fully_parsed_biom = fn.parsed_biom.new(params);
 
+  console.log(fully_parsed_biom);
 
-
-  var ret_val = colors_from_centroids(centroids, parsed_biom);
-
-  var colors          = ret_val[0];
-  var color_details   = ret_val[1];
-  debug_colors_json   = colors;
-  debug_color_details = color_details;
-  var tsv_str         = biom.make_tsv_string(colors);
+  var biom_color_map_str = biom.mapping_file_str(fully_parsed_biom.color_hex_codes);
 
   if (g_val_download_legend) {
     // TODO don't call parse_biom_file again, have a single function do it and pass that around.
 
-    if (g_val_reduce_dimension === "reduce-dimension-none") {
-      var html_str = biom.make_counts_with_colors_html(parsed_biom, false, colors, color_details);
-    }
-    else {
-      var html_str = biom.make_counts_with_colors_html(parsed_biom, biom_str, colors, color_details);
-
-    }
+    // if (g_val_reduce_dimension === "reduce-dimension-none") {
+    //   var html_str = biom.make_counts_with_colors_html(parsed_biom, false, colors, color_details);
+    // }
+    // else {
+    //   var html_str = biom.make_counts_with_colors_html(parsed_biom, biom_str, colors, color_details);
+    //
+    // }
 
     // Make the tsv for sample legend.
-    var sample_color_legend_tsv_str  = fn.parsed_biom.sample_color_legend(parsed_biom, g_val_hue_angle_offset);
-    var sample_color_legend_html_str = fn.parsed_biom.sample_color_legend_html(parsed_biom, g_val_hue_angle_offset);
+    // var sample_color_legend_tsv_str  = fn.parsed_biom.sample_color_legend(parsed_biom, g_val_hue_angle_offset);
+    // var sample_color_legend_html_str = fn.parsed_biom.sample_color_legend_html(parsed_biom, g_val_hue_angle_offset);
 
-    var zip = new JSZip();
-
-    zip.folder("iroki_mapping")
-       .file("mapping.txt", tsv_str)
-       .file("counts_with_colors.html", html_str)
-       .file("sample_approximate_starting_colors.txt", sample_color_legend_tsv_str)
-       .file("sample_approximate_starting_colors.html", sample_color_legend_html_str);
-
-    zip.generateAsync({
-      type: "blob",
-      compression: "DEFLATE",
-      compressionOptions: {
-        level: 1
-      }
-    })
-       .then(function (blob) {
-         saveAs(blob, "iroki_mapping.zip");
-       });
+    // var zip = new JSZip();
+    //
+    // zip.folder("iroki_mapping")
+    //    .file("mapping.txt", tsv_str)
+    //    .file("counts_with_colors.html", html_str)
+    //    .file("sample_approximate_starting_colors.txt", sample_color_legend_tsv_str)
+    //    .file("sample_approximate_starting_colors.html", sample_color_legend_html_str);
+    //
+    // zip.generateAsync({
+    //   type: "blob",
+    //   compression: "DEFLATE",
+    //   compressionOptions: {
+    //     level: 1
+    //   }
+    // })
+    //    .then(function (blob) {
+    //      saveAs(blob, "iroki_mapping.zip");
+    //    });
   }
   else {
-    var blob = new Blob([tsv_str], { type: "text/plain;charset=utf-8" });
+    var blob = new Blob([biom_color_map_str], { type: "text/plain;charset=utf-8" });
 
     // Unicode standard does not recommend using the BOM for UTF-8, so pass in true to NOT put it in.
     saveAs(blob, "mapping.txt", true);
@@ -608,8 +609,6 @@ function biom__save_abundance_colors_old(biom_str) {
   }
 
   var parsed_biom = biom.parse_biom_file_str(str);
-  console.log("right after parsing");
-  console.log(JSON.stringify(parsed_biom));
 
   var points                 = fn.parsed_biom.leaf_sample_points(parsed_biom);
   var non_zero_count_samples = fn.parsed_biom.non_zero_count_samples(parsed_biom);
@@ -621,7 +620,7 @@ function biom__save_abundance_colors_old(biom_str) {
   var color_details   = ret_val[1];
   debug_colors_json   = colors;
   debug_color_details = color_details;
-  var tsv_str         = biom.make_tsv_string(colors);
+  var tsv_str         = biom.mapping_file_str(colors);
 
   if (g_val_download_legend) {
     // TODO don't call parse_biom_file again, have a single function do it and pass that around.
