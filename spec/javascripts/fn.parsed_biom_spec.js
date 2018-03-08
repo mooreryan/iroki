@@ -613,13 +613,13 @@ describe("fn", function () {
         spec_helper.expect_stringify_equal(actual.centroids_of_whole_shape, expected.centroids_of_whole_shape);
       });
 
-      // it("sets color_details", function () {
-      //   spec_helper.expect_stringify_equal(actual.color_details, expected.color_details);
-      // });
-      //
-      // it("sets color_hex_codes", function () {
-      //   spec_helper.expect_stringify_equal(actual.color_hex_codes, expected.color_hex_codes);
-      // });
+      it("sets color_details", function () {
+        spec_helper.expect_stringify_equal(actual.color_details, expected.color_details);
+      });
+
+      it("sets color_hex_codes", function () {
+        spec_helper.expect_stringify_equal(actual.color_hex_codes, expected.color_hex_codes);
+      });
 
       it("sets counts_for_each_leaf", function () {
         spec_helper.expect_stringify_equal(actual.counts_for_each_leaf, expected.counts_for_each_leaf);

@@ -532,13 +532,9 @@ function biom__save_abundance_colors(params) {
 
   var fully_parsed_biom = fn.parsed_biom.new(params);
 
-  console.log(fully_parsed_biom);
-
   var biom_color_map_str = biom.mapping_file_str(fully_parsed_biom.color_hex_codes);
 
   if (g_val_download_legend) {
-    // TODO don't call parse_biom_file again, have a single function do it and pass that around.
-
     // if (g_val_reduce_dimension === "reduce-dimension-none") {
     //   var html_str = biom.make_counts_with_colors_html(parsed_biom, false, colors, color_details);
     // }

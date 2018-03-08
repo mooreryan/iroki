@@ -727,9 +727,9 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
     var luminance_min = fn.ary.min(all_luminance_vals);
     var luminance_max = fn.ary.max(all_luminance_vals);
 
-    // Then get the min and max lightness.
-    var lightness_min = fn.ary.min(all_lightness_vals);
-    var lightness_max = fn.ary.max(all_lightness_vals);
+    // Then get the min and max lightness.  These vals run from 0 to 100, need them from 0 to 1.
+    var lightness_min = fn.ary.min(all_lightness_vals) / 100;
+    var lightness_max = fn.ary.max(all_lightness_vals) / 100;
 
 
     // We want to use the lightness values, becuase those come

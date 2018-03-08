@@ -617,7 +617,9 @@ spec_helper.test_case.ANGLES_FROM_ORIGIN_TO_CENTROIDS = {
 spec_helper.test_case.PARAMS_FOR_NEW = {
   biom_str: spec_helper.test_case.BIOM_STR,
   keep_zero_counts: true,
-  angle_offset: 0
+  angle_offset: 0,
+  evenness_absolute: true,
+  correct_luminance: true
 };
 
 // This is used to test fn.parsed_biom.colors.  It only has just enough attrs to work with the default values need by that function.
@@ -628,8 +630,22 @@ spec_helper.test_case.FULLY_PARSED_BIOM = {
   angles_from_origin_to_centroid: spec_helper.test_case.ANGLES_FROM_ORIGIN_TO_CENTROIDS,
   approx_starting_colors: spec_helper.test_case.APPROX_STARTING_COLORS,
   centroids_of_whole_shape: spec_helper.test_case.CENTROIDS_OF_WHOLE_SHAPE,
-  color_details: TODO,
-  color_hex_codes: TODO,
+  color_details: {
+    apple: {
+      hue: 274.23327766710975,
+      chroma: 71.43002438742897,
+      lightness: 60
+    },
+    pie: {
+      hue: 326.9951158048415,
+      chroma: 71.43002438742897,
+      lightness: 60
+    }
+  },
+  color_hex_codes: {
+    apple: "#94d3ff",
+    pie: "#edbced"
+  },
   counts_for_each_leaf: spec_helper.test_case.COUNTS,
   evenness_across_samples_for_each_leaf: spec_helper.test_case.EVENNESS_ACROSS_ALL_SAMPLES,
   leaf_names: spec_helper.test_case.LEAF_NAMES,
