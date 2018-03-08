@@ -4,6 +4,7 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 */
 
+/*
 $(document).ready(function () {
     $("#min_lumin").change(function () {
         var min_val = parseInt($('#min_lumin').val(), 10);
@@ -49,32 +50,4 @@ $(document).ready(function () {
         }
     });
 });
-/*
-$(document).ready(function() {
-    $("#max_lumin").change(function () {
-        var min_val = parseInt($('#min_lumin').val(), 10);
-        var max_val = parseInt($("#max_lumin").val(), 10);
-        var new_val = (max_val - 1).toString();
-
-        $("#max_lumin_val").html(max_val);
-
-        if (min_val > max_val) {
-            console.log("hey");
-            var old_slider = $("#min_lumin").clone();
-            $("#min_lumin").remove();
-
-            old_slider.appendTo("#max_lumin_container");
-            document.getElementById("min_lumin").setAttribute("value", new_val);
-
-            $("#min_lumin_val").html(new_val);
-        }
-    });
-});*/
-
-
-
-
-
-
-
-
+*/
