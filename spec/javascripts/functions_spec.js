@@ -73,6 +73,53 @@ describe("fn", function () {
       it("handles arrays that aren't all numbers");
       it("handles zero length arrays");
     });
+
+    describe("range", function () {
+      it("returns an array starting at zero with the requested number of elements", function () {
+        spec_helper.expect_stringify_equal(fn.ary.range(0), []);
+        spec_helper.expect_stringify_equal(fn.ary.range(1), [0]);
+        spec_helper.expect_stringify_equal(fn.ary.range(2), [0, 1]);
+        spec_helper.expect_stringify_equal(fn.ary.range(3), [0, 1, 2]);
+      });
+
+      it("can start the range from a number other than zero", function () {
+        spec_helper.expect_stringify_equal(fn.ary.range(0, 0), []);
+        spec_helper.expect_stringify_equal(fn.ary.range(1, 0), [0]);
+        spec_helper.expect_stringify_equal(fn.ary.range(2, 0), [0, 1]);
+        spec_helper.expect_stringify_equal(fn.ary.range(3, 0), [0, 1, 2]);
+
+        spec_helper.expect_stringify_equal(fn.ary.range(1, -3), [-3]);
+        spec_helper.expect_stringify_equal(fn.ary.range(2, 4), [4, 5]);
+        spec_helper.expect_stringify_equal(fn.ary.range(3, -1), [-1, 0, 1]);
+      });
+    });
+
+    describe("center", function () {
+      it("subtracts the mean of all values in ary from each value", function () {
+        var ary = [1, 2, 3, 4, 5];
+
+        var expected = [-2, -1, 0, 1, 2];
+        var actual   = fn.ary.center(ary);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("throws if the array is empty", function () {
+        var func = function () {
+          fn.ary.center([]);
+        };
+
+        expect(func).to.throw();
+      });
+
+      it("throws if the mean is NaN", function() {
+        var func = function () {
+          fn.ary.center(["apple", 2, 3]);
+        };
+
+        expect(func).to.throw();
+      })
+    });
   });
 
   describe("color", function () {

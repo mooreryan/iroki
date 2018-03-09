@@ -777,36 +777,36 @@ function project(ary, type, cutoff) {
 
 }
 
-function apply_to_cols(M, fn) {
-  var cidx, ncols = M.n;
+// function apply_to_cols(M, fn) {
+//   var cidx, ncols = M.n;
+//
+//   var new_ary = [];
+//
+//   for (cidx = 0; cidx < ncols; ++cidx) {
+//     var col = lalolib.getCols(M, [cidx]);
+//
+//     new_ary.push(fn(col));
+//   }
+//
+//   return lalolib.transposeMatrix(lalolib.array2mat(new_ary));
+// }
 
-  var new_ary = [];
-
-  for (cidx = 0; cidx < ncols; ++cidx) {
-    var col = lalolib.getCols(M, [cidx]);
-
-    new_ary.push(fn(col));
-  }
-
-  return lalolib.transposeMatrix(lalolib.array2mat(new_ary));
-}
-
-function biom_to_ary(parsed_biom) {
-  var biom         = parsed_biom;
-  var leaf_names   = biom.data.map(function (obj) {
-    return obj[biom.meta.fields[0]];
-  });
-  var sample_names = biom.meta.fields;
-  sample_names.shift(); // remove the first field, it is 'name'
-
-  var counts = biom.data.map(function (obj) {
-    return sample_names.map(function (name) {
-      return obj[name];
-    });
-  });
-
-  return [leaf_names, counts];
-}
+// function biom_to_ary(parsed_biom) {
+//   var biom         = parsed_biom;
+//   var leaf_names   = biom.data.map(function (obj) {
+//     return obj[biom.meta.fields[0]];
+//   });
+//   var sample_names = biom.meta.fields;
+//   sample_names.shift(); // remove the first field, it is 'name'
+//
+//   var counts = biom.data.map(function (obj) {
+//     return sample_names.map(function (name) {
+//       return obj[name];
+//     });
+//   });
+//
+//   return [leaf_names, counts];
+// }
 
 // This function takes biom_str rather than parsed biom string since it returns a new adjusted biom string.  TODO: We could take the parsed biom string and return an adjusted parsed biom string if the parsing is a bottleneck.
 function reduce_dimension(biom_str, type, cutoff) {

@@ -1,14 +1,12 @@
 fn.project = {};
 
+fn.project.center_matrix = function (M) {
+  if (M.type())
+  return fn.lalolib.apply_to_cols(M, fn.ary.center);
+}
+
+
 fn.project.project = function (ary, type, cutoff) {
-
-};
-
-fn.project.apply_to_cols = function (M, func) {
-
-};
-
-fn.project.biom_to_ary = function (biom_str) {
 
 };
 

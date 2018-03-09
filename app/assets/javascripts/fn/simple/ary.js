@@ -94,3 +94,44 @@ fn.ary.filter_out_zeros = function (ary) {
     return count !== 0;
   });
 };
+
+/**
+ * Returns an array of given length starting either at zero or the requested start.
+ *
+ * @param length length of the output array
+ * @param start starting value of the output array.  It defaults to 0.
+ * @return {Array} an array from start of length length.
+ */
+fn.ary.range = function (length, start) {
+  var ary   = [];
+  var count = 0;
+
+  // set start if it is not passed in.
+  start = start === undefined ? 0 : start;
+
+  for (var val = start; count < length; ++val, ++count) {
+    ary.push(val);
+  }
+
+  return ary;
+};
+
+/**
+ * Centers the array be subtracting the mean of all the values from each value.
+ *
+ * @param ary An array of numeric elements
+ * @return {Array} the centered array
+ * @throws {Error} if the mean cannot be taken.
+ * @throws {Error} if the array is empty
+ */
+fn.ary.center = function (ary) {
+  var mean = fn.ary.mean(ary);
+
+  if (isNaN(mean)) {
+    throw Error("the mean was NaN");
+  }
+
+  return ary.map(function (val) {
+    return val - mean;
+  });
+};
