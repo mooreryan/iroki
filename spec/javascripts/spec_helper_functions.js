@@ -405,7 +405,7 @@ spec_helper.test_case.PARSED_BIOM = Papa.parse(fn.str.chomp(spec_helper.test_cas
 spec_helper.test_case.NUM_SAMPLES          = 6;
 spec_helper.test_case.SAMPLE_NAMES         = ["s1", "s2", "s3", "s4", "s5", "s6"];
 spec_helper.test_case.LEAF_NAMES           = ["apple", "pie"];
-spec_helper.test_case.NUM_LEAVES            = 2;
+spec_helper.test_case.NUM_LEAVES           = 2;
 spec_helper.test_case.SAMPLE_ANGLES        = [0, 60, 120, 180, 240, 300];
 spec_helper.test_case.ZERO_REPLACEMENT_VAL = global.ZERO_REPLACEMENT_VAL;
 
@@ -624,6 +624,12 @@ spec_helper.test_case.PARAMS_FOR_NEW = {
 
 spec_helper.test_case.BIOM_WITH_COLORS_TSV = "name\tcolor\thue\tchroma/saturation\tlightness\tcentroid\tevenness\tabundance\ts1\ts2\ts3\ts4\ts5\ts6\napple\t#94d3ff\t274.23\t71.43\t60\t(0.03, -0.4)\t0.71\t1.67\t0\t1\t2\t0\t3\t4\npie\t#edbced\t327\t71.43\t60\t(0.22, -0.14)\t0.71\t1.67\t1\t2\t0\t3\t0\t4";
 
+spec_helper.test_case.BIOM_WITH_COLORS_HTML = "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}.thick-left-border {border-left: 3px solid #2d2d2d}</style><title>Color table</title></head><body><table><tbody><tr><th>name</th><th class='thick-right-border'>color</th><th>hue</th><th>chroma/saturation</th><th class='thick-right-border'>lightness</th><th>centroid</th><th>evenness</th><th class='thick-right-border'>abundance</th><th>s1</th><th>s2</th><th>s3</th><th>s4</th><th>s5</th><th>s6</th></tr><tr><td>apple</td><td class='thick-right-border' style='background-color: #94d3ff; color: black;'>#94d3ff</td><td>274.23</td><td>71.43</td><td class='thick-right-border'>60</td><td>(0.03, -0.4)</td><td>0.71</td><td class='thick-right-border'>1.67</td><td>0</td><td>1</td><td>2</td><td>0</td><td>3</td><td>4</td></tr><tr><td>pie</td><td class='thick-right-border' style='background-color: #edbced; color: black;'>#edbced</td><td>327</td><td>71.43</td><td class='thick-right-border'>60</td><td>(0.22, -0.14)</td><td>0.71</td><td class='thick-right-border'>1.67</td><td>1</td><td>2</td><td>0</td><td>3</td><td>0</td><td>4</td></tr></tbody></table></body></html>";
+
+spec_helper.test_case.APPROX_STARTING_COLORS_TSV = "name\tappoximate starting color\ns1\t#ed5e93\ns2\t#d47a33\ns3\t#779d2c\ns4\t#00a98f\ns5\t#00a3ec\ns6\t#9083ed";
+
+spec_helper.test_case.APPROX_STARTING_COLORS_HTML = "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}</style><title>Sample legend</title></head><body><table><tr><th class='thick-right-border'>name</th><th>appoximate starting color</th></tr><tr><td class='thick-right-border'>s1</td><td style='background-color: #ed5e93;'>#ed5e93</td></tr><tr><td class='thick-right-border'>s2</td><td style='background-color: #d47a33;'>#d47a33</td></tr><tr><td class='thick-right-border'>s3</td><td style='background-color: #779d2c;'>#779d2c</td></tr><tr><td class='thick-right-border'>s4</td><td style='background-color: #00a98f;'>#00a98f</td></tr><tr><td class='thick-right-border'>s5</td><td style='background-color: #00a3ec;'>#00a3ec</td></tr><tr><td class='thick-right-border'>s6</td><td style='background-color: #9083ed;'>#9083ed</td></tr></table></body></html>";
+
 // This is used to test fn.parsed_biom.colors.  It only has just enough attrs to work with the default values need by that function.
 spec_helper.test_case.FULLY_PARSED_BIOM = {
   abundance_across_samples_for_each_leaf: spec_helper.test_case.ABUNDANCE_ACROSS_ALL_SAMPLES,
@@ -664,5 +670,9 @@ spec_helper.test_case.FULLY_PARSED_BIOM = {
   sample_names: spec_helper.test_case.SAMPLE_NAMES,
   zero_replacement_val: spec_helper.test_case.ZERO_REPLACEMENT_VAL,
 
-  biom_with_colors_tsv: spec_helper.test_case.BIOM_WITH_COLORS_TSV
+  biom_with_colors_tsv: spec_helper.test_case.BIOM_WITH_COLORS_TSV,
+  biom_with_colors_html: spec_helper.test_case.BIOM_WITH_COLORS_HTML,
+
+  approx_starting_colors_tsv: spec_helper.test_case.APPROX_STARTING_COLORS_TSV,
+  approx_starting_colors_html: spec_helper.test_case.APPROX_STARTING_COLORS_HTML
 };

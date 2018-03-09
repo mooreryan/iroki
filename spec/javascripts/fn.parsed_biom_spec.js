@@ -609,6 +609,14 @@ describe("fn", function () {
         spec_helper.expect_stringify_equal(actual.approx_starting_colors, expected.approx_starting_colors);
       });
 
+      it("sets approx_starting_colors_tsv", function () {
+        spec_helper.expect_stringify_equal(actual.approx_starting_colors_tsv, expected.approx_starting_colors_tsv);
+      });
+
+      it("sets approx_starting_colors_html", function () {
+        spec_helper.expect_stringify_equal(actual.approx_starting_colors_html, expected.approx_starting_colors_html);
+      });
+
       it("sets centroids_of_whole_shape", function () {
         spec_helper.expect_stringify_equal(actual.centroids_of_whole_shape, expected.centroids_of_whole_shape);
       });
@@ -683,6 +691,10 @@ describe("fn", function () {
 
       it("sets biom_with_colors_tsv", function () {
         expect(actual.biom_with_colors_tsv).to.equal(expected.biom_with_colors_tsv);
+      });
+
+      it("sets biom_with_colors_html", function () {
+        expect(actual.biom_with_colors_html).to.equal(expected.biom_with_colors_html);
       });
     });
   });

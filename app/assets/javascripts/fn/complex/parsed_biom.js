@@ -1,6 +1,8 @@
 /**
  * Parses the biom file string with Papa.parse.
  *
+ * TODO need to make sure that the biom file is good...eg throw errors if the data is anything other than counts.
+ *
  * @param {String} str The biom file string.
  * @return {Object} a Papa parsed object.
  * @throws {Error} if the first column field is not 'name'
@@ -766,7 +768,7 @@ fn.parsed_biom.leaf_color_legend_html = function (leaf_color_legend_tsv) {
 fn.parsed_biom.biom_with_colors_tsv = function (fully_parsed_biom) {
   var info_names = ["name", "color", "hue", "chroma/saturation", "lightness", "centroid", "evenness", "abundance"];
 
-  var header = info_names.concat(fully_parsed_biom.sample_names);
+  var header    = info_names.concat(fully_parsed_biom.sample_names);
   var data_rows = [header.join("\t")];
 
   fully_parsed_biom.leaf_names.forEach(function (leaf_name, leaf_idx) {
@@ -797,6 +799,80 @@ fn.parsed_biom.biom_with_colors_tsv = function (fully_parsed_biom) {
   });
 
   return data_rows.join("\n");
+};
+
+fn.parsed_biom.biom_with_colors_html = function (biom_with_colors_tsv) {
+  // This is the column that holds the color and needs special treatment.
+  var color_col = 1;
+
+  var class_thick_right_border = "class='thick-right-border'";
+
+  var table = [];
+
+  var cols_with_thick_right_border = [];
+
+  biom_with_colors_tsv.split("\n").forEach(function (line, line_idx) {
+    var table_entries = [];
+
+    line.split("\t").forEach(function (field, col_idx) {
+      if (line_idx === 0) {
+        // In the header row
+
+        // Check if we are in a thick right border column
+        if (field === "color" || field === "lightness" || field === "abundance") {
+          table_entries.push(fn.html.tag("th", field, class_thick_right_border));
+
+          cols_with_thick_right_border.push(col_idx);
+        }
+        else {
+          table_entries.push(fn.html.tag("th", field));
+        }
+      }
+      else {
+        // In the data row
+        if (col_idx === color_col) {
+          if (chroma.hex(field).luminance() < g_COLOR_IS_DARK) {
+            // The background is dark, so make the text light.
+            var text_style = "color: white;";
+          }
+          else {
+            // The background is light so make the text dark.
+            var text_style = "color: black;";
+          }
+
+          var background_color = "background-color: " + field + ";";
+          var attr             = class_thick_right_border + " style='" + background_color + " " + text_style + "'";
+
+          table_entries.push(fn.html.tag("td", field, attr));
+        }
+        else if (cols_with_thick_right_border.includes(col_idx)) {
+          // Need the thick right border
+          table_entries.push(fn.html.tag("td", field, class_thick_right_border));
+        }
+        else {
+          table_entries.push(fn.html.tag("td", field));
+        }
+      }
+    });
+
+    var table_str = table_entries.join("");
+
+    // Wrap each table row string in a tr tag.
+    table.push(fn.html.tag("tr", table_str));
+  });
+
+  var style_str = "<style>" +
+    "table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} " +
+    "th, td {padding: 5px} " +
+    "th {text-align: left; border-bottom: 4px solid #2d2d2d} " +
+    ".thick-right-border {border-right: 3px solid #2d2d2d}" +
+    ".thick-left-border {border-left: 3px solid #2d2d2d}" +
+    "</style>";
+
+  var html_str = "<!DOCTYPE html><head>" + style_str + "<title>Color table</title></head>";
+
+  return html_str + "<body><table>" + fn.html.tag("tbody", table.join("")) + "</table></body></html>";
+
 };
 
 /**
@@ -863,7 +939,12 @@ fn.parsed_biom.new = function (params) {
   fully_parsed_biom.color_details   = return_value.color_details;
 
   // Add the modified biom with colors tsv.
-  fully_parsed_biom.biom_with_colors_tsv = fn.parsed_biom.biom_with_colors_tsv(fully_parsed_biom);
+  fully_parsed_biom.biom_with_colors_tsv  = fn.parsed_biom.biom_with_colors_tsv(fully_parsed_biom);
+  // And the html version.
+  fully_parsed_biom.biom_with_colors_html = fn.parsed_biom.biom_with_colors_html(fully_parsed_biom.biom_with_colors_tsv);
+
+  fully_parsed_biom.approx_starting_colors_tsv  = fn.parsed_biom.sample_color_legend_tsv(fully_parsed_biom.approx_starting_colors);
+  fully_parsed_biom.approx_starting_colors_html = fn.parsed_biom.sample_color_legend_html(fully_parsed_biom.approx_starting_colors_tsv);
 
   return fully_parsed_biom;
 };
