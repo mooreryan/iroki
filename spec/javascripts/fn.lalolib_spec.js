@@ -41,5 +41,23 @@ describe("fn", function () {
         expect(func).to.throw();
       });
     });
+
+    describe("center_matrix", function () {
+      it("centers the columns of the matrix", function () {
+        var M        = lalolib.array2mat([[1, 10], [-1, -10], [0, 0]]);
+        var expected = lalolib.array2mat([[1, 10], [-1, -10], [0, 0]]);
+        var actual   = fn.lalolib.center_matrix(M);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("throws if the input M is not a matrix", function () {
+        var func = function () {
+          fn.lalolib.center_matrix([1, 2]);
+        };
+
+        expect(func).to.throw();
+      });
+    });
   });
 });

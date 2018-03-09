@@ -33,3 +33,14 @@ fn.lalolib.apply_to_cols = function (M, func) {
     throw Error("Wrong type for M.  Expected matrix or vector, got: " + lalolib.type(M));
   }
 };
+
+/**
+ * Centers the matrix columnwise.  I.e., subtracts column means from each column.
+ *
+ * @param M
+ * @return {Object} LALOLib matrix with columns centered.
+ * @throws {Error} if M is not a matrix
+ */
+fn.lalolib.center_matrix = function (M) {
+  return fn.lalolib.apply_to_cols(M, fn.ary.center);
+};
