@@ -427,6 +427,11 @@ spec_helper.test_case.COUNTS = {
   pie: [1, 2, 0, 3, 0, 4]
 };
 
+spec_helper.test_case.COUNT_MATRIX = [
+  spec_helper.test_case.COUNTS.apple,
+  spec_helper.test_case.COUNTS.pie
+];
+
 spec_helper.test_case.COUNTS_WITH_ZEROS_REPLACED = {
   apple: [global.ZERO_REPLACEMENT_VAL, 1, 2, global.ZERO_REPLACEMENT_VAL, 3, 4],
   pie: [1, 2, global.ZERO_REPLACEMENT_VAL, 3, global.ZERO_REPLACEMENT_VAL, 4]
@@ -674,5 +679,7 @@ spec_helper.test_case.FULLY_PARSED_BIOM = {
   biom_with_colors_html: spec_helper.test_case.BIOM_WITH_COLORS_HTML,
 
   approx_starting_colors_tsv: spec_helper.test_case.APPROX_STARTING_COLORS_TSV,
-  approx_starting_colors_html: spec_helper.test_case.APPROX_STARTING_COLORS_HTML
+  approx_starting_colors_html: spec_helper.test_case.APPROX_STARTING_COLORS_HTML,
+
+  count_matrix: spec_helper.test_case.COUNT_MATRIX
 };

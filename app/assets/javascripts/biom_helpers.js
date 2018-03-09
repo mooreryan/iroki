@@ -502,33 +502,34 @@ var debug_biom_csv, debug_colors_json, debug_color_details;
  */
 function biom__save_abundance_colors(params) {
   var str;
-  // switch (g_val_reduce_dimension) {
-  //   case g_ID_REDUCE_DIMENSION_NONE:
-  //     str = biom_str;
-  //     break;
-  //   case g_ID_REDUCE_DIMENSION_AUTO_50:
-  //     str = reduce_dimension(biom_str, "auto", 50);
-  //     break;
-  //   case g_ID_REDUCE_DIMENSION_AUTO_75:
-  //     str = reduce_dimension(biom_str, "auto", 75);
-  //     break;
-  //   case g_ID_REDUCE_DIMENSION_AUTO_90:
-  //     str = reduce_dimension(biom_str, "auto", 90);
-  //     break;
-  //   case g_ID_REDUCE_DIMENSION_1_PC:
-  //     str = reduce_dimension(biom_str, "pc", 1);
-  //     break;
-  //   case g_ID_REDUCE_DIMENSION_2_PC:
-  //     str = reduce_dimension(biom_str, "pc", 2);
-  //     break;
-  //   case g_ID_REDUCE_DIMENSION_3_PC:
-  //     str = reduce_dimension(biom_str, "pc", 3);
-  //     break;
-  //   default:
-  //     str = biom_str;
-  //     break;
-  // }
+  switch (g_val_reduce_dimension) {
+    case g_ID_REDUCE_DIMENSION_NONE:
+      str = params.biom_str;
+      break;
+    case g_ID_REDUCE_DIMENSION_AUTO_50:
+      str = reduce_dimension(params.biom_str, "auto", 50);
+      break;
+    case g_ID_REDUCE_DIMENSION_AUTO_75:
+      str = reduce_dimension(params.biom_str, "auto", 75);
+      break;
+    case g_ID_REDUCE_DIMENSION_AUTO_90:
+      str = reduce_dimension(params.biom_str, "auto", 90);
+      break;
+    case g_ID_REDUCE_DIMENSION_1_PC:
+      str = reduce_dimension(params.biom_str, "pc", 1);
+      break;
+    case g_ID_REDUCE_DIMENSION_2_PC:
+      str = reduce_dimension(params.biom_str, "pc", 2);
+      break;
+    case g_ID_REDUCE_DIMENSION_3_PC:
+      str = reduce_dimension(params.biom_str, "pc", 3);
+      break;
+    default:
+      str = params.biom_str;
+      break;
+  }
 
+  console.log(str);
 
   var fully_parsed_biom = fn.parsed_biom.new(params);
 

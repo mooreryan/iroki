@@ -583,6 +583,16 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.parsed_biom.count_matrix", function () {
+      it("returns a count matrix", function () {
+        var expected = spec_helper.test_case.COUNT_MATRIX;
+
+        var actual = fn.parsed_biom.count_matrix(spec_helper.test_case.FULLY_PARSED_BIOM.leaf_names, spec_helper.test_case.FULLY_PARSED_BIOM.counts_for_each_leaf);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
     describe("fn.parsed_biom.new", function () {
       var expected = spec_helper.test_case.FULLY_PARSED_BIOM;
       var actual   = fn.parsed_biom.new(spec_helper.test_case.PARAMS_FOR_NEW);
@@ -696,6 +706,8 @@ describe("fn", function () {
       it("sets biom_with_colors_html", function () {
         expect(actual.biom_with_colors_html).to.equal(expected.biom_with_colors_html);
       });
+
+      it("sets count_matrix");
     });
   });
 });

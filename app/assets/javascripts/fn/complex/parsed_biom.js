@@ -876,6 +876,22 @@ fn.parsed_biom.biom_with_colors_html = function (biom_with_colors_tsv) {
 };
 
 /**
+ * Returns an array of arrays with the counts.  It is meant to get converted into a LALOLib data structure for projection.
+ *
+ * @param leaf_names
+ * @param counts_for_each_leaf
+ *
+ * @return {Array} an array of count arrays in the order of the leaf_names array.
+ */
+fn.parsed_biom.count_matrix = function (leaf_names, counts_for_each_leaf) {
+  // Make sure they are in the correct order, so iterate on sample_names rather than just calling fn.obj.values on counts for each leaf.
+
+  return leaf_names.map(function (name) {
+    return counts_for_each_leaf[name];
+  });
+};
+
+/**
  * Return an object with all the info you need for working with the parsed biom.
  *
  * @param params Object with keys: biom_str, replace_zeros (replace zero counts with small value), keep_zero_counts (mean across all samples).  Also takes all the keys that fn.parsed_biom.color takes.
