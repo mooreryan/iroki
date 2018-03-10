@@ -94,8 +94,20 @@ describe("fn", function () {
           var zero_cutoff = 0.01;
           var svd         = { s: [10, 1, 0.1, 0.01, 0.001, 0.0001] };
 
-          var expected  = lalolib.array2mat([10, 1, 0.1, 0.01]);
-          var actual = fn.lalolib.svd.non_zero_singular_values(svd, zero_cutoff);
+          var expected = lalolib.array2mat([10, 1, 0.1, 0.01]);
+          var actual   = fn.lalolib.svd.non_zero_singular_values(svd, zero_cutoff);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+
+      describe("keep_X_percent_of_variance", function () {
+        it("returns enough singular values to get the amount of variance you want", function () {
+          var svd          = { s: lalolib.array2mat([10, 7, 5, 4, 1, 0.5, 0.1]) };
+          var expected     = lalolib.array2mat([10, 7, 5]);
+          var perc_to_keep = 90;
+
+          var actual = fn.lalolib.svd.keep_X_percent_of_variance(svd, perc_to_keep);
 
           spec_helper.expect_stringify_equal(actual, expected);
         });

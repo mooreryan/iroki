@@ -110,8 +110,29 @@ fn.lalolib.svd.cumulative_variance = function (svd) {
   });
 };
 
-fn.lalolib.svd.keep_X_percent_of_variance = function (non_zero_sing_vals, percent_variance_to_keep) {
+/**
+ * Returns just enough singular values to get at least as much variance as requested.
+ *
+ * @param svd
+ * @param percent_to_keep Keep at least this much percentage of the variance (from 0 - 100).
+ *
+ * @returns {Array} lalolib array with singular values
+ */
+fn.lalolib.svd.keep_X_percent_of_variance = function (svd, percent_to_keep) {
+  var cum_variance = fn.lalolib.svd.cumulative_variance(svd);
+  var sing_vals = [];
 
+  for (var i = 0; i < cum_variance.length; ++i) {
+    if (cum_variance[i] > percent_to_keep) {
+      sing_vals.push(svd.s[i]);
+      break;
+    }
+    else {
+      sing_vals.push(svd.s[i]);
+    }
+  }
+
+  return lalolib.array2mat(sing_vals);
 };
 
 fn.lalolib.svd.svd = function (M, center) {
