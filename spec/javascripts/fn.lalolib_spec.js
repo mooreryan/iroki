@@ -59,5 +59,47 @@ describe("fn", function () {
         expect(func).to.throw();
       });
     });
+
+    describe("svd", function () {
+      describe("variance_explained", function () {
+        it("returns varaince explained by each PC", function () {
+          var M   = spec_helper.longley.DATA;
+          var svd = fn.lalolib.svd.svd(M, true);
+
+          var expected = spec_helper.longley.VARIANCE_EXPLAINED;
+          var actual   = fn.lalolib.svd.variance_explained(svd);
+
+          actual.forEach(function (actual_val, idx) {
+            expect(actual_val).to.be.closeTo(expected[idx], spec_helper.TOLERANCE);
+          });
+        });
+      });
+
+      describe("cumulative_variance", function () {
+        it("returns varaince explained by each PC", function () {
+          var M   = spec_helper.longley.DATA;
+          var svd = fn.lalolib.svd.svd(M, true);
+
+          var expected = spec_helper.longley.CUMULATIVE_VARIANCE;
+          var actual   = fn.lalolib.svd.cumulative_variance(svd);
+
+          actual.forEach(function (actual_val, idx) {
+            expect(actual_val).to.be.closeTo(expected[idx], spec_helper.TOLERANCE);
+          });
+        });
+      });
+
+      describe("non_zero_singular_values", function () {
+        it("returns all singular values above the zero cutoff", function () {
+          var zero_cutoff = 0.01;
+          var svd         = { s: [10, 1, 0.1, 0.01, 0.001, 0.0001] };
+
+          var expected  = lalolib.array2mat([10, 1, 0.1, 0.01]);
+          var actual = fn.lalolib.svd.non_zero_singular_values(svd, zero_cutoff);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
+    });
   });
 });
