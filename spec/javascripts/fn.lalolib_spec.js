@@ -112,6 +112,41 @@ describe("fn", function () {
           spec_helper.expect_stringify_equal(actual, expected);
         });
       });
+
+      describe("pca_scores", function () {
+        it("returns the pca scores", function () {
+          // function same_sign(n1, n2) {
+          //   return (n1 < 0 && n2 < 0) || (n1 > 0 && n2 > 0) || (n1 === 0 && n2 === 0) || (n1 === -0 && n2 === -0);
+          // }
+
+          var M   = spec_helper.longley.DATA;
+          var svd = fn.lalolib.svd.svd(M, true);
+
+          var expected = spec_helper.longley.PCA_SCORES;
+          expected     = expected.val.map(function (v) {
+            return Math.abs(v);
+          });
+
+          var actual = fn.lalolib.svd.pca_scores(svd);
+          actual     = actual.val.map(function (v) {
+            return Math.abs(v);
+          });
+
+          // TODO make sure the signs are actually either correct or completely opposite.
+          actual.forEach(function (actual_val, idx) {
+            expect(actual_val).to.be.closeTo(expected[idx], spec_helper.TOLERANCE);
+          });
+        });
+      });
+
+      describe("pca_scores_from_zero", function() {
+        it("scales the scores to start at 0 instead of the min", function() {
+          var expected = spec_helper.longley.PCA_SCORES_FROM_ZERO;
+          var actual = fn.lalolib.svd.pca_scores_from_zero(spec_helper.longley.PCA_SCORES);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        })
+      })
     });
   });
 });

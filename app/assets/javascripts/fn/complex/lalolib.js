@@ -120,7 +120,7 @@ fn.lalolib.svd.cumulative_variance = function (svd) {
  */
 fn.lalolib.svd.keep_X_percent_of_variance = function (svd, percent_to_keep) {
   var cum_variance = fn.lalolib.svd.cumulative_variance(svd);
-  var sing_vals = [];
+  var sing_vals    = [];
 
   for (var i = 0; i < cum_variance.length; ++i) {
     if (cum_variance[i] > percent_to_keep) {
@@ -134,6 +134,25 @@ fn.lalolib.svd.keep_X_percent_of_variance = function (svd, percent_to_keep) {
 
   return lalolib.array2mat(sing_vals);
 };
+
+fn.lalolib.svd.pca_scores = function (svd) {
+  return lalolib.mul(svd.U, svd.S);
+};
+
+fn.lalolib.svd.pca_scores_from_zero = function (pca_scores) {
+  var func = function (vals) {
+    var min_val = Math.abs(fn.ary.min(vals));
+
+    vals.map(function (val) {
+      return val + min_val;
+    });
+  };
+
+  // START HERE. Wrong type for M.  Expected matrix or vector, got: matrix
+
+  return fn.lalolib.apply_to_cols(pca_scores, func);
+};
+
 
 fn.lalolib.svd.svd = function (M, center) {
   var the_matrix = center ? fn.lalolib.center_matrix(M) : M;

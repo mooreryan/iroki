@@ -135,3 +135,14 @@ fn.ary.center = function (ary) {
     return val - mean;
   });
 };
+
+/**
+ * Take the first num elements from the array.
+ *
+ * @param ary
+ * @param num
+ * @return {Array} the first num elements of the Array.  It is a deep copy.
+ */
+fn.ary.take = function (ary, num) {
+  return fn.obj.deep_copy(ary).slice(0, num);
+};

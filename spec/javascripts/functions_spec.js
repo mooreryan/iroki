@@ -112,13 +112,42 @@ describe("fn", function () {
         expect(func).to.throw();
       });
 
-      it("throws if the mean is NaN", function() {
+      it("throws if the mean is NaN", function () {
         var func = function () {
           fn.ary.center(["apple", 2, 3]);
         };
 
         expect(func).to.throw();
-      })
+      });
+    });
+
+    describe("take", function () {
+      it("takes the first N elements", function () {
+        var ary      = [1, 2, 3];
+        var expected = [1, 2];
+        var actual   = fn.ary.take(ary, 2);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("the array returned doesn't have references to original objects", function() {
+        var ary = [{a: 10, b: 10}, {a: 100, b: 100}];
+        var orig_ary = fn.obj.deep_copy(ary);
+        var first_part = fn.ary.take(ary, 1);
+        first_part[0].a = 1000;
+
+        spec_helper.expect_stringify_equal(ary, orig_ary);
+      });
+
+      context("when number requested is more than the length", function () {
+        it("returns as many elements as possible", function () {
+          var ary      = [1, 2, 3];
+          var expected = [1, 2, 3];
+          var actual   = fn.ary.take(ary, 200);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+      });
     });
   });
 
