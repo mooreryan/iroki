@@ -88,7 +88,19 @@ describe("fn", function () {
         spec_helper.expect_stringify_equal(actual, expected);
       });
 
-      it("throws if the number to take is > than number of cols");
+      it("throws if the number to take is > than number of cols", function () {
+        var M = lalolib.array2mat([
+          [1, 1, 1, 1],
+          [2, 2, 2, 2],
+          [3, 3, 3, 3]
+        ]);
+
+        var func = function () {
+          fn.lalolib.first_n_cols(M, M.n + 1);
+        };
+
+        expect(func).to.throw();
+      });
     });
 
     describe("center_matrix", function () {

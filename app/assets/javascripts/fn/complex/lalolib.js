@@ -57,6 +57,7 @@ fn.lalolib.scale_columns = function (M, new_min, new_max) {
  * @param M
  * @param num_cols_to_take
  * @return {Matrix} This matrix will have the same number of rows as M, and num_cols_to_take number of columns.
+ * @throws {Error} if num_cols_to_take > actual number of columns.
  */
 fn.lalolib.first_n_cols = function (M, num_cols_to_take) {
   /**
