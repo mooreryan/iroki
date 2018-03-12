@@ -1,4 +1,4 @@
-- provide :title, 'Phylogenetic tree viewer with automatic customization using metadata or biom files'
+- provide :title, 'Online phylogenetic tree viewer with automatic customization using metadata or biom files'
 
 = javascript_include_tag "http://canvg.github.io/canvg/rgbcolor.js", "data-turbolinks-track" => false
 = javascript_include_tag "http://canvg.github.io/canvg/StackBlur.js", "data-turbolinks-track" => false
@@ -15,7 +15,9 @@
       = render "layouts/viewer_form"
     .row
       h3 About
-      p Iroki is a super snazzy tree viewer (phylogenetic or other kinds too!) with automatic customization using metadata or biom files.
+      p Iroki is a super snazzy online tree viewer (phylogenetic or other kinds too!) with automatic customization using metadata or biom files.
+
+      p You can visualize your newick trees as well as project count data into colors that you can use to style the tree!
       /p If you have a biom file with abundance info that you want to convert to a color map, click #{link_to "here", biom_path}.
     .row
       h3 Citation
