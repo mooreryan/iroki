@@ -13,3 +13,8 @@ svd.scores <- svd$u %*% diag(svd$d)
 pca.scores <- pca$x
 
 scores.starting.at.zero <- apply(pca$x, 2, function(col) { col + abs(min(col)) })
+
+par(mfrow=c(1,2))
+## plot(pca.scores, asp=1)
+plot(svd.scores, asp=1)
+plot(svd$v %*% diag(svd$d), asp=1)

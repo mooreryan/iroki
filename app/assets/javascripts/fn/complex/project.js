@@ -3,7 +3,7 @@
 fn.project = {};
 
 /**
- * Project M into PC space.
+ * Project rows of M into PC space.
  *
  * @param M
  * @return {Object}
@@ -15,7 +15,7 @@ fn.project.project = function (M) {
 };
 
 /**
- * Project into PC space only keeping a certain amount of variance.
+ * Project rows of M into PC space only keeping a certain amount of variance.
  *
  * @param M
  * @param variance_cutoff We will keep as many PCs as it takes to account for AT LEAST this much variance.  The actual variance accounted for will be greater than or equal to this value.
@@ -33,7 +33,7 @@ fn.project.project_with_variance_cutoff = function (M, variance_cutoff) {
 };
 
 /**
- * Project into PC space only keeping a certain number of PCs.
+ * Project rows of M into PC space only keeping a certain number of PCs.
  *
  * @param M
  * @param num_pcs_to_keep
