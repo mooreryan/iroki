@@ -11,7 +11,7 @@ fn.lalolib.svd = {}; // For dealing with SVD
  */
 fn.lalolib.apply_to_cols = function (M, func) {
   if (lalolib.type(M) !== "matrix") {
-    throw Error("the type for M should be matrix, got: " + M.type());
+    throw Error("the type for M should be matrix, got: " + lalolib.type(M));
   }
 
   var ncols = M.n;
@@ -31,7 +31,7 @@ fn.lalolib.apply_to_cols = function (M, func) {
     return new_mat;
   }
   else {
-    throw Error("Wrong type for M.  Expected matrix or vector, got: " + lalolib.type(M));
+    throw Error("Wrong type for M.  Expected matrix or vector, got: " + lalolib.type(new_mat));
   }
 };
 
@@ -135,25 +135,47 @@ fn.lalolib.svd.keep_X_percent_of_variance = function (svd, percent_to_keep) {
   return lalolib.array2mat(sing_vals);
 };
 
+/**
+ * Calculate PCA "scores".
+ *
+ * @param svd
+ * @return {Object} a lalolib matrix of pca scores.
+ */
 fn.lalolib.svd.pca_scores = function (svd) {
   return lalolib.mul(svd.U, svd.S);
 };
 
+/**
+ * Scale the PCA scores so that they start at 0.
+ *
+ * @param pca_scores
+ * @return {Object} lalolib matrix of scaled pca scores.
+ */
 fn.lalolib.svd.pca_scores_from_zero = function (pca_scores) {
+  /**
+   * Make the min value zero, and scale the rest from that.
+   *
+   * @param vals
+   * @return {Array} an array with values scaled from zero
+   */
   var func = function (vals) {
     var min_val = Math.abs(fn.ary.min(vals));
 
-    vals.map(function (val) {
+    return vals.map(function (val) {
       return val + min_val;
     });
   };
 
-  // START HERE. Wrong type for M.  Expected matrix or vector, got: matrix
-
   return fn.lalolib.apply_to_cols(pca_scores, func);
 };
 
-
+/**
+ * Calculates the SVD for the given matrix with the option to center the data columnwise first.
+ *
+ * @param M the matrix
+ * @param center pass true if you want to center the values first.
+ * @return {*|{U, S, V, s}}
+ */
 fn.lalolib.svd.svd = function (M, center) {
   var the_matrix = center ? fn.lalolib.center_matrix(M) : M;
 

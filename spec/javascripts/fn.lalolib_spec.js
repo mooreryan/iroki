@@ -139,14 +139,16 @@ describe("fn", function () {
         });
       });
 
-      describe("pca_scores_from_zero", function() {
-        it("scales the scores to start at 0 instead of the min", function() {
-          var expected = spec_helper.longley.PCA_SCORES_FROM_ZERO;
-          var actual = fn.lalolib.svd.pca_scores_from_zero(spec_helper.longley.PCA_SCORES);
+      describe("pca_scores_from_zero", function () {
+        it("scales the scores to start at 0 instead of the min", function () {
+          var expected = spec_helper.longley.PCA_SCORES_FROM_ZERO.val;
+          var actual   = fn.lalolib.svd.pca_scores_from_zero(spec_helper.longley.PCA_SCORES).val;
 
-          spec_helper.expect_stringify_equal(actual, expected);
-        })
-      })
+          expected.forEach(function (expected_val, idx) {
+            expect(actual[idx]).to.be.closeTo(expected_val, spec_helper.TOLERANCE);
+          });
+        });
+      });
     });
   });
 });
