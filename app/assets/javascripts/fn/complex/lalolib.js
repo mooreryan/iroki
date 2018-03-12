@@ -35,6 +35,98 @@ fn.lalolib.apply_to_cols = function (M, func) {
   }
 };
 
+fn.lalolib.scale_columns = function (M, new_min, new_max) {
+  var func = function (vals) {
+    var old_min = fn.ary.min(vals);
+    var old_max = fn.ary.max(vals);
+
+
+    return vals.map(function (val) {
+      return fn.math.scale(val, old_min, old_max, new_min, new_max);
+    });
+  };
+
+  return fn.lalolib.apply_to_cols(M, func);
+};
+
+/**
+ * Returns a new lalolib Matrix with only the number of columns selected.
+ *
+ * Use this to take only a certain number of PC's from the SVD, for example.
+ *
+ * @param M
+ * @param num_cols_to_take
+ * @return {Matrix} This matrix will have the same number of rows as M, and num_cols_to_take number of columns.
+ */
+fn.lalolib.first_n_cols = function (M, num_cols_to_take) {
+  /**
+   * Entries are stored rowwise in a single vector.  This is the accessor.
+   *
+   * @param M
+   * @param ridx Row index
+   * @param cidx Column index
+   * @return The value at ridx, cidx
+   * @throws {Error} If ridx is out of bounds.
+   * @throws {Error} If cidx is out of bounds.
+   */
+  function get_val(M, ridx, cidx) {
+    var num_rows = M.m;
+    var num_cols = M.n;
+
+    if (ridx >= num_rows) {
+      throw Error("ridx was " + ridx + " but there are only " + num_rows + " rows.")
+    }
+    if (cidx >= num_rows) {
+      throw Error("cidx was " + cidx + " but there are only " + num_cols + " columns.")
+    }
+
+    return M.val[ridx * num_cols + cidx];
+  }
+  /**
+   * Entries are stored rowwise in a single vector.  This is the setter.
+   *
+   * @param M
+   * @param ridx Row index
+   * @param cidx Column index
+   * @param val The value you want to set at ridx, cidx
+   * @throws {Error} If ridx is out of bounds.
+   * @throws {Error} If cidx is out of bounds.
+   */
+  function set_val(M, ridx, cidx, val) {
+    var num_rows = M.m;
+    var num_cols = M.n;
+
+    if (ridx >= num_rows) {
+      throw Error("ridx was " + ridx + " but there are only " + num_rows + " rows.")
+    }
+    if (cidx >= num_rows) {
+      throw Error("cidx was " + cidx + " but there are only " + num_cols + " columns.")
+    }
+
+    M.val[ridx * num_cols + cidx] = val;
+  }
+
+  var num_rows = M.m;
+  var num_cols = M.n;
+
+  if (num_cols_to_take > num_cols) {
+    throw Error("num_cols_to_take (" + num_cols_to_take + ") is greater than actual number of columns (" + num_cols + ")");
+  }
+
+  // Get a new matrix of zero vals.
+  var new_M = new lalolib.Matrix(num_rows, num_cols_to_take);
+
+  // Fill in the values.
+  for (var i = 0; i < num_rows; ++i) {
+    for (var j = 0; j < num_cols_to_take; ++j) {
+      var val = get_val(M, i, j);
+      set_val(new_M, i, j, val);
+    }
+  }
+
+  return new_M;
+};
+
 /**
  * Centers the matrix columnwise.  I.e., subtracts column means from each column.
  *

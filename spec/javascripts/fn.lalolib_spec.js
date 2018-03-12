@@ -42,6 +42,55 @@ describe("fn", function () {
       });
     });
 
+    describe("fn.lalolib.scale_columns", function () {
+      it("scales each column individually", function () {
+        var M = lalolib.array2mat([
+          [1, 50],
+          [2, 40],
+          [3, 30],
+          [4, 20],
+          [5, 10]
+        ]);
+
+        var new_min = 0,
+            new_max = 1;
+
+        var expected = lalolib.array2mat([
+          [0, 1],
+          [0.25, 0.75],
+          [0.5, 0.5],
+          [0.75, 0.25],
+          [1, 0]
+        ]);
+
+        var actual = fn.lalolib.scale_columns(M, new_min, new_max);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("fn.lalolib.first_n_cols", function () {
+      it("takes the first n cols of the matrix", function () {
+        var M = lalolib.array2mat([
+          [1, 1, 1, 1],
+          [2, 2, 2, 2],
+          [3, 3, 3, 3]
+        ]);
+
+        var expected = lalolib.array2mat([
+          [1, 1],
+          [2, 2],
+          [3, 3]
+        ]);
+
+        var actual = fn.lalolib.first_n_cols(M, 2);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("throws if the number to take is > than number of cols");
+    });
+
     describe("center_matrix", function () {
       it("centers the columns of the matrix", function () {
         var M        = lalolib.array2mat([[1, 10], [-1, -10], [0, 0]]);
