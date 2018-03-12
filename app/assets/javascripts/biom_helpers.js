@@ -33,7 +33,7 @@ biom.mapping_file_str = function (colors) {
  */
 function biom__save_abundance_colors(params) {
   var fully_parsed_biom = fn.parsed_biom.new(params);
-  
+
   var biom_color_map_str = biom.mapping_file_str(fully_parsed_biom.color_hex_codes);
 
   if (g_val_download_legend) {
