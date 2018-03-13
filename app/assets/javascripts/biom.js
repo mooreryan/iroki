@@ -141,6 +141,39 @@ function biom__upload_button() {
 
     var keep_zeros = g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
 
+    var opts_for_reduced_dimension = {};
+
+    switch (g_val_reduce_dimension) {
+      case g_ID_REDUCE_DIMENSION_AUTO_50:
+        opts_for_reduced_dimension.projection_type   = "auto";
+        opts_for_reduced_dimension.sing_vals_to_keep = 50;
+        break;
+      case g_ID_REDUCE_DIMENSION_AUTO_75:
+        opts_for_reduced_dimension.projection_type   = "auto";
+        opts_for_reduced_dimension.sing_vals_to_keep = 75;
+        break;
+      case g_ID_REDUCE_DIMENSION_AUTO_90:
+        opts_for_reduced_dimension.projection_type   = "auto";
+        opts_for_reduced_dimension.sing_vals_to_keep = 90;
+        break;
+      case g_ID_REDUCE_DIMENSION_1_PC:
+        opts_for_reduced_dimension.projection_type   = "pc";
+        opts_for_reduced_dimension.sing_vals_to_keep = 1;
+        break;
+      case g_ID_REDUCE_DIMENSION_2_PC:
+        opts_for_reduced_dimension.projection_type   = "pc";
+        opts_for_reduced_dimension.sing_vals_to_keep = 2;
+        break;
+      case g_ID_REDUCE_DIMENSION_3_PC:
+        opts_for_reduced_dimension.projection_type   = "pc";
+        opts_for_reduced_dimension.sing_vals_to_keep = 3;
+        break;
+      default:
+        opts_for_reduced_dimension.projection_type   = null;
+        opts_for_reduced_dimension.sing_vals_to_keep = null;
+        break;
+    }
+
     return {
       // These are required for fn.parsed_biom.new
       biom_str: biom_str,
@@ -158,7 +191,10 @@ function biom__upload_button() {
 
       evenness_absolute: g_val_chroma_method === g_ID_CHROMA_METHOD_EVENNESS_ABSOLUTE,
 
-      correct_luminance: g_val_correct_luminance
+      correct_luminance: g_val_correct_luminance,
+
+      projection_type: opts_for_reduced_dimension.projection_type,
+      sing_vals_to_keep: opts_for_reduced_dimension.sing_vals_to_keep
     };
   }
 

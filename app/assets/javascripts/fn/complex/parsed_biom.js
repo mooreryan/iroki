@@ -886,9 +886,11 @@ fn.parsed_biom.biom_with_colors_html = function (biom_with_colors_tsv) {
 fn.parsed_biom.count_matrix = function (leaf_names, counts_for_each_leaf) {
   // Make sure they are in the correct order, so iterate on sample_names rather than just calling fn.obj.values on counts for each leaf.
 
-  return leaf_names.map(function (name) {
-    return counts_for_each_leaf[name];
-  });
+  return lalolib.array2mat(
+    leaf_names.map(function (name) {
+      return counts_for_each_leaf[name];
+    })
+  );
 };
 
 /**
@@ -901,6 +903,10 @@ fn.parsed_biom.new = function (params) {
   var biom_str         = params.biom_str;
   var keep_zero_counts = params.keep_zero_counts;
   var angle_offset     = params.angle_offset;
+  var projection_type  = params.projection_type;
+
+  // This will either be an actual number of singular vals to keep (if projection type is "pc") or the percentage of variance to keep (if projection type is "auto").
+  var sing_vals_to_keep = params.sing_vals_to_keep;
 
   var fully_parsed_biom = {};
 
@@ -961,6 +967,18 @@ fn.parsed_biom.new = function (params) {
 
   fully_parsed_biom.approx_starting_colors_tsv  = fn.parsed_biom.sample_color_legend_tsv(fully_parsed_biom.approx_starting_colors);
   fully_parsed_biom.approx_starting_colors_html = fn.parsed_biom.sample_color_legend_html(fully_parsed_biom.approx_starting_colors_tsv);
+
+  // START HERE.  Add the projection for the geometry here.  Don't forget to get the global value for number of dimensions to keep or the amount of variance to keep.
+  // fully_parsed_biom.count_matrix = fn.parsed_biom.count_matrix(fully_parsed_biom.leaf_names, fully_parsed_biom.counts_for_each_leaf);
+  fully_parsed_biom.count_matrix = fn.parsed_biom.count_matrix(fully_parsed_biom.leaf_names, fully_parsed_biom.counts_for_each_leaf);
+
+  fully_parsed_biom.projection = TODO;
+  if (projection_type === "pc") {
+    fully_parsed_biom.projection = fn.project.project_with_num_pcs_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep);
+  }
+  else {
+    fully_parsed_biom.projection = fn.project.project_with_variance_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep);
+  }
 
   return fully_parsed_biom;
 };

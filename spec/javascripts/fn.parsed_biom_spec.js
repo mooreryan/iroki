@@ -535,7 +535,13 @@ describe("fn", function () {
         expect(actual.biom_with_colors_html).to.equal(expected.biom_with_colors_html);
       });
 
-      it("sets count_matrix");
+      it("sets count_matrix", function () {
+        spec_helper.expect_stringify_equal(actual.count_matrix, expected.count_matrix);
+      });
+
+      it("sets projection", function () {
+        spec_helper.expect_stringify_equal(actual.projection, expected.projection);
+      });
     });
   });
 });

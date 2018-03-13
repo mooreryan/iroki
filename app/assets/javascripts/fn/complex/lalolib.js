@@ -75,14 +75,15 @@ fn.lalolib.first_n_cols = function (M, num_cols_to_take) {
     var num_cols = M.n;
 
     if (ridx >= num_rows) {
-      throw Error("ridx was " + ridx + " but there are only " + num_rows + " rows.")
+      throw Error("ridx was " + ridx + " but there are only " + num_rows + " rows.");
     }
     if (cidx >= num_rows) {
-      throw Error("cidx was " + cidx + " but there are only " + num_cols + " columns.")
+      throw Error("cidx was " + cidx + " but there are only " + num_cols + " columns.");
     }
 
     return M.val[ridx * num_cols + cidx];
   }
+
   /**
    * Entries are stored rowwise in a single vector.  This is the setter.
    *
@@ -98,10 +99,10 @@ fn.lalolib.first_n_cols = function (M, num_cols_to_take) {
     var num_cols = M.n;
 
     if (ridx >= num_rows) {
-      throw Error("ridx was " + ridx + " but there are only " + num_rows + " rows.")
+      throw Error("ridx was " + ridx + " but there are only " + num_rows + " rows.");
     }
     if (cidx >= num_rows) {
-      throw Error("cidx was " + cidx + " but there are only " + num_cols + " columns.")
+      throw Error("cidx was " + cidx + " but there are only " + num_cols + " columns.");
     }
 
     M.val[ridx * num_cols + cidx] = val;
@@ -269,8 +270,103 @@ fn.lalolib.svd.pca_scores_from_zero = function (pca_scores) {
  * @param center pass true if you want to center the values first.
  * @return {*|{U, S, V, s}}
  */
+fn.lalolib.svd.svd_old = function (M, center) {
+  var the_matrix = center ? fn.lalolib.center_matrix(M) : M;
+  var jawn       = lalolib.svd(the_matrix, "thinU");
+
+  return jawn;
+};
+
+/**
+ * Wrapper for calculating SVD.
+ *
+ * Will switch to numeric.js implementation of SVD if lalolib's fails.
+ *
+ * TODO needs specs
+ *
+ * @param M
+ * @param center
+ * @return {*}
+ */
 fn.lalolib.svd.svd = function (M, center) {
   var the_matrix = center ? fn.lalolib.center_matrix(M) : M;
 
-  return lalolib.svd(the_matrix, "thinU");
+  var svd            = null,
+      numeric_matrix = null,
+      numeric_svd    = null;
+
+  try {
+    svd = lalolib.svd(the_matrix, "thinU");
+  }
+  catch (error) {
+    console.log("lalolib.svd() failed with error: " + error + ".  Trying numeric.svd() instead.");
+    var num_rows = the_matrix.m;
+    var num_cols = the_matrix.n;
+
+    if (num_rows < num_cols) {
+      // We need to transpose it for numeric.svd()
+      numeric_matrix = fn.lalolib.mat2array(lalolib.transposeMatrix(the_matrix));
+      numeric_svd    = numeric.svd(numeric_matrix);
+
+      // Need to make a fake lalolib svd output object.  Since we need to transpose the matrix, we need to swap V and U matrices so that things will still work later (like pca_scores).
+      svd = {
+        S: lalolib.array2mat(numeric.diag(numeric_svd.S)),
+        U: lalolib.array2mat(numeric_svd.V),
+        V: undefined,
+        s: lalolib.array2mat(numeric_svd.S)
+      };
+    }
+    else {
+      numeric_matrix = fn.lalolib.mat2array(the_matrix);
+      numeric_svd    = numeric.svd(numeric_matrix);
+
+      // Need to make a fake lalolib svd output object
+      svd = {
+        S: lalolib.array2mat(numeric.diag(numeric_svd.S)),
+        U: lalolib.array2mat(numeric_svd.U),
+        V: undefined,
+        s: lalolib.array2mat(numeric_svd.S)
+      };
+    }
+  }
+
+  return svd;
+};
+
+/**
+ * Converts a lalolib matrix into an array of arrays.
+ *
+ * Use this when you need to switch to numeric.js
+ *
+ * TODO needs tests.
+ *
+ * @param M
+ * @return {Array}
+ */
+fn.lalolib.mat2array = function (M) {
+  function get_val(M, ridx, cidx) {
+    var num_rows = M.m;
+    var num_cols = M.n;
+
+    if (ridx >= num_rows) {
+      throw Error("ridx was " + ridx + " but there are only " + num_rows + " rows.");
+    }
+    if (cidx >= num_cols) {
+      throw Error("cidx was " + cidx + " but there are only " + num_cols + " columns.");
+    }
+
+    return M.val[ridx * num_cols + cidx];
+  }
+
+  var rows = [];
+  for (var i = 0; i < M.m; ++i) {
+    var row = [];
+    for (var j = 0; j < M.n; ++j) {
+      row.push(get_val(M, i, j));
+    }
+
+    rows.push(row);
+  }
+
+  return rows;
 };

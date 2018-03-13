@@ -427,10 +427,18 @@ spec_helper.test_case.COUNTS = {
   pie: [1, 2, 0, 3, 0, 4]
 };
 
-spec_helper.test_case.COUNT_MATRIX = [
+spec_helper.test_case.COUNT_MATRIX = lalolib.array2mat([
   spec_helper.test_case.COUNTS.apple,
   spec_helper.test_case.COUNTS.pie
-];
+]);
+
+// This was checked against R values.  See svd.r
+spec_helper.test_case.COUNT_MATRIX_SVD = JSON.parse('{"S":{"length":2,"m":2,"n":2,"size":[2,2],"type":"matrix","val":{"0":3.464101615137754,"1":0,"2":0,"3":0}},"U":{"length":2,"m":2,"n":2,"size":[2,2],"type":"matrix","val":{"0":0.7071067811865475,"1":-0.7071067811865475,"2":-0.7071067811865474,"3":-0.7071067811865474}},"s":{"0":3.464101615137754,"1":0}}');
+
+spec_helper.test_case.COUNT_MATRIX_PCA_SCORES = lalolib.mul(spec_helper.test_case.COUNT_MATRIX_SVD.U, spec_helper.test_case.COUNT_MATRIX_SVD.S);
+
+// The projection will give two singular values.
+spec_helper.test_case.PROJECTION = fn.lalolib.first_n_cols(spec_helper.test_case.COUNT_MATRIX_PCA_SCORES, 2);
 
 spec_helper.test_case.COUNTS_WITH_ZEROS_REPLACED = {
   apple: [global.ZERO_REPLACEMENT_VAL, 1, 2, global.ZERO_REPLACEMENT_VAL, 3, 4],
@@ -635,6 +643,7 @@ spec_helper.test_case.APPROX_STARTING_COLORS_TSV = "name\tappoximate starting co
 
 spec_helper.test_case.APPROX_STARTING_COLORS_HTML = "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}</style><title>Sample legend</title></head><body><table><tr><th class='thick-right-border'>name</th><th>appoximate starting color</th></tr><tr><td class='thick-right-border'>s1</td><td style='background-color: #ed5e93;'>#ed5e93</td></tr><tr><td class='thick-right-border'>s2</td><td style='background-color: #d47a33;'>#d47a33</td></tr><tr><td class='thick-right-border'>s3</td><td style='background-color: #779d2c;'>#779d2c</td></tr><tr><td class='thick-right-border'>s4</td><td style='background-color: #00a98f;'>#00a98f</td></tr><tr><td class='thick-right-border'>s5</td><td style='background-color: #00a3ec;'>#00a3ec</td></tr><tr><td class='thick-right-border'>s6</td><td style='background-color: #9083ed;'>#9083ed</td></tr></table></body></html>";
 
+
 // This is used to test fn.parsed_biom.colors.  It only has just enough attrs to work with the default values need by that function.
 spec_helper.test_case.FULLY_PARSED_BIOM = {
   abundance_across_samples_for_each_leaf: spec_helper.test_case.ABUNDANCE_ACROSS_ALL_SAMPLES,
@@ -681,7 +690,8 @@ spec_helper.test_case.FULLY_PARSED_BIOM = {
   approx_starting_colors_tsv: spec_helper.test_case.APPROX_STARTING_COLORS_TSV,
   approx_starting_colors_html: spec_helper.test_case.APPROX_STARTING_COLORS_HTML,
 
-  count_matrix: spec_helper.test_case.COUNT_MATRIX
+  count_matrix: spec_helper.test_case.COUNT_MATRIX,
+  projection: spec_helper.test_case.PROJECTION
 };
 
 // See svd.r for how this was generated.
@@ -704,6 +714,13 @@ spec_helper.longley.DATA = lalolib.array2mat([
   [114.2, 502.601, 393.1, 251.4, 125.368, 69.564],
   [115.7, 518.173, 480.6, 257.2, 127.852, 69.331],
   [116.9, 554.894, 400.7, 282.7, 130.081, 70.551]
+]);
+
+spec_helper.longley.DAT_SMALL = lalolib.array2mat([
+  [83.0, 234.289, 235.6, 159.0, 107.608, 60.323],
+  [88.5, 259.426, 232.5, 145.6, 108.632, 61.122],
+  [88.2, 258.054, 368.2, 161.6, 109.773, 60.171],
+  [89.5, 284.599, 335.1, 165.0, 110.929, 61.187],
 ]);
 
 spec_helper.longley.VARIANCE_EXPLAINED = lalolib.array2mat([6.494199e1, 2.995035e1, 5.099393e0, 6.961770e-3, 8.968655e-4, 4.073981e-4]);
