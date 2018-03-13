@@ -440,6 +440,14 @@ spec_helper.test_case.COUNT_MATRIX_PCA_SCORES = lalolib.mul(spec_helper.test_cas
 // The projection will give two singular values.
 spec_helper.test_case.PROJECTION = fn.lalolib.first_n_cols(spec_helper.test_case.COUNT_MATRIX_PCA_SCORES, 2);
 
+
+// These come from scaling the projection by hand
+spec_helper.test_case.PROJECTION_LEAVES_1D = lalolib.array2mat([
+  [1],
+  [0]
+]);
+spec_helper.test_case.PROJECTION_SAMPLES_1D = lalolib.array2mat([0.3333333333333333, 0.3333333333333333, 0.8333333333333334, 0, 1, 0.5]);
+
 spec_helper.test_case.COUNTS_WITH_ZEROS_REPLACED = {
   apple: [global.ZERO_REPLACEMENT_VAL, 1, 2, global.ZERO_REPLACEMENT_VAL, 3, 4],
   pie: [1, 2, global.ZERO_REPLACEMENT_VAL, 3, global.ZERO_REPLACEMENT_VAL, 4]
@@ -691,7 +699,10 @@ spec_helper.test_case.FULLY_PARSED_BIOM = {
   approx_starting_colors_html: spec_helper.test_case.APPROX_STARTING_COLORS_HTML,
 
   count_matrix: spec_helper.test_case.COUNT_MATRIX,
-  projection: spec_helper.test_case.PROJECTION
+  projection: spec_helper.test_case.PROJECTION,
+
+  projection_leaves_1d: spec_helper.test_case.PROJECTION_LEAVES_1D,
+  projection_samples_1d: spec_helper.test_case.PROJECTION_SAMPLES_1D
 };
 
 // See svd.r for how this was generated.

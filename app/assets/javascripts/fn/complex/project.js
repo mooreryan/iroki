@@ -52,3 +52,31 @@ fn.project.project_with_num_pcs_cutoff = function (M, num_pcs_to_keep) {
     return fn.lalolib.first_n_cols(pca_scores, num_pcs_to_keep);
   }
 };
+
+/**
+ * Return a 1D projection of the samples in PC space.
+ *
+ * The output is scaled from 0 to 1 for use in the chroma.js color scale functions.
+ *
+ * @param M
+ * @returns {Matrix}
+ */
+fn.project.projection_samples_1d = function (M) {
+  var svd = fn.lalolib.svd.svd(M, true);
+
+  var scores = fn.lalolib.scale_cols_from_0_to_1(lalolib.mul(svd.V, svd.S));
+
+  return fn.lalolib.first_n_cols(scores, 1);
+};
+
+/**
+ * Return a 1D projection of leaves in PC space.
+ *
+ * The output is scaled from 0 to 1 for use in the chroma.js color scale functions.
+ *
+ * @param M
+ * @returns {Object}
+ */
+fn.project.projection_leaves_1d = function (M) {
+  return fn.lalolib.scale_cols_from_0_to_1(fn.project.project_with_num_pcs_cutoff(M, 1));
+};

@@ -972,13 +972,16 @@ fn.parsed_biom.new = function (params) {
   // fully_parsed_biom.count_matrix = fn.parsed_biom.count_matrix(fully_parsed_biom.leaf_names, fully_parsed_biom.counts_for_each_leaf);
   fully_parsed_biom.count_matrix = fn.parsed_biom.count_matrix(fully_parsed_biom.leaf_names, fully_parsed_biom.counts_for_each_leaf);
 
-  fully_parsed_biom.projection = TODO;
+  fully_parsed_biom.projection = null;
   if (projection_type === "pc") {
     fully_parsed_biom.projection = fn.project.project_with_num_pcs_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep);
   }
   else {
     fully_parsed_biom.projection = fn.project.project_with_variance_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep);
   }
+
+  fully_parsed_biom.projection_leaves_1d = fn.project.projection_leaves_1d(fully_parsed_biom.count_matrix);
+  fully_parsed_biom.projection_samples_1d = fn.project.projection_samples_1d(fully_parsed_biom.count_matrix);
 
   return fully_parsed_biom;
 };

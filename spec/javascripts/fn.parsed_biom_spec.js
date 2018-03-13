@@ -542,6 +542,15 @@ describe("fn", function () {
       it("sets projection", function () {
         spec_helper.expect_stringify_equal(actual.projection, expected.projection);
       });
+
+      it("sets projection_leaves_1d", function () {
+        spec_helper.expect_stringify_equal(actual.projection_leaves_1d, expected.projection_leaves_1d);
+      });
+
+      it("sets projection_samples_1d", function () {
+        // Note that actual is a 6x1 matrix, but the expected is just a vector, so take the val of actual.
+        spec_helper.expect_stringify_equal(actual.projection_samples_1d.val, expected.projection_samples_1d);
+      });
     });
   });
 });

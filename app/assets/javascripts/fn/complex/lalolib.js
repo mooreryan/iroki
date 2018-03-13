@@ -2,6 +2,30 @@ fn.lalolib     = {}; // These interact with the LALOLib structures directly.
 fn.lalolib.svd = {}; // For dealing with SVD
 
 /**
+ * Scales columns of the matrix from 0 to 1.
+ *
+ * TODO needs specs.
+ *
+ * @param M
+ * @returns {returns}
+ */
+fn.lalolib.scale_cols_from_0_to_1 = function (M) {
+  var func = function (col) {
+    var min     = fn.ary.min(col);
+    var max     = fn.ary.max(col);
+    var new_min = 0;
+    var new_max = 1;
+
+    return col.map(function (val) {
+      return fn.math.scale(val, min, max, new_min, new_max);
+    });
+  };
+
+  return fn.lalolib.apply_to_cols(M, func);
+};
+
+
+/**
  * Applies the func to each col in the Matrix M.
  *
  * @param M a lalolib Matrix
@@ -296,7 +320,7 @@ fn.lalolib.svd.svd = function (M, center) {
       numeric_svd    = null;
 
   try {
-    svd = lalolib.svd(the_matrix, "thinU");
+    svd = lalolib.svd(the_matrix, "full");
   }
   catch (error) {
     console.log("lalolib.svd() failed with error: " + error + ".  Trying numeric.svd() instead.");
@@ -312,7 +336,7 @@ fn.lalolib.svd.svd = function (M, center) {
       svd = {
         S: lalolib.array2mat(numeric.diag(numeric_svd.S)),
         U: lalolib.array2mat(numeric_svd.V),
-        V: undefined,
+        V: lalolib.array2mat(numeric_svd.U),
         s: lalolib.array2mat(numeric_svd.S)
       };
     }
@@ -324,7 +348,7 @@ fn.lalolib.svd.svd = function (M, center) {
       svd = {
         S: lalolib.array2mat(numeric.diag(numeric_svd.S)),
         U: lalolib.array2mat(numeric_svd.U),
-        V: undefined,
+        V: lalolib.array2mat(numeric_svd.V),
         s: lalolib.array2mat(numeric_svd.S)
       };
     }
