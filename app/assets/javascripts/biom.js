@@ -86,6 +86,9 @@ var g_ID_LEAF_POSITION_METHOD            = "leaf-position-method",
 var g_ID_CORRECT_PALETTE_LIGHTNESS  = "correct-palette-lightness",
     g_val_correct_palette_lightness = false;
 
+var g_ID_PALETTE_PADDING  = "palette-padding",
+    g_val_palette_padding = 0.05;
+
 
 // Set the correct options panel to show
 function hide_correct_opts_div() {
@@ -154,6 +157,8 @@ function biom__upload_button() {
 
     g_val_correct_palette_lightness = is_checked(g_ID_CORRECT_PALETTE_LIGHTNESS);
 
+    g_val_palette_padding = parseFloat(jq(g_ID_PALETTE_PADDING).val());
+
     draw_the_preview();
 
     // Set the correct options panel to show
@@ -216,10 +221,10 @@ function biom__upload_button() {
       .attr("width", 800);
 
     if (g_val_correct_palette_lightness) {
-      var color_scale = chroma.scale(g_val_palette).padding(0.05).correctLightness();
+      var color_scale = chroma.scale(g_val_palette).padding(g_val_palette_padding).correctLightness();
     }
     else {
-      var color_scale = chroma.scale(g_val_palette).padding(0.05);
+      var color_scale = chroma.scale(g_val_palette).padding(g_val_palette_padding);
     }
 
     if (g_val_biom_str) {
@@ -332,7 +337,8 @@ function biom__upload_button() {
 
       palette: g_val_palette,
       leaf_position_method: g_val_leaf_position_method,
-      correct_palette_lightness: g_val_correct_palette_lightness
+      correct_palette_lightness: g_val_correct_palette_lightness,
+      palette_padding: g_val_palette_padding
     };
   }
 
@@ -385,6 +391,7 @@ function biom__upload_button() {
   var palette                   = document.getElementById(g_ID_PALETTE);
   var leaf_position_method      = document.getElementById(g_ID_LEAF_POSITION_METHOD);
   var correct_palette_lightness = document.getElementById(g_ID_CORRECT_PALETTE_LIGHTNESS);
+  var palette_padding           = document.getElementById(g_ID_PALETTE_PADDING);
 
   var biom_reader    = new FileReader();
   biom_reader.onload = set_biom_str;
@@ -412,6 +419,7 @@ function biom__upload_button() {
   palette.addEventListener("change", undisable_and_update);
   leaf_position_method.addEventListener("change", undisable_and_update);
   correct_palette_lightness.addEventListener("change", undisable_and_update);
+  palette_padding.addEventListener("change", undisable_and_update);
 
   biom_conversion_style.addEventListener("change", hide_correct_opts_div);
 

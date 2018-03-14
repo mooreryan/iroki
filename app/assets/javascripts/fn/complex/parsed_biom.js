@@ -610,6 +610,7 @@ fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
   var palette                   = opts.palette || "Spectral";
   var leaf_position_method      = opts.leaf_position_method || g_ID_LEAF_POSITION_METHOD_PROJECTION;
   var correct_palette_lightness = opts.correct_palette_lightness;
+  var palette_padding           = opts.palette_padding || 0.05;
 
   var leaf_names = fully_parsed_biom.leaf_names;
 
@@ -646,12 +647,12 @@ fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
 
   if (correct_palette_lightness) {
     var color_scale = chroma.scale(palette)
-                            .padding(0.05)
+                            .padding(palette_padding)
                             .correctLightness();
   }
   else {
     var color_scale = chroma.scale(palette)
-                            .padding(0.05);
+                            .padding(palette_padding);
   }
 
   data_scaled.forEach(function (val, idx) {
@@ -1055,8 +1056,8 @@ fn.parsed_biom.new = function (params) {
     var return_value = fn.parsed_biom.colors(fully_parsed_biom, params);
   }
   else {
-    var return_value                   = fn.parsed_biom.colors_palette_style(fully_parsed_biom, params);
-    fully_parsed_biom.data_for_preview = return_value.data;
+    var return_value                          = fn.parsed_biom.colors_palette_style(fully_parsed_biom, params);
+    fully_parsed_biom.data_for_preview        = return_value.data;
     fully_parsed_biom.color_scale_for_preview = return_value.color_scale;
   }
   fully_parsed_biom.color_hex_codes = return_value.color_hex_codes;
