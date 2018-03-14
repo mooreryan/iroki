@@ -5,13 +5,13 @@
       a#upload-tab-button aria-selected="true" href="#upload-panel" Upload
     li.tabs-title
       a#options-tab-button href="#options-panel" Options
-    li.tabs-title
-      a#save-tab-button href="#save-panel" Save
+    /li.tabs-title
+    /  a#save-tab-button href="#save-panel" Save
 
   #form-div.tabs-content data-tabs-content="example-tabs"
     #upload-panel.tabs-panel.is-active
       = render "layouts/biom_upload_panel"
     #options-panel.tabs-panel
       = render "layouts/biom_options_panel"
-    #save-panel.tabs-panel
-      = render "layouts/biom_palette_options"
+    /#save-panel.tabs-panel
+    /  = render "layouts/biom_palette_options"

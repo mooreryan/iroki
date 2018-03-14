@@ -68,6 +68,10 @@ var g_ID_BIOM_CONVERSION_STYLE          = "biom-conversion-style",
     g_ID_BIOM_CONVERSION_STYLE_GEOMETRY = "biom-conversion-style-geometry",
     g_val_biom_conversion_style         = g_ID_BIOM_CONVERSION_STYLE_PALETTE;
 
+var g_ID_SUBMIT_BUTTON = "submit-button",
+    g_ID_RESET_BUTTON  = "reset-button",
+    g_ID_SAVE_BUTTON   = "save-button";
+
 function update_form_vals() {
 
   // Color options
@@ -134,7 +138,6 @@ function hide_correct_opts_div() {
  */
 function biom__upload_button() {
   function handleFiles() {
-    submit_button.setAttribute("disabled", "");
     var file = uploader.files[0];
     if (file) {
       biom_reader.readAsText(file);
@@ -145,8 +148,8 @@ function biom__upload_button() {
   }
 
   function undisable_and_update() {
-    undisable("submit-button");
-    undisable("reset-button");
+    undisable(g_ID_SUBMIT_BUTTON);
+    undisable(g_ID_RESET_BUTTON);
 
     update_form_vals();
   }
@@ -219,17 +222,19 @@ function biom__upload_button() {
     };
   }
 
-  disable("submit-button");
-  disable("reset-button");
+  disable(g_ID_SUBMIT_BUTTON);
+  disable(g_ID_RESET_BUTTON);
   update_form_vals();
 
 
-  var submit_id   = "submit-button";
+  var submit_id   = g_ID_SUBMIT_BUTTON;
   var uploader_id = "uploader";
 
   // Upload elements
   var uploader        = document.getElementById(uploader_id);
-  var submit_button   = document.getElementById(submit_id);
+  var submit_button   = document.getElementById(g_ID_SUBMIT_BUTTON);
+  var reset_button    = document.getElementById(g_ID_RESET_BUTTON);
+  var save_button     = document.getElementById(g_ID_SAVE_BUTTON);
   var download_legend = document.getElementById(g_ID_DOWNLOAD_LEGEND);
 
   var color_space_dropdown    = document.getElementById(g_ID_COLOR_SPACE);
@@ -326,21 +331,28 @@ function biom__upload_button() {
     }
   });
   submit_button.addEventListener("click", function () {
-    undisable("reset-button");
+    disable(g_ID_SUBMIT_BUTTON);
+    undisable(g_ID_RESET_BUTTON);
+    undisable(g_ID_SAVE_BUTTON);
 
     update_form_vals();
 
     handleFiles();
   }, false);
-  document.getElementById("reset-button").addEventListener("click", function () {
-    disable("reset-button");
+  reset_button.addEventListener("click", function () {
+    disable(g_ID_RESET_BUTTON);
 
     // Turn the submit off because it will turn back on once a mapping file is uploaded.
-    disable("submit-button");
+    disable(g_ID_SUBMIT_BUTTON);
+    disable(g_ID_SAVE_BUTTON);
 
     document.getElementById("biom-file-upload-form").reset();
 
     update_form_vals();
+  });
+  save_button.addEventListener("click", function () {
+    // TODO save stuff!
+    alert("you clicked save!");
   });
 
   // Process the biom file once it is finished loading.
