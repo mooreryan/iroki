@@ -644,8 +644,6 @@ fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
   var data_scaled = data.map(function (dat) {
     return fn.math.scale(dat, data_min, data_max, 0, 1);
   });
-  console.log("data from parsed_biom");
-  console.log(data_scaled);
 
   // Set up the color scale
   var color_scale = null;

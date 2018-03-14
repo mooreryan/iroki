@@ -523,6 +523,10 @@ function biom__upload_button() {
     upload_file();
   }, false);
   reset_button.addEventListener("click", function () {
+    // Remove the palette preview so you don't get the tick marks from the last one hanging around.
+    d3.select("#palette-preview").remove();
+    g_val_biom_str = null; // Reset the biom string.
+
     disable(g_ID_RESET_BUTTON);
 
     // Turn the submit off because it will turn back on once a mapping file is uploaded.
