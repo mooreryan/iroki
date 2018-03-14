@@ -1,33 +1,3 @@
 #options-div
-  .row
-    ul id="biom-options-accordion" class="accordion" data-accordion="" data-allow-all-closed="true"
-
-      li class="accordion-item is-active" data-accordion-item=""
-        a href="#" class="accordion-title" Data options
-        .accordion-content data-tab-content=""
-          = render "layouts/biom/data_options"
-
-      li class="accordion-item" data-accordion-item=""
-        a href="#" class="accordion-title" Color space options
-        .accordion-content data-tab-content=""
-          = render "layouts/biom/color_space_options"
-
-      li class="accordion-item" data-accordion-item=""
-        a href="#" class="accordion-title" Hue options
-        .accordion-content data-tab-content=""
-          = render "layouts/biom/hue_options"
-
-      li class="accordion-item" data-accordion-item=""
-        a href="#" class="accordion-title" Chroma (saturation) options
-        .accordion-content data-tab-content=""
-          = render "layouts/biom/chroma_options"
-
-      li class="accordion-item" data-accordion-item=""
-        a href="#" class="accordion-title" Lightness options
-        .accordion-content data-tab-content=""
-          = render "layouts/biom/lightness_options"
-
-      li class="accordion-item" data-accordion-item=""
-        a href="#" class="accordion-title" Direct palette options
-        .accordion-content data-tab-content=""
-          = render "layouts/biom/palette_options"
+  = render "layouts/biom_geometry_options"
+  = render "layouts/biom_palette_options"

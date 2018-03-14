@@ -63,6 +63,11 @@ var g_ID_EVEN_LEAVES_ARE                = "even-leaves-are",
 var g_ID_CORRECT_LUMINANCE  = "correct-luminance",
     g_val_correct_luminance = true;
 
+var g_ID_BIOM_CONVERSION_STYLE          = "biom-conversion-style",
+    g_ID_BIOM_CONVERSION_STYLE_PALETTE  = "biom-conversion-style-palette",
+    g_ID_BIOM_CONVERSION_STYLE_GEOMETRY = "biom-conversion-style-geometry",
+    g_val_biom_conversion_style         = g_ID_BIOM_CONVERSION_STYLE_PALETTE;
+
 function update_form_vals() {
 
   // Color options
@@ -100,8 +105,24 @@ function update_form_vals() {
   g_val_chroma_min      = parseFloat(jq(g_ID_CHROMA_MIN).val());
   g_val_chroma_max      = parseFloat(jq(g_ID_CHROMA_MAX).val());
   g_val_even_leaves_are = jq(g_ID_EVEN_LEAVES_ARE).val();
+
+  // Set the correct options panel to show
+  hide_correct_opts_div();
 }
 
+// Set the correct options panel to show
+function hide_correct_opts_div() {
+  g_val_biom_conversion_style = jq(g_ID_BIOM_CONVERSION_STYLE).val();
+
+  if (g_val_biom_conversion_style === g_ID_BIOM_CONVERSION_STYLE_GEOMETRY) {
+    jq("geometry-options-div").prop("hidden", false);
+    jq("palette-options-div").prop("hidden", true);
+  }
+  else {
+    jq("geometry-options-div").prop("hidden", true);
+    jq("palette-options-div").prop("hidden", false);
+  }
+}
 
 // handle upload button
 
@@ -228,6 +249,8 @@ function biom__upload_button() {
   var chroma_max_input      = document.getElementById(g_ID_CHROMA_MAX);
   var even_leaves_are_input = document.getElementById(g_ID_EVEN_LEAVES_ARE);
 
+  var biom_conversion_style = document.getElementById(g_ID_BIOM_CONVERSION_STYLE);
+
   var biom_reader = new FileReader();
 
 
@@ -242,6 +265,9 @@ function biom__upload_button() {
   chroma_method_input.addEventListener("change", undisable_and_update);
   even_leaves_are_input.addEventListener("change", undisable_and_update);
   correct_luminance.addEventListener("change", undisable_and_update);
+
+  biom_conversion_style.addEventListener("change", hide_correct_opts_div);
+
 
   lightness_min_input.addEventListener("change", function () {
     undisable_and_update();
