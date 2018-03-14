@@ -1,0 +1,8 @@
+.row
+  .small-12.medium-6.columns
+    label for="palette" Choose your palette
+    select id="palette"
+      - @color_brewer_colors.each_with_index do |color, idx|
+        option id="#{color}" value="#{color}" #{@color_brewer_colors_printable_names[idx]}
+  .small-12.medium-6.columns
+    canvas#palette-preview width=400 height=100

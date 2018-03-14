@@ -5,6 +5,10 @@
 .row
   h1 Biom to color map converter
 
+canvas#apple width=1000 height=200
+
+svg#test-svg width=500 height=150
+
 .row
   p This page is currently under construction.  Check back soon!
 
@@ -20,6 +24,15 @@
     .row.expanded.upload-form
       = render "layouts/biom_form"
 
+- @color_brewer_colors.each do |color|
+  p class="#{color}" #{color}
+
 javascript:
   // biom__save_abundance_colors is a function that takes a single arg, the biom file as a string.
   biom__upload_button();
+  fn.palette.draw({
+    data: [1, 2, 5, 9, 10],
+    chart_id: "test-svg",
+    color_scale: chroma.scale("Spectral").padding(0.1),
+    steps: 200
+  });
