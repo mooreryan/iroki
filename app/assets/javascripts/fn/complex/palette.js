@@ -88,6 +88,7 @@ fn.palette.draw = function (params) {
   var color_scale = params.color_scale || chroma.scale("GnBu");
   var data        = params.data || [];
   var steps       = params.steps || 200;
+  var names       = params.names || [];
 
 
   var chart_jq     = jq(chart_id);
@@ -173,6 +174,13 @@ fn.palette.draw = function (params) {
          .attr("width", mark_width)
          .attr("height", mark_height)
          .attr("fill", "black");
+
+    chart.append("text")
+         .attr("x", x_val(idx))
+         .attr("y", grad_rect_y + grad_rect_height + (mark_height) + 8)
+         .attr("text-anchor", "middle")
+         .style("font-size", "0.75em")
+         .html(names[idx][0]); // just the first letter
   };
 
   if (data.length > 0) {

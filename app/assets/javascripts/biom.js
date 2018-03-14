@@ -83,6 +83,9 @@ var g_ID_LEAF_POSITION_METHOD            = "leaf-position-method",
     g_ID_LEAF_POSITION_METHOD_ABUNDANCE  = "leaf-position-method-abundance",
     g_val_leaf_position_method           = g_ID_LEAF_POSITION_METHOD_PROJECTION;
 
+var g_ID_CORRECT_PALETTE_LIGHTNESS  = "correct-palette-lightness",
+    g_val_correct_palette_lightness = false;
+
 
 // Set the correct options panel to show
 function hide_correct_opts_div() {
@@ -149,6 +152,8 @@ function biom__upload_button() {
     g_val_palette              = jq(g_ID_PALETTE).val();
     g_val_leaf_position_method = jq(g_ID_LEAF_POSITION_METHOD).val();
 
+    g_val_correct_palette_lightness = is_checked(g_ID_CORRECT_PALETTE_LIGHTNESS);
+
     draw_the_preview();
 
     // Set the correct options panel to show
@@ -208,33 +213,50 @@ function biom__upload_button() {
       .append("svg")
       .attr("id", "palette-preview")
       .attr("height", 100)
-      .attr("width", 500);
+      .attr("width", 800);
 
-    var color_scale = chroma.scale(g_val_palette).padding(0.05);
+    if (g_val_correct_palette_lightness) {
+      var color_scale = chroma.scale(g_val_palette).padding(0.05).correctLightness();
+    }
+    else {
+      var color_scale = chroma.scale(g_val_palette).padding(0.05);
+    }
 
     if (g_val_biom_str) {
       var params            = set_params(g_val_biom_str);
       var fully_parsed_biom = fn.parsed_biom.new(params);
 
       if (fully_parsed_biom.data_for_preview) {
-        var data     = fn.obj.vals(fully_parsed_biom.data_for_preview);
-        console.log("data from draw")
+        var data = fn.obj.vals(fully_parsed_biom.data_for_preview);
+        console.log("data from draw");
         console.log(data);
         var data_min = fn.ary.min(data);
         var data_max = fn.ary.max(data);
-
       }
+
       else {
-        var data    = [];
+        var data = [];
       }
     }
     else {
-      var data    = [];
+      var data = [];
+    }
+
+    if (fully_parsed_biom && fully_parsed_biom.color_scale_for_preview) {
+      color_scale = fully_parsed_biom.color_scale_for_preview;
+    }
+
+    if (fully_parsed_biom && fully_parsed_biom.leaf_names) {
+      var names = fully_parsed_biom.leaf_names;
+    }
+    else {
+      names = [];
     }
 
     // Also make sure the preview is drawn.
     fn.palette.draw({
       data: data,
+      names: names,
       chart_id: "palette-preview",
       color_scale: color_scale,
       steps: 200
@@ -309,7 +331,8 @@ function biom__upload_button() {
       biom_conversion_style: g_val_biom_conversion_style,
 
       palette: g_val_palette,
-      leaf_position_method: g_val_leaf_position_method
+      leaf_position_method: g_val_leaf_position_method,
+      correct_palette_lightness: g_val_correct_palette_lightness
     };
   }
 
@@ -359,8 +382,9 @@ function biom__upload_button() {
   var biom_conversion_style = document.getElementById(g_ID_BIOM_CONVERSION_STYLE);
 
   // Here are options for palette style
-  var palette              = document.getElementById(g_ID_PALETTE);
-  var leaf_position_method = document.getElementById(g_ID_LEAF_POSITION_METHOD);
+  var palette                   = document.getElementById(g_ID_PALETTE);
+  var leaf_position_method      = document.getElementById(g_ID_LEAF_POSITION_METHOD);
+  var correct_palette_lightness = document.getElementById(g_ID_CORRECT_PALETTE_LIGHTNESS);
 
   var biom_reader    = new FileReader();
   biom_reader.onload = set_biom_str;
@@ -387,6 +411,7 @@ function biom__upload_button() {
   // Palette opts
   palette.addEventListener("change", undisable_and_update);
   leaf_position_method.addEventListener("change", undisable_and_update);
+  correct_palette_lightness.addEventListener("change", undisable_and_update);
 
   biom_conversion_style.addEventListener("change", hide_correct_opts_div);
 

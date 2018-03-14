@@ -4,12 +4,15 @@
     select id="palette"
       - @color_brewer_colors.each_with_index do |color, idx|
         option id="#{color}" value="#{color}" #{@color_brewer_colors_printable_names[idx]}
-  .small-12.medium-6.columns#palette-preview-container
-    svg#palette-preview width=500 height=100
-.row
-  .small-12.columns
+
+  .small-12.medium-6.columns
     label for="leaf-position-method" Leaf positioning method
     select id="leaf-position-method"
       option id="leaf-position-method-projection" value="leaf-position-method-projection" Projection
       option id="leaf-position-method-evenness" value="leaf-position-method-evenness" Evenness
       option id="leaf-position-method-abundance" value="leaf-position-method-abundance" Abundance
+
+.row
+  .small-12.columns
+    label for="correct-palette-lightness" Correct lightness?
+    input id="correct-palette-lightness" type="checkbox"
