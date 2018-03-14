@@ -607,10 +607,13 @@ fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
 // TODO everything from here down needs specs
 
 fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
-  var palette                   = opts.palette || "Spectral";
-  var leaf_position_method      = opts.leaf_position_method || g_ID_LEAF_POSITION_METHOD_PROJECTION;
-  var correct_palette_lightness = opts.correct_palette_lightness;
-  var palette_padding           = opts.palette_padding || 0.05;
+  var leaf_position_method = opts.leaf_position_method || g_ID_LEAF_POSITION_METHOD_PROJECTION;
+
+  // Opts for the color scale function
+  var palette                    = opts.palette || "Spectral";
+  var correct_palette_lightness  = opts.correct_palette_lightness;
+  var palette_padding            = opts.palette_padding || 0.05;
+  var palette_interpolation_mode = opts.palette_interpolation_mode || "lab";
 
   var leaf_names = fully_parsed_biom.leaf_names;
 
@@ -647,11 +650,13 @@ fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
 
   if (correct_palette_lightness) {
     var color_scale = chroma.scale(palette)
+                            .mode(palette_interpolation_mode)
                             .padding(palette_padding)
                             .correctLightness();
   }
   else {
     var color_scale = chroma.scale(palette)
+                            .mode(palette_interpolation_mode)
                             .padding(palette_padding);
   }
 

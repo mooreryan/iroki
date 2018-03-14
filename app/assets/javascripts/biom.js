@@ -89,6 +89,9 @@ var g_ID_CORRECT_PALETTE_LIGHTNESS  = "correct-palette-lightness",
 var g_ID_PALETTE_PADDING  = "palette-padding",
     g_val_palette_padding = 0.05;
 
+var g_ID_PALETTE_INTERPOLATION_MODE  = "palette-interpolation-mode",
+    g_val_palette_interpolation_mode = "lab";
+
 
 // Set the correct options panel to show
 function hide_correct_opts_div() {
@@ -159,6 +162,8 @@ function biom__upload_button() {
 
     g_val_palette_padding = parseFloat(jq(g_ID_PALETTE_PADDING).val());
 
+    g_val_palette_interpolation_mode = jq(g_ID_PALETTE_INTERPOLATION_MODE).val();
+
     draw_the_preview();
 
     // Set the correct options panel to show
@@ -221,10 +226,15 @@ function biom__upload_button() {
       .attr("width", 800);
 
     if (g_val_correct_palette_lightness) {
-      var color_scale = chroma.scale(g_val_palette).padding(g_val_palette_padding).correctLightness();
+      var color_scale = chroma.scale(g_val_palette)
+                              .mode(g_val_palette_interpolation_mode)
+                              .padding(g_val_palette_padding)
+                              .correctLightness();
     }
     else {
-      var color_scale = chroma.scale(g_val_palette).padding(g_val_palette_padding);
+      var color_scale = chroma.scale(g_val_palette)
+                              .mode(g_val_palette_interpolation_mode)
+                              .padding(g_val_palette_padding);
     }
 
     if (g_val_biom_str) {
@@ -338,7 +348,8 @@ function biom__upload_button() {
       palette: g_val_palette,
       leaf_position_method: g_val_leaf_position_method,
       correct_palette_lightness: g_val_correct_palette_lightness,
-      palette_padding: g_val_palette_padding
+      palette_padding: g_val_palette_padding,
+      palette_interpolation_mode: g_val_palette_interpolation_mode
     };
   }
 
@@ -388,10 +399,11 @@ function biom__upload_button() {
   var biom_conversion_style = document.getElementById(g_ID_BIOM_CONVERSION_STYLE);
 
   // Here are options for palette style
-  var palette                   = document.getElementById(g_ID_PALETTE);
-  var leaf_position_method      = document.getElementById(g_ID_LEAF_POSITION_METHOD);
-  var correct_palette_lightness = document.getElementById(g_ID_CORRECT_PALETTE_LIGHTNESS);
-  var palette_padding           = document.getElementById(g_ID_PALETTE_PADDING);
+  var palette                    = document.getElementById(g_ID_PALETTE);
+  var leaf_position_method       = document.getElementById(g_ID_LEAF_POSITION_METHOD);
+  var correct_palette_lightness  = document.getElementById(g_ID_CORRECT_PALETTE_LIGHTNESS);
+  var palette_padding            = document.getElementById(g_ID_PALETTE_PADDING);
+  var palette_interpolation_mode = document.getElementById(g_ID_PALETTE_INTERPOLATION_MODE);
 
   var biom_reader    = new FileReader();
   biom_reader.onload = set_biom_str;
@@ -420,6 +432,7 @@ function biom__upload_button() {
   leaf_position_method.addEventListener("change", undisable_and_update);
   correct_palette_lightness.addEventListener("change", undisable_and_update);
   palette_padding.addEventListener("change", undisable_and_update);
+  palette_interpolation_mode.addEventListener("change", undisable_and_update);
 
   biom_conversion_style.addEventListener("change", hide_correct_opts_div);
 

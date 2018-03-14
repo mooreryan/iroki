@@ -4,18 +4,24 @@
     select id="palette"
       - @color_brewer_colors.each_with_index do |color, idx|
         option id="#{color}" value="#{color}" #{@color_brewer_colors_printable_names[idx]}
+  .small-12.medium-6.columns
+    label for="palette-interpolation-mode" Interpolation mode
+    select id="palette-interpolation-mode"
+      - @palette_interpolation_vals.each do |id, hash|
+        option id="#{id}" value="#{hash[:val]}" #{hash[:name]}
 
+.row
   .small-12.medium-6.columns
     label for="leaf-position-method" Leaf positioning method
     select id="leaf-position-method"
       option id="leaf-position-method-projection" value="leaf-position-method-projection" Projection
       option id="leaf-position-method-evenness" value="leaf-position-method-evenness" Evenness
       option id="leaf-position-method-abundance" value="leaf-position-method-abundance" Abundance
+  .small-12.medium-6.columns
+    label for="palette-padding" Padding
+    input id="palette-padding" type="range" min="0" max="1" value="0.05" class="slider width-100" step="0.05"
 
 .row
   .small-12.medium-6.columns
     label for="correct-palette-lightness" Correct lightness?
     input id="correct-palette-lightness" type="checkbox"
-  .small-12.medium-6.columns
-    label for="palette-padding" Padding
-    input id="palette-padding" type="range" min="0" max="1" value="0.05" class="slider width-100" step="0.05"
