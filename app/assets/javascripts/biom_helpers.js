@@ -42,8 +42,11 @@ function biom__save_abundance_colors(params) {
        .file("mapping.tsv.txt", biom_color_map_str)
        .file("biom_with_colors.tsv.txt", fully_parsed_biom.biom_with_colors_tsv)
        .file("biom_with_colors.html", fully_parsed_biom.biom_with_colors_html)
-       .file("sample_approximate_starting_colors.txt", fully_parsed_biom.approx_starting_colors_tsv)
-       .file("sample_approximate_starting_colors.html", fully_parsed_biom.approx_starting_colors_html);
+       .file("sample_approximate_starting_colors.txt", fully_parsed_biom.approx_starting_colors_tsv);
+
+    if (g_val_biom_conversion_style === g_ID_BIOM_CONVERSION_STYLE_GEOMETRY) {
+      zip.folder("iroki_mapping").file("sample_approximate_starting_colors.html", fully_parsed_biom.approx_starting_colors_html);
+    }
 
     zip.generateAsync({
       type: "blob",

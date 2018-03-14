@@ -640,7 +640,9 @@ spec_helper.test_case.PARAMS_FOR_NEW = {
   keep_zero_counts: true,
   angle_offset: 0,
   evenness_absolute: true,
-  correct_luminance: true
+  correct_luminance: true,
+
+  biom_conversion_style: g_ID_BIOM_CONVERSION_STYLE_GEOMETRY
 };
 
 spec_helper.test_case.BIOM_WITH_COLORS_TSV = "name\tcolor\thue\tchroma/saturation\tlightness\tcentroid\tevenness\tabundance\ts1\ts2\ts3\ts4\ts5\ts6\napple\t#94d3ff\t274.23\t71.43\t60\t(0.03, -0.4)\t0.71\t1.67\t0\t1\t2\t0\t3\t4\npie\t#edbced\t327\t71.43\t60\t(0.22, -0.14)\t0.71\t1.67\t1\t2\t0\t3\t0\t4";

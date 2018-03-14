@@ -97,12 +97,12 @@ fn.palette.draw = function (params) {
   // If you want more steps than pixels, switch it to the total number of pixels.
   steps = steps > chart_width ? chart_width : steps;
 
-  console.log("chart width: " + chart_width);
-
   var chart = d3.select("#" + chart_id);
 
-  var data_min = fn.ary.min(data);
-  var data_max = fn.ary.max(data);
+  if (data.length > 0) {
+    var data_min = fn.ary.min(data);
+    var data_max = fn.ary.max(data);
+  }
 
   // We take the floor to avoid those yucky no color lines.  But because of this, we need to make sure the gradient is centered in the svg area.
   if (chart_width % steps === 0) {
@@ -112,20 +112,17 @@ fn.palette.draw = function (params) {
   else {
     var grad_rect_width = Math.floor(chart_width / steps);
   }
-  console.log("grad rect width: " + grad_rect_width);
   var grad_width = grad_rect_width * steps;
-  console.log("grad_width: " + grad_width);
 
   var chart_width_padding_pixels = chart_width - grad_width;
-  console.log("chart width padding pixels: " + chart_width_padding_pixels);
 
   var grad_rect_height = chart_height / 2;
   var grad_rect_y      = grad_rect_height / 2;
   var total_width      = chart_width - chart_width_padding_pixels;
 
-  var scale = function (val) {
-    return fn.math.scale(val, data_min, data_max, chart_width_padding_pixels, total_width);
-  };
+  // var scale = function (val) {
+  //   return fn.math.scale(val, data_min, data_max, chart_width_padding_pixels, total_width);
+  // };
 
   var grad_rect_min_x = (chart_width_padding_pixels / 2);
   var grad_rect_max_x = grad_rect_width * (steps - 1) + (chart_width_padding_pixels / 2);
@@ -136,8 +133,6 @@ fn.palette.draw = function (params) {
 
   fn.ary.range(steps).map(function (idx) {
     var start = Math.floor(grad_rect_width * idx + (chart_width_padding_pixels / 2));
-
-    console.log("grad rect " + (idx+1) + " start: " + start);
 
     var scaled_start = fn.math.scale(start, grad_rect_min_x, grad_rect_max_x, 0, 1);
 
@@ -163,14 +158,11 @@ fn.palette.draw = function (params) {
       }
       else if (idx === 0) {
         // The first element
-        console.log(grad_rect_min_x)
         start = scaled_datum;
       }
       else {
         start = scaled_datum - (mark_width / 2);
       }
-
-      console.log("tick mark " + (idx+1) + " start: " + scaled_datum);
 
       return start;
     }
@@ -183,6 +175,7 @@ fn.palette.draw = function (params) {
          .attr("fill", "black");
   };
 
-  data.forEach(func);
+  if (data.length > 0) {
+    data.forEach(func);
+  }
 };
-

@@ -606,9 +606,42 @@ fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
 
 // TODO everything from here down needs specs
 
+fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
+  var palette = opts.palette || "Spectral";
+
+  var leaf_names = fully_parsed_biom.leaf_names;
+
+  var color_scale = chroma.scale(palette).padding(0.05);
+
+  // START HERE iterate on this
+  var color_hex_codes = {};
+  var color_details   = {};
+
+  fully_parsed_biom.projection_leaves_1d.forEach(function (val, idx) {
+    var leaf_name = leaf_names[idx];
+    var color     = color_scale(val);
+
+    color_hex_codes[leaf_name] = color.hex();
+
+    var color_hcl     = color.hcl();
+    var hue_val       = color_hcl[0];
+    var chroma_val    = color_hcl[1];
+    var lightness_val = color_hcl[2];
+
+    color_details[leaf_name] = {};
+
+    color_details[leaf_name].hue       = hue_val;
+    color_details[leaf_name].chroma    = chroma_val;
+    color_details[leaf_name].lightness = lightness_val;
+
+  });
+
+  return { color_hex_codes: color_hex_codes, color_details: color_details };
+};
+
 
 /**
- * Thingy!
+ * Thingy!  This is the color function for the geometry style colors.
  *
  * @param fully_parsed_biom
  * @param opts
@@ -691,13 +724,13 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
 
     var hue_val = hue_angle;
 
-    // Set the chroma.
+    // Set the chroma.  We take 1 - evenness because we technically need inverse evenness.
     if (opt_chroma_reversed) {
       // Swap the new min and new max to reverse the scale
-      var chroma_val = fn.math.scale(evenness_val, evenness_min, evenness_max, opt_chroma_max, opt_chroma_min);
+      var chroma_val = fn.math.scale(1 - evenness_val, evenness_min, evenness_max, opt_chroma_max, opt_chroma_min);
     }
     else {
-      var chroma_val = fn.math.scale(evenness_val, evenness_min, evenness_max, opt_chroma_min, opt_chroma_max);
+      var chroma_val = fn.math.scale(1 - evenness_val, evenness_min, evenness_max, opt_chroma_min, opt_chroma_max);
     }
 
     // Set the lightness.
@@ -900,6 +933,7 @@ fn.parsed_biom.count_matrix = function (leaf_names, counts_for_each_leaf) {
  * @return {Object}
  */
 fn.parsed_biom.new = function (params) {
+  // Need to set defaults for all of these.
   var biom_str         = params.biom_str;
   var keep_zero_counts = params.keep_zero_counts;
   var angle_offset     = params.angle_offset;
@@ -907,6 +941,8 @@ fn.parsed_biom.new = function (params) {
 
   // This will either be an actual number of singular vals to keep (if projection type is "pc") or the percentage of variance to keep (if projection type is "auto").
   var sing_vals_to_keep = params.sing_vals_to_keep;
+
+  var biom_conversion_style = params.biom_conversion_style;
 
   var fully_parsed_biom = {};
 
@@ -955,18 +991,6 @@ fn.parsed_biom.new = function (params) {
     fully_parsed_biom.angles_from_origin_to_centroid = fn.parsed_biom.angles_from_origin_to_centroid(fully_parsed_biom.centroids_of_whole_shape);
   }
 
-  // Add the colors
-  var return_value                  = fn.parsed_biom.colors(fully_parsed_biom, params);
-  fully_parsed_biom.color_hex_codes = return_value.color_hex_codes;
-  fully_parsed_biom.color_details   = return_value.color_details;
-
-  // Add the modified biom with colors tsv.
-  fully_parsed_biom.biom_with_colors_tsv  = fn.parsed_biom.biom_with_colors_tsv(fully_parsed_biom);
-  // And the html version.
-  fully_parsed_biom.biom_with_colors_html = fn.parsed_biom.biom_with_colors_html(fully_parsed_biom.biom_with_colors_tsv);
-
-  fully_parsed_biom.approx_starting_colors_tsv  = fn.parsed_biom.sample_color_legend_tsv(fully_parsed_biom.approx_starting_colors);
-  fully_parsed_biom.approx_starting_colors_html = fn.parsed_biom.sample_color_legend_html(fully_parsed_biom.approx_starting_colors_tsv);
 
   // START HERE.  Add the projection for the geometry here.  Don't forget to get the global value for number of dimensions to keep or the amount of variance to keep.
   // fully_parsed_biom.count_matrix = fn.parsed_biom.count_matrix(fully_parsed_biom.leaf_names, fully_parsed_biom.counts_for_each_leaf);
@@ -981,7 +1005,27 @@ fn.parsed_biom.new = function (params) {
   }
 
   fully_parsed_biom.projection_leaves_1d = fn.project.projection_leaves_1d(fully_parsed_biom.count_matrix);
-  fully_parsed_biom.projection_samples_1d = fn.project.projection_samples_1d(fully_parsed_biom.count_matrix);
+  // fully_parsed_biom.projection_samples_1d = fn.project.projection_samples_1d(fully_parsed_biom.count_matrix);
+
+
+  // All the stuff for the colors.
+  if (biom_conversion_style === g_ID_BIOM_CONVERSION_STYLE_GEOMETRY) {
+    var return_value = fn.parsed_biom.colors(fully_parsed_biom, params);
+  }
+  else {
+    var return_value = fn.parsed_biom.colors_palette_style(fully_parsed_biom, params);
+  }
+  fully_parsed_biom.color_hex_codes = return_value.color_hex_codes;
+  fully_parsed_biom.color_details   = return_value.color_details;
+
+  // Add the modified biom with colors tsv.
+  fully_parsed_biom.biom_with_colors_tsv  = fn.parsed_biom.biom_with_colors_tsv(fully_parsed_biom);
+  // And the html version.
+  fully_parsed_biom.biom_with_colors_html = fn.parsed_biom.biom_with_colors_html(fully_parsed_biom.biom_with_colors_tsv);
+
+  fully_parsed_biom.approx_starting_colors_tsv  = fn.parsed_biom.sample_color_legend_tsv(fully_parsed_biom.approx_starting_colors);
+  fully_parsed_biom.approx_starting_colors_html = fn.parsed_biom.sample_color_legend_html(fully_parsed_biom.approx_starting_colors_tsv);
+
 
   return fully_parsed_biom;
 };

@@ -62,8 +62,10 @@ fn.project.project_with_num_pcs_cutoff = function (M, num_pcs_to_keep) {
  * @returns {Matrix}
  */
 fn.project.projection_samples_1d = function (M) {
+  // TODO make sure that the input M has the same order as the leaves.
   var svd = fn.lalolib.svd.svd(M, true);
 
+  // TODO this won't always work as unlike R, we have the full svd.
   var scores = fn.lalolib.scale_cols_from_0_to_1(lalolib.mul(svd.V, svd.S));
 
   return fn.lalolib.first_n_cols(scores, 1);

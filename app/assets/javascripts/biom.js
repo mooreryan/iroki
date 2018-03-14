@@ -74,47 +74,11 @@ var g_ID_SUBMIT_BUTTON = "submit-button",
 
 var g_val_biom_str = null;
 
-function update_form_vals() {
-
-  // Color options
-  g_val_color_space = jq(g_ID_COLOR_SPACE).val();
-
-  g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
-  if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
-    g_val_hue_angle_offset = 0;
-    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset);
-  }
-  else if (g_val_hue_angle_offset >= 360) {
-    g_val_hue_angle_offset = 359;
-    jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset);
-  }
-  var display_color = fn.color.approx_starting_color(g_val_hue_angle_offset);
-  jq("hue-angle-offset-label").css("color", display_color);
+var g_ID_PALETTE  = "palette",
+    g_val_palette = "Spectral";
 
 
-  g_val_abundant_samples_are = jq(g_ID_ABUNDANT_SAMPLES_ARE).val();
 
-  // Other options
-  g_val_avg_method       = jq(g_ID_AVG_METHOD).val();
-  g_val_reduce_dimension = jq(g_ID_REDUCE_DIMENSION).val();
-
-  // Legend options
-  g_val_download_legend = is_checked(g_ID_DOWNLOAD_LEGEND);
-
-  // Lightness options
-  g_val_lightness_min     = parseFloat(jq(g_ID_LIGHTNESS_MIN).val());
-  g_val_lightness_max     = parseFloat(jq(g_ID_LIGHTNESS_MAX).val());
-  g_val_correct_luminance = is_checked(g_ID_CORRECT_LUMINANCE);
-
-  // Chroma opts
-  g_val_chroma_method   = jq(g_ID_CHROMA_METHOD).val();
-  g_val_chroma_min      = parseFloat(jq(g_ID_CHROMA_MIN).val());
-  g_val_chroma_max      = parseFloat(jq(g_ID_CHROMA_MAX).val());
-  g_val_even_leaves_are = jq(g_ID_EVEN_LEAVES_ARE).val();
-
-  // Set the correct options panel to show
-  hide_correct_opts_div();
-}
 
 // Set the correct options panel to show
 function hide_correct_opts_div() {
@@ -139,6 +103,53 @@ function hide_correct_opts_div() {
  * Calls biom__save_abundance_colors once the file is uploaded.  Sets up all the listeners and manages the form values.  It is called directly on the biom.html.slim page.
  */
 function biom__upload_button() {
+  function update_form_vals() {
+
+    // Color options
+    g_val_color_space = jq(g_ID_COLOR_SPACE).val();
+
+    g_val_hue_angle_offset = parseFloat(jq(g_ID_HUE_ANGLE_OFFSET).val());
+    if (isNaN(g_val_hue_angle_offset) || g_val_hue_angle_offset < 0) {
+      g_val_hue_angle_offset = 0;
+      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset);
+    }
+    else if (g_val_hue_angle_offset >= 360) {
+      g_val_hue_angle_offset = 359;
+      jq(g_ID_HUE_ANGLE_OFFSET).val(g_val_hue_angle_offset);
+    }
+    var display_color = fn.color.approx_starting_color(g_val_hue_angle_offset);
+    jq("hue-angle-offset-label").css("color", display_color);
+
+
+    g_val_abundant_samples_are = jq(g_ID_ABUNDANT_SAMPLES_ARE).val();
+
+    // Other options
+    g_val_avg_method       = jq(g_ID_AVG_METHOD).val();
+    g_val_reduce_dimension = jq(g_ID_REDUCE_DIMENSION).val();
+
+    // Legend options
+    g_val_download_legend = is_checked(g_ID_DOWNLOAD_LEGEND);
+
+    // Lightness options
+    g_val_lightness_min     = parseFloat(jq(g_ID_LIGHTNESS_MIN).val());
+    g_val_lightness_max     = parseFloat(jq(g_ID_LIGHTNESS_MAX).val());
+    g_val_correct_luminance = is_checked(g_ID_CORRECT_LUMINANCE);
+
+    // Chroma opts
+    g_val_chroma_method   = jq(g_ID_CHROMA_METHOD).val();
+    g_val_chroma_min      = parseFloat(jq(g_ID_CHROMA_MIN).val());
+    g_val_chroma_max      = parseFloat(jq(g_ID_CHROMA_MAX).val());
+    g_val_even_leaves_are = jq(g_ID_EVEN_LEAVES_ARE).val();
+
+    // Palette opts
+    g_val_palette = jq(g_ID_PALETTE).val();
+
+    draw_the_preview();
+
+    // Set the correct options panel to show
+    hide_correct_opts_div();
+  }
+
   /**
    * Uploads the file to the biom_reader.
    */
@@ -158,17 +169,23 @@ function biom__upload_button() {
    * @param event
    */
   function set_biom_str(event) {
+    update_form_vals();
+
     g_val_biom_str = event.target.result;
-    alert("Biom file uploaded!")
+
+    draw_the_preview();
+
+    undisable_save_button()
   }
 
   /**
    * This function is called when you hit the save button.
    */
   function save_result() {
+    update_form_vals();
     var params = set_params(g_val_biom_str);
 
-    biom__save_abundance_colors(params)
+    biom__save_abundance_colors(params);
   }
 
   function undisable_and_update() {
@@ -178,15 +195,36 @@ function biom__upload_button() {
     update_form_vals();
   }
 
+  // Call update_form_vals() before this.
+  function draw_the_preview() {
+    if (g_val_biom_str) {
+      var params            = set_params(g_val_biom_str);
+      var fully_parsed_biom = fn.parsed_biom.new(params);
+
+      var data = fn.obj.vals(fully_parsed_biom.projection_leaves_1d);
+    }
+    else {
+      var data = [];
+    }
+
+    // Also make sure the preview is drawn.
+    fn.palette.draw({
+      data: data,
+      chart_id: "palette-preview",
+      color_scale: chroma.scale(g_val_palette).padding(0.05),
+      steps: 200
+    });
+  }
+
   /**
    * Sets up the params needed for biom__save_abundance_colors (and fn.parsed_biom.new).
+   *
+   * Make sure to call update_form_values() before running this.
    *
    * @param biom_str
    * @return {Object}
    */
   function set_params(biom_str) {
-    update_form_vals();
-
     var keep_zeros = g_val_avg_method === g_ID_AVG_METHOD_ALL_SAMPLES_MEAN;
 
     var opts_for_reduced_dimension = {};
@@ -227,6 +265,8 @@ function biom__upload_button() {
       biom_str: biom_str,
       keep_zero_counts: keep_zeros,
       angle_offset: g_val_hue_angle_offset,
+      projection_type: opts_for_reduced_dimension.projection_type,
+      sing_vals_to_keep: opts_for_reduced_dimension.sing_vals_to_keep,
 
       // These are required for fn.parsed_biom.colors
       lightness_min: g_val_lightness_min,
@@ -241,13 +281,24 @@ function biom__upload_button() {
 
       correct_luminance: g_val_correct_luminance,
 
-      projection_type: opts_for_reduced_dimension.projection_type,
-      sing_vals_to_keep: opts_for_reduced_dimension.sing_vals_to_keep
+      biom_conversion_style: g_val_biom_conversion_style,
+
+      palette: g_val_palette
     };
+  }
+
+  function undisable_save_button() {
+    jq(g_ID_SAVE_BUTTON).prop("hidden", false);
+    undisable(g_ID_SAVE_BUTTON);
+  }
+  function disable_save_button() {
+    jq(g_ID_SAVE_BUTTON).prop("hidden", true);
+    disable(g_ID_SAVE_BUTTON);
   }
 
   disable(g_ID_SUBMIT_BUTTON);
   disable(g_ID_RESET_BUTTON);
+  disable_save_button();
   update_form_vals();
 
 
@@ -280,11 +331,21 @@ function biom__upload_button() {
 
   var biom_conversion_style = document.getElementById(g_ID_BIOM_CONVERSION_STYLE);
 
-  var biom_reader = new FileReader();
+  // Here are options for palette style
+  var palette = document.getElementById(g_ID_PALETTE);
+
+  var biom_reader    = new FileReader();
   biom_reader.onload = set_biom_str;
 
   // Set up all the listeners.
-  uploader.addEventListener("change", undisable_and_update);
+  uploader.addEventListener("change", function () {
+    undisable(g_ID_SUBMIT_BUTTON);
+    undisable(g_ID_RESET_BUTTON);
+    disable_save_button();
+
+    update_form_vals();
+  });
+
   color_space_dropdown.addEventListener("change", undisable_and_update);
   avg_method_dropdown.addEventListener("change", undisable_and_update);
   hue_angle_offset_slider.addEventListener("change", undisable_and_update);
@@ -294,6 +355,10 @@ function biom__upload_button() {
   chroma_method_input.addEventListener("change", undisable_and_update);
   even_leaves_are_input.addEventListener("change", undisable_and_update);
   correct_luminance.addEventListener("change", undisable_and_update);
+
+  // Palette opts
+  palette.addEventListener("change", undisable_and_update);
+
 
   biom_conversion_style.addEventListener("change", hide_correct_opts_div);
 
@@ -357,7 +422,6 @@ function biom__upload_button() {
   submit_button.addEventListener("click", function () {
     disable(g_ID_SUBMIT_BUTTON);
     undisable(g_ID_RESET_BUTTON);
-    undisable(g_ID_SAVE_BUTTON);
 
     update_form_vals();
 
@@ -368,7 +432,7 @@ function biom__upload_button() {
 
     // Turn the submit off because it will turn back on once a mapping file is uploaded.
     disable(g_ID_SUBMIT_BUTTON);
-    disable(g_ID_SAVE_BUTTON);
+    disable_save_button();
 
     document.getElementById("biom-file-upload-form").reset();
 
