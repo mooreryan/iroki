@@ -607,17 +607,46 @@ fn.parsed_biom.sample_color_legend_html = function (sample_color_legend_tsv) {
 // TODO everything from here down needs specs
 
 fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
-  var palette = opts.palette || "Spectral";
+  var palette              = opts.palette || "Spectral";
+  var leaf_position_method = opts.leaf_position_method || g_ID_LEAF_POSITION_METHOD_PROJECTION;
 
   var leaf_names = fully_parsed_biom.leaf_names;
-
-  var color_scale = chroma.scale(palette).padding(0.05);
 
   // START HERE iterate on this
   var color_hex_codes = {};
   var color_details   = {};
 
-  fully_parsed_biom.projection_leaves_1d.forEach(function (val, idx) {
+  var data = null;
+  switch (leaf_position_method) {
+    case g_ID_LEAF_POSITION_METHOD_EVENNESS:
+      data = fully_parsed_biom.leaf_names.map(function (leaf_name) {
+        return fully_parsed_biom.evenness_across_samples_for_each_leaf[leaf_name];
+      });
+      break;
+    case g_ID_LEAF_POSITION_METHOD_ABUNDANCE:
+      data = fully_parsed_biom.leaf_names.map(function (leaf_name) {
+        return fully_parsed_biom.abundance_across_samples_for_each_leaf[leaf_name];
+      });
+      break;
+    default:
+      data = fully_parsed_biom.projection_leaves_1d;
+      break;
+  }
+
+
+  var data_min    = fn.ary.min(data);
+  var data_max    = fn.ary.max(data);
+  var data_scaled = data.map(function(dat) {
+    return fn.math.scale(dat, data_min, data_max, 0, 1);
+  })
+  console.log("data from parsed_biom");
+  console.log(data_scaled)
+
+
+  var color_scale = chroma.scale(palette)
+                          .padding(0.05);
+
+  data_scaled.forEach(function (val, idx) {
     var leaf_name = leaf_names[idx];
     var color     = color_scale(val);
 
@@ -636,7 +665,11 @@ fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
 
   });
 
-  return { color_hex_codes: color_hex_codes, color_details: color_details };
+  return {
+    color_hex_codes: color_hex_codes,
+    color_details: color_details,
+    data: data_scaled
+  };
 };
 
 
@@ -1014,6 +1047,7 @@ fn.parsed_biom.new = function (params) {
   }
   else {
     var return_value = fn.parsed_biom.colors_palette_style(fully_parsed_biom, params);
+    fully_parsed_biom.data_for_preview = return_value.data;
   }
   fully_parsed_biom.color_hex_codes = return_value.color_hex_codes;
   fully_parsed_biom.color_details   = return_value.color_details;
