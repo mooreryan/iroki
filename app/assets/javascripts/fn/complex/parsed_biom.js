@@ -649,10 +649,27 @@ fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
 
   // Set up the color scale
   var color_scale = null;
-  if (palette_interpolation_mode === g_OPT_PALETTE_INTERPOLATION_MODE_LAB_BEZIER) {
+  if (palette === g_ID_PALETTE_CUBEHELIX_DEFAULT) {
+    color_scale = chroma.cubehelix()
+                        .start(300) // starting hue
+                        .rotations(-1.5)
+                        .hue(1.0) // controls how saturated the colour of all hues are
+                        .gamma(1.0) // used to emphasise low or high intensity values
+                        .scale(); // convert it to scale
+  }
+  else if (palette === g_ID_PALETTE_CUBEHELIX_SATURATED) {
+    color_scale = chroma.cubehelix()
+                        .start(300) // starting hue
+                        .rotations(-1.5)
+                        .hue(1.5) // controls how saturated the colour of all hues are
+                        .gamma(1.0) // used to emphasise low or high intensity values
+                        .scale(); // convert it to scale
+  }
+  else if (palette_interpolation_mode === g_OPT_PALETTE_INTERPOLATION_MODE_LAB_BEZIER) {
+    // Note that you can pick cubehelix and the lab bezier at the same time, but the cubehelix should override bezier interpolation so it is handled after.
     // The max is 5 that bezier can handle.
     var tmp_scale = chroma.scale(palette).colors(5);
-    color_scale = chroma.bezier(tmp_scale).scale();
+    color_scale   = chroma.bezier(tmp_scale).scale();
   }
   else {
     color_scale = chroma.scale(palette)

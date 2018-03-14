@@ -2,8 +2,8 @@
   .small-12.medium-6.columns
     label for="palette" Choose your palette
     select id="palette"
-      - @color_brewer_colors.each_with_index do |color, idx|
-        option id="#{color}" value="#{color}" #{@color_brewer_colors_printable_names[idx]}
+      - @palette_options.each do |id, name|
+        option id="#{id}" value="#{id}" #{name}
   .small-12.medium-6.columns
     label for="palette-interpolation-mode" Interpolation mode
     select id="palette-interpolation-mode"

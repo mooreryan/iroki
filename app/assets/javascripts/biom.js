@@ -74,8 +74,10 @@ var g_ID_SUBMIT_BUTTON = "submit-button",
 
 var g_val_biom_str = null;
 
-var g_ID_PALETTE  = "palette",
-    g_val_palette = "Spectral";
+var g_ID_PALETTE                     = "palette",
+    g_ID_PALETTE_CUBEHELIX_DEFAULT   = "CubeHelixDefault",
+    g_ID_PALETTE_CUBEHELIX_SATURATED = "CubeHelixSaturated",
+    g_val_palette                    = "Viridis";
 
 var g_ID_LEAF_POSITION_METHOD            = "leaf-position-method",
     g_ID_LEAF_POSITION_METHOD_PROJECTION = "leaf-position-method-projection",
@@ -228,10 +230,26 @@ function biom__upload_button() {
 
     // Set up the color scale if it hasn't already been done by the data.
     var color_scale = null;
-    if (g_val_palette_interpolation_mode === g_OPT_PALETTE_INTERPOLATION_MODE_LAB_BEZIER) {
+    if (g_val_palette === g_ID_PALETTE_CUBEHELIX_DEFAULT) {
+      color_scale = chroma.cubehelix()
+                          .start(300) // starting hue
+                          .rotations(-1.5)
+                          .hue(1.0) // controls how saturated the colour of all hues are
+                          .gamma(1.0) // used to emphasise low or high intensity values
+                          .scale(); // convert it to scale
+    }
+    else if (g_val_palette === g_ID_PALETTE_CUBEHELIX_SATURATED) {
+      color_scale = chroma.cubehelix()
+                          .start(300) // starting hue
+                          .rotations(-1.5)
+                          .hue(1.5) // controls how saturated the colour of all hues are
+                          .gamma(1.0) // used to emphasise low or high intensity values
+                          .scale(); // convert it to scale
+    }
+    else if (g_val_palette_interpolation_mode === g_OPT_PALETTE_INTERPOLATION_MODE_LAB_BEZIER) {
       // The max is 5 that bezier can handle.
       var tmp_scale = chroma.scale(g_val_palette).colors(5);
-      color_scale = chroma.bezier(tmp_scale).scale();
+      color_scale   = chroma.bezier(tmp_scale).scale();
     }
     else {
       color_scale = chroma.scale(g_val_palette)
