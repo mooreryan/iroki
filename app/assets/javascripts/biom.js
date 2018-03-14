@@ -89,8 +89,9 @@ var g_ID_CORRECT_PALETTE_LIGHTNESS  = "correct-palette-lightness",
 var g_ID_PALETTE_PADDING  = "palette-padding",
     g_val_palette_padding = 0.05;
 
-var g_ID_PALETTE_INTERPOLATION_MODE  = "palette-interpolation-mode",
-    g_val_palette_interpolation_mode = "lab";
+var g_ID_PALETTE_INTERPOLATION_MODE             = "palette-interpolation-mode",
+    g_OPT_PALETTE_INTERPOLATION_MODE_LAB_BEZIER = "lab-bezier",
+    g_val_palette_interpolation_mode            = "lab";
 
 
 // Set the correct options panel to show
@@ -225,16 +226,20 @@ function biom__upload_button() {
       .attr("height", 100)
       .attr("width", 800);
 
-    if (g_val_correct_palette_lightness) {
-      var color_scale = chroma.scale(g_val_palette)
-                              .mode(g_val_palette_interpolation_mode)
-                              .padding(g_val_palette_padding)
-                              .correctLightness();
+    // Set up the color scale if it hasn't already been done by the data.
+    var color_scale = null;
+    if (g_val_palette_interpolation_mode === g_OPT_PALETTE_INTERPOLATION_MODE_LAB_BEZIER) {
+      // The max is 5 that bezier can handle.
+      var tmp_scale = chroma.scale(g_val_palette).colors(5);
+      color_scale = chroma.bezier(tmp_scale).scale();
     }
     else {
-      var color_scale = chroma.scale(g_val_palette)
-                              .mode(g_val_palette_interpolation_mode)
-                              .padding(g_val_palette_padding);
+      color_scale = chroma.scale(g_val_palette)
+                          .mode(g_val_palette_interpolation_mode);
+    }
+    color_scale = color_scale.padding(g_val_palette_padding);
+    if (g_val_correct_palette_lightness) {
+      color_scale = color_scale.correctLightness();
     }
 
     if (g_val_biom_str) {
@@ -242,9 +247,7 @@ function biom__upload_button() {
       var fully_parsed_biom = fn.parsed_biom.new(params);
 
       if (fully_parsed_biom.data_for_preview) {
-        var data = fn.obj.vals(fully_parsed_biom.data_for_preview);
-        console.log("data from draw");
-        console.log(data);
+        var data     = fn.obj.vals(fully_parsed_biom.data_for_preview);
         var data_min = fn.ary.min(data);
         var data_max = fn.ary.max(data);
       }

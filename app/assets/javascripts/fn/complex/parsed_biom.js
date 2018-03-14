@@ -647,17 +647,20 @@ fn.parsed_biom.colors_palette_style = function (fully_parsed_biom, opts) {
   console.log("data from parsed_biom");
   console.log(data_scaled);
 
-
-  if (correct_palette_lightness) {
-    var color_scale = chroma.scale(palette)
-                            .mode(palette_interpolation_mode)
-                            .padding(palette_padding)
-                            .correctLightness();
+  // Set up the color scale
+  var color_scale = null;
+  if (palette_interpolation_mode === g_OPT_PALETTE_INTERPOLATION_MODE_LAB_BEZIER) {
+    // The max is 5 that bezier can handle.
+    var tmp_scale = chroma.scale(palette).colors(5);
+    color_scale = chroma.bezier(tmp_scale).scale();
   }
   else {
-    var color_scale = chroma.scale(palette)
-                            .mode(palette_interpolation_mode)
-                            .padding(palette_padding);
+    color_scale = chroma.scale(palette)
+                        .mode(palette_interpolation_mode);
+  }
+  color_scale = color_scale.padding(palette_padding);
+  if (correct_palette_lightness) {
+    color_scale = color_scale.correctLightness();
   }
 
   data_scaled.forEach(function (val, idx) {
