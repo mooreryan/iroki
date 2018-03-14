@@ -72,6 +72,8 @@ var g_ID_SUBMIT_BUTTON = "submit-button",
     g_ID_RESET_BUTTON  = "reset-button",
     g_ID_SAVE_BUTTON   = "save-button";
 
+var g_val_biom_str = null;
+
 function update_form_vals() {
 
   // Color options
@@ -137,7 +139,10 @@ function hide_correct_opts_div() {
  * Calls biom__save_abundance_colors once the file is uploaded.  Sets up all the listeners and manages the form values.  It is called directly on the biom.html.slim page.
  */
 function biom__upload_button() {
-  function handleFiles() {
+  /**
+   * Uploads the file to the biom_reader.
+   */
+  function upload_file() {
     var file = uploader.files[0];
     if (file) {
       biom_reader.readAsText(file);
@@ -145,6 +150,25 @@ function biom__upload_button() {
     else {
       alert("Don't forget to select a biom file!");
     }
+  }
+
+  /**
+   * Set the global val of biom str.  This will be used for biom_reader.onload.
+   *
+   * @param event
+   */
+  function set_biom_str(event) {
+    g_val_biom_str = event.target.result;
+    alert("Biom file uploaded!")
+  }
+
+  /**
+   * This function is called when you hit the save button.
+   */
+  function save_result() {
+    var params = set_params(g_val_biom_str);
+
+    biom__save_abundance_colors(params)
   }
 
   function undisable_and_update() {
@@ -257,7 +281,7 @@ function biom__upload_button() {
   var biom_conversion_style = document.getElementById(g_ID_BIOM_CONVERSION_STYLE);
 
   var biom_reader = new FileReader();
-
+  biom_reader.onload = set_biom_str;
 
   // Set up all the listeners.
   uploader.addEventListener("change", undisable_and_update);
@@ -337,7 +361,7 @@ function biom__upload_button() {
 
     update_form_vals();
 
-    handleFiles();
+    upload_file();
   }, false);
   reset_button.addEventListener("click", function () {
     disable(g_ID_RESET_BUTTON);
@@ -351,16 +375,7 @@ function biom__upload_button() {
     update_form_vals();
   });
   save_button.addEventListener("click", function () {
-    // TODO save stuff!
-    alert("you clicked save!");
+    save_result();
   });
 
-  // Process the biom file once it is finished loading.
-  biom_reader.onload = function (event) {
-    var biom_str = event.target.result;
-
-    var params = set_params(biom_str);
-
-    biom__save_abundance_colors(params);
-  };
 }
