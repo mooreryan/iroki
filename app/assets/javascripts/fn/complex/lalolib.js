@@ -320,7 +320,7 @@ fn.lalolib.svd.svd = function (M, center) {
       numeric_svd    = null;
 
   try {
-    svd = lalolib.svd(the_matrix, "full");
+    svd = lalolib.svd(the_matrix, "thin");
   }
   catch (error) {
     console.log("lalolib.svd() failed with error: " + error + ".  Trying numeric.svd() instead.");

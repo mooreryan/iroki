@@ -1071,7 +1071,7 @@ fn.parsed_biom.new = function (params) {
   }
 
   fully_parsed_biom.projection_leaves_1d = fn.project.projection_leaves_1d(fully_parsed_biom.count_matrix);
-  // fully_parsed_biom.projection_samples_1d = fn.project.projection_samples_1d(fully_parsed_biom.count_matrix);
+  fully_parsed_biom.projection_samples_1d = fn.project.projection_samples_1d(fully_parsed_biom.count_matrix);
 
 
   // All the stuff for the colors.

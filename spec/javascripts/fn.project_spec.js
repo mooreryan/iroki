@@ -34,14 +34,24 @@ describe("fn", function () {
         spec_helper.expect_stringify_equal(actual, expected);
       });
 
-      it("returns all PC's if you request more than there actually are", function() {
+      it("returns all PC's if you request more than there actually are", function () {
         var expected = spec_helper.longley.PCA_SCORES_VAL;
         var M        = spec_helper.longley.DATA;
 
         var actual = fn.project.project_with_num_pcs_cutoff(M, 200).val;
 
         spec_helper.expect_stringify_equal(actual, expected);
-      })
+      });
+    });
+
+    describe("fn.project.projection_samples_1d", function () {
+      it("projects the columns into the first PC", function () {
+        var expected = spec_helper.longley.PROJECTION_SAMPLES_1D;
+        var M        = spec_helper.longley.DATA;
+        var actual   = fn.project.projection_samples_1d(M);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
     });
   });
 });

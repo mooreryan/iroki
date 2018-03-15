@@ -645,9 +645,9 @@ spec_helper.test_case.PARAMS_FOR_NEW = {
   biom_conversion_style: g_ID_BIOM_CONVERSION_STYLE_GEOMETRY
 };
 
-spec_helper.test_case.BIOM_WITH_COLORS_TSV = "name\tcolor\thue\tchroma/saturation\tlightness\tcentroid\tevenness\tabundance\ts1\ts2\ts3\ts4\ts5\ts6\napple\t#94d3ff\t274.23\t71.43\t60\t(0.03, -0.4)\t0.71\t1.67\t0\t1\t2\t0\t3\t4\npie\t#edbced\t327\t71.43\t60\t(0.22, -0.14)\t0.71\t1.67\t1\t2\t0\t3\t0\t4";
+spec_helper.test_case.BIOM_WITH_COLORS_TSV = "name\tcolor\thue\tchroma/saturation\tlightness\tcentroid\tevenness\tabundance\ts1\ts2\ts3\ts4\ts5\ts6\napple\t#bfcde3\t274.23\t28.57\t60\t(0.03, -0.4)\t0.71\t1.67\t0\t1\t2\t0\t3\t4\npie\t#d9c6d9\t327\t28.57\t60\t(0.22, -0.14)\t0.71\t1.67\t1\t2\t0\t3\t0\t4";
 
-spec_helper.test_case.BIOM_WITH_COLORS_HTML = "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}.thick-left-border {border-left: 3px solid #2d2d2d}</style><title>Color table</title></head><body><table><tbody><tr><th>name</th><th class='thick-right-border'>color</th><th>hue</th><th>chroma/saturation</th><th class='thick-right-border'>lightness</th><th>centroid</th><th>evenness</th><th class='thick-right-border'>abundance</th><th>s1</th><th>s2</th><th>s3</th><th>s4</th><th>s5</th><th>s6</th></tr><tr><td>apple</td><td class='thick-right-border' style='background-color: #94d3ff; color: black;'>#94d3ff</td><td>274.23</td><td>71.43</td><td class='thick-right-border'>60</td><td>(0.03, -0.4)</td><td>0.71</td><td class='thick-right-border'>1.67</td><td>0</td><td>1</td><td>2</td><td>0</td><td>3</td><td>4</td></tr><tr><td>pie</td><td class='thick-right-border' style='background-color: #edbced; color: black;'>#edbced</td><td>327</td><td>71.43</td><td class='thick-right-border'>60</td><td>(0.22, -0.14)</td><td>0.71</td><td class='thick-right-border'>1.67</td><td>1</td><td>2</td><td>0</td><td>3</td><td>0</td><td>4</td></tr></tbody></table></body></html>";
+spec_helper.test_case.BIOM_WITH_COLORS_HTML = "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}.thick-left-border {border-left: 3px solid #2d2d2d}</style><title>Color table</title></head><body><table><tbody><tr><th>name</th><th class='thick-right-border'>color</th><th>hue</th><th>chroma/saturation</th><th class='thick-right-border'>lightness</th><th>centroid</th><th>evenness</th><th class='thick-right-border'>abundance</th><th>s1</th><th>s2</th><th>s3</th><th>s4</th><th>s5</th><th>s6</th></tr><tr><td>apple</td><td class='thick-right-border' style='background-color: #bfcde3; color: black;'>#bfcde3</td><td>274.23</td><td>28.57</td><td class='thick-right-border'>60</td><td>(0.03, -0.4)</td><td>0.71</td><td class='thick-right-border'>1.67</td><td>0</td><td>1</td><td>2</td><td>0</td><td>3</td><td>4</td></tr><tr><td>pie</td><td class='thick-right-border' style='background-color: #d9c6d9; color: black;'>#d9c6d9</td><td>327</td><td>28.57</td><td class='thick-right-border'>60</td><td>(0.22, -0.14)</td><td>0.71</td><td class='thick-right-border'>1.67</td><td>1</td><td>2</td><td>0</td><td>3</td><td>0</td><td>4</td></tr></tbody></table></body></html>";
 
 spec_helper.test_case.APPROX_STARTING_COLORS_TSV = "name\tappoximate starting color\ns1\t#ed5e93\ns2\t#d47a33\ns3\t#779d2c\ns4\t#00a98f\ns5\t#00a3ec\ns6\t#9083ed";
 
@@ -665,18 +665,18 @@ spec_helper.test_case.FULLY_PARSED_BIOM = {
   color_details: {
     apple: {
       hue: 274.23327766710975,
-      chroma: 71.43002438742897,
+      chroma: 28.56997561257103,
       lightness: 60
     },
     pie: {
       hue: 326.9951158048415,
-      chroma: 71.43002438742897,
+      chroma: 28.56997561257103,
       lightness: 60
     }
   },
   color_hex_codes: {
-    apple: "#94d3ff",
-    pie: "#edbced"
+    apple: "#bfcde3",
+    pie: "#d9c6d9"
   },
   counts_for_each_leaf: spec_helper.test_case.COUNTS,
   evenness_across_samples_for_each_leaf: spec_helper.test_case.EVENNESS_ACROSS_ALL_SAMPLES,
@@ -781,3 +781,6 @@ spec_helper.longley.PCA_SCORES_FROM_ZERO = lalolib.array2mat([
   [387.74338, 90.74273, 54.82607, 2.0335285, 0.5610002, 0.81194518],
   [369.73278, 167.99744, 9.07281, 0.0000000, 0.0000000, 0.48587059]
 ]);
+
+// Checked against R.  Also this is on the centered longley data.
+spec_helper.longley.PROJECTION_SAMPLES_1D = JSON.parse('{"length":6,"m":6,"n":1,"size":[6,1],"type":"matrix","val":{"0":0.07848368082459646,"1":1,"2":0.822259291828756,"3":0.18102954580522598,"4":0.0400701729867867,"5":0}}');

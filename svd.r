@@ -1,3 +1,5 @@
+center <- function(dat) { scale(dat, center=T, scale=F) }
+
 longley.dat <- cbind(longley[1:5], longley[7])
 longley.dat.small <- longley.dat[1:4,]
 
