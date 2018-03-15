@@ -757,13 +757,19 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
 
   var opt_correct_luminance = opt_or_default(opts, "correct_luminance");
 
+  // First thing is that we need inverse evenness for coloring.
+  var inverse_evenness = {};
+  fn.obj.each(fully_parsed_biom.evenness_across_samples_for_each_leaf, function (leaf_name, evenness_val) {
+    inverse_evenness[leaf_name] = 1 - evenness_val;
+  });
+
   // Get min and max evenness (for scaling)
   if (opt_evenness_absolute) {
     var evenness_min = 0;
     var evenness_max = 1;
   }
   else {
-    var evenness_vals = fn.obj.vals(fully_parsed_biom.evenness_across_samples_for_each_leaf);
+    var evenness_vals = fn.obj.vals(inverse_evenness);
     var evenness_min  = fn.ary.min(evenness_vals);
     var evenness_max  = fn.ary.max(evenness_vals);
   }
@@ -782,7 +788,7 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
   fully_parsed_biom.leaf_names.forEach(function (leaf_name, leaf_idx) {
     color_details[leaf_name] = {};
 
-    var evenness_val  = fully_parsed_biom.evenness_across_samples_for_each_leaf[leaf_name];
+    var evenness_val  = inverse_evenness[leaf_name];
     var abundance_val = fully_parsed_biom.abundance_across_samples_for_each_leaf[leaf_name];
 
     // Set the hue.
@@ -793,10 +799,10 @@ fn.parsed_biom.colors = function (fully_parsed_biom, opts) {
     // Set the chroma.  We take 1 - evenness because we technically need inverse evenness.
     if (opt_chroma_reversed) {
       // Swap the new min and new max to reverse the scale
-      var chroma_val = fn.math.scale(1 - evenness_val, evenness_min, evenness_max, opt_chroma_max, opt_chroma_min);
+      var chroma_val = fn.math.scale(evenness_val, evenness_min, evenness_max, opt_chroma_max, opt_chroma_min);
     }
     else {
-      var chroma_val = fn.math.scale(1 - evenness_val, evenness_min, evenness_max, opt_chroma_min, opt_chroma_max);
+      var chroma_val = fn.math.scale(evenness_val, evenness_min, evenness_max, opt_chroma_min, opt_chroma_max);
     }
 
     // Set the lightness.
@@ -1070,7 +1076,7 @@ fn.parsed_biom.new = function (params) {
     fully_parsed_biom.projection = fn.project.project_with_variance_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep);
   }
 
-  fully_parsed_biom.projection_leaves_1d = fn.project.projection_leaves_1d(fully_parsed_biom.count_matrix);
+  fully_parsed_biom.projection_leaves_1d  = fn.project.projection_leaves_1d(fully_parsed_biom.count_matrix);
   fully_parsed_biom.projection_samples_1d = fn.project.projection_samples_1d(fully_parsed_biom.count_matrix);
 
 
@@ -1097,4 +1103,3 @@ fn.parsed_biom.new = function (params) {
 
   return fully_parsed_biom;
 };
-
