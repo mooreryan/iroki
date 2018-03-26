@@ -1,0 +1,13 @@
+- provide :title, 'Big Tree Viewer'
+
+.row.expanded.thick-border
+  .row
+    .small-12.columns
+      label for="file-uploader" Tree file!
+      input id="file-uploader" type="file"
+  .row
+    .small-12.columns
+      canvas#canvas-tree height="900" width="1000"
+
+javascript:
+  cv.upload_handler();
