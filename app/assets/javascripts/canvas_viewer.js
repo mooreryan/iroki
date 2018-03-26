@@ -23,6 +23,9 @@ var canvas_viewer = {
     },
     file_uploader: {
       id: "file-uploader"
+    },
+    submit_button: {
+      id: "submit"
     }
   },
 
@@ -281,8 +284,10 @@ cv.upload_handler = function () {
     }
   }
 
-  var file_reader   = new FileReader(),
-      file_uploader = document.getElementById(cv.html.file_uploader.id);
+  var file_reader   = new FileReader();
+
+  var file_uploader = document.getElementById(cv.html.file_uploader.id);
+  var submit_button = document.getElementById(cv.html.submit_button.id);
 
   file_reader.onload = function (event) {
     var tree_str = event.target.result;
@@ -290,6 +295,9 @@ cv.upload_handler = function () {
   };
 
   file_uploader.addEventListener("change", function () {
-    upload_file(file_uploader, file_reader);
+    undisable(cv.html.submit_button.id);
   });
+  submit_button.addEventListener("click", function () {
+    upload_file(file_uploader, file_reader);
+  })
 };

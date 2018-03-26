@@ -1,13 +1,12 @@
-- provide :title, 'Big Tree Viewer'
+- provide :title, 'Online visualization of large phylogenetic trees'
 
 .row.expanded.thick-border
+  .small-12.medium-6.large-4.columns#outer-container
+    .row.expanded.upload-form
+      = render "layouts/canvas_viewer_form"
   .row
-    .small-12.columns
-      label for="file-uploader" Tree file!
-      input id="file-uploader" type="file"
-  .row
-    .small-12.columns
-      canvas#canvas-tree height="900" width="1000"
+    .small-12.medium-6.large-8.columns
+      canvas#canvas-tree height="900" width="1000" style="background: #f9ceff;"
 
 javascript:
   cv.upload_handler();

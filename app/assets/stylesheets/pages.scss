@@ -121,6 +121,7 @@ label {
   border-right-width: 3px;
 }
 
+
 #save-tab-button {
   border-left-width: 1.5px;
 }
@@ -152,4 +153,31 @@ a {
 
 hr.row {
   height: 1px;
+}
+
+.thick-right-border {
+  border-right-width: 3px;
+}
+.thin-right-border {
+  border-right-width: 1.5px;
+}
+
+.thick-left-border {
+  border-left-width: 3px;
+}
+.thin-left-border {
+  border-left-width: 1.5px;
+}
+
+#canvas-upload-button {
+  border-right-width: 1.5px;
+}
+
+#canvas-options-button {
+  border-left-width: 1.5px;
+  border-right-width: 1.5px;
+}
+
+#canvas-save-button {
+  border-left-width: 1.5px;
 }
