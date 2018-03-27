@@ -10,15 +10,20 @@ var canvas_viewer = {
 
   opts: {},
 
+  sort_fn: null,
+
 
   // For html elem stuff
   html: {
+    // Canvas stuff
     canvas_tree: {
       id: "canvas-tree"
     },
     canvas_tree_container: {
       id: "canvas-tree-container"
     },
+
+    // Submitting & reseting
     file_uploader: {
       id: "file-uploader"
     },
@@ -28,6 +33,25 @@ var canvas_viewer = {
     reset_button: {
       id: "reset"
     },
+
+    // Option buttons & sliders
+    tree_layout: {
+      id: "tree-shape"
+    },
+    tree_sort: {
+      id: "tree-sort"
+    },
+    tree_rotation: {
+      id: "tree-rotation"
+    },
+    tree_size: {
+      id: "size"
+    },
+    tree_padding: {
+      id: "padding"
+    },
+
+    // Other
     status_msg: {
       id: "status-msg"
     }
@@ -53,7 +77,7 @@ cv.helpers.is_inner = function (d) {
 };
 
 cv.helpers.adjust = function (coord) {
-  return Math.floor(coord * cv.opts.size_multiplier);
+  return Math.floor(coord * cv.opts.tree_size);
 };
 
 cv.helpers.default_opts = function () {
@@ -62,9 +86,12 @@ cv.helpers.default_opts = function () {
     show_dots: false,
     show_text: false,
 
-    padding: 50,
-    size_multiplier: 20,
-    tree_rotation: 0
+    // Tree layout opts
+    tree_layout: "radial-tree",
+    tree_sort: "descending",
+    tree_rotation: 0,
+    tree_size: 20,
+    tree_padding: 50,
   };
 };
 
@@ -81,6 +108,33 @@ cv.helpers.clear_canvas = function () {
     .attr("width", cv.canvas_width);
   // .style("background", "#f9ceff");
 };
+
+cv.helpers.sort_descending = function (a, b) {
+  return (a.value - b.value) || d3.ascending(a.data.branch_length, b.data.branch_length);
+};
+
+cv.helpers.sort_ascending = function (a, b) {
+  return (b.value - a.value) || d3.descending(a.data.branch_length, b.data.branch_length);
+};
+
+cv.helpers.sort_none = function (a, b) {
+  return 0;
+};
+
+cv.helpers.set_sort_function = function () {
+  var tree_sort_val = jq(cv.html.tree_sort.id).val();
+
+  if (tree_sort_val === "ascending") {
+    cv.sort_fn = cv.helpers.sort_ascending;
+  }
+  else if (tree_sort_val === "not-sorted") {
+    cv.sort_fn = cv.helpers.sort_none;
+  }
+  else {
+    cv.sort_fn = cv.helpers.sort_descending;
+  }
+};
+
 
 cv.layout_radial = function radial_cluster(root) {
   var xy_range = {
@@ -119,10 +173,10 @@ cv.layout_radial = function radial_cluster(root) {
       vertex.radial_layout_info.parent_x = parent.radial_layout_info.x;
       vertex.radial_layout_info.parent_y = parent.radial_layout_info.y;
 
-      var silly_x  = Math.floor(vertex.radial_layout_info.x * cv.opts.size_multiplier);
-      var silly_y  = Math.floor(vertex.radial_layout_info.y * cv.opts.size_multiplier);
-      var silly_px = Math.floor(vertex.radial_layout_info.parent_x * cv.opts.size_multiplier);
-      var silly_py = Math.floor(vertex.radial_layout_info.parent_y * cv.opts.size_multiplier);
+      var silly_x  = Math.floor(vertex.radial_layout_info.x * cv.opts.tree_size);
+      var silly_y  = Math.floor(vertex.radial_layout_info.y * cv.opts.tree_size);
+      var silly_px = Math.floor(vertex.radial_layout_info.parent_x * cv.opts.tree_size);
+      var silly_py = Math.floor(vertex.radial_layout_info.parent_y * cv.opts.tree_size);
 
       if (silly_x < xy_range.min_x) {
         xy_range.min_x = silly_x;
@@ -203,8 +257,8 @@ cv.width_and_height = function (xy_range) {
       height_low  = xy_range.min_y + Math.abs(xy_range.min_y);
 
   return {
-    w: (width_high - width_low) + cv.opts.padding,
-    h: (height_high - height_low) + cv.opts.padding
+    w: (width_high - width_low) + cv.opts.tree_padding,
+    h: (height_high - height_low) + cv.opts.tree_padding
   };
 };
 
@@ -227,7 +281,7 @@ cv.canvas_buffer = function (w, h) {
 cv.main = function (tree_str, mapping_str) {
 
   function tr(val, min_val) {
-    return Math.floor(val * cv.opts.size_multiplier + Math.abs(min_val) + (cv.opts.padding / 2));
+    return Math.floor(val * cv.opts.tree_size + Math.abs(min_val) + (cv.opts.tree_padding / 2));
   }
 
   // Set the radius of each node by recursively summing and scaling the distance from the root.
@@ -247,15 +301,16 @@ cv.main = function (tree_str, mapping_str) {
 
   var parsed_newick = newick__parse(tree_str);
 
+  // First set the sort function.
+  cv.helpers.set_sort_function();
+  // Then calculate the hierarchy.
   ROOT = d3.hierarchy(parsed_newick, function (d) {
     return d.branchset;
   })
            .sum(function (d) {
              return d.branchset ? 0 : 1;
            })
-           .sort(function (a, b) {
-             return 0;
-           });
+           .sort(cv.sort_fn);
 
   // This modifies root.
   cv.xy_range      = cv.layout_radial(ROOT);
@@ -276,6 +331,7 @@ cv.main = function (tree_str, mapping_str) {
     return d.radial_layout_info;
   });
 
+  // This is for the radial layout.
   data.forEach(function (d, i) {
     var x  = tr(d.x, cv.xy_range.min_x),
         px = tr(d.parent_x, cv.xy_range.min_x),
@@ -332,11 +388,19 @@ cv.upload_handler = function () {
   var submit_button = document.getElementById(cv.html.submit_button.id);
   var reset_button  = document.getElementById(cv.html.reset_button.id);
 
+  // Tree layout options
+  cv.html.tree_layout.elem   = document.getElementById(cv.html.tree_layout.id);
+  cv.html.tree_sort.elem     = document.getElementById(cv.html.tree_sort.id);
+  cv.html.tree_rotation.elem = document.getElementById(cv.html.tree_rotation.id);
+  cv.html.tree_size.elem     = document.getElementById(cv.html.tree_size.id);
+  cv.html.tree_padding.elem  = document.getElementById(cv.html.tree_padding.id);
+
   file_reader.onload = function (event) {
     var tree_str = event.target.result;
     cv.main(tree_str);
   };
 
+  // Submitting and reseting
   file_uploader.addEventListener("change", function () {
     cv.tree_changed = true;
     undisable(cv.html.submit_button.id);
@@ -358,4 +422,28 @@ cv.upload_handler = function () {
     cv.helpers.clear_canvas();
     undisable(cv.html.submit_button.id);
   });
+
+  // Tree layout options
+  cv.html.tree_layout.elem.addEventListener("change", function () {
+    cv.opts.tree_layout = jq(cv.html.tree_layout.id).val();
+    undisable(cv.html.submit_button.id);
+  });
+  cv.html.tree_sort.elem.addEventListener("change", function () {
+    cv.opts.tree_sort = jq(cv.html.tree_sort.id).val();
+    undisable(cv.html.submit_button.id);
+  });
+  cv.html.tree_rotation.elem.addEventListener("change", function () {
+    cv.opts.tree_rotation = parseInt(jq(cv.html.tree_rotation.id).val());
+    undisable(cv.html.submit_button.id);
+  });
+  cv.html.tree_size.elem.addEventListener("change", function () {
+    cv.opts.tree_size = parseInt(jq(cv.html.tree_size.id).val());
+    undisable(cv.html.submit_button.id);
+  });
+  cv.html.tree_padding.elem.addEventListener("change", function () {
+    cv.opts.tree_padding = parseInt(jq(cv.html.tree_padding.id).val());
+    undisable(cv.html.submit_button.id);
+  });
 };
+
+var p;
