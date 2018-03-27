@@ -54,6 +54,11 @@ var canvas_viewer = {
       id: "padding"
     },
 
+    // Viewer opts
+    viewer_size_fixed: {
+      id: "viewer-size-fixed"
+    },
+
     // Other
     status_msg: {
       id: "status-msg"
@@ -99,7 +104,10 @@ cv.helpers.default_opts = function () {
     tree_sort: "descending",
     tree_rotation: 0,
     tree_size: 20,
-    tree_padding: 50
+    tree_padding: 50,
+
+    // Viewer opts
+    viewer_size_fixed: false
   };
 };
 
@@ -117,6 +125,10 @@ cv.helpers.reset_opts = function () {
   jq(cv.html.tree_rotation.id).val(cv.opts.tree_rotation);
   jq(cv.html.tree_size.id).val(cv.opts.tree_size);
   jq(cv.html.tree_padding.id).val(cv.opts.tree_padding);
+
+  // Update the fixed viewer size stuff.
+  jq(cv.html.viewer_size_fixed.id).prop("checked", false);
+  jq(cv.html.canvas_tree_container.id).css("overflow", "visible");
 
   disable(cv.html.tree_branch_style.id);
 };
@@ -184,6 +196,7 @@ cv.layout_radial = function radial_cluster(root) {
       var parent = vertex.parent;
 
 
+      // NOTE if the tree has branches less than 1e-10, it will be slightly off.
       var distance_to_parent = vertex.data.branch_length === 0 ? cv.helpers.zero_len_branch : vertex.data.branch_length;
 
       var x = parent.radial_layout_info.x + distance_to_parent * Math.cos(vertex.radial_layout_info.wedge_border + (vertex.radial_layout_info.wedge_size / 2));
@@ -505,6 +518,9 @@ cv.upload_handler = function () {
   cv.html.tree_size.elem         = document.getElementById(cv.html.tree_size.id);
   cv.html.tree_padding.elem      = document.getElementById(cv.html.tree_padding.id);
 
+  // Viewer opts
+  cv.html.viewer_size_fixed.elem = document.getElementById(cv.html.viewer_size_fixed.id);
+
   file_reader.onload = function (event) {
     var tree_str = event.target.result;
     cv.main(tree_str);
@@ -530,6 +546,10 @@ cv.upload_handler = function () {
     cv.tree_changed = false;
     cv.helpers.reset_opts();
     cv.helpers.clear_canvas();
+
+    document.getElementById("canvas-tree-upload-form").reset();
+    document.getElementById("canvas-mapping-upload-form").reset();
+
     undisable(cv.html.submit_button.id);
   });
 
@@ -587,6 +607,15 @@ cv.upload_handler = function () {
     cv.opts.tree_padding = parseInt(jq(cv.html.tree_padding.id).val());
     undisable(cv.html.submit_button.id);
   });
+
+  cv.html.viewer_size_fixed.elem.addEventListener("change", function(){
+    if (is_checked(cv.html.viewer_size_fixed.id)) {
+      jq(cv.html.canvas_tree_container.id).css("overflow", "scroll");
+    }
+    else {
+      jq(cv.html.canvas_tree_container.id).css("overflow", "visible");
+    }
+  })
 };
 
 cv.helpers.circular_tree_size = function (val) {
