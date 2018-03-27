@@ -76,6 +76,10 @@ cv.helpers.is_inner = function (d) {
   return !cv.helpers.is_leaf(d);
 };
 
+cv.helpers.is_level_one_node = function (d) {
+  return d.depth === 1;
+};
+
 cv.helpers.adjust = function (coord) {
   return Math.floor(coord * cv.opts.tree_size);
 };
@@ -299,6 +303,17 @@ cv.main = function (tree_str, mapping_str) {
     return d.data.branch_length + (d.children ? d3.max(d.children, max_length) : 0);
   }
 
+  /**
+   *
+   * @param x the angle of the point (theta) in radians
+   * @param y the radius (r)
+   */
+  function to_polar(x, y) {
+    var theta = x,
+        r     = y;
+    return { x: r * Math.cos(theta) + LALA, y: r * Math.sin(theta) + LALA };
+  }
+
   var parsed_newick = newick__parse(tree_str);
 
   // First set the sort function.
@@ -318,6 +333,9 @@ cv.main = function (tree_str, mapping_str) {
   cv.canvas_width  = cv.ret_val.w;
   cv.canvas_height = cv.ret_val.h;
 
+  cv.canvas_width  = 1000;
+  cv.canvas_height = 1000;
+
   // set_radius(ROOT, ROOT.data.branch_length = 0, cv.canvas_height / max_length(ROOT));
 
   var buffer_background = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
@@ -327,25 +345,95 @@ cv.main = function (tree_str, mapping_str) {
 
   buffer_branches.context.beginPath();
 
-  var data = ROOT.descendants().map(function (d) {
-    return d.radial_layout_info;
-  });
+  console.log(ROOT);
+  var LALA           = 250;
+  var circle_cluster = d3.cluster()
+                         .size([2 * Math.PI, LALA])
+                         .separation(function (a, b) {
+                           return 1;
+                         });
+  circle_cluster(ROOT);
+  set_radius(ROOT, ROOT.data.branch_length = 0, LALA / max_length(ROOT));
 
-  // This is for the radial layout.
-  data.forEach(function (d, i) {
-    var x  = tr(d.x, cv.xy_range.min_x),
-        px = tr(d.parent_x, cv.xy_range.min_x),
-        y  = tr(d.y, cv.xy_range.min_y),
-        py = tr(d.parent_y, cv.xy_range.min_y);
 
-    if (cv.helpers.is_leaf(d)) {
-      // TODO draw dots
-      // TODO draw text
+  var base = ROOT.descendants()[0];
+  if (base.depth !== 0) {
+    throw Error("This is not the base!");
+  }
+  var retval   = to_polar(base.x, base.y);
+  var center_x = retval.x;
+  var center_y = retval.y;
+
+  // d.x is theta, and d.y is radius, which runs from 0 to LALA.
+  ROOT.descendants().forEach(function (d) {
+    var tree_rotation_radians = fn.math.degrees_to_radians(cv.opts.tree_rotation);
+
+    var this_radius       = d.y;
+    var this_theta        = d.x + tree_rotation_radians;
+    var clockwise         = false;
+    var counter_clockwise = true;
+
+    var ret_val = to_polar(d.x + tree_rotation_radians, d.y);
+    var x       = ret_val.x;
+    var y       = ret_val.y;
+
+
+    if (d.parent) {
+      var parent_radius     = d.parent.y;
+      var parent_theta      = d.parent.x + tree_rotation_radians;
+
+      ret_val = to_polar(d.parent.x, d.parent.y);
+      var px  = ret_val.x;
+      var py  = ret_val.y;
+
+      // Use this node's theta and the parent's radius.
+      var drop_point = to_polar(d.x + tree_rotation_radians, d.parent.y);
+
+      buffer_branches.context.moveTo(x, y);
+      buffer_branches.context.lineTo(drop_point.x, drop_point.y);
+
+      if (!cv.helpers.is_level_one_node(d)) {
+        // buffer_branches.context.moveTo(center_x, center_y);
+
+        if (this_theta < parent_theta) {
+          buffer_branches.context.arc(center_x, center_y, parent_radius, this_theta, parent_theta, clockwise);
+        }
+        else {
+          buffer_branches.context.arc(center_x, center_y, parent_radius, this_theta, parent_theta, counter_clockwise);
+
+        }
+      }
     }
 
-    buffer_branches.context.moveTo(x, y);
-    buffer_branches.context.lineTo(px, py);
+    // console.log("name: " + d.data.name + ", x: " + d.x + ", y: " + d.y);
+    // console.log("name: " + d.data.name + ", tx: " + x + ", ty: " + y);
+    // buffer_branches.context.fillRect(x, y, 10, 10);
+    // buffer_branches.context.fillText(d.data.name, x+5, y+5);
+    buffer_branches.context.fillRect(x, y, 10, 10);
+    buffer_branches.context.fillText(d.data.name, x + 5, y + 5);
+
   });
+
+
+  // var data = ROOT.descendants().map(function (d) {
+  //   return d.radial_layout_info;
+  // });
+
+  // This is for the radial layout.
+  // data.forEach(function (d, i) {
+  //   var x  = tr(d.x, cv.xy_range.min_x),
+  //       px = tr(d.parent_x, cv.xy_range.min_x),
+  //       y  = tr(d.y, cv.xy_range.min_y),
+  //       py = tr(d.parent_y, cv.xy_range.min_y);
+  //
+  //   if (cv.helpers.is_leaf(d)) {
+  //     // TODO draw dots
+  //     // TODO draw text
+  //   }
+  //
+  //   buffer_branches.context.moveTo(x, y);
+  //   buffer_branches.context.lineTo(px, py);
+  // });
 
   buffer_branches.context.stroke();
 
