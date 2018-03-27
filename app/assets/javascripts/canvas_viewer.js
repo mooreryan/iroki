@@ -1,31 +1,35 @@
 var canvas_viewer = {
   // In pixels
-  canvas_height: 900,
+  canvas_height: 1000,
   canvas_width: 1000,
-  padding: 50,
 
-  size_multiplier: 20,
+  tree_changed: false,
 
   // Tmp container for return values.
   ret_val: null,
 
-  params: {
-    show_branches: true,
-    show_dots: false,
-    show_text: false,
-    tree_rotation: 0
-  },
+  opts: {},
+
 
   // For html elem stuff
   html: {
     canvas_tree: {
       id: "canvas-tree"
     },
+    canvas_tree_container: {
+      id: "canvas-tree-container"
+    },
     file_uploader: {
       id: "file-uploader"
     },
     submit_button: {
       id: "submit"
+    },
+    reset_button: {
+      id: "reset"
+    },
+    status_msg: {
+      id: "status-msg"
     }
   },
 
@@ -49,7 +53,33 @@ cv.helpers.is_inner = function (d) {
 };
 
 cv.helpers.adjust = function (coord) {
-  return Math.floor(coord * cv.size_multiplier);
+  return Math.floor(coord * cv.opts.size_multiplier);
+};
+
+cv.helpers.default_opts = function () {
+  return {
+    show_branches: true,
+    show_dots: false,
+    show_text: false,
+
+    padding: 50,
+    size_multiplier: 20,
+    tree_rotation: 0
+  };
+};
+
+cv.helpers.reset_opts = function () {
+  cv.opts = cv.helpers.default_opts();
+};
+
+cv.helpers.clear_canvas = function () {
+  utils__clear_elem(cv.html.canvas_tree.id);
+  d3.select("#" + cv.html.canvas_tree_container.id)
+    .append("canvas")
+    .attr("id", cv.html.canvas_tree.id)
+    .attr("height", cv.canvas_height)
+    .attr("width", cv.canvas_width);
+  // .style("background", "#f9ceff");
 };
 
 cv.layout_radial = function radial_cluster(root) {
@@ -89,10 +119,10 @@ cv.layout_radial = function radial_cluster(root) {
       vertex.radial_layout_info.parent_x = parent.radial_layout_info.x;
       vertex.radial_layout_info.parent_y = parent.radial_layout_info.y;
 
-      var silly_x = Math.floor(vertex.radial_layout_info.x * cv.size_multiplier);
-      var silly_y = Math.floor(vertex.radial_layout_info.y * cv.size_multiplier);
-      var silly_px = Math.floor(vertex.radial_layout_info.parent_x * cv.size_multiplier);
-      var silly_py = Math.floor(vertex.radial_layout_info.parent_y * cv.size_multiplier);
+      var silly_x  = Math.floor(vertex.radial_layout_info.x * cv.opts.size_multiplier);
+      var silly_y  = Math.floor(vertex.radial_layout_info.y * cv.opts.size_multiplier);
+      var silly_px = Math.floor(vertex.radial_layout_info.parent_x * cv.opts.size_multiplier);
+      var silly_py = Math.floor(vertex.radial_layout_info.parent_y * cv.opts.size_multiplier);
 
       if (silly_x < xy_range.min_x) {
         xy_range.min_x = silly_x;
@@ -143,7 +173,7 @@ cv.layout_radial = function radial_cluster(root) {
         "y": 0,
         "num_leaves_in_subtree": 0,
         "wedge_size": 2 * Math.PI,
-        "wedge_border": utils__deg_to_rad(cv.params.tree_rotation)
+        "wedge_border": utils__deg_to_rad(cv.opts.tree_rotation)
       };
     }
     else {
@@ -173,8 +203,8 @@ cv.width_and_height = function (xy_range) {
       height_low  = xy_range.min_y + Math.abs(xy_range.min_y);
 
   return {
-    w: (width_high - width_low) + cv.padding,
-    h: (height_high - height_low) + cv.padding
+    w: (width_high - width_low) + cv.opts.padding,
+    h: (height_high - height_low) + cv.opts.padding
   };
 };
 
@@ -197,7 +227,7 @@ cv.canvas_buffer = function (w, h) {
 cv.main = function (tree_str, mapping_str) {
 
   function tr(val, min_val) {
-    return Math.floor(val * cv.size_multiplier + Math.abs(min_val) + (cv.padding / 2));
+    return Math.floor(val * cv.opts.size_multiplier + Math.abs(min_val) + (cv.opts.padding / 2));
   }
 
   // Set the radius of each node by recursively summing and scaling the distance from the root.
@@ -214,7 +244,6 @@ cv.main = function (tree_str, mapping_str) {
   function max_length(d) {
     return d.data.branch_length + (d.children ? d3.max(d.children, max_length) : 0);
   }
-
 
   var parsed_newick = newick__parse(tree_str);
 
@@ -236,9 +265,10 @@ cv.main = function (tree_str, mapping_str) {
 
   // set_radius(ROOT, ROOT.data.branch_length = 0, cv.canvas_height / max_length(ROOT));
 
-  var buffer_branches = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
-  var buffer_leaves   = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
-  var buffer_text     = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+  var buffer_background = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+  var buffer_branches   = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+  var buffer_leaves     = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+  var buffer_text       = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
 
   buffer_branches.context.beginPath();
 
@@ -263,16 +293,25 @@ cv.main = function (tree_str, mapping_str) {
 
   buffer_branches.context.stroke();
 
+  buffer_background.context.fillStyle = "white";
+  buffer_background.context.fillRect(0, 0, cv.canvas_width, cv.canvas_height);
+
   // Get the actual canvas image
-  var canvas  = document.getElementById(cv.html.canvas_tree.id);
-  canvas.width = cv.canvas_width;
+  var canvas    = document.getElementById(cv.html.canvas_tree.id);
+  canvas.width  = cv.canvas_width;
   canvas.height = cv.canvas_height;
-  var context = canvas.getContext("2d");
+  var context   = canvas.getContext("2d");
 
   // Copy the buffers on to the main image.
+  context.drawImage(buffer_background.canvas, 0, 0);
   context.drawImage(buffer_branches.canvas, 0, 0);
+
+  jq(cv.html.status_msg.id).html("Here is your tree!");
 };
 
+/**
+ * This function is called on the page to get everything started.
+ */
 cv.upload_handler = function () {
   function upload_file(file_uploader, file_reader) {
     var file = file_uploader.files[0];
@@ -284,10 +323,14 @@ cv.upload_handler = function () {
     }
   }
 
-  var file_reader   = new FileReader();
+  // First set default opts
+  cv.helpers.reset_opts();
+
+  var file_reader = new FileReader();
 
   var file_uploader = document.getElementById(cv.html.file_uploader.id);
   var submit_button = document.getElementById(cv.html.submit_button.id);
+  var reset_button  = document.getElementById(cv.html.reset_button.id);
 
   file_reader.onload = function (event) {
     var tree_str = event.target.result;
@@ -295,9 +338,24 @@ cv.upload_handler = function () {
   };
 
   file_uploader.addEventListener("change", function () {
+    cv.tree_changed = true;
     undisable(cv.html.submit_button.id);
   });
   submit_button.addEventListener("click", function () {
+    cv.tree_changed = false;
+
+    jq(cv.html.status_msg.id).html("Rendering tree!  Please wait....");
+
+    disable(cv.html.submit_button.id);
+
+    // First clear the canvas so the background switching can be used to tell when the rendering is finished.
+    cv.helpers.clear_canvas();
     upload_file(file_uploader, file_reader);
-  })
+  });
+  reset_button.addEventListener("click", function () {
+    cv.tree_changed = false;
+    cv.helpers.reset_opts();
+    cv.helpers.clear_canvas();
+    undisable(cv.html.submit_button.id);
+  });
 };
