@@ -38,6 +38,9 @@ var canvas_viewer = {
     tree_layout: {
       id: "tree-shape"
     },
+    tree_branch_style: {
+      id: "tree-branch-style"
+    },
     tree_sort: {
       id: "tree-sort"
     },
@@ -92,15 +95,30 @@ cv.helpers.default_opts = function () {
 
     // Tree layout opts
     tree_layout: "radial-tree",
+    tree_branch_style: "normalogram",
     tree_sort: "descending",
     tree_rotation: 0,
     tree_size: 20,
-    tree_padding: 50,
+    tree_padding: 50
   };
 };
 
+/**
+ * Resets the opts hash as well as the form values to reflect the defaults.
+ */
 cv.helpers.reset_opts = function () {
+  // Set the hash.
   cv.opts = cv.helpers.default_opts();
+
+  // Update the form.
+  jq(cv.html.tree_layout.id).val(cv.opts.tree_layout);
+  jq(cv.html.tree_branch_style.id).val(cv.opts.tree_branch_style);
+  jq(cv.html.tree_sort.id).val(cv.opts.tree_sort);
+  jq(cv.html.tree_rotation.id).val(cv.opts.tree_rotation);
+  jq(cv.html.tree_size.id).val(cv.opts.tree_size);
+  jq(cv.html.tree_padding.id).val(cv.opts.tree_padding);
+
+  disable(cv.html.tree_branch_style.id);
 };
 
 cv.helpers.clear_canvas = function () {
@@ -311,7 +329,10 @@ cv.main = function (tree_str, mapping_str) {
   function to_polar(x, y) {
     var theta = x,
         r     = y;
-    return { x: r * Math.cos(theta) + LALA, y: r * Math.sin(theta) + LALA };
+    return {
+      x: r * Math.cos(theta) + cluster_width + cv.opts.tree_padding,
+      y: r * Math.sin(theta) + cluster_width + cv.opts.tree_padding
+    };
   }
 
   var parsed_newick = newick__parse(tree_str);
@@ -333,8 +354,10 @@ cv.main = function (tree_str, mapping_str) {
   cv.canvas_width  = cv.ret_val.w;
   cv.canvas_height = cv.ret_val.h;
 
-  cv.canvas_width  = 1000;
-  cv.canvas_height = 1000;
+  if (cv.opts.tree_layout === "circular-tree") {
+    cv.canvas_width  = cv.opts.tree_size + (2 * cv.opts.tree_padding);
+    cv.canvas_height = cv.opts.tree_size + (2 * cv.opts.tree_padding);
+  }
 
   // set_radius(ROOT, ROOT.data.branch_length = 0, cv.canvas_height / max_length(ROOT));
 
@@ -345,95 +368,91 @@ cv.main = function (tree_str, mapping_str) {
 
   buffer_branches.context.beginPath();
 
-  console.log(ROOT);
-  var LALA           = 250;
-  var circle_cluster = d3.cluster()
-                         .size([2 * Math.PI, LALA])
-                         .separation(function (a, b) {
-                           return 1;
-                         });
-  circle_cluster(ROOT);
-  set_radius(ROOT, ROOT.data.branch_length = 0, LALA / max_length(ROOT));
-
-
-  var base = ROOT.descendants()[0];
-  if (base.depth !== 0) {
-    throw Error("This is not the base!");
-  }
-  var retval   = to_polar(base.x, base.y);
-  var center_x = retval.x;
-  var center_y = retval.y;
-
-  // d.x is theta, and d.y is radius, which runs from 0 to LALA.
-  ROOT.descendants().forEach(function (d) {
+  if (cv.opts.tree_layout === "circular-tree") {
     var tree_rotation_radians = fn.math.degrees_to_radians(cv.opts.tree_rotation);
 
-    var this_radius       = d.y;
-    var this_theta        = d.x + tree_rotation_radians;
-    var clockwise         = false;
-    var counter_clockwise = true;
+    var cluster_width = cv.opts.tree_size / 2;
 
-    var ret_val = to_polar(d.x + tree_rotation_radians, d.y);
-    var x       = ret_val.x;
-    var y       = ret_val.y;
+    var circle_cluster = d3.cluster()
+                           .size([2 * Math.PI, cluster_width])
+                           .separation(function (a, b) {
+                             return 1;
+                           });
+    circle_cluster(ROOT);
+    set_radius(ROOT, ROOT.data.branch_length = 0, cluster_width / max_length(ROOT));
 
 
-    if (d.parent) {
-      var parent_radius     = d.parent.y;
-      var parent_theta      = d.parent.x + tree_rotation_radians;
+    var base = ROOT.descendants()[0];
+    if (base.depth !== 0) {
+      throw Error("This is not the base!");
+    }
+    var retval   = to_polar(base.x, base.y);
+    var center_x = retval.x;
+    var center_y = retval.y;
 
-      ret_val = to_polar(d.parent.x, d.parent.y);
-      var px  = ret_val.x;
-      var py  = ret_val.y;
+    // d.x is theta, and d.y is radius, which runs from 0 to LALA.
+    ROOT.descendants().forEach(function (d) {
+      var this_radius = cv.opts.tree_branch_style === "cladogram" ? d.y : d.radius;
 
-      // Use this node's theta and the parent's radius.
-      var drop_point = to_polar(d.x + tree_rotation_radians, d.parent.y);
+      var this_theta        = d.x + tree_rotation_radians;
+      var clockwise         = false;
+      var counter_clockwise = true;
 
-      buffer_branches.context.moveTo(x, y);
-      buffer_branches.context.lineTo(drop_point.x, drop_point.y);
+      var ret_val = to_polar(d.x + tree_rotation_radians, this_radius);
+      var x       = ret_val.x;
+      var y       = ret_val.y;
 
-      if (!cv.helpers.is_level_one_node(d)) {
-        // buffer_branches.context.moveTo(center_x, center_y);
 
-        if (this_theta < parent_theta) {
-          buffer_branches.context.arc(center_x, center_y, parent_radius, this_theta, parent_theta, clockwise);
-        }
-        else {
-          buffer_branches.context.arc(center_x, center_y, parent_radius, this_theta, parent_theta, counter_clockwise);
+      if (d.parent) {
+        var parent_radius = cv.opts.tree_branch_style === "cladogram" ? d.parent.y : d.parent.radius;
+        var parent_theta  = d.parent.x + tree_rotation_radians;
 
+        ret_val = to_polar(d.parent.x, parent_radius);
+        var px  = ret_val.x;
+        var py  = ret_val.y;
+
+        // Use this node's theta and the parent's radius.
+        var drop_point = to_polar(d.x + tree_rotation_radians, parent_radius);
+
+        buffer_branches.context.moveTo(x, y);
+        buffer_branches.context.lineTo(drop_point.x, drop_point.y);
+
+        if (!cv.helpers.is_level_one_node(d)) {
+          // buffer_branches.context.moveTo(center_x, center_y);
+
+          if (this_theta < parent_theta) {
+            buffer_branches.context.arc(center_x, center_y, parent_radius, this_theta, parent_theta, clockwise);
+          }
+          else {
+            buffer_branches.context.arc(center_x, center_y, parent_radius, this_theta, parent_theta, counter_clockwise);
+          }
         }
       }
-    }
+    });
+  }
+  else {
+    // Do radial layout.
 
-    // console.log("name: " + d.data.name + ", x: " + d.x + ", y: " + d.y);
-    // console.log("name: " + d.data.name + ", tx: " + x + ", ty: " + y);
-    // buffer_branches.context.fillRect(x, y, 10, 10);
-    // buffer_branches.context.fillText(d.data.name, x+5, y+5);
-    buffer_branches.context.fillRect(x, y, 10, 10);
-    buffer_branches.context.fillText(d.data.name, x + 5, y + 5);
+    var data = ROOT.descendants().map(function (d) {
+      return d.radial_layout_info;
+    });
 
-  });
+    // This is for the radial layout.
+    data.forEach(function (d, i) {
+      var x  = tr(d.x, cv.xy_range.min_x),
+          px = tr(d.parent_x, cv.xy_range.min_x),
+          y  = tr(d.y, cv.xy_range.min_y),
+          py = tr(d.parent_y, cv.xy_range.min_y);
 
+      if (cv.helpers.is_leaf(d)) {
+        // TODO draw dots
+        // TODO draw text
+      }
 
-  // var data = ROOT.descendants().map(function (d) {
-  //   return d.radial_layout_info;
-  // });
-
-  // This is for the radial layout.
-  // data.forEach(function (d, i) {
-  //   var x  = tr(d.x, cv.xy_range.min_x),
-  //       px = tr(d.parent_x, cv.xy_range.min_x),
-  //       y  = tr(d.y, cv.xy_range.min_y),
-  //       py = tr(d.parent_y, cv.xy_range.min_y);
-  //
-  //   if (cv.helpers.is_leaf(d)) {
-  //     // TODO draw dots
-  //     // TODO draw text
-  //   }
-  //
-  //   buffer_branches.context.moveTo(x, y);
-  //   buffer_branches.context.lineTo(px, py);
-  // });
+      buffer_branches.context.moveTo(x, y);
+      buffer_branches.context.lineTo(px, py);
+    });
+  }
 
   buffer_branches.context.stroke();
 
@@ -469,6 +488,8 @@ cv.upload_handler = function () {
 
   // First set default opts
   cv.helpers.reset_opts();
+  // And disable the branch style as default is radial
+  disable(cv.html.tree_branch_style.id);
 
   var file_reader = new FileReader();
 
@@ -477,11 +498,12 @@ cv.upload_handler = function () {
   var reset_button  = document.getElementById(cv.html.reset_button.id);
 
   // Tree layout options
-  cv.html.tree_layout.elem   = document.getElementById(cv.html.tree_layout.id);
-  cv.html.tree_sort.elem     = document.getElementById(cv.html.tree_sort.id);
-  cv.html.tree_rotation.elem = document.getElementById(cv.html.tree_rotation.id);
-  cv.html.tree_size.elem     = document.getElementById(cv.html.tree_size.id);
-  cv.html.tree_padding.elem  = document.getElementById(cv.html.tree_padding.id);
+  cv.html.tree_layout.elem       = document.getElementById(cv.html.tree_layout.id);
+  cv.html.tree_branch_style.elem = document.getElementById(cv.html.tree_branch_style.id);
+  cv.html.tree_sort.elem         = document.getElementById(cv.html.tree_sort.id);
+  cv.html.tree_rotation.elem     = document.getElementById(cv.html.tree_rotation.id);
+  cv.html.tree_size.elem         = document.getElementById(cv.html.tree_size.id);
+  cv.html.tree_padding.elem      = document.getElementById(cv.html.tree_padding.id);
 
   file_reader.onload = function (event) {
     var tree_str = event.target.result;
@@ -514,6 +536,30 @@ cv.upload_handler = function () {
   // Tree layout options
   cv.html.tree_layout.elem.addEventListener("change", function () {
     cv.opts.tree_layout = jq(cv.html.tree_layout.id).val();
+
+    // If it is a circular layout, we need to adjust the tree size.
+    if (cv.opts.tree_layout === "circular-tree") {
+      // First set a better default
+      var val = 10;
+      jq(cv.html.tree_size.id).val(val);
+      // Need to scale it to the width in pixels.
+      cv.opts.tree_size = cv.helpers.circular_tree_size(val);
+
+      undisable(cv.html.tree_branch_style.id);
+    }
+    else {
+      // It is a radial tree.
+      var val = 20;
+      jq(cv.html.tree_size.id).val(val);
+      cv.opts.tree_size = val;
+
+      disable(cv.html.tree_branch_style.id);
+    }
+
+    undisable(cv.html.submit_button.id);
+  });
+  cv.html.tree_branch_style.elem.addEventListener("change", function () {
+    cv.opts.tree_branch_style = jq(cv.html.tree_branch_style.id).val();
     undisable(cv.html.submit_button.id);
   });
   cv.html.tree_sort.elem.addEventListener("change", function () {
@@ -525,7 +571,16 @@ cv.upload_handler = function () {
     undisable(cv.html.submit_button.id);
   });
   cv.html.tree_size.elem.addEventListener("change", function () {
-    cv.opts.tree_size = parseInt(jq(cv.html.tree_size.id).val());
+    if (cv.opts.tree_layout === "circular-tree") {
+      // Need to scale it to the width in pixels.
+      var val           = parseInt(jq(cv.html.tree_size.id).val());
+      cv.opts.tree_size = cv.helpers.circular_tree_size(val);
+    }
+    else {
+      cv.opts.tree_size = parseInt(jq(cv.html.tree_size.id).val());
+    }
+
+
     undisable(cv.html.submit_button.id);
   });
   cv.html.tree_padding.elem.addEventListener("change", function () {
@@ -534,4 +589,6 @@ cv.upload_handler = function () {
   });
 };
 
-var p;
+cv.helpers.circular_tree_size = function (val) {
+  return fn.math.scale(val, 5, 50, 500, 2500);
+};
