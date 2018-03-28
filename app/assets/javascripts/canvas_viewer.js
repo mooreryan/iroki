@@ -69,7 +69,8 @@ var canvas_viewer = {
   helpers: {},
   const: {
     two_pi: 2 * Math.PI,
-    zero_len_branch: 1e-10
+    zero_len_branch: 1e-10,
+    min_pixel_size: 1000
   }
 };
 
@@ -208,10 +209,10 @@ cv.layout_radial = function radial_cluster(root) {
       vertex.radial_layout_info.parent_x = parent.radial_layout_info.x;
       vertex.radial_layout_info.parent_y = parent.radial_layout_info.y;
 
-      var silly_x  = Math.floor(vertex.radial_layout_info.x * cv.opts.tree_size);
-      var silly_y  = Math.floor(vertex.radial_layout_info.y * cv.opts.tree_size);
-      var silly_px = Math.floor(vertex.radial_layout_info.parent_x * cv.opts.tree_size);
-      var silly_py = Math.floor(vertex.radial_layout_info.parent_y * cv.opts.tree_size);
+      var silly_x  = (vertex.radial_layout_info.x);
+      var silly_y  = (vertex.radial_layout_info.y);
+      var silly_px = (vertex.radial_layout_info.parent_x);
+      var silly_py = (vertex.radial_layout_info.parent_y);
 
       if (silly_x < xy_range.min_x) {
         xy_range.min_x = silly_x;
@@ -284,7 +285,7 @@ cv.layout_radial = function radial_cluster(root) {
 };
 
 
-cv.width_and_height = function (xy_range) {
+cv.width_and_height = function (xy_range, multiplier, padding) {
   var width_high = xy_range.max_x + Math.abs(xy_range.min_x),
       width_low  = xy_range.min_x + Math.abs(xy_range.min_x);
 
@@ -292,8 +293,8 @@ cv.width_and_height = function (xy_range) {
       height_low  = xy_range.min_y + Math.abs(xy_range.min_y);
 
   return {
-    w: (width_high - width_low) + cv.opts.tree_padding,
-    h: (height_high - height_low) + cv.opts.tree_padding
+    w: Math.ceil(multiplier * (width_high - width_low) + padding),
+    h: Math.ceil(multiplier * (height_high - height_low) + padding)
   };
 };
 
@@ -316,7 +317,7 @@ cv.canvas_buffer = function (w, h) {
 cv.main = function (tree_str, mapping_str) {
 
   function tr(val, min_val) {
-    return Math.floor(val * cv.opts.tree_size + Math.abs(min_val) + (cv.opts.tree_padding / 2));
+    return Math.floor((val * cv.opts.tree_size) + (Math.abs(min_val) * cv.opts.tree_size) + (cv.opts.tree_padding / 2));
   }
 
   // Set the radius of each node by recursively summing and scaling the distance from the root.
@@ -362,7 +363,7 @@ cv.main = function (tree_str, mapping_str) {
            .sort(cv.sort_fn);
 
   // This modifies root.
-  cv.xy_range      = cv.layout_radial(ROOT);
+  cv.xy_range = cv.layout_radial(ROOT);
 
   // set_radius(ROOT, ROOT.data.branch_length = 0, cv.canvas_height / max_length(ROOT));
 
@@ -453,31 +454,20 @@ cv.main = function (tree_str, mapping_str) {
     });
 
     // Bump up the tree size if the branches are quite small.
-    // if (ROOT.children.length >= 2) {
-    //   var c1 = ROOT.children[0];
-    //   var c2 = ROOT.children[1];
-    //
-    //   var x1 = c1.radial_layout_info.x;
-    //   var x2 = c2.radial_layout_info.x;
-    //
-    //   var y1 = c1.radial_layout_info.y;
-    //   var y2 = c2.radial_layout_info.y;
-    //
-    //   var dist = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    //
-    //   // We want the multiplier to at least get us to a distance of 100 pixels.
-    //   if (dist * cv.opts.tree_size < 100) {
-    //     console.log("hi")
-    //     console.log(dist)
-    //     cv.opts.tree_size = Math.floor(100 / dist);
-    //
-    //     // And update the actual option.
-    //     jq(cv.html.tree_size.id).val(cv.opts.tree_size);
-    //   }
-    // }
+    cv.ret_val = cv.width_and_height(cv.xy_range, 1, 0);
+
+    var longer = cv.ret_val.w > cv.ret_val.h ? cv.ret_val.w : cv.ret_val.h;
+
+
+    if (longer * cv.opts.tree_size < cv.const.min_pixel_size) {
+      // We want the longer of the sides to be at least approx cv.const.min_pixel_size pixels
+      cv.opts.tree_size = Math.ceil(cv.const.min_pixel_size / longer);
+      // And update the actual option.
+      jq(cv.html.tree_size.id).val(cv.opts.tree_size);
+    }
 
     // Width and height depends on the tree_size
-    cv.ret_val       = cv.width_and_height(cv.xy_range);
+    cv.ret_val = cv.width_and_height(cv.xy_range, cv.opts.tree_size, cv.opts.tree_padding);
     cv.canvas_width  = cv.ret_val.w;
     cv.canvas_height = cv.ret_val.h;
 
