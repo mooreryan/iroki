@@ -363,25 +363,27 @@ cv.main = function (tree_str, mapping_str) {
 
   // This modifies root.
   cv.xy_range      = cv.layout_radial(ROOT);
-  cv.ret_val       = cv.width_and_height(cv.xy_range);
-  cv.canvas_width  = cv.ret_val.w;
-  cv.canvas_height = cv.ret_val.h;
+
+  // set_radius(ROOT, ROOT.data.branch_length = 0, cv.canvas_height / max_length(ROOT));
+
+  // Radial layout could change the height and width so get context separately for that.
+  var buffer_background = null;
+  var buffer_branches   = null;
+  var buffer_leaves     = null;
+  var buffer_text       = null;
+
 
   if (cv.opts.tree_layout === "circular-tree") {
     cv.canvas_width  = cv.opts.tree_size + (2 * cv.opts.tree_padding);
     cv.canvas_height = cv.opts.tree_size + (2 * cv.opts.tree_padding);
-  }
 
-  // set_radius(ROOT, ROOT.data.branch_length = 0, cv.canvas_height / max_length(ROOT));
+    buffer_background = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_branches   = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_leaves     = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_text       = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
 
-  var buffer_background = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
-  var buffer_branches   = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
-  var buffer_leaves     = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
-  var buffer_text       = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_branches.context.beginPath();
 
-  buffer_branches.context.beginPath();
-
-  if (cv.opts.tree_layout === "circular-tree") {
     var tree_rotation_radians = fn.math.degrees_to_radians(cv.opts.tree_rotation);
 
     var cluster_width = cv.opts.tree_size / 2;
@@ -450,6 +452,40 @@ cv.main = function (tree_str, mapping_str) {
       return d.radial_layout_info;
     });
 
+    // Bump up the tree size if the branches are quite small.
+    // if (ROOT.children.length >= 2) {
+    //   var c1 = ROOT.children[0];
+    //   var c2 = ROOT.children[1];
+    //
+    //   var x1 = c1.radial_layout_info.x;
+    //   var x2 = c2.radial_layout_info.x;
+    //
+    //   var y1 = c1.radial_layout_info.y;
+    //   var y2 = c2.radial_layout_info.y;
+    //
+    //   var dist = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    //
+    //   // We want the multiplier to at least get us to a distance of 100 pixels.
+    //   if (dist * cv.opts.tree_size < 100) {
+    //     console.log("hi")
+    //     console.log(dist)
+    //     cv.opts.tree_size = Math.floor(100 / dist);
+    //
+    //     // And update the actual option.
+    //     jq(cv.html.tree_size.id).val(cv.opts.tree_size);
+    //   }
+    // }
+
+    // Width and height depends on the tree_size
+    cv.ret_val       = cv.width_and_height(cv.xy_range);
+    cv.canvas_width  = cv.ret_val.w;
+    cv.canvas_height = cv.ret_val.h;
+
+    buffer_background = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_branches   = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_leaves     = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_text       = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+
     // This is for the radial layout.
     data.forEach(function (d, i) {
       var x  = tr(d.x, cv.xy_range.min_x),
@@ -462,8 +498,8 @@ cv.main = function (tree_str, mapping_str) {
         // TODO draw text
       }
 
-      buffer_branches.context.moveTo(x, y);
-      buffer_branches.context.lineTo(px, py);
+      buffer_branches.context.moveTo(px, py);
+      buffer_branches.context.lineTo(x, y);
     });
   }
 
@@ -529,6 +565,11 @@ cv.upload_handler = function () {
   // Submitting and reseting
   file_uploader.addEventListener("change", function () {
     cv.tree_changed = true;
+
+    // Set a small value to start in case it is a huge tree.
+    jq(cv.html.tree_size.id).val(20);
+    cv.opts.tree_size = 20;
+
     undisable(cv.html.submit_button.id);
   });
   submit_button.addEventListener("click", function () {
@@ -608,14 +649,14 @@ cv.upload_handler = function () {
     undisable(cv.html.submit_button.id);
   });
 
-  cv.html.viewer_size_fixed.elem.addEventListener("change", function(){
+  cv.html.viewer_size_fixed.elem.addEventListener("change", function () {
     if (is_checked(cv.html.viewer_size_fixed.id)) {
       jq(cv.html.canvas_tree_container.id).css("overflow", "scroll");
     }
     else {
       jq(cv.html.canvas_tree_container.id).css("overflow", "visible");
     }
-  })
+  });
 };
 
 cv.helpers.circular_tree_size = function (val) {
