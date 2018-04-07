@@ -1,3 +1,11 @@
+/*
+  TODO optimize
+    - sorting the hierarchy (1/6 of the time)
+    - summing the hierarchy (1/20 of the time).  It sets d.value, used in sorting and checking if a node is a leaf or not.
+    - newick__parse (1/3 of the time)
+    - radial_cluster (1/3 of the time)
+*/
+
 var canvas_viewer = {
   // In pixels
   canvas_height: 1000,
@@ -54,6 +62,14 @@ var canvas_viewer = {
       id: "padding"
     },
 
+    // Scale bar opts
+    scale_bar_show: {
+      id: "show-scale-bar"
+    },
+    scale_bar_length: {
+      id: "scale-bar-length"
+    },
+
     // Viewer opts
     viewer_size_fixed: {
       id: "viewer-size-fixed"
@@ -70,7 +86,7 @@ var canvas_viewer = {
   const: {
     two_pi: 2 * Math.PI,
     zero_len_branch: 1e-10,
-    min_pixel_size: 1000
+    min_pixel_size: 1000,
   }
 };
 
@@ -108,7 +124,11 @@ cv.helpers.default_opts = function () {
     tree_padding: 50,
 
     // Viewer opts
-    viewer_size_fixed: false
+    viewer_size_fixed: false,
+
+    // Scale bar opts
+    scale_bar_show: true,
+    scale_bar_length: 75
   };
 };
 
@@ -126,6 +146,8 @@ cv.helpers.reset_opts = function () {
   jq(cv.html.tree_rotation.id).val(cv.opts.tree_rotation);
   jq(cv.html.tree_size.id).val(cv.opts.tree_size);
   jq(cv.html.tree_padding.id).val(cv.opts.tree_padding);
+  check(cv.html.scale_bar_show.id);
+  jq(cv.html.scale_bar_length.id).val(cv.opts.scale_bar_length);
 
   // Update the fixed viewer size stuff.
   jq(cv.html.viewer_size_fixed.id).prop("checked", false);
@@ -170,6 +192,34 @@ cv.helpers.set_sort_function = function () {
   }
 };
 
+cv.helpers.vec_len = function (x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+};
+
+cv.helpers.scale_bar = function (root) {
+  if (root.children.length > 0) {
+    var child = root.children[0];
+
+    var x  = tr(child.radial_layout_info.x, cv.xy_range.min_x),
+        y  = tr(child.radial_layout_info.y, cv.xy_range.min_y),
+        px = tr(child.radial_layout_info.parent_x, cv.xy_range.min_x),
+        py = tr(child.radial_layout_info.parent_y, cv.xy_range.min_y);
+
+    // Get the dist from the parent to this node.
+    var dist          = Math.sqrt(Math.pow(px - x, 2) + Math.pow(py - y, 2));
+    var branch_length = child.data.branch_length;
+
+    var pixels_per_unit_length = dist / branch_length;
+
+    var scale_bar_length = cv.opts.scale_bar_length / pixels_per_unit_length;
+
+  }
+  else {
+    throw Error("The root has no children!");
+  }
+
+  return { length: scale_bar_length, width: cv.opts.scale_bar_length };
+};
 
 cv.layout_radial = function radial_cluster(root) {
   var xy_range = {
@@ -192,6 +242,7 @@ cv.layout_radial = function radial_cluster(root) {
     }
   }
 
+  // TODO optimize: this recursive call takes up about (1/6) of the time
   function a_preorder_traversal(vertex) {
     if (vertex !== root) {
       var parent = vertex.parent;
@@ -249,6 +300,7 @@ cv.layout_radial = function radial_cluster(root) {
         child.radial_layout_info.wedge_size   = (child.radial_layout_info.num_leaves_in_subtree / root.radial_layout_info.num_leaves_in_subtree) * 2 * Math.PI;
         child.radial_layout_info.wedge_border = current_vertex_wedge_border;
         current_vertex_wedge_border += child.radial_layout_info.wedge_size;
+
         a_preorder_traversal(child);
       });
     }
@@ -284,17 +336,20 @@ cv.layout_radial = function radial_cluster(root) {
   return xy_range;
 };
 
+cv.const.scale_bar_padding = 50;
 
 cv.width_and_height = function (xy_range, multiplier, padding) {
-  var width_high = xy_range.max_x + Math.abs(xy_range.min_x),
-      width_low  = xy_range.min_x + Math.abs(xy_range.min_x);
+  var width_padding  = padding;
+  var height_padding = padding + cv.const.scale_bar_padding; // Extra for the scale bar.
+  var width_high     = xy_range.max_x + Math.abs(xy_range.min_x),
+      width_low      = xy_range.min_x + Math.abs(xy_range.min_x);
 
   var height_high = xy_range.max_y + Math.abs(xy_range.min_y),
       height_low  = xy_range.min_y + Math.abs(xy_range.min_y);
 
   return {
-    w: Math.ceil(multiplier * (width_high - width_low) + padding),
-    h: Math.ceil(multiplier * (height_high - height_low) + padding)
+    w: Math.ceil(multiplier * (width_high - width_low) + width_padding),
+    h: Math.ceil(multiplier * (height_high - height_low) + height_padding)
   };
 };
 
@@ -314,12 +369,11 @@ cv.canvas_buffer = function (w, h) {
   return { canvas: canvas, context: context };
 };
 
+function tr(val, min_val) {
+  return Math.floor((val * cv.opts.tree_size) + (Math.abs(min_val) * cv.opts.tree_size) + (cv.opts.tree_padding / 2));
+}
+
 cv.main = function (tree_str, mapping_str) {
-
-  function tr(val, min_val) {
-    return Math.floor((val * cv.opts.tree_size) + (Math.abs(min_val) * cv.opts.tree_size) + (cv.opts.tree_padding / 2));
-  }
-
   // Set the radius of each node by recursively summing and scaling the distance from the root.
   function set_radius(d, y0, k) {
     d.radius = (y0 += d.data.branch_length) * k;
@@ -372,6 +426,7 @@ cv.main = function (tree_str, mapping_str) {
   var buffer_branches   = null;
   var buffer_leaves     = null;
   var buffer_text       = null;
+  var buffer_scale_bar  = null;
 
 
   if (cv.opts.tree_layout === "circular-tree") {
@@ -382,6 +437,7 @@ cv.main = function (tree_str, mapping_str) {
     buffer_branches   = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
     buffer_leaves     = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
     buffer_text       = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_scale_bar  = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
 
     buffer_branches.context.beginPath();
 
@@ -456,8 +512,14 @@ cv.main = function (tree_str, mapping_str) {
     // Bump up the tree size if the branches are quite small.
     cv.ret_val = cv.width_and_height(cv.xy_range, 1, 0);
 
-    var longer = cv.ret_val.w > cv.ret_val.h ? cv.ret_val.w : cv.ret_val.h;
 
+    // Minus off the scale bar padding as it is not part of the actula tree size but the width and height accounts for it.
+    var longer = cv.ret_val.w > (cv.ret_val.h - cv.const.scale_bar_padding) ? cv.ret_val.w : (cv.ret_val.h - cv.const.scale_bar_padding);
+
+    console.log(cv.ret_val);
+    console.log(longer);
+    console.log(longer * cv.opts.tree_size);
+    console.log(cv.const.min_pixel_size);
 
     if (longer * cv.opts.tree_size < cv.const.min_pixel_size) {
       // We want the longer of the sides to be at least approx cv.const.min_pixel_size pixels
@@ -467,7 +529,7 @@ cv.main = function (tree_str, mapping_str) {
     }
 
     // Width and height depends on the tree_size
-    cv.ret_val = cv.width_and_height(cv.xy_range, cv.opts.tree_size, cv.opts.tree_padding);
+    cv.ret_val       = cv.width_and_height(cv.xy_range, cv.opts.tree_size, cv.opts.tree_padding);
     cv.canvas_width  = cv.ret_val.w;
     cv.canvas_height = cv.ret_val.h;
 
@@ -475,8 +537,28 @@ cv.main = function (tree_str, mapping_str) {
     buffer_branches   = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
     buffer_leaves     = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
     buffer_text       = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+    buffer_scale_bar  = cv.canvas_buffer(cv.canvas_width, cv.canvas_height);
+
+    buffer_scale_bar.context.font         = "16px Helvetica";
+    buffer_scale_bar.context.textBaseline = 'top';
+
+    var scale_bar              = cv.helpers.scale_bar(ROOT);
+    var scale_bar_start_x      = (cv.canvas_width - scale_bar.width) / 2;
+    var scale_bar_start_y      = tr(cv.xy_range.max_y, cv.xy_range.min_y) + (0.67 * cv.const.scale_bar_padding);
+    var scale_bar_text_start_y = scale_bar_start_y + 5;
+    var scale_bar_text         = fn.math.round(scale_bar.length, 2).toString();
+    var scale_bar_text_width   = buffer_scale_bar.context.measureText(scale_bar_text).width;
+    var scale_bar_text_start_x = (scale_bar.width - scale_bar_text_width) / 2;
+
+    buffer_scale_bar.context.beginPath();
+    buffer_scale_bar.context.moveTo(scale_bar_start_x, scale_bar_start_y);
+    buffer_scale_bar.context.lineTo(scale_bar_start_x + scale_bar.width, scale_bar_start_y);
+    buffer_scale_bar.context.stroke();
+
+    buffer_scale_bar.context.fillText(scale_bar_text, scale_bar_start_x + scale_bar_text_start_x, scale_bar_text_start_y);
 
     // This is for the radial layout.
+    buffer_branches.context.beginPath();
     data.forEach(function (d, i) {
       var x  = tr(d.x, cv.xy_range.min_x),
           px = tr(d.parent_x, cv.xy_range.min_x),
@@ -488,6 +570,7 @@ cv.main = function (tree_str, mapping_str) {
         // TODO draw text
       }
 
+      // TODO on the arb guide tree move to needs to be x, y but on the fastree GG tree moveTo needs to be px, py
       buffer_branches.context.moveTo(px, py);
       buffer_branches.context.lineTo(x, y);
     });
@@ -507,6 +590,7 @@ cv.main = function (tree_str, mapping_str) {
   // Copy the buffers on to the main image.
   context.drawImage(buffer_background.canvas, 0, 0);
   context.drawImage(buffer_branches.canvas, 0, 0);
+  context.drawImage(buffer_scale_bar.canvas, 0, 0);
 
   jq(cv.html.status_msg.id).html("Here is your tree!");
 };
@@ -543,6 +627,10 @@ cv.upload_handler = function () {
   cv.html.tree_rotation.elem     = document.getElementById(cv.html.tree_rotation.id);
   cv.html.tree_size.elem         = document.getElementById(cv.html.tree_size.id);
   cv.html.tree_padding.elem      = document.getElementById(cv.html.tree_padding.id);
+
+  // Scale bar opts
+  cv.html.scale_bar_show.elem   = document.getElementById(cv.html.scale_bar_show.id);
+  cv.html.scale_bar_length.elem = document.getElementById(cv.html.scale_bar_length.id);
 
   // Viewer opts
   cv.html.viewer_size_fixed.elem = document.getElementById(cv.html.viewer_size_fixed.id);
@@ -636,6 +724,16 @@ cv.upload_handler = function () {
   });
   cv.html.tree_padding.elem.addEventListener("change", function () {
     cv.opts.tree_padding = parseInt(jq(cv.html.tree_padding.id).val());
+    undisable(cv.html.submit_button.id);
+  });
+
+  // Scale bar opts
+  cv.html.scale_bar_show.elem.addEventListener("change", function () {
+    cv.opts.scale_bar_show = is_checked(cv.html.scale_bar_show.id);
+    undisable(cv.html.submit_button.id);
+  });
+  cv.html.scale_bar_length.elem.addEventListener("change", function () {
+    cv.opts.scale_bar_length = parseInt(jq(cv.html.scale_bar_length.id).val());
     undisable(cv.html.submit_button.id);
   });
 

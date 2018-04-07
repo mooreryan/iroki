@@ -95,6 +95,9 @@ var g_ID_PALETTE_INTERPOLATION_MODE             = "palette-interpolation-mode",
     g_OPT_PALETTE_INTERPOLATION_MODE_LAB_BEZIER = "lab-bezier",
     g_val_palette_interpolation_mode            = "lab";
 
+var g_ID_SCALE_MATRIX_FOR_SVD = "scale-matrix",
+    g_val_scale_matrix_for_svd = false;
+
 
 // Set the correct options panel to show
 function hide_correct_opts_div() {
@@ -166,6 +169,8 @@ function biom__upload_button() {
     g_val_palette_padding = parseFloat(jq(g_ID_PALETTE_PADDING).val());
 
     g_val_palette_interpolation_mode = jq(g_ID_PALETTE_INTERPOLATION_MODE).val();
+
+    g_val_scale_matrix_for_svd = is_checked(g_ID_SCALE_MATRIX_FOR_SVD);
 
     draw_the_preview();
 
@@ -349,6 +354,9 @@ function biom__upload_button() {
       keep_zero_counts: keep_zeros,
       angle_offset: g_val_hue_angle_offset,
       projection_type: opts_for_reduced_dimension.projection_type,
+      scale_matrix_for_svd: g_val_scale_matrix_for_svd,
+      download_legend: g_val_download_legend,
+
       sing_vals_to_keep: opts_for_reduced_dimension.sing_vals_to_keep,
 
       // These are required for fn.parsed_biom.colors
@@ -426,6 +434,8 @@ function biom__upload_button() {
   var palette_padding            = document.getElementById(g_ID_PALETTE_PADDING);
   var palette_interpolation_mode = document.getElementById(g_ID_PALETTE_INTERPOLATION_MODE);
 
+  var scale_matrix_for_svd = document.getElementById(g_ID_SCALE_MATRIX_FOR_SVD);
+
   var biom_reader    = new FileReader();
   biom_reader.onload = set_biom_str;
 
@@ -454,6 +464,8 @@ function biom__upload_button() {
   correct_palette_lightness.addEventListener("change", undisable_and_update);
   palette_padding.addEventListener("change", undisable_and_update);
   palette_interpolation_mode.addEventListener("change", undisable_and_update);
+
+  scale_matrix_for_svd.addEventListener("change", undisable_and_update);
 
   biom_conversion_style.addEventListener("change", hide_correct_opts_div);
 

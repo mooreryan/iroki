@@ -121,6 +121,30 @@ describe("fn", function () {
       });
     });
 
+    describe("scale_to_unit_variance", function () {
+      it("divides each value by the population sd", function () {
+        var ary      = [-2, -1, 0, 1, 2];
+        var expected = [-1.41, -0.71, 0, 0.71, 1.41];
+        var actual   = fn.ary.scale_to_unit_variance(ary).map(function (v) {
+          return fn.math.round(v, 2);
+        });
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("throws if the array is empty", function () {
+        expect(function () {
+          fn.ary.scale_to_unit_variance([]);
+        }).to.throw();
+      });
+
+      it("throws if the sd is zero", function () {
+        expect(function () {
+          fn.ary.scale_to_unit_variance([1, 1, 1, 1]);
+        }).to.throw();
+      });
+    });
+
     describe("take", function () {
       it("takes the first N elements", function () {
         var ary      = [1, 2, 3];
@@ -130,10 +154,10 @@ describe("fn", function () {
         spec_helper.expect_stringify_equal(actual, expected);
       });
 
-      it("the array returned doesn't have references to original objects", function() {
-        var ary = [{a: 10, b: 10}, {a: 100, b: 100}];
-        var orig_ary = fn.obj.deep_copy(ary);
-        var first_part = fn.ary.take(ary, 1);
+      it("the array returned doesn't have references to original objects", function () {
+        var ary         = [{ a: 10, b: 10 }, { a: 100, b: 100 }];
+        var orig_ary    = fn.obj.deep_copy(ary);
+        var first_part  = fn.ary.take(ary, 1);
         first_part[0].a = 1000;
 
         spec_helper.expect_stringify_equal(ary, orig_ary);
