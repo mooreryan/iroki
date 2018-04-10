@@ -1,3 +1,43 @@
+var viewer = {
+  defaults: {
+    radial: {
+      width: 7,
+      height: 7
+    },
+    circular: {
+      width: 22,
+      height: 22
+    },
+    rectangular: {
+      width: 22,
+      height: 22
+    }
+  },
+
+  html: {
+    tree_height: {
+      id: "height"
+    },
+    tree_width: {
+      id: "width"
+    },
+
+    layout: {
+      id: "tree-shape",
+
+      rectangular: {
+        id: "rectangular-tree"
+      },
+      circular: {
+        id: "circular-tree"
+      },
+      radial: {
+        id: "radial-tree"
+      }
+    }
+  }
+};
+
 var MAPPING_CHANGED, TREE_CHANGED;
 
 
@@ -35,7 +75,7 @@ function upload_button(submit_id, uploader_id, callback) {
     mapping_reader.onload = function (mapping_event) {
       var mapping_str = mapping_event.target.result;
 
-      callback(tree_str, mapping_str)
+      callback(tree_str, mapping_str);
     };
   };
 
@@ -72,8 +112,8 @@ function upload_button(submit_id, uploader_id, callback) {
   }, false);
   document.getElementById(ID_RESET_BUTTON).addEventListener("click", function () {
     biological_root_sibling_warnings_already_warned = false;
-    MAPPING_CHANGED = false;
-    TREE_CHANGED    = false;
+    MAPPING_CHANGED                                 = false;
+    TREE_CHANGED                                    = false;
 
     d3.select("#status-msg").html("I'm still in beta.  Please report any bugs on the contact page.");
 
@@ -227,31 +267,32 @@ var tmp_root;
 var TREE_IS_ROOTED_ON_A_LEAF_NODE;
 
 // TODO we have to check if we've already warned about this as it will try and warn each time the links are redrawn.
-var biological_root_sibling_warnings = [], biological_root_sibling_warnings_already_warned;
+var biological_root_sibling_warnings = [],
+    biological_root_sibling_warnings_already_warned;
 
 // Any value higher than this will be dropped down to this value.  Some tree software puts the number of bootstrap trees with support rather than a percent so this number can get pretty high.
 var MAX_BOOTSTRAP_VAL = 1e9;
 
 var defaults = {
-  "leaf_label_color" : "#000000",
-  "leaf_label_font" : "Helvetica",
-  "leaf_label_size" : 16,
-  "leaf_dot_color" : "#000000",
-  "leaf_dot_size" : 2,
-  "new_name" : null,
-  "branch_width" : 2,
-  "branch_color" : "#000000"
+  "leaf_label_color": "#000000",
+  "leaf_label_font": "Helvetica",
+  "leaf_label_size": 16,
+  "leaf_dot_color": "#000000",
+  "leaf_dot_size": 2,
+  "new_name": null,
+  "branch_width": 2,
+  "branch_color": "#000000"
 };
 
 var md_cat_name2id = {
-  "leaf_label_color" : null,
-  "leaf_label_font" : null,
-  "leaf_label_size" : "leaf-label-size",
-  "leaf_dot_color" : null,
-  "leaf_dot_size" : ID_LEAF_DOT_SIZE,
-  "new_name" : null,
-  "branch_width" : "branch-width",
-  "branch_color" : null
+  "leaf_label_color": null,
+  "leaf_label_font": null,
+  "leaf_label_size": "leaf-label-size",
+  "leaf_dot_color": null,
+  "leaf_dot_size": ID_LEAF_DOT_SIZE,
+  "new_name": null,
+  "branch_width": "branch-width",
+  "branch_color": null
 };
 
 // Hold these as globals so that we can make sure the reset button resets them.
@@ -304,7 +345,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // Check if there is as many branchlengths as there are number of nodes.
     var num_colons;
-    var colon_match = tree_input.match(/:/g)
+    var colon_match = tree_input.match(/:/g);
     if (colon_match) {
       num_colons = colon_match.length;
     }
@@ -314,7 +355,7 @@ function lalala(tree_input_param, mapping_input_param) {
     // Subtract off one to account for the root, which doesn't need to have a branch length in the newick file.
     var num_nodes = tmp_root.descendants().length - 1;
     if (num_nodes > num_colons) {
-      alert("WARNING -- found more non-root nodes than colons.  This may indicate not every non-root node in the tree has a branch length.  Any nodes other than the root node that are missing the branch length will be assigned a branch length of 1.")
+      alert("WARNING -- found more non-root nodes than colons.  This may indicate not every non-root node in the tree has a branch length.  Any nodes other than the root node that are missing the branch length will be assigned a branch length of 1.");
     }
 
     MIN_LENGTH_IN_TREE = min_non_zero_len_in_tree(tmp_root);
@@ -433,7 +474,7 @@ function lalala(tree_input_param, mapping_input_param) {
             if (jq(ID_MATCHING_TYPE).val() === "partial") {
               // Reshow the warning.
               if (has_non_specific_matching(tmp_root, name2md)) {
-                name2md = null
+                name2md = null;
               }
             }
           }
@@ -447,9 +488,73 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     });
 
-    listener("width", "change", set_msg_and_draw);
     listener("padding", "change", set_msg_and_draw);
-    listener("height", "change", set_msg_and_draw);
+
+    listener(viewer.html.tree_width.id, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        // Make sure the input is not negative
+        var w_val = jq(viewer.html.tree_width.id).val();
+
+        var layout_value = jq(viewer.html.layout.id).val();
+        var default_value = null;
+
+        if (layout_value === viewer.html.layout.rectangular.id) {
+          default_value = viewer.defaults.rectangular.width;
+        }
+        else if (layout_value === viewer.html.layout.circular.id) {
+          default_value = viewer.defaults.circular.width;
+        }
+        else {
+          default_value = viewer.defaults.radial.width;
+        }
+
+        if (isNaN(parseFloat(w_val))) {
+          jq(viewer.html.tree_width.id).val(default_value);
+        }
+
+        if (w_val < 1) {
+          jq(viewer.html.tree_width.id).val(default_value);
+        }
+
+        draw_tree();
+        utils__set_status_msg_to_done();
+      });
+    });
+
+    listener(viewer.html.tree_height.id, "change", function(){
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        // Make sure the input is not negative
+        var h_val = jq(viewer.html.tree_height.id).val();
+
+        var layout_value = jq(viewer.html.layout.id).val();
+        var default_value = null;
+
+        if (layout_value === viewer.html.layout.rectangular.id) {
+          default_value = viewer.defaults.rectangular.height;
+        }
+        else if (layout_value === viewer.html.layout.circular.id) {
+          default_value = viewer.defaults.circular.height;
+        }
+        else {
+          default_value = viewer.defaults.radial.height;
+        }
+
+        if (isNaN(parseFloat(h_val))) {
+          jq(viewer.html.tree_height.id).val(default_value);
+        }
+
+        if (h_val < 1) {
+          jq(viewer.html.tree_height.id).val(default_value);
+        }
+
+        draw_tree();
+        utils__set_status_msg_to_done();
+      });
+    });
 
     // TODO no status-msg
     listener(ID_LAYOUT, "change", function () {
@@ -462,43 +567,43 @@ function lalala(tree_input_param, mapping_input_param) {
 
         if (document.getElementById("rectangular-tree").selected) {
           width_elem
-            .attr("min", 15)
-            .attr("max", 150)
-            .attr("step", 1)
-            .val(22);
+          // .attr("min", 15)
+          // .attr("max", 150)
+          // .attr("step", 1)
+            .val(viewer.defaults.rectangular.width);
 
           height_elem
-            .attr("min", 15)
-            .attr("max", 150)
-            .attr("step", 1)
-            .val(22);
+          // .attr("min", 15)
+          // .attr("max", 150)
+          // .attr("step", 1)
+            .val(viewer.defaults.rectangular.height);
         }
         else if (document.getElementById("circular-tree").selected) {
           width_elem
-            .attr("min", 15)
-            .attr("max", 150)
-            .attr("step", 1)
-            .val(22);
+          // .attr("min", 15)
+          // .attr("max", 150)
+          // .attr("step", 1)
+            .val(viewer.defaults.circular.width);
 
           height_elem
-            .attr("min", 15)
-            .attr("max", 150)
-            .attr("step", 1)
-            .val(22);
+          // .attr("min", 15)
+          // .attr("max", 150)
+          // .attr("step", 1)
+            .val(viewer.defaults.circular.height);
         }
         else { // radial
           // The values look weird since they are polynomial transformed later.
           width_elem
-            .attr("min", 5)
-            .attr("max", 125)
-            .attr("step", 1)
-            .val(7);
+          // .attr("min", 5)
+          // .attr("max", 125)
+          // .attr("step", 1)
+            .val(viewer.defaults.radial.width);
 
           width_elem
-            .attr("min", 5)
-            .attr("max", 125)
-            .attr("step", 1)
-            .val(7);
+          // .attr("min", 5)
+          // .attr("max", 125)
+          // .attr("step", 1)
+            .val(viewer.defaults.radial.height);
         }
 
         draw_tree();
@@ -853,7 +958,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        
+
         update_form_constants();
         draw_links();
         draw_link_extensions();
@@ -997,7 +1102,7 @@ function lalala(tree_input_param, mapping_input_param) {
         undisable(ID_LEAF_DOT_SIZE);
       }
       else {
-        disable(ID_LEAF_DOT_SIZE)
+        disable(ID_LEAF_DOT_SIZE);
       }
 
 
@@ -1007,7 +1112,7 @@ function lalala(tree_input_param, mapping_input_param) {
       TREE_BRANCH_CLADOGRAM = "cladogram";
       TREE_BRANCH_NORMAL    = "normalogram";
       if (LAYOUT_RADIAL) {
-        TREE_BRANCH_STYLE = "normalogram"
+        TREE_BRANCH_STYLE = "normalogram";
         $("#tree-branch-style").prop("disabled", true);
       }
       else {
@@ -1029,7 +1134,7 @@ function lalala(tree_input_param, mapping_input_param) {
         }
         elem.setAttribute("min", "0");
         elem.setAttribute("max", "270");
-        elem.setAttribute("step", "270")
+        elem.setAttribute("step", "270");
       }
       else {
         // Works for both circular and radial
@@ -1252,7 +1357,7 @@ function lalala(tree_input_param, mapping_input_param) {
              .attr("height", chart_height)
              .attr("transform",
                "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
-               "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
+               "translate(" + chart_transform_width + ", " + chart_transform_height + ")");
       }
       else {
         chart = svg.append("g")
@@ -1261,7 +1366,7 @@ function lalala(tree_input_param, mapping_input_param) {
                    .attr("height", chart_height)
                    .attr("transform",
                      "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
-                     "translate(" + chart_transform_width + ", " + chart_transform_height + ")")
+                     "translate(" + chart_transform_width + ", " + chart_transform_height + ")");
       }
     }
 
@@ -1686,7 +1791,7 @@ function lalala(tree_input_param, mapping_input_param) {
         if (-90 < rotate_by && rotate_by < 90) {
           // Don't change rotate by
           // return "start";
-          return "0.6em"
+          return "0.6em";
         }
         else if (rotate_by >= 90) { // TODO which should have the equal part
           // rotate_by += 180; // TODO also flip the text-anchor to end
@@ -1717,7 +1822,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     function text_y_offset(d) {
       if (LAYOUT_CIRCLE) { // circular
-        return "0.2em"  // center the label on the branch;
+        return "0.2em";  // center the label on the branch;
       }
       else if (LAYOUT_RADIAL) {
         return "0.3em";
@@ -1765,7 +1870,7 @@ function lalala(tree_input_param, mapping_input_param) {
           top    = bottom + 180;
         }
 
-        return { "bottom" : bottom, "top" : top };
+        return { "bottom": bottom, "top": top };
       }
 
       var key_points = circle_key_points(TREE_ROTATION);
@@ -1877,7 +1982,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     function link_radial(d) {
       var start_point = (d.target.radial_layout_info.parent_x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.parent_y * RADIAL_LAYOUT_WEIGHT);
-      var end_point   = (d.target.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT)
+      var end_point   = (d.target.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT);
 
       return "M " + start_point + " L " + end_point;
     }
@@ -1963,13 +2068,13 @@ function save_png_data() {
   canvg(canvas, svg_string);
   canvas.toBlobHD(function (blob) {
     saveAs(blob, "tree.png");
-  })
+  });
 }
 
 function save_svg_data() {
   saveAs(
     new Blob([svg_elem_to_string("svg-tree")],
-      { type : "application/svg+xml" }),
+      { type: "application/svg+xml" }),
     "tree.svg"
   );
 }
@@ -2067,7 +2172,7 @@ function draw_scale_bar() {
 
     if (LAYOUT_RADIAL) {
       lengths = ROOT.descendants().map(function (d) {
-        return d.data.branch_length
+        return d.data.branch_length;
       });
 
       pixels_per_unit_length = RADIAL_LAYOUT_WEIGHT * Math.sqrt(Math.pow(first_link.target.radial_layout_info.x - first_link.source.radial_layout_info.x, 2) + Math.pow(first_link.target.radial_layout_info.y - first_link.source.radial_layout_info.y, 2)) / first_link.target.data.branch_length;
@@ -2076,14 +2181,14 @@ function draw_scale_bar() {
     else {
       if (TREE_BRANCH_STYLE == TREE_BRANCH_NORMAL) {
         lengths                = ROOT.descendants().map(function (d) {
-          return d.data.branch_length
+          return d.data.branch_length;
         });
         pixels_per_unit_length = (first_link.target.radius - first_link.source.radius) / first_link.target.data.branch_length;
 
       }
       else {
         lengths = ROOT.descendants().map(function (d) {
-          return d.height
+          return d.height;
         });
 
         // The source height will be higher than the target height as the leaf nodes have a height of 0 and internal nodes add 1 for each speciation event.
@@ -2275,7 +2380,7 @@ function add_metadata(root, name2md, match_style) {
 function add_blank_metadata(root) {
   root.leaves().forEach(function (d) {
     return d.metadata = {};
-  })
+  });
 }
 
 function get_branch_md_val(node, branch_option, default_value) {
@@ -2433,7 +2538,7 @@ function is_rooted_on_a_leaf_node(d3_tree) {
         return true;
       }
       else {
-        return child.data.name
+        return child.data.name;
       }
     }
   }
@@ -2544,22 +2649,22 @@ function radial_cluster(root) {
   root.descendants().map(function (vertex) {
     if (vertex == root) {
       root.radial_layout_info = {
-        "name" : root.data.name,
-        "x" : 0,
-        "y" : 0,
-        "num_leaves_in_subtree" : 0,
-        "wedge_size" : 2 * Math.PI,
-        "wedge_border" : utils__deg_to_rad(TREE_ROTATION)
+        "name": root.data.name,
+        "x": 0,
+        "y": 0,
+        "num_leaves_in_subtree": 0,
+        "wedge_size": 2 * Math.PI,
+        "wedge_border": utils__deg_to_rad(TREE_ROTATION)
       };
     }
     else {
       vertex.radial_layout_info = {
-        "name" : vertex.data.name,
-        "x" : 0,
-        "y" : 0,
-        "num_leaves_in_subtree" : 0,
-        "wedge_size" : 0,
-        "wedge_border" : 0
+        "name": vertex.data.name,
+        "x": 0,
+        "y": 0,
+        "num_leaves_in_subtree": 0,
+        "wedge_size": 0,
+        "wedge_border": 0
       };
     }
   });
@@ -2571,10 +2676,10 @@ function radial_cluster(root) {
 function get_translation(transform_str) {
   var match = transform_str.match(/translate\((\d+\.?\d*) (\d+\.?\d*)\)/);
   if (match) {
-    return { "x" : parseFloat(match[1]), "y" : parseFloat(match[2]) };
+    return { "x": parseFloat(match[1]), "y": parseFloat(match[2]) };
   }
   else {
-    return { "x" : 0, "y" : 0 };
+    return { "x": 0, "y": 0 };
   }
 }
 
@@ -2612,6 +2717,7 @@ function undisable(id) {
   return jq(id).prop("disabled", false);
 }
 
+
 // Currently, these are all the defaults for the radial tree.
 function reset_all_to_defaults() {
   EXTRA_NAME_WARNINGS = false;
@@ -2626,8 +2732,9 @@ function reset_all_to_defaults() {
   // Tree options
   // jq(ID_MATCHING_TYPE).val("partial");
 
-  $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
-  $("#height").prop("disabled", true).val(7);
+  // $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
+  $("#width").val(viewer.defaults.radial.width);
+  $("#height").prop("disabled", true).val(viewer.defaults.radial.height);
   $("#padding").val(0.05);
   $("#tree-rotation").val(0);
 
@@ -2699,7 +2806,7 @@ function ary_min_max(ary) {
     }
   });
 
-  return { min : min, max : max };
+  return { min: min, max: max };
 }
 
 // Space hsl looks nice for an even mix of counts.  lch looks pretty good for typical power law count data.
