@@ -462,42 +462,42 @@ function lalala(tree_input_param, mapping_input_param) {
 
         if (document.getElementById("rectangular-tree").selected) {
           width_elem
-            .attr("min", 15)
-            .attr("max", 150)
-            .attr("step", 1)
+            // .attr("min", 15)
+            // .attr("max", 150)
+            // .attr("step", 1)
             .val(22);
 
           height_elem
-            .attr("min", 15)
-            .attr("max", 150)
-            .attr("step", 1)
+            // .attr("min", 15)
+            // .attr("max", 150)
+            // .attr("step", 1)
             .val(22);
         }
         else if (document.getElementById("circular-tree").selected) {
           width_elem
-            .attr("min", 15)
-            .attr("max", 150)
-            .attr("step", 1)
+            // .attr("min", 15)
+            // .attr("max", 150)
+            // .attr("step", 1)
             .val(22);
 
           height_elem
-            .attr("min", 15)
-            .attr("max", 150)
-            .attr("step", 1)
+            // .attr("min", 15)
+            // .attr("max", 150)
+            // .attr("step", 1)
             .val(22);
         }
         else { // radial
           // The values look weird since they are polynomial transformed later.
           width_elem
-            .attr("min", 5)
-            .attr("max", 125)
-            .attr("step", 1)
+            // .attr("min", 5)
+            // .attr("max", 125)
+            // .attr("step", 1)
             .val(7);
 
           width_elem
-            .attr("min", 5)
-            .attr("max", 125)
-            .attr("step", 1)
+            // .attr("min", 5)
+            // .attr("max", 125)
+            // .attr("step", 1)
             .val(7);
         }
 
@@ -2626,7 +2626,8 @@ function reset_all_to_defaults() {
   // Tree options
   // jq(ID_MATCHING_TYPE).val("partial");
 
-  $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
+  // $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
+  $("#width").val(7);
   $("#height").prop("disabled", true).val(7);
   $("#padding").val(0.05);
   $("#tree-rotation").val(0);
