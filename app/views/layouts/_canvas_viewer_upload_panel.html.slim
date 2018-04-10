@@ -1,0 +1,37 @@
+hr.row
+
+.row
+  h4 Upload tree
+  form id="canvas-tree-upload-form"
+    .small-12.columns
+      label for="file-uploader" Newick tree
+      input id="file-uploader" type="file"
+
+hr.row
+
+.row
+  h4 Upload mapping file
+  form id="canvas-mapping-upload-form"
+    .row
+      .small-12.columns
+        label for="mapping-file-uploader" Mapping file
+        input id="mapping-file-uploader" type="file"
+    .row
+      .small-12.columns
+        label for="matching-type" Mapping file label matching
+        select id="matching-type"
+          option id="exact" value="exact" selected="" Exact
+          option id="partial" value="partial" Partial (substring matching)
+
+hr.row
+
+.row
+  h4 Submit
+  .small-6.columns
+    label for="submit" Submit your files
+    input id="submit" type="button" value="Submit!" disabled=""
+  .small-6.columns
+    label for="reset" Reset the viewer
+    input id="reset" type="button" value="Reset!"
+
+hr.row

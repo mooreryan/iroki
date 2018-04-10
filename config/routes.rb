@@ -14,6 +14,9 @@ Rails.application.routes.draw do
 
   get 'biom' => 'pages#biom', as: :biom
 
+  get 'large' => 'pages#canvas_viewer', as: :large
+  get 'cluster' => 'pages#tree_cluster', as: :tree_cluster
+
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

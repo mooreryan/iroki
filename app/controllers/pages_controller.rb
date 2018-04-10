@@ -17,6 +17,12 @@ class PagesController < ApplicationController
   def docs
   end
 
+  def canvas_viewer
+  end
+
+  def tree_cluster
+  end
+
   def biom
     @color_brewer_colors = %w(Viridis Spectral CubeHelixDefault CubeHelixSaturated OrRd PuBu BuPu Oranges BuGn YlOrBr YlGn Reds RdPu Greens YlGnBu Purples GnBu Greys YlOrRd PuRd Blues PuBuGn RdYlGn RdBu PiYG PRGn RdYlBu BrBG RdGy PuOr Set2 Accent Set1 Set3 Dark2 Paired Pastel2 Pastel1)
 
