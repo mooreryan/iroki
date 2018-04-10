@@ -1,0 +1,17 @@
+.row#everything
+
+  ul#example-tabs.tabs data-tabs=""
+    li.tabs-title.is-active
+      a#canvas-upload-button aria-selected="true" href="#upload-panel" Upload
+    li.tabs-title
+      a#canvas-options-button href="#options-panel" Options
+    li.tabs-title
+      a#canvas-save-button href="#save-panel" Save
+
+  #form-div.tabs-content data-tabs-content="example-tabs"
+    #upload-panel.tabs-panel.is-active
+      = render "layouts/canvas_viewer_upload_panel"
+    #options-panel.tabs-panel
+      = render "layouts/canvas_viewer_options_panel"
+    #save-panel.tabs-panel
+      = render "layouts/canvas_viewer_save_panel"

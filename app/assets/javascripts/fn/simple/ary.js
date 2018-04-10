@@ -137,6 +137,30 @@ fn.ary.center = function (ary) {
 };
 
 /**
+ * Divide each value of the array by the population standard variation.
+ *
+ * @param ary
+ * @throws {Error} if SD is NaN
+ * @throws {Error} if SD is 0.
+ * @return {Array} the array but scaled to unit variance.
+ */
+fn.ary.scale_to_unit_variance = function (ary) {
+  // This is population standard deviation.
+  var sd = lalolib.std(lalolib.array2mat(ary));
+
+  if (isNaN(sd)) {
+    throw Error("the sd was NaN");
+  }
+  if (sd === 0) {
+    throw Error("the SD was zero");
+  }
+
+  return ary.map(function (val) {
+    return val / sd;
+  });
+};
+
+/**
  * Take the first num elements from the array.
  *
  * @param ary

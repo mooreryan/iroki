@@ -1001,15 +1001,19 @@ fn.parsed_biom.count_matrix = function (leaf_names, counts_for_each_leaf) {
 /**
  * Return an object with all the info you need for working with the parsed biom.
  *
+ * Note that the params are set by the set_params function in biom.js
+ *
  * @param params Object with keys: biom_str, replace_zeros (replace zero counts with small value), keep_zero_counts (mean across all samples).  Also takes all the keys that fn.parsed_biom.color takes.
  * @return {Object}
  */
 fn.parsed_biom.new = function (params) {
   // Need to set defaults for all of these.
-  var biom_str         = params.biom_str;
-  var keep_zero_counts = params.keep_zero_counts;
-  var angle_offset     = params.angle_offset;
-  var projection_type  = params.projection_type;
+  var biom_str             = params.biom_str;
+  var keep_zero_counts     = params.keep_zero_counts;
+  var angle_offset         = params.angle_offset;
+  var projection_type      = params.projection_type;
+  var scale_matrix_for_svd = params.scale_matrix_for_svd;
+  var download_legend      = params.download_legend;
 
   // This will either be an actual number of singular vals to keep (if projection type is "pc") or the percentage of variance to keep (if projection type is "auto").
   var sing_vals_to_keep = params.sing_vals_to_keep;
@@ -1068,16 +1072,27 @@ fn.parsed_biom.new = function (params) {
   // fully_parsed_biom.count_matrix = fn.parsed_biom.count_matrix(fully_parsed_biom.leaf_names, fully_parsed_biom.counts_for_each_leaf);
   fully_parsed_biom.count_matrix = fn.parsed_biom.count_matrix(fully_parsed_biom.leaf_names, fully_parsed_biom.counts_for_each_leaf);
 
-  fully_parsed_biom.projection = null;
-  if (projection_type === "pc") {
-    fully_parsed_biom.projection = fn.project.project_with_num_pcs_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep);
+  if (lalolib.type(fully_parsed_biom.count_matrix) === "matrix") {
+    fully_parsed_biom.projection = null;
+    if (projection_type === "pc") {
+      fully_parsed_biom.projection = fn.project.project_with_num_pcs_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep, scale_matrix_for_svd);
+    }
+    else {
+      fully_parsed_biom.projection = fn.project.project_with_variance_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep, scale_matrix_for_svd);
+    }
+
+    fully_parsed_biom.projection_leaves_1d  = fn.project.projection_leaves_1d(fully_parsed_biom.count_matrix, scale_matrix_for_svd);
+    fully_parsed_biom.projection_samples_1d = fn.project.projection_samples_1d(fully_parsed_biom.count_matrix, scale_matrix_for_svd);
+  }
+  else if (lalolib.type(fully_parsed_biom.count_matrix) === "vector") {
+    fully_parsed_biom.projection            = fully_parsed_biom.count_matrix;
+    fully_parsed_biom.projection_leaves_1d  = fully_parsed_biom.count_matrix;
+    fully_parsed_biom.projection_samples_1d = TODO;
+
   }
   else {
-    fully_parsed_biom.projection = fn.project.project_with_variance_cutoff(fully_parsed_biom.count_matrix, sing_vals_to_keep);
+    throw Error("count matrix type was '" + lalolib.type(fully_parsed_biom.count_matrix) + ", but should be either matrix or vector");
   }
-
-  fully_parsed_biom.projection_leaves_1d  = fn.project.projection_leaves_1d(fully_parsed_biom.count_matrix);
-  fully_parsed_biom.projection_samples_1d = fn.project.projection_samples_1d(fully_parsed_biom.count_matrix);
 
 
   // All the stuff for the colors.
@@ -1092,14 +1107,18 @@ fn.parsed_biom.new = function (params) {
   fully_parsed_biom.color_hex_codes = return_value.color_hex_codes;
   fully_parsed_biom.color_details   = return_value.color_details;
 
-  // Add the modified biom with colors tsv.
-  fully_parsed_biom.biom_with_colors_tsv  = fn.parsed_biom.biom_with_colors_tsv(fully_parsed_biom);
-  // And the html version.
-  fully_parsed_biom.biom_with_colors_html = fn.parsed_biom.biom_with_colors_html(fully_parsed_biom.biom_with_colors_tsv);
+  // TODO these two things often break.
+  if (download_legend) {
+    // Add the modified biom with colors tsv.
+    fully_parsed_biom.biom_with_colors_tsv  = fn.parsed_biom.biom_with_colors_tsv(fully_parsed_biom);
+    // And the html version.
+    fully_parsed_biom.biom_with_colors_html = fn.parsed_biom.biom_with_colors_html(fully_parsed_biom.biom_with_colors_tsv);
 
-  fully_parsed_biom.approx_starting_colors_tsv  = fn.parsed_biom.sample_color_legend_tsv(fully_parsed_biom.approx_starting_colors);
-  fully_parsed_biom.approx_starting_colors_html = fn.parsed_biom.sample_color_legend_html(fully_parsed_biom.approx_starting_colors_tsv);
-
+    fully_parsed_biom.approx_starting_colors_tsv  = fn.parsed_biom.sample_color_legend_tsv(fully_parsed_biom.approx_starting_colors);
+    fully_parsed_biom.approx_starting_colors_html = fn.parsed_biom.sample_color_legend_html(fully_parsed_biom.approx_starting_colors_tsv);
+  }
 
   return fully_parsed_biom;
 };
+
+var TODO = null;

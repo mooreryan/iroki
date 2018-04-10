@@ -164,6 +164,14 @@ fn.lalolib.center_matrix = function (M) {
   return fn.lalolib.apply_to_cols(M, fn.ary.center);
 };
 
+fn.lalolib.scale_matrix = function (M) {
+  return fn.lalolib.apply_to_cols(M, fn.ary.scale_to_unit_variance);
+};
+
+fn.lalolib.center_and_scale_matrix = function (M) {
+  return fn.lalolib.scale_matrix(fn.lalolib.center_matrix(M));
+};
+
 /**
  * Gives the non-zero singular values for the svd object.
  *
@@ -309,11 +317,24 @@ fn.lalolib.svd.svd_old = function (M, center) {
  * TODO needs specs
  *
  * @param M
- * @param center
+ * @param center Center the matrix.
+ * @param scale Scale the matrix to unit variance.  Uses population SD.
  * @return {*}
  */
-fn.lalolib.svd.svd = function (M, center) {
-  var the_matrix = center ? fn.lalolib.center_matrix(M) : M;
+fn.lalolib.svd.svd = function (M, center, scale) {
+  var the_matrix = null;
+  if (center && scale) {
+    the_matrix = fn.lalolib.center_and_scale_matrix(M)
+  }
+  else if (center) {
+    the_matrix = fn.lalolib.center_matrix(M)
+  }
+  else if (scale) {
+    the_matrix = fn.lalolib.scale_matrix(M)
+  }
+  else {
+    the_matrix = M;
+  }
 
   var svd            = null,
       numeric_matrix = null,

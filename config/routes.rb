@@ -14,6 +14,8 @@ Rails.application.routes.draw do
 
   get 'biom' => 'pages#biom', as: :biom
 
+  get 'large' => 'pages#canvas_viewer', as: :large
+
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

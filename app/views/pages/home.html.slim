@@ -13,6 +13,13 @@
   .small-12.medium-6.large-4.columns#outer-container
     .row.upload-form
       = render "layouts/viewer_form"
+
+    .row
+      h1 Iroki tree viewer
+    .row
+      p Hi! I'm the Iroki tree viewer for normal sized trees!
+      p If you have a really big tree (up to one million leaves!), you should try the #{link_to "large tree viewer", large_path}.
+
     .row
       h3 About
       p Iroki is a super snazzy online tree viewer (phylogenetic or other kinds too!) with automatic customization using metadata or biom files.
