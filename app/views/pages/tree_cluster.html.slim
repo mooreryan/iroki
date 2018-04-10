@@ -1,0 +1,31 @@
+- provide :title, 'About'
+
+.row
+  h1 Tree cluster
+
+  p It's a fun way to cluster sequences.
+
+hr.row
+
+.row
+  h4 Upload tree
+  form id="tree-upload-form"
+    .small-12.columns
+      label for="file-uploader" Newick tree
+      input id="file-uploader" type="file"
+
+hr.row
+
+.row
+  h4 Submit
+  .small-6.columns
+    label for="submit" Submit your files
+    input id="submit" type="button" value="Submit!" disabled=""
+  .small-6.columns
+    label for="reset" Reset
+    input id="reset" type="button" value="Reset!"
+
+hr.row
+
+javascript:
+  tc.upload_handler();
