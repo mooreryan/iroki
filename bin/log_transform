@@ -1,0 +1,21 @@
+#!/bin/bash
+
+awk 'BEGIN {FS="\t"; OFS="\t"}
+{
+  if (NR == 1) {
+    print;
+  }
+  else {
+    for (i = 2; i <= NF; ++i) {
+      if ($i <= 1) {
+        $i = 0;
+      }
+      else {
+        $i = log($i);
+      }
+    }
+    {
+      print;
+    }
+  }
+}' "$1" > "${1%.*}".log_transform.txt
