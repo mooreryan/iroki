@@ -1,0 +1,16 @@
+#!/bin/bash
+
+infile="$1"
+
+awk 'BEGIN { FS="\t"; OFS="\t" }
+{
+  if (NR == 2)
+  {
+    $1 = "name";
+    print;
+  }
+  else if (NR >= 3)
+  {
+    print;
+  }
+}' "$infile"
