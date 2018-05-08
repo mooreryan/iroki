@@ -890,7 +890,13 @@ fn.parsed_biom.biom_with_colors_tsv = function (fully_parsed_biom) {
     data_row.push(fn.math.round(fully_parsed_biom.color_details[leaf_name].lightness, 2));
 
     // Data characteristics
-    data_row.push(fn.pt.to_s(fully_parsed_biom.centroids_of_whole_shape[leaf_name]));
+    var centroid = "";
+    if (fully_parsed_biom.centroids_of_whole_shape && fully_parsed_biom.centroids_of_whole_shape[leaf_name]) {
+      // If we are in pallete mode, centroids_of_whole_shape will be undefined
+      centroid = fully_parsed_biom.centroids_of_whole_shape[leaf_name];
+    }
+    data_row.push(centroid);
+
     data_row.push(fn.math.round(fully_parsed_biom.evenness_across_samples_for_each_leaf[leaf_name], 2));
     data_row.push(fn.math.round(fully_parsed_biom.abundance_across_samples_for_each_leaf[leaf_name], 2));
 
