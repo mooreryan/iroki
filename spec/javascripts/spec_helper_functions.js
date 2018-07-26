@@ -3,12 +3,7 @@ var TODO = null;
 var spec_helper = {
   TOLERANCE: 1e-3,
   BIOM_STR: "name\ts1\ts2\napple\t10\t0\npie\t0\t10\n",
-  PAPA_CONFIG: {
-    delimiter: "\t",
-    header: true,
-    dynamicTyping: true,
-    skipEmptyLines: true
-  },
+  PAPA_CONFIG: PAPA_CONFIG, // THis is defined in parse_mapping_file.js
   SINGLE_SAMPLE_BIOM_STR: "name\tsample_1\ngeode\t5\nclock\t1\ntire\t2\nbanana\t9\neggplant\t10",
   SINGLE_SAMPLE_APPROX_START_COLORS: "name\tappoximate starting color\nsample_1\t#ed5e93\n",
   SINGLE_SAMPLE_APPROX_START_COLORS_HTML: "<!DOCTYPE html><head><style>table, th, td {border: 1px solid #2d2d2d; border-collapse: collapse} th, td {padding: 5px} th {text-align: left; border-bottom: 4px solid #2d2d2d} .thick-right-border {border-right: 3px solid #2d2d2d}.thick-left-border {border-left: 3px solid #2d2d2d}</style><title>Sample legend</title></head><body><table><tr><th class='thick-right-border'>name</th><th>appoximate starting color</th></tr><tr><td class='thick-right-border'>sample_1</td><td style='background-color: #ed5e93;'>#ed5e93</td></tr></table></body></html>",

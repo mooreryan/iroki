@@ -1,7 +1,8 @@
 var PAPA_CONFIG = {
   delimiter: "\t",
   header: true,
-  dynamicTyping: true,
+  // See GitHub Issue #64
+  dynamicTyping: function(col_name){ return col_name !== "name"; },
   // worker: true,
   skipEmptyLines: true
 };
@@ -936,6 +937,8 @@ function is_bad_col_header(str)
       includes(BRANCH_OPTIONS, str))
 }
 
+// TODO RYAN
+var MOORER;
 
 function parse_mapping_file(str)
 {
@@ -953,6 +956,7 @@ function parse_mapping_file(str)
 
   // Parse mapping string.
   var mapping_csv = Papa.parse(chomp(stripped_str), PAPA_CONFIG);
+  MOORER = mapping_csv;
 
   // Check for erros
   if (has_papa_errors(mapping_csv)) {

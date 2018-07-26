@@ -5,3 +5,4 @@
 //= require fn.project_spec
 //= require functions_spec
 //= require newick_spec
+//= require parse_mapping_file_spec
