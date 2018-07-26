@@ -102,94 +102,12 @@ test('json_each() applies the function to each k,v pair', function() {
   expect(ary).toEqual(["a", 1, "b", 2]);
 });
 
-test('bad_col_header() is true if the header is not valid', function() {
-  expect(is_bad_col_header('apple')).toBe(true);
-});
-test('bad_col_header() is false if the header is valid', function() {
-  expect(is_bad_col_header('new_name')).toBe(false);
-});
 
 test('has_non_specific_matching() returns true if there is non specific matching', function() {
   expect(has_non_specific_matching(root, parse_mapping_file(non_specific_mapping_str))).toBe(true);
 });
 test('has_non_specific_matching() returns false if there is not non-specific matching', function() {
   expect(has_non_specific_matching(root, parse_mapping_file(tiny_mapping_str))).toBe(false);
-});
-
-test('has_papa_errors() is true when the parsed csv has errors', function() {
-  var csv = Papa.parse(chomp(missing_col_str), PAPA_CONFIG);
-
-  expect(has_papa_errors(csv)).toBe(true);
-});
-test('has_papa_errors() is false when the parsed csv has no errors', function() {
-  var csv = Papa.parse(chomp(mapping_str), PAPA_CONFIG);
-
-  expect(has_papa_errors(csv)).toBe(false);
-});
-
-
-test('parse_mapping_file() returns the name2md object', function() {
-  var obj = {
-    "apple" : { "leaf_label_color" : BLUE },
-    "pie" : { "leaf_label_color" : GREEN }
-  };
-  expect(parse_mapping_file(mapping_str)).toEqual(obj);
-});
-test('parse_mapping_file() returns null if columns headers are no good', function() {
-  expect(parse_mapping_file(bad_col_header_str)).toBe(null);
-});
-test('parse_mapping_file() returns null if a row name is duplicated', function() {
-  expect(parse_mapping_file(duplicate_row_str)).toBe(null);
-});
-test('parse_mapping_file() returns null if there were Papa parsing errors', function() {
-  expect(parse_mapping_file(missing_col_str)).toBe(null);
-});
-test('parse_mapping_file() returns null if there is no "name" col header', function() {
-  expect(parse_mapping_file(no_name_col_str)).toBe(null);
-});
-test('parse_mapping_file() returns null if there are too few columns', function() {
-  expect(parse_mapping_file(too_few_cols_str)).toBe(null);
-});
-test('parse_mapping_file() returns null if there are too many columns', function() {
-  expect(parse_mapping_file(too_many_cols_str)).toBe(null);
-});
-test('parse_mapping_file() returns null if there are duplicated column headers', function() {
-  expect(parse_mapping_file(duplicate_col_headers_str)).toBe(null);
-});
-test('parse_mapping_file() sets bad colors to black instead', function(){
-  var obj = {
-    "geode" : { "leaf_label_color" : BLACK }
-  };
-  expect(parse_mapping_file(bad_color_str)).toEqual(obj);
-});
-test('parse_mapping_file() can handle R colors and Kelly colors', function(){
-  var r_chocolate4 = "#8B4513";
-  var k_purple = "#875692";
-  var obj = {
-    "geode" : { "leaf_label_color" : r_chocolate4 },
-    "tire" : { "leaf_label_color" : k_purple },
-    "clock" : { "leaf_label_color" : k_purple }
-  };
-
-  expect(parse_mapping_file(kelly_and_r_colors_str)).toEqual(obj);
-});
-test('parse_mapping_file() can handle hex codes without the starting # char', function() {
-  var hex_codes_without_pound = "name\tbranch_color\ngeode\tFF00FF\n";
-
-  var obj = {
-    "geode" : { "branch_color" : "#ff00ff" }
-  };
-
-  expect(parse_mapping_file(hex_codes_without_pound)).toEqual(obj);
-});
-test('parse_mapping_file() strips spaces from the name column', function() {
-  var with_spaces = "name\tbranch_color\n   apple    \t#ff00ff\n";
-
-  var obj = {
-    "apple" : { "branch_color" : "#ff00ff" }
-  };
-
-  expect(parse_mapping_file(with_spaces)).toEqual(obj);
 });
 
 test('push_unless_present() pushes an item if it is not there already', function() {

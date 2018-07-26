@@ -1,3 +1,6 @@
+// Set window.alert to console logging for all specs.
+window.alert = console.log;
+
 var TODO = null;
 
 var spec_helper = {

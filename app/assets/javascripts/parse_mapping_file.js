@@ -937,9 +937,6 @@ function is_bad_col_header(str)
       includes(BRANCH_OPTIONS, str))
 }
 
-// TODO RYAN
-var MOORER;
-
 function parse_mapping_file(str)
 {
   // Strip spaces from the start and end of all tokens.
@@ -956,7 +953,6 @@ function parse_mapping_file(str)
 
   // Parse mapping string.
   var mapping_csv = Papa.parse(chomp(stripped_str), PAPA_CONFIG);
-  MOORER = mapping_csv;
 
   // Check for erros
   if (has_papa_errors(mapping_csv)) {
