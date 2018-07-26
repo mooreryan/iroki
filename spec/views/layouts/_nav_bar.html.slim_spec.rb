@@ -16,7 +16,13 @@ end
 
 RSpec.describe "nav_bar.html.slim" do
   it_has_link "Iroki"
-  it_has_link "Biom"
+  # it_has_link "Biom"
   it_has_link "Contact"
   it_has_link "Citation"
+
+  it "has the Documentation link" do
+    render partial: "layouts/nav_bar.html.slim"
+
+    expect(rendered).to have_link "Documentation", href: "/docs"
+  end
 end
