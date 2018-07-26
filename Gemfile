@@ -83,5 +83,6 @@ gem 'delayed_job_active_record'
 gem 'slim-rails'
 gem 'annotate', '~> 2.7', '>= 2.7.1'
 
-# Specify this version because of a security vulnerability
+# Specify these versions because of security vulnerabilities.
 gem 'loofah', '~> 2.2', '>= 2.2.2'
+gem 'sprockets', '~> 3.7', '>= 3.7.2'
