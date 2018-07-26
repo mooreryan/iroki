@@ -86,3 +86,4 @@ gem 'annotate', '~> 2.7', '>= 2.7.1'
 # Specify these versions because of security vulnerabilities.
 gem 'loofah', '~> 2.2', '>= 2.2.2'
 gem 'sprockets', '~> 3.7', '>= 3.7.2'
+gem 'rails-html-sanitizer', '~> 1.0', '>= 1.0.4'
