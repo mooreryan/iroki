@@ -1,0 +1,29 @@
+= render 'layouts/docs_nav_bar_title'
+
+= render 'layouts/docs_nav_bar'
+
+.row
+  h2 Newick trees
+
+.row
+  p Iroki reads Newick formatted trees. This is a widely used format for storing phylogenetic and other types of trees in plain text.
+
+  p Here is an example of a tree with bootstrap support values.  In this case, the support values run from 0 - 1, but depending on your tree building software, they might run from 0 - 100, or look super neat like this <code>95.6/100</code> if you used IQ-TREE.
+
+  p Knowing which type of bootstrap support values your tree has will be important if you want to use the inner dots to represent bootstrap support.
+
+.row
+  pre
+    code
+      | ((geode:1, (clock:0.5, tire:5.3)0.4:2)0.75:6, (banana:1.7, eggplant:1.5)0.5:3);
+
+.row
+  p You can download this tree #{link_to "here", "/doc_stuff/tiny_tree_with_bootstraps.txt"}.
+
+  p This tree will look like this when viewed with Iroki.
+
+.row
+  = image_tag "/doc_stuff/tiny_tree_with_bootstraps.png", id: "tiny_tree_with_bootstraps"
+
+.row
+  p For the rest of the examples, we will use this tree.

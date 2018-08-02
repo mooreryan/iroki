@@ -1,0 +1,11 @@
+.row
+  ul.sand-color.vertical.dropdown.menu data-dropdown-menu="" style="max-width: 250px;"
+    li = link_to 'Newick trees', docs_newick_path
+    li
+      = link_to 'Mapping files', docs_mapping_files_path
+      ul.menu.sand-color
+        li
+          = link_to 'Styling options', docs_styling_opts_path
+          ul.menu.sand-color
+            li = link_to 'Branch styling', docs_branch_styling_path
+        li = link_to 'Mapping file priority', docs_mapping_file_priority_path

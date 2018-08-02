@@ -7,7 +7,7 @@
         li
           = link_to 'Iroki', root_path
     .top-bar-right
-      ul.menu
+      ul.menu.dropdown data-dropdown-menu=""
         /li.divider
         /li = link_to 'About', about_path
         / li.divider
@@ -21,4 +21,23 @@
         li.divider
         li = link_to 'Citation', citation_path
         li.divider
-        li = link_to 'Documentation', docs_path
+        / Level 0
+        li
+          = link_to 'Documentation', docs_path
+          ul.menu
+            / Level 1
+            li
+              = link_to 'Newick trees', docs_newick_path
+            li
+              = link_to 'Mapping files', docs_mapping_files_path
+              ul.menu
+                / Level 2
+                li
+                  = link_to 'Styling options', docs_styling_opts_path
+                  ul.menu
+                    / Level 3
+                    li
+                      = link_to 'Branch styling', docs_branch_styling_path
+                / Level 2
+                li
+                  = link_to 'Mapping file priority', docs_mapping_file_priority_path

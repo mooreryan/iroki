@@ -1,4 +1,5 @@
 class PagesController < ApplicationController
+
   def home
   end
 
@@ -15,7 +16,15 @@ class PagesController < ApplicationController
   end
 
   def docs
+
+
   end
+
+  def docs_newick; end
+  def docs_mapping_files; end
+  def docs_styling_opts; end
+  def docs_branch_styling; end
+  def docs_mapping_file_priority; end
 
   def canvas_viewer
   end

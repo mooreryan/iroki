@@ -2,6 +2,8 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
+@import 'settings';
+
 .hideme {
   display: none;
 }
@@ -186,4 +188,8 @@ hr.row {
   //overflow: scroll;
   width: 800px;
   height: 800px;
+}
+
+.sand-color {
+  background-color: $body-background;
 }

@@ -11,6 +11,11 @@ Rails.application.routes.draw do
   get 'citation' => 'pages#citation', as: :citation # gives you citation_path
 
   get 'docs' => 'pages#docs', as: :docs
+  get 'docs_newick' => 'pages#docs_newick', as: :docs_newick
+  get 'docs_mapping_files' => 'pages#docs_mapping_files', as: :docs_mapping_files
+  get 'docs_styling_opts' => 'pages#docs_styling_opts', as: :docs_styling_opts
+  get 'docs_branch_styling' => 'pages#docs_branch_styling', as: :docs_branch_styling
+  get 'docs_mapping_file_priority' => 'pages#docs_mapping_file_priority', as: :docs_mapping_file_priority
 
   get 'biom' => 'pages#biom', as: :biom
 

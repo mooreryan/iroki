@@ -1,0 +1,34 @@
+= render 'layouts/docs_nav_bar_title'
+
+= render 'layouts/docs_nav_bar'
+
+.row
+  h2 Mapping files
+
+.row
+  p Iroki is all about mapping files, so we try to make them as simple to use as possible.
+
+  p Here is an example mapping file.  It's just a sweet screenshot of a spreadsheet.
+
+.row
+  = image_tag "/doc_stuff/tiny_tree_simple_mapping.png", id: "tiny_tree_simple_mapping"
+
+.row
+  p Mapping files should be tab-delimited.  We reccomend making your mapping file in your favorite spreadsheet program and then exporting it as a tab-delimited text file (tsv).  Right click #{link_to "here", "/doc_stuff/tiny_tree_simple_mapping.txt"} and select Download to get the above mapping file as a tab seperated text file.
+  p Note that Iroki will strip off whitespace from the beginning and end of all tokens in the mapping file.
+
+/ .row
+/   h3 Styling options
+/
+/ .row
+/   p The first row of the mapping file tells Iroki what aspects of the tree that you want to style.
+/
+/   p The first column of the first row must always be <code>name</code>.
+/
+/   p The above mapping file has all the options currently supported by Iroki.  Here they are again:
+/
+/   p There are options for styling labels (<code>leaf_label_color</code>, <code>leaf_label_font</code>, <code>leaf_label_size</code>), leaf dots (<code>leaf_dot_color</code>, <code>leaf_dot_size</code>), branches (<code>branch_width</code>, <code>branch_color</code>), and for renaming nodes (<code>new_name</code>).
+/
+/   p If you have anything in the first row of your mapping file that is not one of these options, Iroki will let you know about it.
+/
+/   p Note that you should only include the styling labels that you actually want to use in your mapping file.  This is because Iroki will take whatever is in the mapping file and lock those options in the viewer.  For example, if I have <code>leaf_label_color</code> in my header row, then Iroki will lock the option for "Show leaf labels?" to on.

@@ -1,0 +1,33 @@
+= render 'layouts/docs_nav_bar_title'
+
+= render 'layouts/docs_nav_bar'
+
+.row
+  h3 Mapping file priority
+
+.row
+  p Iroki will take whatever is in your mapping file and generate styling options that will override whatever was previously set in the options panel.  Here is an example.
+
+.row
+  p First we have a tree and we have manually set the branch color to magenta.
+
+.row
+  = image_tag "/doc_stuff/mapping_file_priority_1.png", id: "mapping_file_priority_1"
+
+.row
+  p Next, we upload the mapping file from above.  Note that it has <code>branch_color</code> in the header row.
+
+.row
+  = image_tag "/doc_stuff/mapping_file_priority_2.png", id: "mapping_file_priority_2"
+
+.row
+  p As you can see, the branch_option is still set to magenta, but the branch colors have been set by the mapping automatically.
+
+.row
+  p Let's look at one more example.  This time, the mapping file will only set <code>branch_color</code> for certain clock and tire.  You can see the mapping file #{link_to "here", "/doc_stuff/tiny_tree_some_branch_colors.txt"}.
+
+.row
+  = image_tag "/doc_stuff/mapping_file_priority_3.png", id: "mapping_file_priority_3"
+
+.row
+  p As you can see, the clock and tire clade is colored blue (by the mapping file) and the rest of the branches are colored magenta (by the option set by the user in the options panel).
