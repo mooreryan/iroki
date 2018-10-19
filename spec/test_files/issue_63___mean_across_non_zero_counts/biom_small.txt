@@ -1,0 +1,3 @@
+name	s1	s2
+apple	0	1
+good	0	0

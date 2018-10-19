@@ -73,6 +73,17 @@ describe("fn", function () {
       });
 
       context("do not keep zero counts", function () {
+        it("handles cases where a row has zeros for each sample", function () {
+          // "good" has all zeros.
+          var biom_str    = "name\ts1\ts2\napple\t0\t1\ngood\t0\t0\n";
+          var parsed_biom = Papa.parse(fn.str.chomp(biom_str), spec_helper.PAPA_CONFIG);
+
+          var expected = { apple: 1, good: 0 };
+          var actual   = fn.parsed_biom.abundance_across_samples_for_each_leaf(parsed_biom, false);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+
         it("returns mean abundance across non zero samples", function () {
           var expected = spec_helper.test_case.ABUNDANCE_ACROSS_NONZERO_SAMPLES;
           var actual   = fn.parsed_biom.abundance_across_samples_for_each_leaf(spec_helper.test_case.PARSED_BIOM, false);
@@ -93,6 +104,18 @@ describe("fn", function () {
       });
 
       context("do not keep zero counts", function () {
+        it("handles cases where a row has zeros for each sample", function () {
+          var counts = {
+            apple: [0, 1],
+            good: [0, 0]
+          };
+
+          var expected = { apple: 1, good: 1 };
+          var actual   = fn.parsed_biom.evenness_across_samples_for_each_leaf(counts, false);
+
+          spec_helper.expect_stringify_equal(actual, expected);
+        });
+
         it("returns evenness across non zero samples", function () {
           var expected = spec_helper.test_case.EVENNESS_ACROSS_NONZERO_SAMPLES;
           var actual   = fn.parsed_biom.evenness_across_samples_for_each_leaf(spec_helper.test_case.COUNTS, false);

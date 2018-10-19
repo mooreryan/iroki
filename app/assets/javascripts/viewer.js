@@ -2197,7 +2197,7 @@ function draw_scale_bar() {
     }
 
 
-    var rotated_rectangle = LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED;
+    var rotated_rectangle = LAYOUT_STRAIGHT && TREE_ROTATION === ROTATED;
     mean_length           = fn.math.round(ary_mean(lengths), ROUNDING_PRECISION);
 
     var min_scale_bar_size;

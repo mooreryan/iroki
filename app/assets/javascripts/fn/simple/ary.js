@@ -71,8 +71,15 @@ fn.ary.min = function (ary) {
   });
 };
 
+/**
+ *
+ * @param ary
+ * @returns zero if array is empty, else the sum
+ */
 fn.ary.sum = function (ary) {
-  fn.ary._throw_if_empty(ary);
+  if (ary.length === 0) {
+    return 0;
+  }
 
   return ary.reduce(function (a, b) {
     return a + b;

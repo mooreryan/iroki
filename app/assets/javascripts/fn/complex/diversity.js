@@ -1,6 +1,13 @@
 // Depends on fn.ary, fn.math
 
+/**
+ * @throws if the array is empty
+ * @param counts
+ * @returns {number}
+ */
 fn.diversity.shannon_entropy = function (counts) {
+  fn.ary._throw_if_empty(counts);
+
   // First convert counts to proportions
   var ary_sum = fn.ary.sum(counts);
 
@@ -16,6 +23,17 @@ fn.diversity.shannon_entropy = function (counts) {
   }));
 };
 
+/**
+ * This is evenness calculated from the shannon entropy.
+ *
+ * @note If the array is empty, then the evenness entropy is set to 0.
+ * @note If the array sums to 0, then it is set to 1.
+ *
+ * @todo not sure how to handle negative counts here
+ *
+ * @param counts
+ * @returns {number}
+ */
 fn.diversity.evenness_entropy = function (counts) {
   var ary_len = counts.length;
   if (ary_len === 0) {
@@ -25,9 +43,16 @@ fn.diversity.evenness_entropy = function (counts) {
     return 1;
   }
   else {
-    var shannon_max = fn.math.log2(counts.length);
+    var sum = fn.ary.sum(counts);
 
-    return fn.diversity.shannon_entropy(counts) / shannon_max;
+    if (sum === 0) {
+      return 1;
+    }
+    else {
+      var shannon_max = fn.math.log2(counts.length);
+
+      return fn.diversity.shannon_entropy(counts) / shannon_max;
+    }
   }
 };
 

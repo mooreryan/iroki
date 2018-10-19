@@ -51,10 +51,10 @@ describe("fn", function () {
     });
 
     describe("sum", function () {
-      it("throws an error if the array is empty", function () {
-        expect(function () {
-          fn.ary.sum([]);
-        }).to.throw();
+      it("returns zero if the array is empty", function () {
+        var ary = [];
+
+        expect(fn.ary.sum(ary)).to.equal(0);
       });
 
       it("returns the sum of the ary", function () {
@@ -279,9 +279,9 @@ describe("fn", function () {
         expect(actual).to.equal(expected);
       });
 
-      // TODO not sure what the actual behavior here should be
-      it("is 0 if all counts are zero", function () {
-        var expected = 0;
+      // If they're all zero, shannon would be 0, but the sum is 0, so it'd be 0/0 ~ infinity.  But it's also perfectly even, in a way.  So just set it to 1 and be done with it.
+      it("is 1 if all counts are zero", function () {
+        var expected = 1;
         var actual   = fn.diversity.evenness_entropy([0, 0, 0]);
 
         expect(actual).to.equal(expected);

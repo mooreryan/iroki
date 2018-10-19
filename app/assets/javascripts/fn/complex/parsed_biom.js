@@ -167,7 +167,13 @@ fn.parsed_biom.abundance_across_samples_for_each_leaf = function (parsed_biom, k
     });
 
     fn.obj.each(counts, function (leaf, counts) {
-      abundance[leaf] = fn.ary.mean(counts);
+      // This can happen when taking non-zero count samples only, if all the samples in fact are zero count only.
+      if (counts.length === 0) {
+        abundance[leaf] = 0.0;
+      }
+      else {
+        abundance[leaf] = fn.ary.mean(counts);
+      }
     });
   });
 
@@ -176,6 +182,8 @@ fn.parsed_biom.abundance_across_samples_for_each_leaf = function (parsed_biom, k
 
 /**
  * It gives evenness across samples for each leaf.
+ *
+ * @note If you're looking at non-zero samples only, but that is an empty set, the evenness will be set to 1.
  *
  * @param {Object} counts_for_each_leaf (leaf_name => [s1_count, s2_count, ...)
  * @param keep_zero_counts Pass true if you want evenness across all samples.  Pass false if you want evenness across samples with count > 0.
@@ -193,7 +201,13 @@ fn.parsed_biom.evenness_across_samples_for_each_leaf = function (counts_for_each
       counts = fn.ary.filter_out_zeros(count_vals);
     }
 
-    obj[leaf] = fn.diversity.evenness_entropy(counts);
+    // If the thing has all zero samples
+    if (counts.length === 0) {
+      obj[leaf] = 1;
+    }
+    else {
+      obj[leaf] = fn.diversity.evenness_entropy(counts);
+    }
   });
 
   return obj;
