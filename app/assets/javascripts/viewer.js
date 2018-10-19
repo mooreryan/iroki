@@ -497,7 +497,7 @@ function lalala(tree_input_param, mapping_input_param) {
         // Make sure the input is not negative
         var w_val = jq(viewer.html.tree_width.id).val();
 
-        var layout_value = jq(viewer.html.layout.id).val();
+        var layout_value  = jq(viewer.html.layout.id).val();
         var default_value = null;
 
         if (layout_value === viewer.html.layout.rectangular.id) {
@@ -523,14 +523,14 @@ function lalala(tree_input_param, mapping_input_param) {
       });
     });
 
-    listener(viewer.html.tree_height.id, "change", function(){
+    listener(viewer.html.tree_height.id, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
         // Make sure the input is not negative
         var h_val = jq(viewer.html.tree_height.id).val();
 
-        var layout_value = jq(viewer.html.layout.id).val();
+        var layout_value  = jq(viewer.html.layout.id).val();
         var default_value = null;
 
         if (layout_value === viewer.html.layout.rectangular.id) {
@@ -696,7 +696,8 @@ function lalala(tree_input_param, mapping_input_param) {
       setTimeout(function () {
 
         update_form_constants();
-        draw_scale_bar();
+        // the user caused this change
+        draw_scale_bar(true);
         adjust_tree();
         utils__set_status_msg_to_done();
       }, TIMEOUT);
@@ -2156,7 +2157,11 @@ function ary_mean(ary) {
   return total / num_elems;
 }
 
-function draw_scale_bar() {
+/**
+ *
+ * @param user_changed set this to true if the user triggered this (through even listener)
+ */
+function draw_scale_bar(user_changed) {
   d3.select("#scale-bar-container").remove();
 
   if (SHOW_SCALE_BAR) {
@@ -2228,6 +2233,9 @@ function draw_scale_bar() {
 
     // If the original scale bar is smaller than the min size, bump up the size.
     if (scale_bar_pixels < min_scale_bar_size) {
+      if (user_changed) {
+        alert("Selected scale bar size was too small.  Using default.");
+      }
       scale_bar_pixels = min_scale_bar_size;
       // scale_bar_label_text = fn.math.round(min_scale_bar_size / pixels_per_unit_length, ROUNDING_PRECISION);
     }
