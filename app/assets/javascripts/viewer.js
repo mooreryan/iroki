@@ -1124,22 +1124,26 @@ function lalala(tree_input_param, mapping_input_param) {
       if (LAYOUT_STRAIGHT) {
         // It could be coming from the circle which has a different slider behavior
         elem    = document.getElementById("tree-rotation");
-        var val = parseInt(elem.value);
-        if (val < 180) { // The slider will jump to the beginning so set it to 0.
-          TREE_ROTATION = 0;
-          elem.setAttribute("value", "0");
-        }
-        else {
-          TREE_ROTATION = 270;
-          elem.setAttribute("value", "270");
-        }
-        elem.setAttribute("min", "0");
-        elem.setAttribute("max", "270");
-        elem.setAttribute("step", "270");
+        TREE_ROTATION = 270;
+        elem.setAttribute("disabled", "");
+        // var val = parseInt(elem.value);
+        // if (val < 180) { // The slider will jump to the beginning so set it to 0.
+        //   TREE_ROTATION = 0;
+        //   elem.setAttribute("value", "0");
+        // }
+        // else {
+        //   TREE_ROTATION = 270;
+        //   elem.setAttribute("value", "270");
+        // }
+        // elem.setAttribute("min", "0");
+        // elem.setAttribute("max", "270");
+        // elem.setAttribute("step", "270");
       }
       else {
         // Works for both circular and radial
         elem          = document.getElementById("tree-rotation");
+        elem.removeAttribute("disabled");
+
         TREE_ROTATION = parseInt(elem.value);
         // Flip tree rotation to 0
         TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
