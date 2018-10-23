@@ -1,0 +1,12 @@
+TY  - JOUR
+T1  - Iroki: automatic customization and visualization of phylogenetic trees
+JF  - bioRxiv
+M3  - 10.1101/106138
+AU  - Moore, Ryan M
+AU  - Harrison, Amelia O
+AU  - McAllister, Sean M
+AU  - Wommack, K. Eric
+Y1  - 2018/01/01
+UR  - http://biorxiv.org/content/early/2018/08/15/106138.abstract
+N2  - Phylogenetic trees are an important analytical tool for examining community diversity and the evolutionary history of species. In the case of microorganisms, decreasing sequencing costs have enabled researchers to generate ever-larger sequence datasets, which in turn have begun to fill gaps in the evolutionary history of microbial groups. However, phylogenetic analyses of these types of datasets present challenges to the extraction of meaningful trends from complex trees. Scientific inferences made by visual inspection of phylogenetic trees can be simplified and enhanced by customizing various parts of the tree. Yet, manual customization is time-consuming and error prone, and programs designed to assist in batch tree customization often require programming experience or complicated file formats for annotation. To address these issues, we developed Iroki, a user-friendly web interface for tree visualization that provides automatic customization of phylogenetic trees based on metadata and abundance information. The Iroki web app and documentation is available at http://www.iroki.net or through the VIROME portal (http://virome.dbi.udel.edu). Iroki&#039;s source code is released under the MIT license and is available at https://github.com/mooreryan/iroki.
+ER  - 
