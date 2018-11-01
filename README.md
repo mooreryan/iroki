@@ -2,7 +2,7 @@
 
 # Iroki
 
-Rails 5 source for the [Iroki webapp](www.iroki.net), a viewer and customizer for phylogenetic trees.
+Rails 5 source for the [Iroki webapp](https://www.iroki.net), a viewer and customizer for phylogenetic trees.
 
 ## Citation
 
@@ -25,4 +25,4 @@ In addition to viewing the [manuscript on bioRxiv](https://doi.org/10.1101/10613
 
 ## Documentation
 
-Please see the [the docs](http://www.iroki.net/docs) for info on how to run Iroki.
+Please see the [the docs](https://www.iroki.net/docs) for info on how to run Iroki.
