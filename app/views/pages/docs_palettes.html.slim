@@ -1,0 +1,38 @@
+= render 'layouts/docs_nav_bar_title'
+
+= render 'layouts/docs_nav_bar'
+
+.row
+  h4 Available palettes
+
+.row
+  p If you need a diverging palette, please use one of the palettes that we provide with Iroki.  They were designed to be extra lovely!
+
+.row
+  h5 My favorites!
+
+  ul
+    li = link_to "Paul Tol Muted (color blind friendly)", "/palettes/palette_paul_tol_muted.pdf", id: "Paul Tol Muted"
+    li = link_to "Kelly", "/palettes/palette_kelly.pdf", id: "Kelly"
+    li = link_to "Paul Tol Bright (color blind friendly)", "/palettes/palette_paul_tol_bright.pdf", id: "Paul Tol Bright"
+
+.row
+  h5 Other snazzy palettes (in alphabetical order)
+
+  ul
+    li = link_to "Color Brewer Accent", "/palettes/palette_brewer_accent.pdf", id: "Color Brewer Accent"
+    li = link_to "Color Brewer Dark 2", "/palettes/palette_brewer_dark2.pdf", id: "Color Brewer Dark 2"
+    li = link_to "Color Brewer Paired", "/palettes/palette_brewer_paired.pdf", id: "Color Brewer Paired"
+    li = link_to "Color Brewer Set 1", "/palettes/palette_brewer_set1.pdf", id: "Color Brewer Set 1"
+    li = link_to "Color Brewer Set 2", "/palettes/palette_brewer_set2.pdf", id: "Color Brewer Set 2"
+    li = link_to "Paul Tol High Contrast (color blind friendly)", "/palettes/palette_paul_tol_high_contrast.pdf", id: "Paul Tol High Contrast"
+    li = link_to "Paul Tol Vibrant (color blind friendly)", "/palettes/palette_paul_tol_vibrant.pdf", id: "Paul Tol Vibrant"
+
+.row
+  h4 Info
+
+  p The Paul Tol palettes were designed to be color friendly!  See #{link_to 'here', 'https://personal.sron.nl/~pault/'} for more info.
+
+  p The Color Brewer palettes were taken from the R package #{link_to 'pals', 'https://cran.r-project.org/web/packages/pals/index.html'}.
+
+  p The Kelly colors were adapted from Kenneth Kelly's 22 colors of maximum contrast.

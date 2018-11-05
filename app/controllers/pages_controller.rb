@@ -25,6 +25,7 @@ class PagesController < ApplicationController
   def docs_styling_opts; end
   def docs_branch_styling; end
   def docs_mapping_file_priority; end
+  def docs_palettes; end
 
   def canvas_viewer
   end

@@ -17,6 +17,9 @@ Rails.application.routes.draw do
   get 'docs_branch_styling' => 'pages#docs_branch_styling', as: :docs_branch_styling
   get 'docs_mapping_file_priority' => 'pages#docs_mapping_file_priority', as: :docs_mapping_file_priority
 
+  # palette info
+  get 'docs_palettes' => 'pages#docs_palettes', as: :docs_palettes
+
   get 'biom' => 'pages#biom', as: :biom
 
   get 'large' => 'pages#canvas_viewer', as: :large
