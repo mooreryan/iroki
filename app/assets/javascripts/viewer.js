@@ -293,7 +293,12 @@ var defaults = {
   "leaf_dot_size": 2,
   "new_name": null,
   "branch_width": 2,
-  "branch_color": "#000000"
+  "branch_color": "#000000",
+
+  "bar_color": "#000000",
+  "bar_padding": 10,
+  "bar_height": 100,
+  "bar_width": 10
 };
 
 var md_cat_name2id = {
@@ -1542,7 +1547,9 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
       function get_max_bar_height(bars) {
-        return fn.ary.max($.map(name2md, function(val) { return val.bar_height }))
+        return fn.ary.max($.map(name2md, function (val) {
+          return val.bar_height;
+        }));
       }
 
       function scale_bar_height(height, max) {
@@ -2972,6 +2979,13 @@ function reset_all_to_defaults() {
 
   jq(ID_LEAF_DOT_COLOR).val("#000000");
   jq(ID_INNER_DOT_COLOR).val("#000000");
+
+  // Bar options
+  uncheck(ID_BAR_SHOW);
+  jq(ID_BAR_COLOR).val(defaults.bar_color);
+  jq(ID_BAR_HEIGHT).val(defaults.bar_height);
+  jq(ID_BAR_WIDTH).val(defaults.bar_width);
+  jq(ID_BAR_PADDING).val(defaults.bar_padding);
 
   // Branch options
   $("#branch-color").val("#000000");
