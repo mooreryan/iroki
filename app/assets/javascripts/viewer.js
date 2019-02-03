@@ -239,6 +239,18 @@ var ID_INNER_LABEL_COLOR           = "inner-label-color",
     VAL_INNER_LABEL_COLOR,
     VAL_INNER_LABEL_FONT;
 
+// Bar option IDs
+var ID_BAR_SHOW    = "show-bars",
+    VAL_BAR_SHOW,
+    ID_BAR_COLOR   = "bar-color",
+    VAL_BAR_COLOR,
+    ID_BAR_HEIGHT  = "bar-height",
+    VAL_BAR_HEIGHT,
+    ID_BAR_WIDTH   = "bar-width",
+    VAL_BAR_WIDTH,
+    ID_BAR_PADDING = "bar-padding",
+    VAL_BAR_PADDING;
+
 var ID_INNER_DOT_SIZE = "inner-dot-size",
     ID_LEAF_DOT_SIZE  = "leaf-dot-size";
 
@@ -405,18 +417,19 @@ function lalala(tree_input_param, mapping_input_param) {
       d3.select("#" + id).on(action, fn);
     }
 
-    function pick_transform(d) {
+    // TODO when picking transform for bars, we don't want the final rotate_by at all (or just set it to 0).
+    function pick_transform(d, is_bar) {
       if (LAYOUT_CIRCLE && is_leaf(d)) {
-        return circle_transform(d, the_x, align_tip_labels ? "y" : the_y);
+        return circle_transform(d, the_x, align_tip_labels ? "y" : the_y, is_bar);
       }
       else if (LAYOUT_CIRCLE) {
-        return circle_transform(d, the_x, the_y);
+        return circle_transform(d, the_x, the_y, is_bar);
       }
       else if (LAYOUT_STRAIGHT && is_leaf(d)) {
-        return rectangle_transform(d, the_x, align_tip_labels ? "y" : the_y);
+        return rectangle_transform(d, the_x, align_tip_labels ? "y" : the_y, is_bar);
       }
       else if (LAYOUT_STRAIGHT) {
-        return rectangle_transform(d, the_x, the_y);
+        return rectangle_transform(d, the_x, the_y, is_bar);
       }
       else {
         var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
@@ -762,6 +775,7 @@ function lalala(tree_input_param, mapping_input_param) {
         draw_link_extensions();
         draw_leaf_dots();
         draw_leaf_labels();
+        draw_bars(); // bars may need to be adjusted if they're shown.
         draw_scale_bar();
         adjust_tree();
         utils__set_status_msg_to_done();
@@ -941,6 +955,55 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT);
     });
 
+    // Bar listeners ///////////////////////////////////////////////
+    listener(ID_BAR_SHOW, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        // These are all the things that happen when leaf dots are drawn.  Pretty sure you need to redraw all the stuff up to the labels and tips and dots, then the bars, then the scale bar and tree adjust as adding bars will change the overall tree size.
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_BAR_PADDING, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        update_and_draw(draw_bars);
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_BAR_COLOR, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        update_and_draw(draw_bars);
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_BAR_HEIGHT, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        update_and_draw(draw_bars);
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_BAR_WIDTH, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        update_and_draw(draw_bars);
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+
 
     listener("branch-color", "change", function () {
       utils__set_status_msg_to_rendering();
@@ -1067,6 +1130,12 @@ function lalala(tree_input_param, mapping_input_param) {
       document.getElementById("save-svg").removeAttribute("disabled");
       document.getElementById("save-png").removeAttribute("disabled");
 
+      // Bars
+      VAL_BAR_SHOW    = document.getElementById(ID_BAR_SHOW).checked;
+      VAL_BAR_PADDING = jq(ID_BAR_PADDING).val();
+      VAL_BAR_WIDTH   = jq(ID_BAR_WIDTH).val();
+      VAL_BAR_HEIGHT  = jq(ID_BAR_HEIGHT).val();
+      VAL_BAR_COLOR   = jq(ID_BAR_COLOR).val();
 
       // Dots
       VAL_SHOW_INNER_DOTS = jq(ID_SHOW_INNER_DOTS).val();
@@ -1123,7 +1192,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
       if (LAYOUT_STRAIGHT) {
         // It could be coming from the circle which has a different slider behavior
-        elem    = document.getElementById("tree-rotation");
+        elem          = document.getElementById("tree-rotation");
         TREE_ROTATION = 270;
         elem.setAttribute("disabled", "");
         // var val = parseInt(elem.value);
@@ -1141,7 +1210,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }
       else {
         // Works for both circular and radial
-        elem          = document.getElementById("tree-rotation");
+        elem = document.getElementById("tree-rotation");
         elem.removeAttribute("disabled");
 
         TREE_ROTATION = parseInt(elem.value);
@@ -1461,6 +1530,95 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     }
 
+    function draw_bars() {
+      var bars = d3.select("#bars-container")
+                   .selectAll("rect")
+                   .data(ROOT.descendants().filter(is_leaf));
+
+      function lala() {
+        var min = 10, max = 200;
+
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function new_transform(transform) {
+        // We need to move it a bit away from the tip as well as center it on the line.  We can do that by adding another translate command tacked on to the end.  In rectangle mode, the first number moves it to the right if positive, to the left if negative.  The second number moves it down if positive, up if negative.
+
+        var nudge_horiz = VAL_BAR_PADDING;
+
+        // This will center it on the line
+        var nudge_vert = -VAL_BAR_WIDTH / 2;
+
+        return transform + " translate(" + nudge_horiz + " " + nudge_vert + ")";
+      }
+
+      if (VAL_BAR_SHOW) {
+        bars
+          .enter().append("rect")
+          .attr("transform", function (d) {
+            // This will be the point of the tip of the branch to the leaf.
+            var transform = pick_transform(d, true);
+
+            return new_transform(transform);
+          })
+          .attr("fill", function (d) {
+            var val = d.metadata.bar_color;
+
+            return val ? val : VAL_BAR_COLOR;
+          })
+          // This is right to left length in rectangle mode
+          .attr("width", function (d) {
+            // Check and see if height is specified in mapping file
+            var val = d.metadata.bar_height;
+
+            // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
+            return val ? val : VAL_BAR_HEIGHT;
+          })
+          // This is up and down length in rectangle mode
+          .attr("height", function (d) {
+            return VAL_BAR_WIDTH;
+          });
+
+        bars.merge(bars)
+            .attr("transform", function (d) {
+              // This will be the point of the tip of the branch to the leaf.
+              var transform = pick_transform(d, true);
+
+              return new_transform(transform);
+            })
+            .attr("fill", function (d) {
+              var val = d.metadata.bar_color;
+
+              return val ? val : VAL_BAR_COLOR;
+            })
+            // This is right to left length in rectangle mode
+            .attr("width", function (d) {
+              // Check and see if height is specified in mapping file
+              var val = d.metadata.bar_height;
+
+              // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
+              return val ? val : VAL_BAR_HEIGHT;
+            })
+            // This is up and down length in rectangle mode
+            .attr("height", function (d) {
+              return VAL_BAR_WIDTH;
+            });
+
+        // .attr("r", function (d) {
+        //   var val = d.metadata.leaf_dot_size;
+        //   return val ? val : LEAF_DOT_SIZE;
+        // })
+        // .attr("fill", function (d) {
+        //   var val = d.metadata.leaf_dot_color;
+        //   return val ? val : VAL_LEAF_DOT_COLOR;
+        // });
+
+      }
+      else {
+        bars.remove();
+      }
+    }
+
     function draw_inner_labels() {
       inner_labels = d3.select("#inner-label-container")
                        .selectAll("text")
@@ -1770,6 +1928,9 @@ function lalala(tree_input_param, mapping_input_param) {
       chart.append("g").attr("id", "leaf-dot-container");
       draw_leaf_dots();
 
+      chart.append("g").attr("id", "bars-container");
+      draw_bars();
+
       chart.append("g").attr("id", "leaf-label-container");
       draw_leaf_labels();
 
@@ -1945,13 +2106,21 @@ function lalala(tree_input_param, mapping_input_param) {
 
 
     // These functions update the layout
-    function circle_transform(d, x, y) {
-      return "rotate(" + d[x] +
-        ") translate(" + d[y] + ", 0)" +
-        (circular_label_flipping_test(d[x]) ? "" : "rotate(180)");
+    function circle_transform(d, x, y, is_bar) {
+      if (is_bar) {
+        // Bars never get the final rotation.
+        return "rotate(" + d[x] +
+          ") translate(" + d[y] + ", 0)";
+      }
+      else {
+        return "rotate(" + d[x] +
+          ") translate(" + d[y] + ", 0)" +
+          (circular_label_flipping_test(d[x]) ? "" : " rotate(180)");
+      }
     }
 
-    function rectangle_transform(d, x, y) {
+    function rectangle_transform(d, x, y, is_bar) {
+      // TODO if you add back in the ability to rotate rectangles, you'll need to handle bar rotation seperately.
       return "rotate(0) translate(" + d[x] + " " + d[y] + ") rotate(" +
         LABEL_ROTATION + ")";
     }
