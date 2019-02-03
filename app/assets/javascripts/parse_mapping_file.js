@@ -2,7 +2,9 @@ var PAPA_CONFIG = {
   delimiter: "\t",
   header: true,
   // See GitHub Issue #64
-  dynamicTyping: function(col_name){ return col_name !== "name"; },
+  dynamicTyping: function (col_name) {
+    return col_name !== "name";
+  },
   // worker: true,
   skipEmptyLines: true
 };
@@ -22,6 +24,11 @@ var LEAF_LABEL_OPTIONS = [
 var BRANCH_OPTIONS = [
   "branch_width",
   "branch_color"
+];
+
+var BAR_OPTIONS = [
+  "bar_height",
+  "bar_color"
 ];
 
 var valid_colors = {
@@ -246,7 +253,7 @@ var valid_colors = {
   "ptm_8": "#999933",
   "ptm_9": "#AA4499",
   "ptm_10": "#DDDDDD",
-  
+
   // These are the R colors by name.
   "r_white": "#FFFFFF",
   "r_aliceblue": "#F0F8FF",
@@ -1058,33 +1065,35 @@ var valid_colors = {
 };
 
 // Add one to account for the name column.
-var MAX_NUM_COLS = LEAF_DOT_OPTIONS.length + LEAF_LABEL_OPTIONS.length + BRANCH_OPTIONS.length + 1;
+var MAX_NUM_COLS =
+      LEAF_DOT_OPTIONS.length +
+      LEAF_LABEL_OPTIONS.length +
+      BRANCH_OPTIONS.length +
+      BAR_OPTIONS +
+      1;
 
 // From tested parse functions
-function push_unless_present(ary, item)
-{
+function push_unless_present(ary, item) {
   if (ary.indexOf(item) === -1) {
     ary.push(item);
   }
 }
-function has_duplicates(ary)
-{
+
+function has_duplicates(ary) {
   var tmp = [];
-  ary.forEach(function(item) {
+  ary.forEach(function (item) {
     push_unless_present(tmp, item);
   });
 
   return tmp.length !== ary.length;
 }
 
-function chomp(str)
-{
+function chomp(str) {
   return str.replace(/\r?\n?$/, '');
 }
 
 // fn is a function that takes two arguments: 1. the json key, and 2. the json value for that key.
-function json_each(json, fn)
-{
+function json_each(json, fn) {
   for (var key in json) {
     if (json.hasOwnProperty(key)) {
       fn(key, json[key]);
@@ -1092,8 +1101,7 @@ function json_each(json, fn)
   }
 }
 
-function json_keys(json)
-{
+function json_keys(json) {
   var keys = [];
   for (var key in json) {
     if (json.hasOwnProperty(key)) {
@@ -1104,21 +1112,19 @@ function json_keys(json)
   return keys;
 }
 
-function includes(ary, elem)
-{
+function includes(ary, elem) {
   return ary.indexOf(elem) !== -1;
 }
 
-function is_bad_col_header(str)
-{
+function is_bad_col_header(str) {
   return str !== "name" &&
     !(includes(LEAF_DOT_OPTIONS, str) ||
       includes(LEAF_LABEL_OPTIONS, str) ||
-      includes(BRANCH_OPTIONS, str))
+      includes(BRANCH_OPTIONS, str) ||
+      includes(BAR_OPTIONS, str));
 }
 
-function parse_mapping_file(str)
-{
+function parse_mapping_file(str) {
   // Strip spaces from the start and end of all tokens.
   var stripped_str = str
     .replace(/\r?\n/g, "\n") // First make all newlines \n
@@ -1129,7 +1135,6 @@ function parse_mapping_file(str)
 
   // To hold messages about bad colors in the mapping file.
   var bad_color_errors = [];
-  
 
   // Parse mapping string.
   var mapping_csv = Papa.parse(chomp(stripped_str), PAPA_CONFIG);
@@ -1144,7 +1149,7 @@ function parse_mapping_file(str)
     return null;
   }
 
-  var bad_headers = mapping_csv.meta.fields.filter(function(header) {
+  var bad_headers = mapping_csv.meta.fields.filter(function (header) {
     return is_bad_col_header(header);
   });
 
@@ -1170,16 +1175,17 @@ function parse_mapping_file(str)
   }
 
   // Convert to name2md.
-  var mapping = {};
+  var mapping            = {};
   var mapping_duplicates = [];
 
   // Check for duplicated keys in the mapping file.
-  mapping_csv.data.forEach(function(info) {
+  mapping_csv.data.forEach(function (info) {
     if (mapping[info.name]) {
       alert("ERROR -- " + info.name + " is duplicated in the mapping file");
 
       mapping_duplicates.push(info.name);
-    } else {
+    }
+    else {
       mapping[info.name] = {};
     }
   });
@@ -1189,8 +1195,8 @@ function parse_mapping_file(str)
     return null;
   }
 
-  mapping_csv.data.forEach(function(info) {
-    json_each(info, function(md_cat, val) {
+  mapping_csv.data.forEach(function (info) {
+    json_each(info, function (md_cat, val) {
 
       if (md_cat !== "name") {
         mapping[info.name][md_cat] = val;
@@ -1199,9 +1205,9 @@ function parse_mapping_file(str)
   });
 
   // Check for valid named colors.
-  var color_options = ["leaf_dot_color", "leaf_label_color", "branch_color"];
-  json_each(mapping, function(name, md){
-    color_options.forEach(function(option){
+  var color_options = ["leaf_dot_color", "leaf_label_color", "branch_color", "bar_color"];
+  json_each(mapping, function (name, md) {
+    color_options.forEach(function (option) {
       if (md[option]) { // color option is present
         // Check that it is valid
         var color_val;
@@ -1210,7 +1216,8 @@ function parse_mapping_file(str)
         // Since Kelly colors can be numbers 1-19, need to convert them.
         if ((typeof color_val) === "string") {
           color_val = color_val.toLowerCase();
-        } else {
+        }
+        else {
           color_val = color_val.toString();
         }
 
@@ -1219,12 +1226,14 @@ function parse_mapping_file(str)
           if (valid_colors[color_val]) {
             // Replace it with the hexcode. TODO if the casing is wrong in user input will the browser care?
             md[option] = valid_colors[color_val];
-          } else if (is_hex("#" + color_val)) {
+          }
+          else if (is_hex("#" + color_val)) {
             // It is a hex code but just missing the first # symbol, so pass it in with the # appended to the front.
 
             md[option] = ("#" + color_val);
-          } else {
-            bad_color_errors.push("WARNING -- there was an invalid color name in the mapping file: '" + color_val + "'.  The default color will be used instead.")
+          }
+          else {
+            bad_color_errors.push("WARNING -- there was an invalid color name in the mapping file: '" + color_val + "'.  The default color will be used instead.");
 
             // Set the color to the default color.
             md[option] = valid_colors["black"];
@@ -1242,28 +1251,27 @@ function parse_mapping_file(str)
 }
 
 // Also returns the hex code
-function is_hex(str)
-{
+function is_hex(str) {
   return str.match(/^#[0-9A-Fa-f]{6}$/);
 }
 
 // This should only be able to happen when it is not exact matching.
-function has_non_specific_matching(root, name2md)
-{
+function has_non_specific_matching(root, name2md) {
   var names_with_md = json_keys(name2md);
-  var leaf_matches = {};
-  root.leaves().forEach(function(leaf) {
+  var leaf_matches  = {};
+  root.leaves().forEach(function (leaf) {
     var leaf_name = leaf.data.name;
 
     // This assumes that the leaf names are unique.
-    names_with_md.forEach(function(name_with_md) {
+    names_with_md.forEach(function (name_with_md) {
       if (leaf_name.indexOf(name_with_md) !== -1) { //match!
         if (leaf_matches[leaf_name]) {
           // Sometimes, if you have duplicate leaf names, you will match the exact same name_with_md multiple times and trigger a false positive on the error below.
           if (leaf_matches[leaf_name].indexOf(name_with_md) === -1) {
             leaf_matches[leaf_name].push(name_with_md);
           }
-        } else {
+        }
+        else {
           leaf_matches[leaf_name] = [name_with_md];
         }
       }
@@ -1272,15 +1280,15 @@ function has_non_specific_matching(root, name2md)
 
 
   var non_specific_matches = false;
-  var error_string = "ERROR -- there were non-specific matches in the mapping fle.  ";
-  json_each(leaf_matches, function(name, matches) {
+  var error_string         = "ERROR -- there were non-specific matches in the mapping fle.  ";
+  json_each(leaf_matches, function (name, matches) {
     if (matches.length > 1) { // non specific matching
       error_string += name + " matched with: " + matches.join(', ') + ".  \n";
       // alert("ERROR -- '" + name + "' had multiple matches in the mapping file: '" + matches.join(', ') + "'.");
       non_specific_matches = true;
     }
   });
-  
+
   if (non_specific_matches) {
     alert(error_string);
   }
@@ -1288,26 +1296,25 @@ function has_non_specific_matching(root, name2md)
   return non_specific_matches;
 }
 
-function has_papa_errors(name2md)
-{
+function has_papa_errors(name2md) {
   if (name2md.errors.length > 0) {
-    name2md.errors.forEach(function(error) {
+    name2md.errors.forEach(function (error) {
       // TODO better alert
       alert("ERROR -- Parsing error on line " + (error.row + 2) + "!  Type -- " + error.type + ".  Code -- " + error.code + ".  Message -- " + error.message + ".");
     });
 
     return true;
-  } else {
+  }
+  else {
     return false;
   }
 }
 
 
 // TODO move to a ultils.js script.
-function min_non_zero_len_in_tree(root)
-{
+function min_non_zero_len_in_tree(root) {
   var min_length = undefined;
-  root.descendants().map(function(d) {
+  root.descendants().map(function (d) {
     if ((min_length === undefined || d.data.length < min_length) && d.data.length !== 0) {
       min_length = d.data.length;
     }
@@ -1317,36 +1324,35 @@ function min_non_zero_len_in_tree(root)
 }
 
 // The tree file ends in a ';' so if you split on it and get more than one thing, you may have more than one tree.
-function has_multiple_trees(tree_str)
-{
-  var splits = chomp(tree_str).split(";").filter(function(s) { return s; });
+function has_multiple_trees(tree_str) {
+  var splits = chomp(tree_str).split(";").filter(function (s) {
+    return s;
+  });
 
   return splits.length > 1;
 }
 
-function is_bad_newick(tree_str)
-{
+function is_bad_newick(tree_str) {
   var str_len = chomp(tree_str).length;
 
   var first_char = tree_str[0];
-  var last_char = tree_str[str_len - 1];
+  var last_char  = tree_str[str_len - 1];
 
   return !(first_char === "(" && last_char === ";");
 }
 
 
-
 // TODO move this to a utils file.
-function leaf_names(tree)
-{
+function leaf_names(tree) {
   var names = [];
-  function get_names(branchset)
-  {
+
+  function get_names(branchset) {
     branchset.forEach(function (set) {
       if (set.branchset) {
         // Not at a leaf yet, recurse
         get_names(set.branchset);
-      } else {
+      }
+      else {
         // it's a leaf, get the name
         names.push(set.name);
       }
@@ -1360,15 +1366,15 @@ function leaf_names(tree)
 }
 
 // Takes array of strings, returns false if no duplicates, array of duplicates otherwise.
-function has_duplicate_strings(ary)
-{
-  var obj = {};
+function has_duplicate_strings(ary) {
+  var obj        = {};
   var duplicates = {}; // track them for the error message.
-  ary.forEach(function(str) {
+  ary.forEach(function (str) {
     if (obj[str]) {
       if (duplicates[str]) {
         duplicates[str] += 1;
-      } else {
+      }
+      else {
         duplicates[str] = 2; // the second time we've seen it
       }
     }
@@ -1376,8 +1382,9 @@ function has_duplicate_strings(ary)
   });
 
   if (json_keys(obj).length === ary.length) {
-    return false
-  } else {
+    return false;
+  }
+  else {
     return duplicates;
   }
 }

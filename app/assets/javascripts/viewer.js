@@ -1541,6 +1541,14 @@ function lalala(tree_input_param, mapping_input_param) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
+      function get_max_bar_height(bars) {
+        return fn.ary.max($.map(name2md, function(val) { return val.bar_height }))
+      }
+
+      function scale_bar_height(height, max) {
+        return (height / max) * VAL_BAR_HEIGHT;
+      }
+
       function new_transform(transform) {
         // We need to move it a bit away from the tip as well as center it on the line.  We can do that by adding another translate command tacked on to the end.  In rectangle mode, the first number moves it to the right if positive, to the left if negative.  The second number moves it down if positive, up if negative.
 
@@ -1553,6 +1561,9 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
       if (VAL_BAR_SHOW) {
+        // TODO if this is slow, you could move it into the parse mapping file function or just after parsing.
+        var max_bar_height = get_max_bar_height(bars);
+
         bars
           .enter().append("rect")
           .attr("transform", function (d) {
@@ -1564,6 +1575,8 @@ function lalala(tree_input_param, mapping_input_param) {
           .attr("fill", function (d) {
             var val = d.metadata.bar_color;
 
+            console.log(d.data.name + " " + d.metadata.bar_color);
+
             return val ? val : VAL_BAR_COLOR;
           })
           // This is right to left length in rectangle mode
@@ -1571,8 +1584,11 @@ function lalala(tree_input_param, mapping_input_param) {
             // Check and see if height is specified in mapping file
             var val = d.metadata.bar_height;
 
+            console.log(d.data.name + " " + d.metadata.bar_height);
+
+
             // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-            return val ? val : VAL_BAR_HEIGHT;
+            return val || val === 0 ? scale_bar_height(val, max_bar_height) : 0;
           })
           // This is up and down length in rectangle mode
           .attr("height", function (d) {
@@ -1597,7 +1613,7 @@ function lalala(tree_input_param, mapping_input_param) {
               var val = d.metadata.bar_height;
 
               // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-              return val ? val : VAL_BAR_HEIGHT;
+              return val || val === 0 ? scale_bar_height(val, max_bar_height) : 0;
             })
             // This is up and down length in rectangle mode
             .attr("height", function (d) {
