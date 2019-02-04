@@ -297,6 +297,8 @@ var defaults = {
 
   "bar_color": "#000000",
   "bar_padding": 10,
+  "bar_padding_min": 0,
+  "bar_padding_max": 10000, // TODO this is just some silly default.
   "bar_height": 100,
   "bar_width": 10
 };
@@ -979,6 +981,8 @@ function lalala(tree_input_param, mapping_input_param) {
     listener(ID_BAR_PADDING, "change", function () {
       utils__set_status_msg_to_rendering();
 
+      validate_bar_padding_input();
+
       setTimeout(function () {
         update_and_draw(draw_bars);
         utils__set_status_msg_to_done();
@@ -1088,6 +1092,9 @@ function lalala(tree_input_param, mapping_input_param) {
       // Make sure the bootstrap cutoffs are good
       set_and_validate_bootstrap_cutoff_input();
 
+      // Make sure bar padding text input is good
+      validate_bar_padding_input();
+
       VAL_BIOLOGICALLY_ROOTED = is_checked(ID_BIOLOGICALLY_ROOTED);
       // try_disable_bio_rooted();
 
@@ -1137,7 +1144,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
       // Bars
       VAL_BAR_SHOW    = document.getElementById(ID_BAR_SHOW).checked;
-      VAL_BAR_PADDING = jq(ID_BAR_PADDING).val();
+      VAL_BAR_PADDING = validate_bar_padding_input(ID_BAR_PADDING);
       VAL_BAR_WIDTH   = jq(ID_BAR_WIDTH).val();
       VAL_BAR_HEIGHT  = jq(ID_BAR_HEIGHT).val();
       VAL_BAR_COLOR   = jq(ID_BAR_COLOR).val();
@@ -1582,17 +1589,12 @@ function lalala(tree_input_param, mapping_input_param) {
           .attr("fill", function (d) {
             var val = d.metadata.bar_color;
 
-            console.log(d.data.name + " " + d.metadata.bar_color);
-
             return val ? val : VAL_BAR_COLOR;
           })
           // This is right to left length in rectangle mode
           .attr("width", function (d) {
             // Check and see if height is specified in mapping file
             var val = d.metadata.bar_height;
-
-            console.log(d.data.name + " " + d.metadata.bar_height);
-
 
             // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
             return val || val === 0 ? scale_bar_height(val, max_bar_height) : 0;
@@ -3187,6 +3189,44 @@ function inner_dot_stroke_width(d) {
   }
 }
 
+// Check that the bar padding text input is good and return appropriate values if it is not.
+function validate_bar_padding_input(id) {
+  var raw_val = jq(id).val();
+
+  // Basic decimal number matcher
+  if (raw_val && !raw_val.match(/^\d*\.?\d*$/)) {
+    // Set the user option
+    jq(id).val(defaults.bar_padding);
+    // And return the actual usable value
+    return defaults.bar_padding;
+  }
+
+  // If raw_val is undefined, then this will be NaN.
+  var val = Math.round(parseFloat(raw_val));
+
+  // First check if it's NaN.  If so, use default value
+  if (isNaN(val)) {
+
+    // Set the user option
+    jq(id).val(defaults.bar_padding);
+    // And return the actual usable value
+    return defaults.bar_padding;
+  }
+  else if (val > defaults.bar_padding_max) {
+    jq(id).val(defaults.bar_padding_max);
+    return defaults.bar_padding_max;
+  }
+  else if (val < defaults.bar_padding_min) {
+    jq(id).val(defaults.bar_padding_min);
+    return defaults.bar_padding_min;
+  }
+  else {
+    // It's fine return the actual val.
+    return val;
+  }
+
+}
+
 function set_and_validate_bootstrap_cutoff_input() {
   VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT = parseFloat(jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val());
   VAL_BOOTSTRAP_CUTOFF_FILLED_DOT   = parseFloat(jq(ID_BOOTSTRAP_CUTOFF_FILLED_DOT).val());
@@ -3204,7 +3244,10 @@ function set_and_validate_bootstrap_cutoff_input() {
     VAL_BOOTSTRAP_CUTOFF_FILLED_DOT = DEFAULT_BOOTSTRAP_CUTOFF_FILLED_DOT;
   }
 
+  // TODO this should be an else.
+
   // Make sure that the bootstrap values are okay.
+  // TODO the corresponding VAL vars should also be changed.
   if (VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT > MAX_BOOTSTRAP_VAL) {
     jq(ID_BOOTSTRAP_CUTOFF_UNFILLED_DOT).val(MAX_BOOTSTRAP_VAL);
   }
