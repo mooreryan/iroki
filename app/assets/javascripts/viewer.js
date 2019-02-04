@@ -232,8 +232,10 @@ var ID_LEAF_DOT_COLOR              = "leaf-dot-color",
     VAL_INNER_DOT_COLOR;
 var ID_LEAF_LABEL_COLOR            = "leaf-label-color",
     ID_LEAF_LABEL_FONT             = "leaf-label-font",
+    ID_LEAF_LABEL_PADDING          = "leaf-label-padding",
     VAL_LEAF_LABEL_COLOR,
-    VAL_LEAF_LABEL_FONT;
+    VAL_LEAF_LABEL_FONT,
+    VAL_LEAF_LABEL_PADDING;
 var ID_INNER_LABEL_COLOR           = "inner-label-color",
     ID_INNER_LABEL_FONT            = "inner-label-font",
     VAL_INNER_LABEL_COLOR,
@@ -289,6 +291,9 @@ var defaults = {
   "leaf_label_color": "#000000",
   "leaf_label_font": "Helvetica",
   "leaf_label_size": 16,
+  "leaf_label_padding": 0,
+  "leaf_label_padding_min": 0,
+  "leaf_label_padding_max": 10000,
   "leaf_dot_color": "#000000",
   "leaf_dot_size": 2,
   "new_name": null,
@@ -441,14 +446,17 @@ function lalala(tree_input_param, mapping_input_param) {
       else {
         var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
-        if (-90 < rotate_by && rotate_by < 90) {
-          // Don't change rotate by
-        }
-        else if (rotate_by >= 90) { // TODO which should have the equal part
-          rotate_by += 180; // TODO also flip the text-anchor to end
-        }
-        else if (rotate_by <= -90) {
-          rotate_by -= 180; // TODO also flip the text anchor to end
+        if (!is_bar) {
+          // Check the adjustments if we are not a bar.
+          if (-90 < rotate_by && rotate_by < 90) {
+            // Don't change rotate by
+          }
+          else if (rotate_by >= 90) { // TODO which should have the equal part
+            rotate_by += 180; // TODO also flip the text-anchor to end
+          }
+          else if (rotate_by <= -90) {
+            rotate_by -= 180; // TODO also flip the text anchor to end
+          }
         }
 
         if (isNaN(rotate_by)) {
@@ -766,6 +774,14 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT);
     });
     listener("leaf-label-size", "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        update_and_draw(draw_leaf_labels);
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_LEAF_LABEL_PADDING, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1188,8 +1204,9 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
 
-      INNER_LABEL_SIZE = parseInt(document.getElementById("inner-label-size").value);
-      LEAF_LABEL_SIZE  = parseInt(document.getElementById("leaf-label-size").value);
+      INNER_LABEL_SIZE       = parseInt(document.getElementById("inner-label-size").value);
+      LEAF_LABEL_SIZE        = parseInt(document.getElementById("leaf-label-size").value);
+      VAL_LEAF_LABEL_PADDING = validate_leaf_label_padding_input(ID_LEAF_LABEL_PADDING);
 
       TREE_BRANCH_CLADOGRAM = "cladogram";
       TREE_BRANCH_NORMAL    = "normalogram";
@@ -1257,9 +1274,11 @@ function lalala(tree_input_param, mapping_input_param) {
       // Show/hide labels size
       if (SHOW_LEAF_LABELS) {
         document.getElementById("leaf-label-size").removeAttribute("disabled");
+        document.getElementById("leaf-label-padding").removeAttribute("disabled");
       }
       else {
         document.getElementById("leaf-label-size").setAttribute("disabled", "");
+        document.getElementById("leaf-label-padding").setAttribute("disabled", "");
       }
 
       // If it's circle the label rotation gets disabled
@@ -1547,12 +1566,6 @@ function lalala(tree_input_param, mapping_input_param) {
                    .selectAll("rect")
                    .data(ROOT.descendants().filter(is_leaf));
 
-      function lala() {
-        var min = 10, max = 200;
-
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      }
-
       function get_max_bar_height(bars) {
         return fn.ary.max($.map(name2md, function (val) {
           return val.bar_height;
@@ -1658,7 +1671,9 @@ function lalala(tree_input_param, mapping_input_param) {
           .attr("class", "inner")
           // .attr("font-size", 0)
           .attr("dy", text_y_offset)
-          .attr("dx", text_x_offset)
+          .attr("dx", function (d) {
+            return text_x_offset(d, null);
+          })
           .attr("text-anchor", text_anchor)
           .attr("transform", function (d) {
             return pick_transform(d);
@@ -1675,7 +1690,9 @@ function lalala(tree_input_param, mapping_input_param) {
           .merge(inner_labels)
           // .transition(TR)
           .attr("dy", text_y_offset)
-          .attr("dx", text_x_offset)
+          .attr("dx", function (d) {
+            return text_x_offset(d, null);
+          })
           .attr("text-anchor", text_anchor)
           .attr("transform", function (d) {
             return pick_transform(d);
@@ -1708,7 +1725,9 @@ function lalala(tree_input_param, mapping_input_param) {
           .attr("class", "leaf")
           // .attr("font-size", 0)
           .attr("dy", text_y_offset)
-          .attr("dx", text_x_offset)
+          .attr("dx", function (d) {
+            return text_x_offset(d, VAL_LEAF_LABEL_PADDING);
+          })
           .attr("text-anchor", text_anchor)
           .attr("transform", function (d) {
             return pick_transform(d);
@@ -1738,7 +1757,9 @@ function lalala(tree_input_param, mapping_input_param) {
           // .transition(TR)
           // Same things that may change
           .attr("dy", text_y_offset)
-          .attr("dx", text_x_offset)
+          .attr("dx", function (d) {
+            return text_x_offset(d, VAL_LEAF_LABEL_PADDING);
+          })
           .attr("text-anchor", text_anchor)
           .attr("transform", function (d) {
             return pick_transform(d);
@@ -1968,12 +1989,26 @@ function lalala(tree_input_param, mapping_input_param) {
       // jq("status-msg").html("seanie");
     }
 
-    function text_x_offset(d) {
+    function text_x_offset(d, padding) {
+      // Set padding to 0 if it is not passed in.
+      if (!padding) {
+        padding = 0;
+      }
+
+      var positive_padding = 0.6 + padding + "em";
+      var negative_padding = -0.6 - padding + "em";
+
+
       // TODO replace these with function params
       // var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
 
       if (LAYOUT_CIRCLE) { // circular
-        return circular_label_flipping_test(d[the_x]) ? "0.6em" : "-0.6em";
+        if (circular_label_flipping_test(d[the_x])) {
+          return positive_padding;
+        }
+        else {
+          return negative_padding;
+        }
       }
       else if (LAYOUT_RADIAL) {
         // Positive moves text anchor start labels away from branch tip, but moves text anchor end labels closer to the branch tip.
@@ -1982,28 +2017,28 @@ function lalala(tree_input_param, mapping_input_param) {
         if (-90 < rotate_by && rotate_by < 90) {
           // Don't change rotate by
           // return "start";
-          return "0.6em";
+          return positive_padding;
         }
         else if (rotate_by >= 90) { // TODO which should have the equal part
           // rotate_by += 180; // TODO also flip the text-anchor to end
           // return "end";
-          return "-0.6em";
+          return negative_padding;
         }
         else if (rotate_by <= -90) {
           // rotate_by -= 180; // TODO also flip the text anchor to end
           // return "end";
-          return "-0.6em";
+          return negative_padding;
 
         }
 
         return "1.0em"; // TODO radial layout placeholder
       }
       else {
-        if (LABEL_ROTATION == 90) {
-          return "0.6em"; // They're going up and down so move away from branch
+        if (LABEL_ROTATION === 90) {
+          return positive_padding; // They're going up and down so move away from branch
         }
-        else if (LABEL_ROTATION == -90) {
-          return "-0.6em";
+        else if (LABEL_ROTATION === -90) {
+          return negative_padding;
         }
         else {
           return "0em";
@@ -2962,6 +2997,7 @@ function reset_all_to_defaults() {
 
   check("show-leaf-labels");
   $("#leaf-label-size").val(16);
+  jq(ID_LEAF_LABEL_PADDING).val(defaults.leaf_label_padding);
 
   uncheck("align-tip-labels");
   $("#label-rotation").val(0);
@@ -3186,6 +3222,43 @@ function inner_dot_stroke_width(d) {
     else {
       return "none";
     }
+  }
+}
+
+// TODO merge this with the other padding validation function.
+function validate_leaf_label_padding_input(id) {
+  var raw_val = jq(id).val();
+
+  // Basic decimal number matcher
+  if (raw_val && !raw_val.match(/^\d*\.?\d*$/)) {
+    // Set the user option
+    jq(id).val(defaults.leaf_label_padding);
+    // And return the actual usable value
+    return defaults.leaf_label_padding;
+  }
+
+  // If raw_val is undefined, then this will be NaN.
+  var val = parseFloat(raw_val);
+
+  // First check if it's NaN.  If so, use default value
+  if (isNaN(val)) {
+
+    // Set the user option
+    jq(id).val(defaults.leaf_label_padding);
+    // And return the actual usable value
+    return defaults.leaf_label_padding;
+  }
+  else if (val > defaults.leaf_label_padding_max) {
+    jq(id).val(defaults.leaf_label_padding_max);
+    return defaults.leaf_label_padding_max;
+  }
+  else if (val < defaults.leaf_label_padding_min) {
+    jq(id).val(defaults.leaf_label_padding_min);
+    return defaults.leaf_label_padding_min;
+  }
+  else {
+    // It's fine return the actual val.
+    return val;
   }
 }
 
