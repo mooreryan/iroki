@@ -115,7 +115,7 @@ function upload_button(submit_id, uploader_id, callback) {
     MAPPING_CHANGED                                 = false;
     TREE_CHANGED                                    = false;
 
-    d3.select("#status-msg").html("I'm still in beta.  Please report any bugs on the contact page.");
+    d3.select("#status-msg").html("Big new update (bar charts!!).  Please report any bugs on the contact page.");
 
     // Reset all sliders and options to default.
     reset_all_to_defaults();
