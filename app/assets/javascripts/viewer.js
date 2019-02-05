@@ -1659,7 +1659,8 @@ function lalala(tree_input_param, mapping_input_param) {
 
       // Scales bar height so the max size will be the one set by the user.
       function scale_bar_height(height, max) {
-        return (height / max) * VAL_BAR_HEIGHT;
+        // Heights can be negative, but we always want a positive value for rectangle attrs.  The flipping is taken care of elsewhere.
+        return Math.abs((height / max) * VAL_BAR_HEIGHT);
       }
 
       // TODO If there is more than 2 translate directives, this will braek
@@ -1676,7 +1677,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
       // Takes the old transform (the tip of the leaf) and adds some padding so each set of bars is nice and separated.
-      function new_transform(transform, bar_set, max_height) {
+      function new_transform(d, transform, bar_set, max_height) {
         // We need to move it a bit away from the tip as well as center it on the line.  We can do that by adding another translate command tacked on to the end.  In rectangle mode, the first number moves it to the right if positive, to the left if negative.  The second number moves it down if positive, up if negative.
 
         // need a bit of extra padding for sets 2 - N
@@ -1684,15 +1685,25 @@ function lalala(tree_input_param, mapping_input_param) {
         var extra       = bar_set * 10;
         var nudge_horiz = VAL_BAR_PADDING + (bar_set * max_height) + extra;
 
-        // This will center it on the line
-        var nudge_vert = -VAL_BAR_WIDTH / 2;
+        // If the bar height is a negative number (e.g., negative fold change) we need to flip the bar 180 and adjust the verticle nudge.  But ONLY if the layout is circle.  (not yet implemented for rectangle)
+        var barh = d.metadata["bar" + (i + 1) + "_height"];
+        if (LAYOUT_CIRCLE && barh < 0) {
+          var nudge_vert = VAL_BAR_WIDTH / 2;
+        }
+        else {
+          // This will center it on the line
+          var nudge_vert = -VAL_BAR_WIDTH / 2;
+        }
 
-        return transform + " translate(" + nudge_horiz + ", " + nudge_vert + ")";
+        var ajusted_transform = transform + " translate(" + nudge_horiz + ", " + nudge_vert + ")";
+
+        // Finally, if barh is negative we need to add a 180 degree rotation to get the bar going in the opposite direction.
+        if (LAYOUT_CIRCLE && barh < 0) {
+          ajusted_transform += " rotate(180)";
+        }
+
+        return ajusted_transform;
       }
-
-      // var bars = d3.select("#bars-container")
-      //              .selectAll("rect")
-      //              .data(ROOT.descendants().filter(is_leaf));
 
       if (VAL_BAR_SHOW) {
         // TODO if this is slow, you could move it into the parse mapping file function or just after parsing.
@@ -1710,7 +1721,7 @@ function lalala(tree_input_param, mapping_input_param) {
             .attr("transform", function (d) {
               // This will be the point of the tip of the branch to the leaf.
               var transform = pick_transform(d, true);
-              var new_trans = new_transform(transform, i, VAL_BAR_HEIGHT);
+              var new_trans = new_transform(d, transform, i, VAL_BAR_HEIGHT);
 
               if (start_radii[i] === undefined) {
                 start_radii.push(get_radius_from_translate(new_trans));
@@ -1741,8 +1752,8 @@ function lalala(tree_input_param, mapping_input_param) {
                             .selectAll("circle")
                             .data(start_radii);
 
-        // Draw the radii
-        if (VAL_BAR_SHOW_START_AXIS) {
+        // Draw the radii (only circle layout)
+        if (VAL_BAR_SHOW_START_AXIS && LAYOUT_CIRCLE) {
           rad_circles.enter()
                      .append("circle")
                      .merge(rad_circles)
@@ -1753,7 +1764,8 @@ function lalala(tree_input_param, mapping_input_param) {
                      // TODO currently uses the default bar color
                      .attr("stroke", VAL_BAR_COLOR)
                      .attr("stroke-width", 2);
-        } else {
+        }
+        else {
           rad_circles.remove();
         }
       }
