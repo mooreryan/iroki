@@ -1,0 +1,10 @@
+name	bar1_height	bar2_height	bar3_height	bar1_color	bar2_color	bar3_color
+apple	8	2	0	pthc_blue	pthc_yellow	pthc_red
+orange	10	2	1	pthc_blue	pthc_yellow	pthc_red
+pear	12	0	0	pthc_blue	pthc_yellow	pthc_red
+chicken	5	10	5	pthc_blue	pthc_yellow	pthc_red
+beef	4	9	5	pthc_blue	pthc_yellow	pthc_red
+ryan	0	5	10	pthc_blue	pthc_yellow	pthc_red
+amelia	1	5	11	pthc_blue	pthc_yellow	pthc_red
+prasanna	0	5	12	pthc_blue	pthc_yellow	pthc_red
+tree	3	3	3	pthc_blue	pthc_yellow	pthc_red

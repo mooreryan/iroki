@@ -1005,6 +1005,12 @@ function lalala(tree_input_param, mapping_input_param) {
       setTimeout(function () {
         // First, activate the align tip decorations opts if you are turning bars on.  If you do it here, as soon as bars are added, everything lines up, but the user can still turn it off later.
         if (is_checked(ID_BAR_SHOW)) {
+          // Check to see if there are any bar columns in the metadata file.  If not, we want to warnt he user that they should add some.
+          // TODO might be nice to lock all the bar opts if there aren't any in a mapping file
+          if (!check_for_bar_options()) {
+            alert("WARNING -- you don't have any bar info in your mapping file.  Try adding some!");
+          }
+
           sync_align_buttons_and_vals(true, false);
         }
 
@@ -1634,16 +1640,18 @@ function lalala(tree_input_param, mapping_input_param) {
         return maxes;
       }
 
+      // Scales bar height so the max size will be the one set by the user.
       function scale_bar_height(height, max) {
         return (height / max) * VAL_BAR_HEIGHT;
       }
 
+      // Takes the old transform (the tip of the leaf) and adds some padding so each set of bars is nice and separated.
       function new_transform(transform, bar_set, max_height) {
         // We need to move it a bit away from the tip as well as center it on the line.  We can do that by adding another translate command tacked on to the end.  In rectangle mode, the first number moves it to the right if positive, to the left if negative.  The second number moves it down if positive, up if negative.
 
         // need a bit of extra padding for sets 2 - N
         // TODO need to set the 10 to an inner bar padding option.
-        var extra = bar_set === 0 ? 0 : 10;
+        var extra       = bar_set * 10;
         var nudge_horiz = VAL_BAR_PADDING + (bar_set * max_height) + extra;
 
         // This will center it on the line
@@ -1675,14 +1683,14 @@ function lalala(tree_input_param, mapping_input_param) {
               return new_transform(transform, i, VAL_BAR_HEIGHT);
             })
             .attr("fill", function (d) {
-              var val = d.metadata["bar" + (i+1) + "_color"] //.bar1_color;
+              var val = d.metadata["bar" + (i + 1) + "_color"]; //.bar1_color;
 
               return val ? val : VAL_BAR_COLOR;
             })
             // This is right to left length in rectangle mode
             .attr("width", function (d) {
               // Check and see if height is specified in mapping file
-              var val = d.metadata["bar" + (i+1) + "_height"] //.bar1_height;
+              var val = d.metadata["bar" + (i + 1) + "_height"]; //.bar1_height;
 
               // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
               return val || val === 0 ? scale_bar_height(val, max_bar_heights[i]) : 0;
@@ -2056,6 +2064,7 @@ function lalala(tree_input_param, mapping_input_param) {
       chart.append("g").attr("id", "leaf-dot-container");
       draw_leaf_dots();
 
+      // We need to add the correct number of containers to hold all the bars.
       chart.append("g").attr("id", "bars-container");
       for (i = 0; i < how_many_bar_sets(name2md); ++i) {
         d3.select("#bars-container").append("g")
@@ -2806,6 +2815,29 @@ function is_silly(node) {
         if (sibling !== node && is_rooted_on_this_leaf_node(sibling)) {
           return sibling;
         }
+      }
+    }
+  }
+
+  return false;
+}
+
+// Handles nicely the case where name2md isn't set.
+function check_for_bar_options() {
+  var category_names = [];
+
+  if (name2md) {
+
+    json_each(name2md, function (seq_name, metadata) {
+      json_each(metadata, function (category_name, value) {
+        push_unless_present(category_names, category_name);
+      });
+    });
+
+    var i;
+    for (i = 0; i < category_names.length; ++i) {
+      if (category_names[i].match(/^bar[?:0-9]+_(?:height|color)$/)) {
+        return true;
       }
     }
   }
