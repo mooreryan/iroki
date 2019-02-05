@@ -3,7 +3,7 @@
 
 context("parse_mapping_file.js", function () {
   var good_mapping_str = "name\tleaf_label_color\napple\tblue\npie\tgreen\n";
-  var missing_col_str = "name\tbranch_color\napple\tgreen\npie\n";
+  var missing_col_str  = "name\tbranch_color\napple\tgreen\npie\n";
 
 
   context("helper functions defined in this file", function () {
@@ -27,6 +27,65 @@ context("parse_mapping_file.js", function () {
         BRANCH_OPTIONS.forEach(function (opt) {
           expect(is_bad_col_header(opt)).to.be.false;
         });
+      });
+      it("returns false if header matches one of the bar options", function () {
+        expect(is_bad_col_header("bar_height")).to.be.false;
+        expect(is_bad_col_header("bar_color")).to.be.false;
+
+        expect(is_bad_col_header("bar3_height")).to.be.false;
+        expect(is_bad_col_header("bar3_color")).to.be.false;
+
+        expect(is_bad_col_header("bar33_height")).to.be.false;
+        expect(is_bad_col_header("bar33_color")).to.be.false;
+      });
+    });
+
+    describe("bad_bar_fields()", function () {
+      it("returns null if there are no bar options", function () {
+        var fields = ["name", "dot_color"];
+
+        expect(bad_bar_fields(fields)).to.be.null;
+      });
+
+      it("doesn't care about the field order", function () {
+        var fields = ["name", "bar2_height", "bar1_color", "bar1_height", "bar2_color"];
+
+        expect(bad_bar_fields(fields)).to.be.null;
+      });
+
+      it("returns null if the bar fields are fine", function () {
+        var fields = ["name", "bar2_height", "bar1_height", "bar1_color"];
+
+        expect(bad_bar_fields(fields)).to.be.null;
+      });
+
+      it("returns bad heights if bar heights skip a number", function () {
+        var fields = ["name", "bar1_height", "bar3_height"];
+
+        var actual   = bad_bar_fields(fields);
+        var expected = ["height", ["bar3_height"]];
+
+        alert("SOTIEN:  " + expected);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("returns false if bar heights doesn't have a 1", function () {
+        var fields = ["name", "bar2_height", "bar3_height"];
+
+        var actual   = bad_bar_fields(fields);
+        var expected = ["height", ["bar2_height", "bar3_height"]];
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("returns false if bar color doesn't have a matching height", function () {
+        var fields = ["bar1_height", "bar3_color"];
+
+        var actual   = bad_bar_fields(fields);
+        var expected = ["color", ["bar3_color"]];
+
+        spec_helper.expect_stringify_equal(actual, expected);
       });
     });
 
@@ -63,7 +122,7 @@ context("parse_mapping_file.js", function () {
 
 
     it("can handle R colors and Kelly colors", function () {
-      var kelly_and_r_colors_str = "name\tleaf_label_color\nclock\tk_purple\ntire\t1\ngeode\tr_chocolate4";
+      var kelly_and_r_colors_str = "name\tleaf_label_color\nclock\tk_purple\ntire\tk_1\ngeode\tr_chocolate4";
 
       var r_chocolate4 = "#8B4513";
       var k_purple     = "#875692";
@@ -141,16 +200,22 @@ context("parse_mapping_file.js", function () {
 
         expect(parse_mapping_file(too_few_cols_str)).to.be.null;
       });
-      it("if there are too many columns", function () {
-        var too_many_cols_str = "name\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\napple\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\n";
-
-        expect(parse_mapping_file(too_many_cols_str)).to.be.null;
-      });
+      // It no longer does this.
+      // it("if there are too many columns", function () {
+      //   var too_many_cols_str = "name\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\tleaf_label_color\napple\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\tblue\n";
+      //
+      //   expect(parse_mapping_file(too_many_cols_str)).to.be.null;
+      // });
       it("if there are duplicated column headers", function () {
         var duplicate_col_headers_str = "name\tleaf_label_color\tleaf_label_color\napple\tblue\tpurple\npie\tgreen\tpink\n";
 
         expect(parse_mapping_file(duplicate_col_headers_str)).to.be.null;
       });
+      it("if there are bad bar headers", function() {
+        var bad_bar_headers_str = "name\tbar3_height\napple\t30\n";
+
+        expect(parse_mapping_file(bad_bar_headers_str)).to.be.null;
+      })
     });
 
     context("GitHub Issue 64", function () {

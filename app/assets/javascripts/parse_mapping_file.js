@@ -26,11 +26,11 @@ var BRANCH_OPTIONS = [
   "branch_color"
 ];
 
-var BAR_OPTIONS = [
-  "bar_height",
-  "bar_color"
-];
-
+// var BAR_OPTIONS = [
+//   "bar_height",
+//   "bar_color"
+// ];
+//
 var valid_colors = {
   // These are the Kelly colors by number.
   "k_1": "#875692",
@@ -1064,12 +1064,13 @@ var valid_colors = {
   "white": "#ffffff"
 };
 
+// TODO max num cols is obsolete with unlimited bar options....
 // Add one to account for the name column.
 var MAX_NUM_COLS =
       LEAF_DOT_OPTIONS.length +
       LEAF_LABEL_OPTIONS.length +
       BRANCH_OPTIONS.length +
-      BAR_OPTIONS +
+      // BAR_OPTIONS +
       1;
 
 // From tested parse functions
@@ -1116,12 +1117,73 @@ function includes(ary, elem) {
   return ary.indexOf(elem) !== -1;
 }
 
+
 function is_bad_col_header(str) {
+  // the ?: means non capturing parentheses
+  var bar_field_regex = /^bar(?:[0-9]*)_(?:height|color)$/;
+
   return str !== "name" &&
     !(includes(LEAF_DOT_OPTIONS, str) ||
       includes(LEAF_LABEL_OPTIONS, str) ||
       includes(BRANCH_OPTIONS, str) ||
-      includes(BAR_OPTIONS, str));
+      str.match(bar_field_regex));
+}
+
+// Returns the bad stuff if there is any.
+function bad_bar_fields(fields) {
+  var bar_heights = fields.map(function (name) {
+    return name.match(/^bar([0-9]*)_height$/);
+  }).filter(function (m) {
+    // Return the good matches
+    return m !== null;
+  });
+
+  var bar_height_numbers = bar_heights.map(function (match) {
+    // Get the first parenthesis capture.  (it is the bar number)
+    return parseInt(match[1]);
+  }).sort();
+
+  // First, we check that the indexes of the bar heights start at 1 and then continue up by 1 until we get them all.
+  var bad_height_fields = bar_height_numbers.filter(function (num, idx) {
+    // Good array is like [1, 2, ..., n].  Each item always one more than the index.
+    return num - idx !== 1;
+  });
+
+  if (bad_height_fields.length !== 0) {
+    var bad_heights = bad_height_fields.map(function (num) {
+      return "bar" + num + "_height";
+    });
+
+    return ["height", bad_heights];
+  }
+
+  // If we've gotten here, we know the bar_heights are okay.  Now we need to check that each bar_color field has a matching bar_height field.
+  var bar_colors = fields.map(function (name) {
+    return name.match(/^bar([0-9]*)_color$/);
+  }).filter(function (m) {
+    // Return the good matches
+    return m !== null;
+  });
+
+  // if bar_colors is empty, bar_color_numbers will also be empty.
+  var bar_color_numbers = bar_colors.map(function (match) {
+    return parseInt(match[1]);
+  }).sort();
+
+  // now the numbers should all be number - 1 = (an index into the height numbers)
+  var bad_color_numbers = bar_color_numbers.filter(function (color_num) {
+    var height_idx = color_num - 1;
+    return bar_height_numbers[height_idx] !== color_num;
+  });
+
+  if (bad_color_numbers.length > 0) {
+    var bad_colors = bad_color_numbers.map(function (num) {
+      return "bar" + num + "_color";
+    });
+    return ["color", bad_colors];
+  }
+
+  return null;
 }
 
 function parse_mapping_file(str) {
@@ -1158,16 +1220,22 @@ function parse_mapping_file(str) {
     return null;
   }
 
+  var bad_bars = bad_bar_fields(mapping_csv.meta.fields);
+  if (bad_bars) {
+    alert("ERROR -- bad bar " + bad_bars[0] + " fields: " + bad_bars[1]);
+    return null;
+  }
+
   var num_fields = mapping_csv.meta.fields.length;
   if (num_fields <= 1) {
     alert("ERROR -- Too few fields in mapping file!");
     return null;
   }
 
-  if (num_fields > MAX_NUM_COLS) {
-    alert("ERROR -- Too many fields in mapping file!");
-    return null;
-  }
+  // if (num_fields > MAX_NUM_COLS) {
+  //   alert("ERROR -- Too many fields in mapping file!");
+  //   return null;
+  // }
 
   if (has_duplicates(mapping_csv.meta.fields)) {
     alert("ERROR -- One of the column headers is duplicated in the mapping file.");
