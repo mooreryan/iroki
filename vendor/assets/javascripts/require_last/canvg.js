@@ -7,7 +7,7 @@
  * Requires: rgbcolor.js - http://www.phpied.com/rgb-color-parser-in-javascript/
  */
 !function(t,e){"use strict"
-  "undefined"!=typeof define&&define.amd?define("canvgModule",["rgbcolor","stackblur"],e):"undefined"!=typeof module&&module.exports&&(module.exports=e(require("rgbcolor"),require("stackblur"))),t.canvg=e(t.RGBColor,t.stackBlur)}("undefined"!=typeof window?window:this,function(t,e){function n(t){var e=[0,0,0],i=function(i,n){var s=t.match(i)
+  "undefined"!=typeof define&&define.amd?define("canvgModule",["require_first/rgbcolor","require_first/stackblur"],e):"undefined"!=typeof module&&module.exports&&(module.exports=e(require("require_first/rgbcolor"),require("require_first/stackblur"))),t.canvg =e(t.RGBColor,t.stackBlur)}("undefined"!=typeof window?window:this,function(t, e){function n(t){var e =[0,0,0], i =function(i, n){var s =t.match(i)
   null!=s&&(e[n]+=s.length,t=t.replace(i," "))}
   return t=t.replace(/:not\(([^\)]*)\)/g,"     $1 "),t=t.replace(/{[\s\S]*/gm," "),i(o,1),i(l,0),i(h,1),i(u,2),i(c,1),i(f,1),t=t.replace(/[\*\s\+>~]/g," "),t=t.replace(/[#\.]/g," "),i(p,2),e.join("")}function s(s){var r={opts:s}
   r.FRAMERATE=30,r.MAX_VIRTUAL_PIXELS=3e4,r.log=function(t){},1==r.opts.log&&"undefined"!=typeof console&&(r.log=function(t){console.log(t)}),r.init=function(t){var e=0

@@ -29,7 +29,7 @@ function parseNewick(a)
   return r
 }
 
-var d3 = require("d3");
+var d3 = require("require_last/d3");
 var Papa = require('./papaparse.min.js');
 
 var tree_str = "((geode:1, (clock:0.0, tire:5.3)Personmade:0.05)Round:6, (banana:1.7, eggplant:1.5)Fruit:3)ALL;\n";

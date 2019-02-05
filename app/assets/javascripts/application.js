@@ -18,7 +18,8 @@
 //= require polyfills
 
 // This is all of the vendor things.
-//= require_directory ../../../vendor/assets/javascripts
+//= require_directory ../../../vendor/assets/javascripts/require_first
+//= require_directory ../../../vendor/assets/javascripts/require_last
 
 //= require global
 //= require fn
