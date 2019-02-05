@@ -238,17 +238,19 @@ var ID_INNER_LABEL_COLOR           = "inner-label-color",
     VAL_INNER_LABEL_FONT;
 
 // Bar option IDs
-var ID_BAR_SHOW    = "show-bars",
+var ID_BAR_SHOW            = "show-bars",
     VAL_BAR_SHOW,
-    ID_BAR_COLOR   = "bar-color",
+    ID_BAR_COLOR           = "bar-color",
     VAL_BAR_COLOR,
-    ID_BAR_HEIGHT  = "bar-height",
+    ID_BAR_HEIGHT          = "bar-height",
     VAL_BAR_HEIGHT,
-    ID_BAR_WIDTH   = "bar-width",
+    ID_BAR_WIDTH           = "bar-width",
     VAL_BAR_WIDTH,
-    ID_BAR_PADDING = "bar-padding",
+    ID_BAR_PADDING         = "bar-padding",
     VAL_BAR_PADDING,
-    ID_BAR_ALIGN   = "align-bars";
+    ID_BAR_ALIGN           = "align-bars";
+var ID_BAR_SHOW_START_AXIS = "show-bar-start-axis",
+    VAL_BAR_SHOW_START_AXIS;
 
 var ID_INNER_DOT_SIZE = "inner-dot-size",
     ID_LEAF_DOT_SIZE  = "leaf-dot-size";
@@ -1025,6 +1027,20 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
+    listener(ID_BAR_SHOW_START_AXIS, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
     listener(ID_BAR_ALIGN, "change", function () {
       utils__set_status_msg_to_rendering();
 
@@ -1219,11 +1235,12 @@ function lalala(tree_input_param, mapping_input_param) {
       document.getElementById("save-png").removeAttribute("disabled");
 
       // Bars
-      VAL_BAR_SHOW    = document.getElementById(ID_BAR_SHOW).checked;
-      VAL_BAR_PADDING = validate_bar_padding_input(ID_BAR_PADDING);
-      VAL_BAR_WIDTH   = jq(ID_BAR_WIDTH).val();
-      VAL_BAR_HEIGHT  = jq(ID_BAR_HEIGHT).val();
-      VAL_BAR_COLOR   = jq(ID_BAR_COLOR).val();
+      VAL_BAR_SHOW            = document.getElementById(ID_BAR_SHOW).checked;
+      VAL_BAR_SHOW_START_AXIS = is_checked(ID_BAR_SHOW_START_AXIS);
+      VAL_BAR_PADDING         = validate_bar_padding_input(ID_BAR_PADDING);
+      VAL_BAR_WIDTH           = jq(ID_BAR_WIDTH).val();
+      VAL_BAR_HEIGHT          = jq(ID_BAR_HEIGHT).val();
+      VAL_BAR_COLOR           = jq(ID_BAR_COLOR).val();
 
       // Dots
       VAL_SHOW_INNER_DOTS = jq(ID_SHOW_INNER_DOTS).val();
@@ -1645,6 +1662,19 @@ function lalala(tree_input_param, mapping_input_param) {
         return (height / max) * VAL_BAR_HEIGHT;
       }
 
+      // TODO If there is more than 2 translate directives, this will braek
+      function get_radius_from_translate(trans) {
+        var regex = /translate\(([0-9]+),.*translate\(([0-9]+)/;
+        var match = trans.match(regex);
+
+        if (match) {
+          return parseFloat(match[1]) + parseFloat(match[2]);
+        }
+        else {
+          return 0;
+        }
+      }
+
       // Takes the old transform (the tip of the leaf) and adds some padding so each set of bars is nice and separated.
       function new_transform(transform, bar_set, max_height) {
         // We need to move it a bit away from the tip as well as center it on the line.  We can do that by adding another translate command tacked on to the end.  In rectangle mode, the first number moves it to the right if positive, to the left if negative.  The second number moves it down if positive, up if negative.
@@ -1657,7 +1687,7 @@ function lalala(tree_input_param, mapping_input_param) {
         // This will center it on the line
         var nudge_vert = -VAL_BAR_WIDTH / 2;
 
-        return transform + " translate(" + nudge_horiz + " " + nudge_vert + ")";
+        return transform + " translate(" + nudge_horiz + ", " + nudge_vert + ")";
       }
 
       // var bars = d3.select("#bars-container")
@@ -1667,6 +1697,7 @@ function lalala(tree_input_param, mapping_input_param) {
       if (VAL_BAR_SHOW) {
         // TODO if this is slow, you could move it into the parse mapping file function or just after parsing.
         var max_bar_heights = get_max_bar_heights();
+        var start_radii     = [];
 
         for (i = 0; i < num_bar_sets; ++i) {
           var bars = d3.select("#bars-container-" + (i + 1))
@@ -1679,8 +1710,13 @@ function lalala(tree_input_param, mapping_input_param) {
             .attr("transform", function (d) {
               // This will be the point of the tip of the branch to the leaf.
               var transform = pick_transform(d, true);
+              var new_trans = new_transform(transform, i, VAL_BAR_HEIGHT);
 
-              return new_transform(transform, i, VAL_BAR_HEIGHT);
+              if (start_radii[i] === undefined) {
+                start_radii.push(get_radius_from_translate(new_trans));
+              }
+
+              return new_trans;
             })
             .attr("fill", function (d) {
               var val = d.metadata["bar" + (i + 1) + "_color"]; //.bar1_color;
@@ -1699,42 +1735,27 @@ function lalala(tree_input_param, mapping_input_param) {
             .attr("height", function (d) {
               return VAL_BAR_WIDTH;
             });
-
-          // bars.merge(bars)
-          //     .attr("transform", function (d) {
-          //       // This will be the point of the tip of the branch to the leaf.
-          //       var transform = pick_transform(d, true);
-          //
-          //       return new_transform(transform);
-          //     })
-          //     .attr("fill", function (d) {
-          //       var val = d.metadata.bar1_color;
-          //
-          //       return val ? val : VAL_BAR_COLOR;
-          //     })
-          //     // This is right to left length in rectangle mode
-          //     .attr("width", function (d) {
-          //       // Check and see if height is specified in mapping file
-          //       var val = d.metadata.bar1_height;
-          //
-          //       // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-          //       return val || val === 0 ? scale_bar_height(val, max_bar_heights) : 0;
-          //     })
-          //     // This is up and down length in rectangle mode
-          //     .attr("height", function (d) {
-          //       return VAL_BAR_WIDTH;
-          //     });
         }
 
-        // .attr("r", function (d) {
-        //   var val = d.metadata.leaf_dot_size;
-        //   return val ? val : LEAF_DOT_SIZE;
-        // })
-        // .attr("fill", function (d) {
-        //   var val = d.metadata.leaf_dot_color;
-        //   return val ? val : VAL_LEAF_DOT_COLOR;
-        // });
+        var rad_circles = d3.select("#bars-container")
+                            .selectAll("circle")
+                            .data(start_radii);
 
+        // Draw the radii
+        if (VAL_BAR_SHOW_START_AXIS) {
+          rad_circles.enter()
+                     .append("circle")
+                     .merge(rad_circles)
+                     .attr("r", function (d) {
+                       return d;
+                     })
+                     .attr("fill", "none")
+                     // TODO currently uses the default bar color
+                     .attr("stroke", VAL_BAR_COLOR)
+                     .attr("stroke-width", 2);
+        } else {
+          rad_circles.remove();
+        }
       }
       else {
         for (i = 0; i < num_bar_sets; ++i) {
@@ -1743,6 +1764,10 @@ function lalala(tree_input_param, mapping_input_param) {
                        .data(ROOT.descendants().filter(is_leaf));
 
           bars.remove();
+
+          d3.select("#bars-container")
+            .selectAll("circle")
+            .remove();
         }
       }
     }
@@ -3143,6 +3168,7 @@ function reset_all_to_defaults() {
 
   // Bar options
   uncheck(ID_BAR_SHOW);
+  uncheck(ID_BAR_SHOW_START_AXIS);
   jq(ID_BAR_COLOR).val(defaults.bar_color);
   jq(ID_BAR_HEIGHT).val(defaults.bar_height);
   jq(ID_BAR_WIDTH).val(defaults.bar_width);
