@@ -1003,6 +1003,10 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
+        // First, activate the align tip decorations opts if you are turning bars on.  If you do it here, as soon as bars are added, everything lines up, but the user can still turn it off later.
+        if (is_checked(ID_BAR_SHOW)) {
+          sync_align_buttons_and_vals(true, false);
+        }
 
         // These are all the things that happen when leaf dots are drawn.  Pretty sure you need to redraw all the stuff up to the labels and tips and dots, then the bars, then the scale bar and tree adjust as adding bars will change the overall tree size.
         update_form_constants();
