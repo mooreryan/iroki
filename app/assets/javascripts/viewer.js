@@ -1640,27 +1640,61 @@ function lalala(tree_input_param, mapping_input_param) {
 
       var num_bar_sets = how_many_bar_sets(name2md);
 
+      function get_min_bar_heights() {
+        var i   = 0;
+        var ary = [];
+        for (i = 0; i < num_bar_sets; ++i) {
+          // TODO deal with negative values in the bar heights.
+          var this_min = fn.ary.min($.map(name2md, function (val) {
+            var height = val["bar" + (i + 1) + "_height"];
+            if (isNaN(height)) {
+              // Just treat NaN as 0.  It wont affect the calculation.
+              return 0;
+            }
+            else {
+              return height;
+            }
+          }));
+
+          ary.push(this_min);
+        }
+
+        return ary;
+      }
 
       // Returns an ary with max heights for each set.
       function get_max_bar_heights() {
-        var i     = 0;
-        var maxes = [];
+        var i   = 0;
+        var ary = [];
         for (i = 0; i < num_bar_sets; ++i) {
           // TODO deal with negative values in the bar heights.
           var this_max = fn.ary.max($.map(name2md, function (val) {
-            return val["bar" + (i + 1) + "_height"];
+            // Need to take absolute value incase there are negative bar values.
+            var height = Math.abs(val["bar" + (i + 1) + "_height"]);
+
+            if (isNaN(height)) {
+              // Just treat NaN as 0.  It wont affect the calculation.
+              return 0;
+            }
+            else {
+              return height;
+            }
           }));
 
-          maxes.push(this_max);
+          ary.push(this_max);
         }
 
-        return maxes;
+        return ary;
       }
 
       // Scales bar height so the max size will be the one set by the user.
-      function scale_bar_height(height, max) {
+      function scale_bar_height(height, max, min) {
         // Heights can be negative, but we always want a positive value for rectangle attrs.  The flipping is taken care of elsewhere.
-        return Math.abs((height / max) * VAL_BAR_HEIGHT);
+
+        // If there are negative values we need to scale bars by 1/2
+        var scale_factor = min < 0 ? 2 : 1;
+
+        return Math.abs((height / max) * VAL_BAR_HEIGHT) / scale_factor;
       }
 
       // TODO If there is more than 2 translate directives, this will braek
@@ -1677,13 +1711,22 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
       // Takes the old transform (the tip of the leaf) and adds some padding so each set of bars is nice and separated.
-      function new_transform(d, transform, bar_set, max_height) {
+      // Max height is the one set by the user, not the one from the data
+      // Min height should always be the min height of the first series
+      function new_transform(d, transform, bar_set, max_height_user_opt, max_height_data, min_height_data) {
         // We need to move it a bit away from the tip as well as center it on the line.  We can do that by adding another translate command tacked on to the end.  In rectangle mode, the first number moves it to the right if positive, to the left if negative.  The second number moves it down if positive, up if negative.
 
         // need a bit of extra padding for sets 2 - N
         // TODO need to set the 10 to an inner bar padding option.
         var extra       = bar_set * 10;
-        var nudge_horiz = VAL_BAR_PADDING + (bar_set * max_height) + extra;
+        var nudge_horiz = VAL_BAR_PADDING + (bar_set * max_height_user_opt) + extra;
+
+        // If there are some min heights less than 0, some bars will be going backwards and we'd like a little more nudge.
+        if (min_height_data < 0) {
+          // We also want to scale the min height in terms of this max and min.
+          nudge_horiz += scale_bar_height(min_height_data, max_height_data, min_height_data);
+        }
+
 
         // If the bar height is a negative number (e.g., negative fold change) we need to flip the bar 180 and adjust the verticle nudge.  But ONLY if the layout is circle.  (not yet implemented for rectangle)
         var barh = d.metadata["bar" + (i + 1) + "_height"];
@@ -1694,6 +1737,8 @@ function lalala(tree_input_param, mapping_input_param) {
           // This will center it on the line
           var nudge_vert = -VAL_BAR_WIDTH / 2;
         }
+
+
 
         var ajusted_transform = transform + " translate(" + nudge_horiz + ", " + nudge_vert + ")";
 
@@ -1708,7 +1753,9 @@ function lalala(tree_input_param, mapping_input_param) {
       if (VAL_BAR_SHOW) {
         // TODO if this is slow, you could move it into the parse mapping file function or just after parsing.
         var max_bar_heights = get_max_bar_heights();
-        var start_radii     = [];
+        var min_bar_heights = get_min_bar_heights();
+
+        var start_radii = [];
 
         for (i = 0; i < num_bar_sets; ++i) {
           var bars = d3.select("#bars-container-" + (i + 1))
@@ -1721,7 +1768,8 @@ function lalala(tree_input_param, mapping_input_param) {
             .attr("transform", function (d) {
               // This will be the point of the tip of the branch to the leaf.
               var transform = pick_transform(d, true);
-              var new_trans = new_transform(d, transform, i, VAL_BAR_HEIGHT);
+              // We only want to adjust for min bar height if the first series has min values
+              var new_trans = new_transform(d, transform, i, VAL_BAR_HEIGHT, max_bar_heights[0], min_bar_heights[0]);
 
               if (start_radii[i] === undefined) {
                 start_radii.push(get_radius_from_translate(new_trans));
@@ -1740,7 +1788,7 @@ function lalala(tree_input_param, mapping_input_param) {
               var val = d.metadata["bar" + (i + 1) + "_height"]; //.bar1_height;
 
               // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-              return val || val === 0 ? scale_bar_height(val, max_bar_heights[i]) : 0;
+              return val || val === 0 ? scale_bar_height(val, max_bar_heights[i], min_bar_heights[i]) : 0;
             })
             // This is up and down length in rectangle mode
             .attr("height", function (d) {
