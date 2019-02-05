@@ -178,8 +178,6 @@ var TREE_ROTATION;
 
 var VIEWER_WIDTH, VIEWER_HEIGHT, VIEWER_SIZE_FIXED;
 
-var align_tip_labels;
-
 var SORT_STATE, SORT_NONE, SORT_ASCENDING, SORT_DESCENDING, sort_function;
 
 var the_width, the_height, the_width, the_height, padding;
@@ -233,9 +231,11 @@ var ID_LEAF_DOT_COLOR              = "leaf-dot-color",
 var ID_LEAF_LABEL_COLOR            = "leaf-label-color",
     ID_LEAF_LABEL_FONT             = "leaf-label-font",
     ID_LEAF_LABEL_PADDING          = "leaf-label-padding",
+    ID_LEAF_LABEL_ALIGN            = "align-tip-labels",
     VAL_LEAF_LABEL_COLOR,
     VAL_LEAF_LABEL_FONT,
-    VAL_LEAF_LABEL_PADDING;
+    VAL_LEAF_LABEL_PADDING,
+    VAL_LEAF_LABEL_ALIGN;
 var ID_INNER_LABEL_COLOR           = "inner-label-color",
     ID_INNER_LABEL_FONT            = "inner-label-font",
     VAL_INNER_LABEL_COLOR,
@@ -432,13 +432,13 @@ function lalala(tree_input_param, mapping_input_param) {
     // TODO when picking transform for bars, we don't want the final rotate_by at all (or just set it to 0).
     function pick_transform(d, is_bar) {
       if (LAYOUT_CIRCLE && is_leaf(d)) {
-        return circle_transform(d, the_x, align_tip_labels ? "y" : the_y, is_bar);
+        return circle_transform(d, the_x, VAL_LEAF_LABEL_ALIGN ? "y" : the_y, is_bar);
       }
       else if (LAYOUT_CIRCLE) {
         return circle_transform(d, the_x, the_y, is_bar);
       }
       else if (LAYOUT_STRAIGHT && is_leaf(d)) {
-        return rectangle_transform(d, the_x, align_tip_labels ? "y" : the_y, is_bar);
+        return rectangle_transform(d, the_x, VAL_LEAF_LABEL_ALIGN ? "y" : the_y, is_bar);
       }
       else if (LAYOUT_STRAIGHT) {
         return rectangle_transform(d, the_x, the_y, is_bar);
@@ -789,7 +789,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("align-tip-labels", "change", function () {
+    listener(ID_LEAF_LABEL_ALIGN, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1262,13 +1262,13 @@ function lalala(tree_input_param, mapping_input_param) {
 
       // Show or hide align tip labels
       if ((!SHOW_LEAF_LABELS && !SHOW_LEAF_DOTS) || TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
-        document.getElementById("align-tip-labels").setAttribute("disabled", "");
-        document.getElementById("align-tip-labels").removeAttribute("checked");
-        align_tip_labels = false;
+        document.getElementById(ID_LEAF_LABEL_ALIGN).setAttribute("disabled", "");
+        document.getElementById(ID_LEAF_LABEL_ALIGN).removeAttribute("checked");
+        VAL_LEAF_LABEL_ALIGN = false;
       }
       else {
-        document.getElementById("align-tip-labels").removeAttribute("disabled");
-        align_tip_labels = document.getElementById("align-tip-labels").checked;
+        document.getElementById(ID_LEAF_LABEL_ALIGN).removeAttribute("disabled");
+        VAL_LEAF_LABEL_ALIGN = document.getElementById(ID_LEAF_LABEL_ALIGN).checked;
       }
 
       // Show/hide labels size
@@ -1299,7 +1299,7 @@ function lalala(tree_input_param, mapping_input_param) {
       // Set the align tip labels button to false if it is a cladogram or radial layout.
       if (TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM || LAYOUT_RADIAL) {
         elem         = null;
-        elem         = document.getElementById("align-tip-labels");
+        elem         = document.getElementById(ID_LEAF_LABEL_ALIGN);
         elem.checked = false;
       }
 
@@ -1806,7 +1806,7 @@ function lalala(tree_input_param, mapping_input_param) {
         //   return { "the_x" : d.target[the_x], "the_y" : d.target[the_y] };
         // });
 
-        if (align_tip_labels) {
+        if (VAL_LEAF_LABEL_ALIGN) {
           linkExtension.exit().remove();
 
           // Draw the link extensions.  Don't need merge because they are either on or off.
@@ -1993,9 +1993,10 @@ function lalala(tree_input_param, mapping_input_param) {
       // Set padding to 0 if it is not passed in.
       if (!padding) {
         padding = 0;
-      } else {
+      }
+      else {
         // Use the 16 px == 1 em convention
-        padding /= 16
+        padding /= 16;
       }
 
       var positive_padding = 0.6 + padding + "em";
@@ -3002,7 +3003,7 @@ function reset_all_to_defaults() {
   $("#leaf-label-size").val(16);
   jq(ID_LEAF_LABEL_PADDING).val(defaults.leaf_label_padding);
 
-  uncheck("align-tip-labels");
+  uncheck(ID_LEAF_LABEL_ALIGN);
   $("#label-rotation").val(0);
 
   jq(ID_LEAF_LABEL_COLOR).val("#000000");
