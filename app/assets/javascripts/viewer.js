@@ -224,10 +224,6 @@ var ID_SCALE_BAR_SHOW              = "show-scale-bar",
     ID_SCALE_BAR_LENGTH            = "scale-bar-length";
 var ID_VIEWER_SIZE_FIXED           = "viewer-size-fixed";
 var ID_OPTIONS_ACCORDION           = "options-accordion";
-var ID_LEAF_DOT_COLOR              = "leaf-dot-color",
-    ID_INNER_DOT_COLOR             = "inner-dot-color",
-    VAL_LEAF_DOT_COLOR,
-    VAL_INNER_DOT_COLOR;
 var ID_LEAF_LABEL_COLOR            = "leaf-label-color",
     ID_LEAF_LABEL_FONT             = "leaf-label-font",
     ID_LEAF_LABEL_PADDING          = "leaf-label-padding",
@@ -251,10 +247,18 @@ var ID_BAR_SHOW    = "show-bars",
     ID_BAR_WIDTH   = "bar-width",
     VAL_BAR_WIDTH,
     ID_BAR_PADDING = "bar-padding",
-    VAL_BAR_PADDING;
+    VAL_BAR_PADDING,
+    ID_BAR_ALIGN   = "align-bars";
 
 var ID_INNER_DOT_SIZE = "inner-dot-size",
     ID_LEAF_DOT_SIZE  = "leaf-dot-size";
+
+var ID_LEAF_DOT_COLOR  = "leaf-dot-color",
+    ID_INNER_DOT_COLOR = "inner-dot-color",
+    VAL_LEAF_DOT_COLOR,
+    VAL_INNER_DOT_COLOR;
+
+var ID_LEAF_DOT_ALIGN = "align-leaf-dots";
 
 var ID_BIOLOGICALLY_ROOTED = "biological-root",
     VAL_BIOLOGICALLY_ROOTED;
@@ -487,6 +491,17 @@ function lalala(tree_input_param, mapping_input_param) {
         draw_tree();
         utils__set_status_msg_to_done();
       });
+    }
+
+    function leaf_label_align_listener_actions() {
+      update_form_constants();
+      draw_link_extensions();
+      draw_leaf_dots();
+      draw_leaf_labels();
+      draw_bars(); // bars may need to be adjusted if they're shown.
+      draw_scale_bar();
+      adjust_tree();
+      utils__set_status_msg_to_done();
     }
 
     var TIMEOUT = 10;
@@ -793,15 +808,10 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
+        // First sync all the align buttons.
+        sync_align_buttons_and_vals(is_checked(ID_LEAF_LABEL_ALIGN), false);
 
-        update_form_constants();
-        draw_link_extensions();
-        draw_leaf_dots();
-        draw_leaf_labels();
-        draw_bars(); // bars may need to be adjusted if they're shown.
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
+        leaf_label_align_listener_actions();
       }, TIMEOUT);
     });
     listener("label-rotation", "change", function () {
@@ -900,6 +910,16 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
+    listener(ID_LEAF_DOT_ALIGN, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        // First sync all the align buttons.
+        sync_align_buttons_and_vals(is_checked(ID_LEAF_DOT_ALIGN), false);
+
+        leaf_label_align_listener_actions();
+      }, TIMEOUT);
+    });
     listener(ID_LEAF_DOT_SIZE, "change", function () {
       utils__set_status_msg_to_rendering();
 
@@ -983,6 +1003,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
+
         // These are all the things that happen when leaf dots are drawn.  Pretty sure you need to redraw all the stuff up to the labels and tips and dots, then the bars, then the scale bar and tree adjust as adding bars will change the overall tree size.
         update_form_constants();
         draw_link_extensions(); // may need to be removed.
@@ -992,6 +1013,17 @@ function lalala(tree_input_param, mapping_input_param) {
         draw_scale_bar();
         adjust_tree();
         utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(ID_BAR_ALIGN, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        // First sync all the align buttons.
+        sync_align_buttons_and_vals(is_checked(ID_BAR_ALIGN), false);
+
+        // Then do the rest of the actions.
+        leaf_label_align_listener_actions();
       }, TIMEOUT);
     });
     listener(ID_BAR_PADDING, "change", function () {
@@ -1259,16 +1291,22 @@ function lalala(tree_input_param, mapping_input_param) {
       SHOW_INNER_LABELS = document.getElementById("show-inner-labels").checked;
       SHOW_LEAF_LABELS  = document.getElementById("show-leaf-labels").checked;
 
-
-      // Show or hide align tip labels
-      if ((!SHOW_LEAF_LABELS && !SHOW_LEAF_DOTS) || TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM) {
-        document.getElementById(ID_LEAF_LABEL_ALIGN).setAttribute("disabled", "");
-        document.getElementById(ID_LEAF_LABEL_ALIGN).removeAttribute("checked");
-        VAL_LEAF_LABEL_ALIGN = false;
+      // Show or hide align tip labels TODO also account for bars here
+      if (
+        (!SHOW_LEAF_LABELS && !SHOW_LEAF_DOTS && !VAL_BAR_SHOW) ||
+        TREE_BRANCH_STYLE === TREE_BRANCH_CLADOGRAM ||
+        LAYOUT_RADIAL
+      ) {
+        // not checked, disabled.
+        sync_align_buttons_and_vals(false, true);
+        // document.getElementById(ID_LEAF_LABEL_ALIGN).setAttribute("disabled", "");
+        // document.getElementById(ID_LEAF_LABEL_ALIGN).removeAttribute("checked");
+        // VAL_LEAF_LABEL_ALIGN = false;
       }
       else {
-        document.getElementById(ID_LEAF_LABEL_ALIGN).removeAttribute("disabled");
-        VAL_LEAF_LABEL_ALIGN = document.getElementById(ID_LEAF_LABEL_ALIGN).checked;
+        undisable(ID_LEAF_LABEL_ALIGN);
+        VAL_LEAF_LABEL_ALIGN = is_checked(ID_LEAF_LABEL_ALIGN);
+        sync_align_buttons_and_vals(VAL_LEAF_LABEL_ALIGN, false);
       }
 
       // Show/hide labels size
@@ -1295,14 +1333,6 @@ function lalala(tree_input_param, mapping_input_param) {
       else {
         document.getElementById("inner-label-size").setAttribute("disabled", "");
       }
-
-      // Set the align tip labels button to false if it is a cladogram or radial layout.
-      if (TREE_BRANCH_STYLE == TREE_BRANCH_CLADOGRAM || LAYOUT_RADIAL) {
-        elem         = null;
-        elem         = document.getElementById(ID_LEAF_LABEL_ALIGN);
-        elem.checked = false;
-      }
-
 
       // Set the height to match the width
       if (LAYOUT_CIRCLE || LAYOUT_RADIAL) {
@@ -3003,7 +3033,8 @@ function reset_all_to_defaults() {
   $("#leaf-label-size").val(16);
   jq(ID_LEAF_LABEL_PADDING).val(defaults.leaf_label_padding);
 
-  uncheck(ID_LEAF_LABEL_ALIGN);
+  // not checked, not disabled
+  sync_align_buttons_and_vals(false, false);
   $("#label-rotation").val(0);
 
   jq(ID_LEAF_LABEL_COLOR).val("#000000");
@@ -3365,3 +3396,20 @@ function set_and_validate_bootstrap_cutoff_input() {
 //
 
 // Same thing but varying different parts of the hcl scale.
+
+// val should be true or false.
+//
+// Also makes sure that the option is disabled or not.
+var sync_align_buttons_and_vals = function (checked, disabled) {
+  jq(ID_LEAF_LABEL_ALIGN).prop("checked", checked);
+  jq(ID_LEAF_DOT_ALIGN).prop("checked", checked);
+  jq(ID_BAR_ALIGN).prop("checked", checked);
+
+  jq(ID_LEAF_LABEL_ALIGN).prop("disabled", disabled);
+  jq(ID_LEAF_DOT_ALIGN).prop("disabled", disabled);
+  jq(ID_BAR_ALIGN).prop("disabled", disabled);
+
+  // Make sure the val variable is also set so that everything is sync'd.
+  VAL_LEAF_LABEL_ALIGN = checked;
+};
+
