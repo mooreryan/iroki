@@ -1600,10 +1600,42 @@ function lalala(tree_input_param, mapping_input_param) {
                    .selectAll("rect")
                    .data(ROOT.descendants().filter(is_leaf));
 
-      function get_max_bar_height(bars) {
-        return fn.ary.max($.map(name2md, function (val) {
-          return val.bar_height;
-        }));
+      function how_many_bar_sets() {
+        var first_thing = name2md[Object.keys(name2md)[0]];
+
+        // TODO this is just to prevent an infinite loop.  Need a real check.
+        var max  = 1000;
+        var iter = 1;
+        while (iter < max) {
+          var idx = "bar" + iter + "_height";
+
+          if (!first_thing[idx]) {
+            return iter - 1;
+          }
+
+          iter += 1;
+        }
+
+        // If you've gotten here, there are no bar sets.
+        return 0;
+      }
+
+      var num_bar_sets = how_many_bar_sets();
+
+      // Returns an ary with max heights for each set.
+      function get_max_bar_heights() {
+        var i   = 0;
+        var maxes = [];
+        for (i = 0; i < num_bar_sets; ++i) {
+          // TODO deal with negative values in the bar heights.
+          var this_max = fn.ary.max($.map(name2md, function (val) {
+            return val["bar" + (i + 1) + "_height"];
+          }));
+
+          maxes.push(this_max);
+        }
+
+        return maxes;
       }
 
       function scale_bar_height(height, max) {
@@ -1623,7 +1655,8 @@ function lalala(tree_input_param, mapping_input_param) {
 
       if (VAL_BAR_SHOW) {
         // TODO if this is slow, you could move it into the parse mapping file function or just after parsing.
-        var max_bar_height = get_max_bar_height(bars);
+        var max_bar_heights = get_max_bar_heights()[0];
+        console.log(max_bar_heights);
 
         bars
           .enter().append("rect")
@@ -1634,17 +1667,17 @@ function lalala(tree_input_param, mapping_input_param) {
             return new_transform(transform);
           })
           .attr("fill", function (d) {
-            var val = d.metadata.bar_color;
+            var val = d.metadata.bar1_color;
 
             return val ? val : VAL_BAR_COLOR;
           })
           // This is right to left length in rectangle mode
           .attr("width", function (d) {
             // Check and see if height is specified in mapping file
-            var val = d.metadata.bar_height;
+            var val = d.metadata.bar1_height;
 
             // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-            return val || val === 0 ? scale_bar_height(val, max_bar_height) : 0;
+            return val || val === 0 ? scale_bar_height(val, max_bar_heights) : 0;
           })
           // This is up and down length in rectangle mode
           .attr("height", function (d) {
@@ -1659,17 +1692,17 @@ function lalala(tree_input_param, mapping_input_param) {
               return new_transform(transform);
             })
             .attr("fill", function (d) {
-              var val = d.metadata.bar_color;
+              var val = d.metadata.bar1_color;
 
               return val ? val : VAL_BAR_COLOR;
             })
             // This is right to left length in rectangle mode
             .attr("width", function (d) {
               // Check and see if height is specified in mapping file
-              var val = d.metadata.bar_height;
+              var val = d.metadata.bar1_height;
 
               // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-              return val || val === 0 ? scale_bar_height(val, max_bar_height) : 0;
+              return val || val === 0 ? scale_bar_height(val, max_bar_heights) : 0;
             })
             // This is up and down length in rectangle mode
             .attr("height", function (d) {

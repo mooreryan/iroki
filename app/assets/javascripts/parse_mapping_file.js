@@ -1273,7 +1273,18 @@ function parse_mapping_file(str) {
   });
 
   // Check for valid named colors.
-  var color_options = ["leaf_dot_color", "leaf_label_color", "branch_color", "bar_color"];
+  var color_options = ["leaf_dot_color", "leaf_label_color", "branch_color"];
+
+  // Can have multiple color bar fields that we need to check.  Here they are.
+  var bar_color_field_names =
+        mapping_csv.meta.fields.filter(function (field) {
+          return field.match(/^bar[0-9]+_color$/);
+        });
+
+  // Add the bar color field names
+  bar_color_field_names.forEach(function (name) {
+    color_options.push(name);
+  });
   json_each(mapping, function (name, md) {
     color_options.forEach(function (option) {
       if (md[option]) { // color option is present

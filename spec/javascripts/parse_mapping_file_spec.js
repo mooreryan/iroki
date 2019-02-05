@@ -173,6 +173,17 @@ context("parse_mapping_file.js", function () {
 
         spec_helper.expect_stringify_equal(actual, expected);
       });
+
+      it("can handle bar heights and colors", function () {
+        var good_bar_stuff = "name\tbar1_height\tbar1_color\napple\t10\tptv_1\n";
+
+        var expected = {
+          "apple": { "bar1_height": 10, "bar1_color": "#EE7733" }
+        };
+        var actual = parse_mapping_file(good_bar_stuff);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
     });
 
     context("returns null with bad mapping files", function () {
@@ -211,11 +222,11 @@ context("parse_mapping_file.js", function () {
 
         expect(parse_mapping_file(duplicate_col_headers_str)).to.be.null;
       });
-      it("if there are bad bar headers", function() {
+      it("if there are bad bar headers", function () {
         var bad_bar_headers_str = "name\tbar3_height\napple\t30\n";
 
         expect(parse_mapping_file(bad_bar_headers_str)).to.be.null;
-      })
+      });
     });
 
     context("GitHub Issue 64", function () {
