@@ -1993,6 +1993,9 @@ function lalala(tree_input_param, mapping_input_param) {
       // Set padding to 0 if it is not passed in.
       if (!padding) {
         padding = 0;
+      } else {
+        // Use the 16 px == 1 em convention
+        padding /= 16
       }
 
       var positive_padding = 0.6 + padding + "em";
