@@ -1036,7 +1036,13 @@ function lalala(tree_input_param, mapping_input_param) {
       validate_bar_padding_input();
 
       setTimeout(function () {
-        update_and_draw(draw_bars);
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_scale_bar();
+        adjust_tree();
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
@@ -1052,7 +1058,13 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        update_and_draw(draw_bars);
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_scale_bar();
+        adjust_tree();
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
@@ -1060,7 +1072,13 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        update_and_draw(draw_bars);
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_scale_bar();
+        adjust_tree();
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
@@ -1596,35 +1614,13 @@ function lalala(tree_input_param, mapping_input_param) {
     }
 
     function draw_bars() {
-      var bars = d3.select("#bars-container")
-                   .selectAll("rect")
-                   .data(ROOT.descendants().filter(is_leaf));
 
-      function how_many_bar_sets() {
-        var first_thing = name2md[Object.keys(name2md)[0]];
+      var num_bar_sets = how_many_bar_sets(name2md);
 
-        // TODO this is just to prevent an infinite loop.  Need a real check.
-        var max  = 1000;
-        var iter = 1;
-        while (iter < max) {
-          var idx = "bar" + iter + "_height";
-
-          if (!first_thing[idx]) {
-            return iter - 1;
-          }
-
-          iter += 1;
-        }
-
-        // If you've gotten here, there are no bar sets.
-        return 0;
-      }
-
-      var num_bar_sets = how_many_bar_sets();
 
       // Returns an ary with max heights for each set.
       function get_max_bar_heights() {
-        var i   = 0;
+        var i     = 0;
         var maxes = [];
         for (i = 0; i < num_bar_sets; ++i) {
           // TODO deal with negative values in the bar heights.
@@ -1642,10 +1638,13 @@ function lalala(tree_input_param, mapping_input_param) {
         return (height / max) * VAL_BAR_HEIGHT;
       }
 
-      function new_transform(transform) {
+      function new_transform(transform, bar_set, max_height) {
         // We need to move it a bit away from the tip as well as center it on the line.  We can do that by adding another translate command tacked on to the end.  In rectangle mode, the first number moves it to the right if positive, to the left if negative.  The second number moves it down if positive, up if negative.
 
-        var nudge_horiz = VAL_BAR_PADDING;
+        // need a bit of extra padding for sets 2 - N
+        // TODO need to set the 10 to an inner bar padding option.
+        var extra = bar_set === 0 ? 0 : 10;
+        var nudge_horiz = VAL_BAR_PADDING + (bar_set * max_height) + extra;
 
         // This will center it on the line
         var nudge_vert = -VAL_BAR_WIDTH / 2;
@@ -1653,61 +1652,71 @@ function lalala(tree_input_param, mapping_input_param) {
         return transform + " translate(" + nudge_horiz + " " + nudge_vert + ")";
       }
 
+      // var bars = d3.select("#bars-container")
+      //              .selectAll("rect")
+      //              .data(ROOT.descendants().filter(is_leaf));
+
       if (VAL_BAR_SHOW) {
         // TODO if this is slow, you could move it into the parse mapping file function or just after parsing.
-        var max_bar_heights = get_max_bar_heights()[0];
-        console.log(max_bar_heights);
+        var max_bar_heights = get_max_bar_heights();
 
-        bars
-          .enter().append("rect")
-          .attr("transform", function (d) {
-            // This will be the point of the tip of the branch to the leaf.
-            var transform = pick_transform(d, true);
+        for (i = 0; i < num_bar_sets; ++i) {
+          var bars = d3.select("#bars-container-" + (i + 1))
+                       .selectAll("rect")
+                       .data(ROOT.descendants().filter(is_leaf));
 
-            return new_transform(transform);
-          })
-          .attr("fill", function (d) {
-            var val = d.metadata.bar1_color;
-
-            return val ? val : VAL_BAR_COLOR;
-          })
-          // This is right to left length in rectangle mode
-          .attr("width", function (d) {
-            // Check and see if height is specified in mapping file
-            var val = d.metadata.bar1_height;
-
-            // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-            return val || val === 0 ? scale_bar_height(val, max_bar_heights) : 0;
-          })
-          // This is up and down length in rectangle mode
-          .attr("height", function (d) {
-            return VAL_BAR_WIDTH;
-          });
-
-        bars.merge(bars)
+          bars
+            .enter().append("rect")
+            .merge(bars)
             .attr("transform", function (d) {
               // This will be the point of the tip of the branch to the leaf.
               var transform = pick_transform(d, true);
 
-              return new_transform(transform);
+              return new_transform(transform, i, VAL_BAR_HEIGHT);
             })
             .attr("fill", function (d) {
-              var val = d.metadata.bar1_color;
+              var val = d.metadata["bar" + (i+1) + "_color"] //.bar1_color;
 
               return val ? val : VAL_BAR_COLOR;
             })
             // This is right to left length in rectangle mode
             .attr("width", function (d) {
               // Check and see if height is specified in mapping file
-              var val = d.metadata.bar1_height;
+              var val = d.metadata["bar" + (i+1) + "_height"] //.bar1_height;
 
               // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-              return val || val === 0 ? scale_bar_height(val, max_bar_heights) : 0;
+              return val || val === 0 ? scale_bar_height(val, max_bar_heights[i]) : 0;
             })
             // This is up and down length in rectangle mode
             .attr("height", function (d) {
               return VAL_BAR_WIDTH;
             });
+
+          // bars.merge(bars)
+          //     .attr("transform", function (d) {
+          //       // This will be the point of the tip of the branch to the leaf.
+          //       var transform = pick_transform(d, true);
+          //
+          //       return new_transform(transform);
+          //     })
+          //     .attr("fill", function (d) {
+          //       var val = d.metadata.bar1_color;
+          //
+          //       return val ? val : VAL_BAR_COLOR;
+          //     })
+          //     // This is right to left length in rectangle mode
+          //     .attr("width", function (d) {
+          //       // Check and see if height is specified in mapping file
+          //       var val = d.metadata.bar1_height;
+          //
+          //       // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
+          //       return val || val === 0 ? scale_bar_height(val, max_bar_heights) : 0;
+          //     })
+          //     // This is up and down length in rectangle mode
+          //     .attr("height", function (d) {
+          //       return VAL_BAR_WIDTH;
+          //     });
+        }
 
         // .attr("r", function (d) {
         //   var val = d.metadata.leaf_dot_size;
@@ -1720,7 +1729,13 @@ function lalala(tree_input_param, mapping_input_param) {
 
       }
       else {
-        bars.remove();
+        for (i = 0; i < num_bar_sets; ++i) {
+          var bars = d3.select("#bars-container-" + (i + 1))
+                       .selectAll("rect")
+                       .data(ROOT.descendants().filter(is_leaf));
+
+          bars.remove();
+        }
       }
     }
 
@@ -2042,6 +2057,10 @@ function lalala(tree_input_param, mapping_input_param) {
       draw_leaf_dots();
 
       chart.append("g").attr("id", "bars-container");
+      for (i = 0; i < how_many_bar_sets(name2md); ++i) {
+        d3.select("#bars-container").append("g")
+          .attr("id", "bars-container-" + (i + 1));
+      }
       draw_bars();
 
       chart.append("g").attr("id", "leaf-label-container");
@@ -3450,3 +3469,24 @@ var sync_align_buttons_and_vals = function (checked, disabled) {
   VAL_LEAF_LABEL_ALIGN = checked;
 };
 
+function how_many_bar_sets(name2md) {
+  if (name2md) {
+    var first_thing = name2md[Object.keys(name2md)[0]];
+
+    // TODO this is just to prevent an infinite loop.  Need a real check.
+    var max  = 1000;
+    var iter = 1;
+    while (iter < max) {
+      var idx = "bar" + iter + "_height";
+
+      if (first_thing[idx] === undefined) {
+        return iter - 1;
+      }
+
+      iter += 1;
+    }
+  }
+
+  // If you've gotten here, there are no bar sets.
+  return 0;
+}
