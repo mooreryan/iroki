@@ -1730,6 +1730,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
         // If the bar height is a negative number (e.g., negative fold change) we need to flip the bar 180 and adjust the verticle nudge.  But ONLY if the layout is circle.  (not yet implemented for rectangle)
         var barh = d.metadata["bar" + (i + 1) + "_height"];
+
         if (LAYOUT_CIRCLE && barh < 0) {
           var nudge_vert = VAL_BAR_WIDTH / 2;
         }
@@ -1739,12 +1740,15 @@ function lalala(tree_input_param, mapping_input_param) {
         }
 
 
-
         var ajusted_transform = transform + " translate(" + nudge_horiz + ", " + nudge_vert + ")";
 
         // Finally, if barh is negative we need to add a 180 degree rotation to get the bar going in the opposite direction.
         if (LAYOUT_CIRCLE && barh < 0) {
           ajusted_transform += " rotate(180)";
+        }
+        else if (LAYOUT_STRAIGHT && barh < 0) {
+          // Do a little something different for rectangle layouts
+          ajusted_transform += " rotate(180) translate(0, -" + VAL_BAR_WIDTH + ")";
         }
 
         return ajusted_transform;
@@ -1799,9 +1803,24 @@ function lalala(tree_input_param, mapping_input_param) {
         var rad_circles = d3.select("#bars-container")
                             .selectAll("circle")
                             .data(start_radii);
+        var rad_lines   = d3.select("#bars-container")
+                            .selectAll("path")
+                            .data(start_radii);
 
         // Draw the radii (only circle layout)
         if (VAL_BAR_SHOW_START_AXIS && LAYOUT_CIRCLE) {
+          rad_circles.enter()
+                     .append("circle")
+                     .merge(rad_circles)
+                     .attr("r", function (d) {
+                       return d;
+                     })
+                     .attr("fill", "none")
+                     // TODO currently uses the default bar color
+                     .attr("stroke", VAL_BAR_COLOR)
+                     .attr("stroke-width", 2);
+        }
+        else if (VAL_BAR_SHOW_START_AXIS && LAYOUT_STRAIGHT) {
           rad_circles.enter()
                      .append("circle")
                      .merge(rad_circles)
