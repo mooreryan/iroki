@@ -451,6 +451,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     d3.select("body").on("keydown", function () {
       var key_code = {
+        a: 65,
         b: 66,
         c: 67,
         d: 83,
@@ -523,6 +524,16 @@ function lalala(tree_input_param, mapping_input_param) {
               node.is_selected = true;
             });
           }
+        });
+
+        rebind_labels();
+      }
+      else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.a) {
+        // Select all!
+        add_previously_selected();
+
+        ROOT.descendants().forEach(function(node) {
+          node.is_selected = true;
         });
 
         rebind_labels();
