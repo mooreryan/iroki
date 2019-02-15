@@ -449,47 +449,6 @@ function lalala(tree_input_param, mapping_input_param) {
     d3.select("#save-svg").on("click", save_svg_data);
     d3.select("#save-png").on("click", save_png_data);
 
-    // // Listener on the body to register keyboard presses
-    // d3.select("body").on("keydown", function () {
-    //   // 67 === 'c'
-    //   if (d3.event.altKey && d3.event.keyCode === 67) {
-    //     d3.selectAll("text.selected-label").each(function (selected_data) {
-    //       console.log("this")
-    //       console.log(typeof(this))
-    //       console.log(this)
-    //
-    //       console.log("selected_data")
-    //       console.log(typeof(selected_data));
-    //       console.log(selected_data)
-    //       var parent = selected_data.parent;
-    //       console.log(parent)
-    //
-    //       console.log("trying d3 select on parent")
-    //       console.log(d3.selectAll(parent.children))
-    //       d3.select(parent).each(function(arst) {
-    //         console.log('arst')
-    //         console.log(arst)
-    //         console.log(this)
-    //       })
-    //       // d3.select(parent).attr('RYAN', 'MOORE')
-    //       // d3.select(parent).classed("WAHA", true);
-    //       // d3.selectAll(parent.children).classed("WHAT", true)
-    //
-    //       if (parent) {
-    //         var children = parent.children;
-    //
-    //         if (children) {
-    //           console.log("the parent is: " + parent.data.name);
-    //           children.forEach(function(child) {
-    //             console.log(typeof(child) + " "  + child.data.name + " is a child of " + parent.data.name);
-    //             // d3.select(child).classed("selected-label", true);
-    //           })
-    //         }
-    //       }
-    //     });
-    //   }
-    // });
-
     d3.select("body").on("keydown", function () {
       var key_code = {
         b: 66,
@@ -3228,13 +3187,16 @@ function add_previously_selected() {
 }
 
 function toggle_selected(d) {
-  d.is_selected = !d.is_selected;
+  // Only works if you alt
+  if (d3.event.altKey) {
+    d.is_selected = !d.is_selected;
 
-  // First select the node.
-  var sel = d3.select(this);
+    // First select the node.
+    var sel = d3.select(this);
 
-  // Then toggle the clicked-label class on or off depending if it is already toggled.
-  sel.classed("selected-label", !sel.classed("selected-label"));
+    // Then toggle the clicked-label class on or off depending if it is already toggled.
+    sel.classed("selected-label", !sel.classed("selected-label"));
+  }
 }
 
 var z;
