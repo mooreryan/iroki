@@ -449,6 +449,171 @@ function lalala(tree_input_param, mapping_input_param) {
     d3.select("#save-svg").on("click", save_svg_data);
     d3.select("#save-png").on("click", save_png_data);
 
+    // // Listener on the body to register keyboard presses
+    // d3.select("body").on("keydown", function () {
+    //   // 67 === 'c'
+    //   if (d3.event.altKey && d3.event.keyCode === 67) {
+    //     d3.selectAll("text.selected-label").each(function (selected_data) {
+    //       console.log("this")
+    //       console.log(typeof(this))
+    //       console.log(this)
+    //
+    //       console.log("selected_data")
+    //       console.log(typeof(selected_data));
+    //       console.log(selected_data)
+    //       var parent = selected_data.parent;
+    //       console.log(parent)
+    //
+    //       console.log("trying d3 select on parent")
+    //       console.log(d3.selectAll(parent.children))
+    //       d3.select(parent).each(function(arst) {
+    //         console.log('arst')
+    //         console.log(arst)
+    //         console.log(this)
+    //       })
+    //       // d3.select(parent).attr('RYAN', 'MOORE')
+    //       // d3.select(parent).classed("WAHA", true);
+    //       // d3.selectAll(parent.children).classed("WHAT", true)
+    //
+    //       if (parent) {
+    //         var children = parent.children;
+    //
+    //         if (children) {
+    //           console.log("the parent is: " + parent.data.name);
+    //           children.forEach(function(child) {
+    //             console.log(typeof(child) + " "  + child.data.name + " is a child of " + parent.data.name);
+    //             // d3.select(child).classed("selected-label", true);
+    //           })
+    //         }
+    //       }
+    //     });
+    //   }
+    // });
+
+    d3.select("body").on("keydown", function () {
+      var key_code = {
+        b: 66,
+        c: 67,
+        d: 83,
+        f: null,
+        u: 76,
+        x: 88,
+        arrow_left: 37,
+        arrow_up: 38,
+        arrow_right: 39,
+        arrow_down: 40
+      };
+
+      function rebind_labels() {
+        // And now rebind the data.
+        var new_labels = d3.select("#leaf-label-container")
+            .selectAll("text")
+            .data(ROOT.descendants().filter(is_leaf));
+
+        // And now add the selected class to the DOM elements that have just been selected.
+        new_labels
+          .merge(new_labels).classed("selected-label", function (d) {
+            return d.is_selected;
+          });
+      }
+
+      function clear_selected() {
+        ROOT.descendants().forEach(function(node) {
+          node.is_selected = false;
+        });
+
+        rebind_labels();
+      }
+
+
+
+      if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.arrow_up) {
+        add_previously_selected();
+
+        var par = null;
+        var old_par = null;
+        var pars = [];
+
+        d3.selectAll("text.selected-label").each(function (dat, idx, nodes) {
+          par = dat.parent;
+          // console.log("current dat: " + dat.data.name);
+          // console.log("parent: " + par.data.name);
+
+          while (par && par.is_selected) {
+            // The root will not have a parent, so we want to keep the root in that case.
+            old_par = par;
+            par = par.parent;
+          }
+
+          // If par is null that means you asked the root for a parent, so go back one to get a reference to the root again.
+          if (!par) {
+            par = old_par;
+          }
+
+          // Need to track all of them as you can have things selected on different clades from the start.
+          push_unless_present(pars, par);
+        });
+
+
+        pars.forEach(function(par) {
+          // Just make sure par is good for old par.
+          if (par) {
+            par.is_selected = true;
+            z = par;
+            par.descendants().forEach(function(node) {
+              node.is_selected = true;
+            });
+          }
+        });
+
+        rebind_labels();
+      }
+      else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.x) {
+        // Clearing also clears the history.
+        PREVIOUSLY_SELECTED = [];
+
+        // This time we want to clear all is_selected attrs
+        clear_selected();
+      }
+      else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.arrow_down) {
+        // Go back!
+
+        var nodes = PREVIOUSLY_SELECTED.pop()
+        // Make sure there is actually something to pop.
+        if (nodes) {
+          clear_selected();
+
+          nodes.forEach(function(d) {
+            d.is_selected = true;
+          });
+        }
+
+        rebind_labels();
+      }
+      else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.c) {
+        // Copy the text!
+        var selected_names = [];
+
+        ROOT.descendants()
+          .filter(function(d) {
+            return is_leaf(d) && d.is_selected;
+          })
+          .forEach(function(d) {
+            if (d.data && d.data.name) {
+              selected_names.push(d.data.name);
+            }
+          })
+
+        // Create a temporary element to hold the text
+        var text_elem = document.createElement("textarea");
+
+        text_elem.innerHTML = selected_names.join("\n");
+        document.body.appendChild(text_elem);
+        text_elem.select();
+        document.execCommand("copy");
+        document.body.removeChild(text_elem);
+      }
+    });
 
     // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
 
@@ -1123,7 +1288,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
       if (LAYOUT_STRAIGHT) {
         // It could be coming from the circle which has a different slider behavior
-        elem    = document.getElementById("tree-rotation");
+        elem          = document.getElementById("tree-rotation");
         TREE_ROTATION = 270;
         elem.setAttribute("disabled", "");
         // var val = parseInt(elem.value);
@@ -1141,7 +1306,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }
       else {
         // Works for both circular and radial
-        elem          = document.getElementById("tree-rotation");
+        elem = document.getElementById("tree-rotation");
         elem.removeAttribute("disabled");
 
         TREE_ROTATION = parseInt(elem.value);
@@ -1547,7 +1712,8 @@ function lalala(tree_input_param, mapping_input_param) {
           .attr("fill", function (d) {
             var color = d.metadata.leaf_label_color;
             return color ? color : VAL_LEAF_LABEL_COLOR;
-          });
+          })
+          .on("click", toggle_selected);
 
         labels
         // What to do for merging
@@ -1576,7 +1742,8 @@ function lalala(tree_input_param, mapping_input_param) {
           .attr("fill", function (d) {
             var color = d.metadata.leaf_label_color;
             return color ? color : VAL_LEAF_LABEL_COLOR;
-          });
+          })
+          .on("click", toggle_selected);
 
       }
       else {
@@ -3046,3 +3213,30 @@ function set_and_validate_bootstrap_cutoff_input() {
 //
 
 // Same thing but varying different parts of the hcl scale.
+
+function add_previously_selected() {
+  var selected = ROOT.descendants().filter(function(d) {
+    return d.is_selected;
+  });
+
+  // If array too long, remove the item at the bottom
+  if (PREVIOUSLY_SELECTED.length > HISTORY_LIMIT) {
+    PREVIOUSLY_SELECTED.shift();
+  }
+
+  PREVIOUSLY_SELECTED.push(selected);
+}
+
+function toggle_selected(d) {
+  d.is_selected = !d.is_selected;
+
+  // First select the node.
+  var sel = d3.select(this);
+
+  // Then toggle the clicked-label class on or off depending if it is already toggled.
+  sel.classed("selected-label", !sel.classed("selected-label"));
+}
+
+var z;
+var PREVIOUSLY_SELECTED = [];
+var HISTORY_LIMIT = 10

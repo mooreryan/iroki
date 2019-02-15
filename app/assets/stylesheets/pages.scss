@@ -193,3 +193,23 @@ hr.row {
 .sand-color {
   background-color: $body-background;
 }
+
+.selected-label {
+  fill: #3adb76;
+}
+
+/* .selected-label { */
+/*     animation-duration: 1s; */
+/*     animation-name: blink; */
+/*     animation-iteration-count: infinite; */
+/*     animation-direction: alternate; */
+/*     animation-timing-function: ease-in-out; */
+/* } */
+/* @keyframes selected-label { */
+/*     from { */
+/*         opacity: 1; */
+/*     } */
+/*     to { */
+/*         opacity: 0; */
+/*     } */
+/* } */
