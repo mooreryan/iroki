@@ -569,8 +569,16 @@ function lalala(tree_input_param, mapping_input_param) {
             return is_leaf(d) && d.is_selected;
           })
           .forEach(function(d) {
-            if (d.data && d.data.name) {
-              selected_names.push(d.data.name);
+            var name = null;
+            if (d.data) {
+              // We want to use the new name if it is available
+              if (d.metadata && d.metadata.new_name) {
+                selected_names.push(d.metadata.new_name);
+              }
+              else if (d.data.name) {
+                // Else push the orig name.
+                selected_names.push(d.data.name);
+              }
             }
           })
 
