@@ -1729,6 +1729,11 @@ function lalala(tree_input_param, mapping_input_param) {
         // .transition(TR)
         // .attr("font-size", 0)
           .remove();
+
+        // If labels get removed, then we want all the nodes unselected.
+        ROOT.descendants().forEach(function(node) {
+          node.is_selected = false;
+        });
       }
     }
 
