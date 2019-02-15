@@ -200,6 +200,10 @@ hr.row {
   font-style: italic;
 }
 
+.selected-branch {
+  stroke: map-get($foundation-palette, secondarydark);
+}
+
 /* This is for animations, but they look a little wonky.... */
 /* .selected-label { */
 /*     animation-duration: 0.6s; */

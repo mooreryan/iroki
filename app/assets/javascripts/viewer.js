@@ -516,7 +516,6 @@ function lalala(tree_input_param, mapping_input_param) {
 
 
         pars.forEach(function(par) {
-          // Just make sure par is good for old par.
           if (par) {
             par.is_selected = true;
             z = par;
@@ -526,7 +525,11 @@ function lalala(tree_input_param, mapping_input_param) {
           }
         });
 
+        // This will ensure the correct classes are set!
         rebind_labels();
+
+        select_branches();
+
       }
       else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.a) {
         // Select all!
@@ -537,6 +540,9 @@ function lalala(tree_input_param, mapping_input_param) {
         });
 
         rebind_labels();
+
+        select_branches();
+
       }
       else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.x) {
         // Clearing also clears the history.
@@ -544,6 +550,9 @@ function lalala(tree_input_param, mapping_input_param) {
 
         // This time we want to clear all is_selected attrs
         clear_selected();
+
+        select_branches();
+
       }
       else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.arrow_down) {
         // Go back!
@@ -559,6 +568,9 @@ function lalala(tree_input_param, mapping_input_param) {
         }
 
         rebind_labels();
+
+        select_branches();
+
       }
       else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.c) {
         // Copy the text!
@@ -591,6 +603,7 @@ function lalala(tree_input_param, mapping_input_param) {
         document.execCommand("copy");
         document.body.removeChild(text_elem);
       }
+
     });
 
     // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
@@ -1801,7 +1814,6 @@ function lalala(tree_input_param, mapping_input_param) {
             d.target.linkNode = this;
           })
           .attr("d", link_path)
-          // TODO this is very slow for the tree of life.
           .attr("stroke", function (d) {
             return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
           })
@@ -3210,6 +3222,16 @@ function add_previously_selected() {
   PREVIOUSLY_SELECTED.push(selected);
 }
 
+// Adds the selected-branch class to branches that need it, based on whether the node is selected or not.
+function select_branches() {
+  ROOT.descendants()
+    .forEach(function(d) {
+      if (d.linkNode) {
+        d3.select(d.linkNode).classed("selected-branch", d.is_selected);
+      }
+    })
+}
+
 function toggle_selected(d) {
   // Only works if you alt
   if (d3.event.altKey) {
@@ -3220,6 +3242,8 @@ function toggle_selected(d) {
 
     // Then toggle the clicked-label class on or off depending if it is already toggled.
     sel.classed("selected-label", !sel.classed("selected-label"));
+
+    select_branches();
   }
 }
 
