@@ -201,8 +201,6 @@ var DEFAULT_BRANCH_COLOR, DEFAULT_BRANCH_WIDTH;
 // To hold temporary DOM elements
 var elem;
 
-var TR;
-
 var RADIAL_LAYOUT_WEIGHT = 1;
 
 // These vars hold elem IDs
@@ -427,9 +425,6 @@ function lalala(tree_input_param, mapping_input_param) {
     else {
       name2md = null;
     }
-
-    // TODO this transition doesn't get picked up by the draw functions when they are called by a listener.
-    TR = d3.transition().duration(750).ease(d3.easeExp);
 
     function listener(id, action, fn) {
       d3.select("#" + id).on(action, fn);
@@ -1648,7 +1643,6 @@ function lalala(tree_input_param, mapping_input_param) {
     function draw_svg() {
       if (document.getElementById("svg-tree")) {
         svg.merge(svg)
-           // .transition(TR)
            .attr("width", the_width * 1)
            .attr("height", the_height * 1)
            .style("background-color", "white"); // TODO make bg color an option
@@ -1688,7 +1682,6 @@ function lalala(tree_input_param, mapping_input_param) {
 
       if (document.getElementById("chart-container")) {
         chart.merge(chart)
-             // .transition(TR)
              .attr("width", chart_width)
              .attr("height", chart_height)
              .attr("transform",
@@ -1733,7 +1726,6 @@ function lalala(tree_input_param, mapping_input_param) {
           .attr("stroke-width", inner_dot_stroke_width); // TODO make this an option.
 
         inner_dots.merge(inner_dots)
-                  // .transition(TR)
                   .attr("r", INNER_DOT_SIZE)
                   .attr("transform", function (d) {
                     return pick_transform(d);
@@ -1746,7 +1738,6 @@ function lalala(tree_input_param, mapping_input_param) {
       }
       else {
         inner_dots
-        // .transition(TR)
           .remove();
       }
     }
@@ -1773,7 +1764,6 @@ function lalala(tree_input_param, mapping_input_param) {
           });
 
         leaf_dots.merge(leaf_dots)
-                 // .transition(TR)
                  .attr("transform", function (d) {
                    return pick_transform(d);
                  })
@@ -2031,14 +2021,12 @@ function lalala(tree_input_param, mapping_input_param) {
           .text(function (d) {
             return d.data.name;
           })
-          // .transition(TR)
           .attr("fill", VAL_INNER_LABEL_COLOR)
           .attr("font-size", INNER_LABEL_SIZE)
           .attr("font-family", VAL_INNER_LABEL_FONT);
 
         inner_labels
           .merge(inner_labels)
-          // .transition(TR)
           .attr("dy", text_y_offset)
           .attr("dx", function (d) {
             return text_x_offset(d, null);
@@ -2054,7 +2042,6 @@ function lalala(tree_input_param, mapping_input_param) {
       }
       else {
         inner_labels
-        // .transition(TR)
         // .attr("font-size", 0)
           .remove();
       }
@@ -2087,7 +2074,6 @@ function lalala(tree_input_param, mapping_input_param) {
 
             return new_name ? new_name : d.data.name;
           })
-          // .transition(TR) // This transistion prevents the bounding box calculation.  TODO need to wait on it.
           .attr("font-size", function (d) {
             var size = d.metadata.leaf_label_size;
             return size ? size : LEAF_LABEL_SIZE;
@@ -2105,7 +2091,6 @@ function lalala(tree_input_param, mapping_input_param) {
         labels
         // What to do for merging
           .merge(labels)
-          // .transition(TR)
           // Same things that may change
           .attr("dy", text_y_offset)
           .attr("dx", function (d) {
@@ -2137,7 +2122,6 @@ function lalala(tree_input_param, mapping_input_param) {
       }
       else {
         labels
-        // .transition(TR)
         // .attr("font-size", 0)
           .remove();
 
@@ -2174,7 +2158,6 @@ function lalala(tree_input_param, mapping_input_param) {
           //   {
           //     return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
           //   })
-          //   .transition(TR)
             .attr("fill", "none")
             .attr("stroke", "#000")
             .attr("stroke-opacity", "0.35")
@@ -2188,7 +2171,6 @@ function lalala(tree_input_param, mapping_input_param) {
         }
         else {
           linkExtension
-          // .transition(TR)
           // .attr("d", function(d, i) {
           //   return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
           // })
@@ -2222,7 +2204,6 @@ function lalala(tree_input_param, mapping_input_param) {
       // .attr("stroke", function(d) { return d.target.color; });
 
       link.merge(link)
-          // .transition(TR)
           .attr("fill", "none")
           .attr("stroke", "#000")
           .each(function (d) {
