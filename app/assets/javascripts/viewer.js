@@ -40,6 +40,10 @@ var viewer = {
   }
 };
 
+viewer.defaults.inner_labels_size  = 12;
+viewer.defaults.inner_labels_color = "#000000";
+viewer.defaults.inner_labels_font = "Helvetica";
+
 var MAPPING_CHANGED, TREE_CHANGED;
 
 
@@ -228,8 +232,8 @@ var ID_LEAF_LABEL_COLOR        = "leaf-label-color",
     VAL_LEAF_LABEL_FONT,
     VAL_LEAF_LABEL_PADDING,
     VAL_LEAF_LABEL_ALIGN;
-var ID_INNER_LABEL_COLOR       = "inner-label-color",
-    ID_INNER_LABEL_FONT        = "inner-label-font",
+
+var ID_INNER_LABEL_FONT        = "inner-label-font",
     VAL_INNER_LABEL_COLOR,
     VAL_INNER_LABEL_FONT;
 
@@ -290,7 +294,7 @@ var MAX_BOOTSTRAP_VAL = 1e9;
 
 var defaults = {
   "leaf_label_color": "#000000",
-  "leaf_label_font": "Helvetica",
+  "leaf_label_font": viewer.defaults.inner_labels_font,
   "leaf_label_size": 16,
   "leaf_label_padding": 0,
   "leaf_label_padding_min": 0,
@@ -909,7 +913,7 @@ function lalala(tree_input_param, mapping_input_param) {
     //   adjust_tree();
     // });
 
-    listener("show-inner-labels", "change", function () {
+    listener(global.html.id.inner_labels_show, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -917,7 +921,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("inner-label-size", "change", function () {
+    listener(global.html.id.inner_labels_size, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1004,7 +1008,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_INNER_LABEL_COLOR, "change", function () {
+    listener(global.html.id.inner_labels_color, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1342,7 +1346,7 @@ function lalala(tree_input_param, mapping_input_param) {
       VAL_LEAF_LABEL_COLOR = jq(ID_LEAF_LABEL_COLOR).val();
       VAL_LEAF_LABEL_FONT  = jq(ID_LEAF_LABEL_FONT).val();
 
-      VAL_INNER_LABEL_COLOR = jq(ID_INNER_LABEL_COLOR).val();
+      VAL_INNER_LABEL_COLOR = jq(global.html.id.inner_labels_color).val();
       VAL_INNER_LABEL_FONT  = jq(ID_INNER_LABEL_FONT).val();
 
       DEFAULT_BRANCH_COLOR = document.getElementById("branch-color").value;
@@ -1430,7 +1434,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
 
-      INNER_LABEL_SIZE       = parseInt(document.getElementById("inner-label-size").value);
+      INNER_LABEL_SIZE       = parseInt(document.getElementById(global.html.id.inner_labels_size).value);
       LEAF_LABEL_SIZE        = parseInt(document.getElementById("leaf-label-size").value);
       VAL_LEAF_LABEL_PADDING = validate_leaf_label_padding_input(ID_LEAF_LABEL_PADDING);
 
@@ -1482,7 +1486,7 @@ function lalala(tree_input_param, mapping_input_param) {
       else {
         LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value);
       }
-      SHOW_INNER_LABELS = document.getElementById("show-inner-labels").checked;
+      SHOW_INNER_LABELS = document.getElementById(global.html.id.inner_labels_show).checked;
       SHOW_LEAF_LABELS  = document.getElementById("show-leaf-labels").checked;
 
       // Show or hide align tip labels TODO also account for bars here
@@ -1522,10 +1526,10 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
       if (SHOW_INNER_LABELS) {
-        document.getElementById("inner-label-size").removeAttribute("disabled");
+        document.getElementById(global.html.id.inner_labels_size).removeAttribute("disabled");
       }
       else {
-        document.getElementById("inner-label-size").setAttribute("disabled", "");
+        document.getElementById(global.html.id.inner_labels_size).setAttribute("disabled", "");
       }
 
       // Set the height to match the width
@@ -3343,7 +3347,7 @@ function reset_all_to_defaults() {
   // $("#" + global.html.id.tree_width).attr("min", 3).attr("max", 55).attr("step", 1).val(7);
   $("#" + global.html.id.tree_width).val(viewer.defaults.radial.width);
   $("#" + global.html.id.tree_height).prop("disabled", true).val(viewer.defaults.radial.height);
-  $("#padding").val(0.05);
+  $("#" + global.html.id.tree_padding).val(viewer.defaults.tree_padding);
   $("#" + global.html.id.tree_rotation).val(viewer.defaults.tree_rotation);
 
   jq(global.html.id.tree_layout).val(global.html.id.tree_layout_radial);
@@ -3359,8 +3363,8 @@ function reset_all_to_defaults() {
   $("#scale-bar-offset-weight").val(1);
 
   // Label options
-  uncheck("show-inner-labels");
-  $("#inner-label-size").val(12);
+  uncheck(global.html.id.inner_labels_show);
+  $("#" + global.html.id.inner_labels_size).val(viewer.defaults.inner_labels_size);
 
   check("show-leaf-labels");
   $("#leaf-label-size").val(16);
@@ -3371,10 +3375,10 @@ function reset_all_to_defaults() {
   $("#label-rotation").val(0);
 
   jq(ID_LEAF_LABEL_COLOR).val("#000000");
-  jq(ID_LEAF_LABEL_FONT).val("Helvetica");
+  jq(ID_LEAF_LABEL_FONT).val(viewer.defaults.inner_labels_font);
 
-  jq(ID_INNER_LABEL_COLOR).val("#000000");
-  jq(ID_INNER_LABEL_FONT).val("Helvetica");
+  jq(global.html.id.inner_labels_color).val(viewer.defaults.inner_labels_color);
+  jq(ID_INNER_LABEL_FONT).val(viewer.defaults.inner_labels_font);
 
   // Dot options
   uncheck(ID_SHOW_INNER_DOTS);

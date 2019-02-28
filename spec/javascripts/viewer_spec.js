@@ -73,8 +73,38 @@ describe("viewer", function () {
 
           it("sets default tree padding", function () {
             expect(
-              parseInt($("#" + global.html.id.tree_padding).val())
+              parseFloat($("#" + global.html.id.tree_padding).val())
             ).to.equal(viewer.defaults.tree_padding);
+          });
+        });
+
+        describe("label options", function () {
+          it("unchecks show leaf labels", function () {
+            expect(
+              $("#" + global.html.id.inner_labels_show).prop("checked")
+            ).to.be.false;
+          });
+
+          it("sets inner label default size", function () {
+            expect(
+              parseInt($("#" + global.html.id.inner_labels_size).val())
+            ).to.equal(viewer.defaults.inner_labels_size);
+          });
+
+          it("sets inner label default color", function () {
+            expect(
+              $("#" + global.html.id.inner_labels_color).val()
+            ).to.equal(viewer.defaults.inner_labels_color);
+          });
+
+          it("sets the inner label default font", function () {
+            expect(
+              $("#" + global.html.id.inner_labels_font).val()
+            ).to.equal(viewer.defaults.inner_labels_font);
+
+            expect(
+              $("#" + global.html.id.inner_labels_font_helvetica).prop("selected")
+            ).to.be.true;
           });
         });
       });
