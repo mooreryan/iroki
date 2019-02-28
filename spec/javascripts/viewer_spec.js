@@ -78,7 +78,38 @@ describe("viewer", function () {
           });
         });
 
-        describe("label options", function () {
+        describe("scale bar options", function () {
+
+          it("checks show scale bar", function () {
+            expect(
+              $("#" + global.html.id.scale_bar_show).prop("checked")
+            ).to.be.true;
+          });
+
+          it("sets default scale bar offset", function () {
+            expect(
+              parseFloat($("#" + global.html.id.scale_bar_offset_weight).val())
+            ).to.equal(viewer.defaults.scale_bar_offset_weight);
+          });
+
+          it("checks autosize scale bar", function () {
+            expect(
+              $("#" + global.html.id.scale_bar_autosize).prop("checked")
+            ).to.equal(viewer.defaults.scale_bar_autosize_is_checked);
+          });
+
+          it("sets the default scale bar length", function () {
+            expect(
+              parseFloat($("#" + global.html.id.scale_bar_length).val())
+            ).to.equal(viewer.defaults.scale_bar_length);
+
+            expect(
+              $("#" + global.html.id.scale_bar_length).prop("disabled")
+            ).to.equal(viewer.defaults.scale_bar_length_is_disabled);
+          });
+        });
+
+        describe("inner label options", function () {
           it("unchecks show leaf labels", function () {
             expect(
               $("#" + global.html.id.inner_labels_show).prop("checked")

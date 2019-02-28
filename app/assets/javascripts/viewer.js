@@ -42,7 +42,14 @@ var viewer = {
 
 viewer.defaults.inner_labels_size  = 12;
 viewer.defaults.inner_labels_color = "#000000";
-viewer.defaults.inner_labels_font = "Helvetica";
+viewer.defaults.inner_labels_font  = "Helvetica";
+
+// Scale bar defaults
+viewer.defaults.scale_bar_length              = 1;
+viewer.defaults.scale_bar_length_is_disabled  = true;
+viewer.defaults.scale_bar_offset_weight       = 1;
+viewer.defaults.scale_bar_autosize_is_checked = true;
+viewer.defaults.scale_bar_show_is_checked     = true;
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -218,22 +225,22 @@ var ID_LAYOUT_RECTANGULAR = "rectangular-tree",
 //     ID_SORT_FORWARD                = "descending",
 //     ID_SORT_REVERSE                = "ascending",
 //     ID_SORT_UNSORTED               = "not-sorted";
-var ID_SCALE_BAR_SHOW          = "show-scale-bar",
-    ID_SCALE_BAR_OFFSET_WEIGHT = "scale-bar-offset-weight",
-    ID_SCALE_BAR_AUTOSIZE      = "scale-bar-auto-size",
-    ID_SCALE_BAR_LENGTH        = "scale-bar-length";
-var ID_VIEWER_SIZE_FIXED       = "viewer-size-fixed";
-var ID_OPTIONS_ACCORDION       = "options-accordion";
-var ID_LEAF_LABEL_COLOR        = "leaf-label-color",
-    ID_LEAF_LABEL_FONT         = "leaf-label-font",
-    ID_LEAF_LABEL_PADDING      = "leaf-label-padding",
-    ID_LEAF_LABEL_ALIGN        = "align-tip-labels",
-    VAL_LEAF_LABEL_COLOR,
-    VAL_LEAF_LABEL_FONT,
-    VAL_LEAF_LABEL_PADDING,
-    VAL_LEAF_LABEL_ALIGN;
+var //ID_SCALE_BAR_SHOW          = "show-scale-bar",
+    //ID_SCALE_BAR_OFFSET_WEIGHT = "scale-bar-offset-weight",
+  ID_SCALE_BAR_AUTOSIZE  = "scale-bar-auto-size";
+//ID_SCALE_BAR_LENGTH        = "scale-bar-length";
+var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
+var ID_OPTIONS_ACCORDION = "options-accordion";
+var ID_LEAF_LABEL_COLOR  = "leaf-label-color",
+  ID_LEAF_LABEL_FONT     = "leaf-label-font",
+  ID_LEAF_LABEL_PADDING  = "leaf-label-padding",
+  ID_LEAF_LABEL_ALIGN    = "align-tip-labels",
+  VAL_LEAF_LABEL_COLOR,
+  VAL_LEAF_LABEL_FONT,
+  VAL_LEAF_LABEL_PADDING,
+  VAL_LEAF_LABEL_ALIGN;
 
-var ID_INNER_LABEL_FONT        = "inner-label-font",
+var ID_INNER_LABEL_FONT = "inner-label-font",
     VAL_INNER_LABEL_COLOR,
     VAL_INNER_LABEL_FONT;
 
@@ -848,7 +855,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT * 2);
     });
 
-    listener(ID_SCALE_BAR_SHOW, "change", function () {
+    listener(global.html.id.scale_bar_show, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -859,7 +866,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_SCALE_BAR_OFFSET_WEIGHT, "change", function () {
+    listener(global.html.id.scale_bar_offset_weight, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -870,15 +877,15 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_SCALE_BAR_AUTOSIZE, "change", function () {
+    listener(global.html.id.scale_bar_autosize, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
-          jq(ID_SCALE_BAR_LENGTH).prop("disabled", true);
+        if (document.getElementById(global.html.id.scale_bar_autosize).checked) {
+          jq(global.html.id.scale_bar_length).prop("disabled", true);
         }
         else {
-          jq(ID_SCALE_BAR_LENGTH).prop("disabled", false);
+          jq(global.html.id.scale_bar_length).prop("disabled", false);
         }
 
 
@@ -888,7 +895,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_SCALE_BAR_LENGTH, "change", function () {
+    listener(global.html.id.scale_bar_length, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1374,9 +1381,9 @@ function lalala(tree_input_param, mapping_input_param) {
         sort_function = sort_descending;
       }
 
-      SHOW_SCALE_BAR          = document.getElementById(ID_SCALE_BAR_SHOW).checked;
-      SCALE_BAR_OFFSET_WEIGHT = parseFloat(document.getElementById(ID_SCALE_BAR_OFFSET_WEIGHT).value);
-      SCALE_BAR_LENGTH        = parseFloat(document.getElementById(ID_SCALE_BAR_LENGTH).value);
+      SHOW_SCALE_BAR          = document.getElementById(global.html.id.scale_bar_show).checked;
+      SCALE_BAR_OFFSET_WEIGHT = parseFloat(document.getElementById(global.html.id.scale_bar_offset_weight).value);
+      SCALE_BAR_LENGTH        = parseFloat(document.getElementById(global.html.id.scale_bar_length).value);
 
 
       LAYOUT_CIRCLE   = document.getElementById("circular-tree").selected;
@@ -2798,16 +2805,16 @@ function draw_scale_bar(user_changed) {
     }
 
     var scale_bar_pixels;
-    if (document.getElementById(ID_SCALE_BAR_AUTOSIZE).checked) {
+    if (document.getElementById(global.html.id.scale_bar_autosize).checked) {
       scale_bar_pixels = mean_length * pixels_per_unit_length;
-      jq(ID_SCALE_BAR_LENGTH).val(mean_length);
+      jq(global.html.id.scale_bar_length).val(mean_length);
     }
     else {
-      scale_bar_pixels = jq(ID_SCALE_BAR_LENGTH).val() * pixels_per_unit_length;
+      scale_bar_pixels = jq(global.html.id.scale_bar_length).val() * pixels_per_unit_length;
 
       if (isNaN(scale_bar_pixels)) {
         scale_bar_pixels = mean_length * pixels_per_unit_length;
-        jq(ID_SCALE_BAR_LENGTH).val(mean_length);
+        jq(global.html.id.scale_bar_length).val(mean_length);
       }
     }
 
@@ -2824,7 +2831,7 @@ function draw_scale_bar(user_changed) {
     // // Now that we have a minimum scale bar size, weight it by the slider value.
     // scale_bar_pixels *= SCALE_BAR_LENGTH;
     var scale_bar_label_text = fn.math.round(scale_bar_pixels / pixels_per_unit_length, ROUNDING_PRECISION);
-    jq(ID_SCALE_BAR_LENGTH).val(scale_bar_label_text);
+    jq(global.html.id.scale_bar_length).val(scale_bar_label_text);
 
 
     var label_x, label_y;
@@ -3357,10 +3364,15 @@ function reset_all_to_defaults() {
   jq(global.html.id.tree_sorting).val(global.html.id.tree_sorting_forward);
 
   // Scale bar options
-  check(ID_SCALE_BAR_SHOW);
-  check(ID_SCALE_BAR_AUTOSIZE);
-  jq(ID_SCALE_BAR_LENGTH).val(1).prop("disabled", true);
-  $("#scale-bar-offset-weight").val(1);
+  jq(global.html.id.scale_bar_show)
+    .prop("checked", viewer.defaults.scale_bar_show_is_checked);
+  jq(global.html.id.scale_bar_autosize)
+    .prop("checked", viewer.defaults.scale_bar_autosize_is_checked);
+  jq(global.html.id.scale_bar_length)
+    .val(viewer.defaults.scale_bar_length)
+    .prop("disabled", viewer.defaults.scale_bar_length_is_disabled);
+  jq(global.html.id.scale_bar_offset_weight)
+    .val(viewer.defaults.scale_bar_offset_weight);
 
   // Label options
   uncheck(global.html.id.inner_labels_show);
