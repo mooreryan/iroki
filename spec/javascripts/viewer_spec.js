@@ -276,7 +276,7 @@ describe("viewer", function () {
           it("sets default bar and axis color", function () {
             expect(
               $("#" + global.html.id.bars_color).val()
-            ).to.equal(viewer.defaults.bar_color);
+            ).to.equal(viewer.defaults.bars_color);
           });
 
           it("sets default bar padding", function () {
@@ -295,6 +295,20 @@ describe("viewer", function () {
             expect(
               parseFloat($("#" + global.html.id.bars_width).val())
             ).to.eq(viewer.defaults.bars_width);
+          });
+        });
+
+        describe("branch options", function () {
+          it("sets default branch color", function () {
+            expect(
+              $("#" + global.html.id.branches_color).val()
+            ).to.equal(viewer.defaults.branches_color);
+          });
+
+          it("sets default branch width", function () {
+            expect(
+              parseFloat($("#" + global.html.id.branches_width).val())
+            ).to.equal(viewer.defaults.branches_width);
           });
         });
       });

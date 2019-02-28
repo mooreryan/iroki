@@ -77,4 +77,9 @@ global.html.id.bars_padding   = "bar-padding";
 global.html.id.bars_align     = "align-bars";
 global.html.id.bars_axis_show = "show-bar-start-axis";
 
+// Branch options
+global.html.id.branches_color = "branch-color"; // #000
+global.html.id.branches_width = "branch-width"; // 2
+
+
 global.ZERO_REPLACEMENT_VAL = 1e-5;

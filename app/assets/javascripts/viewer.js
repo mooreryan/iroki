@@ -79,13 +79,20 @@ viewer.defaults.leaf_dots_color = "#000000";
 viewer.defaults.leaf_dots_size  = 5;
 
 // Bars defaults
-viewer.defaults.bars_show      = false;
-viewer.defaults.bars_axis_show = false;
-viewer.defaults.bars_padding   = 10;
-viewer.defaults.bars_height    = 100;
-viewer.defaults.bars_width     = 10;
-viewer.defaults.bars_align     = false;
-viewer.defaults.bar_color      = "#000000";
+viewer.defaults.bars_show        = false;
+viewer.defaults.bars_axis_show   = false;
+viewer.defaults.bars_padding     = 10;
+viewer.defaults.bars_padding_min = 0;
+viewer.defaults.bars_padding_max = 10000; // TODO this is just some silly default
+
+viewer.defaults.bars_height = 100;
+viewer.defaults.bars_width  = 10;
+viewer.defaults.bars_align  = false;
+viewer.defaults.bars_color  = "#000000";
+
+// Branches default
+viewer.defaults.branches_color = "#000000";
+viewer.defaults.branches_width = 2;
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -244,7 +251,7 @@ var NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES;
 
 var LARGE_TREE_CUTOFF = 1000; // in number of nodes.  TODO tune this...phage proteomic tree is 5200, slow; tree of life 381, fast.
 
-var DEFAULT_BRANCH_COLOR, DEFAULT_BRANCH_WIDTH;
+var SELECTED_BRANCH_COLOR, SELECTED_BRANCH_WIDTH;
 
 // To hold temporary DOM elements
 var elem;
@@ -320,15 +327,6 @@ var defaults = {
   "leaf_dot_color": "#000000",
   "leaf_dot_size": 2,
   "new_name": null,
-  "branch_width": 2,
-  "branch_color": "#000000",
-
-  "bar_color": "#000000",
-  "bar_padding": 10,
-  "bar_padding_min": 0,
-  "bar_padding_max": 10000, // TODO this is just some silly default.
-  "bar_height": 100,
-  "bar_width": 10
 };
 
 var md_cat_name2id = {
@@ -338,7 +336,7 @@ var md_cat_name2id = {
   "leaf_dot_color": null,
   "leaf_dot_size": global.html.id.leaf_dots_size,
   "new_name": null,
-  "branch_width": "branch-width",
+  "branch_width": global.html.id.branches_width,
   "branch_color": null
 };
 
@@ -1277,7 +1275,7 @@ function lalala(tree_input_param, mapping_input_param) {
     });
 
 
-    listener("branch-color", "change", function () {
+    listener(global.html.id.branches_color, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1290,7 +1288,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("branch-width", "change", function () {
+    listener(global.html.id.branches_width, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1367,8 +1365,8 @@ function lalala(tree_input_param, mapping_input_param) {
       VAL_INNER_LABEL_COLOR = jq(global.html.id.inner_labels_color).val();
       VAL_INNER_LABEL_FONT  = jq(ID_INNER_LABEL_FONT).val();
 
-      DEFAULT_BRANCH_COLOR = document.getElementById("branch-color").value;
-      DEFAULT_BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
+      SELECTED_BRANCH_COLOR = document.getElementById(global.html.id.branches_color).value;
+      SELECTED_BRANCH_WIDTH = parseInt(document.getElementById(global.html.id.branches_width).value);
 
       VAL_LEAF_DOT_COLOR  = jq(global.html.id.leaf_dots_color).val();
       VAL_INNER_DOT_COLOR = jq(global.html.id.inner_dots_color).val();
@@ -2181,7 +2179,7 @@ function lalala(tree_input_param, mapping_input_param) {
             .attr("fill", "none")
             .attr("stroke", "#000")
             .attr("stroke-opacity", "0.35")
-            .attr("stroke-width", DEFAULT_BRANCH_WIDTH > 2 ? 2 : DEFAULT_BRANCH_WIDTH)
+            .attr("stroke-width", SELECTED_BRANCH_WIDTH > 2 ? 2 : SELECTED_BRANCH_WIDTH)
             .attr("stroke-dasharray", "1, 5")
             .attr("class", "dotted-links")
             .each(function (d) {
@@ -2215,10 +2213,10 @@ function lalala(tree_input_param, mapping_input_param) {
           })
           .attr("d", link_path)
           .attr("stroke", function (d) {
-            return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
+            return get_branch_md_val(d.target, "branch_color", SELECTED_BRANCH_COLOR);
           })
           .attr("stroke-width", function (d) {
-            return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
+            return get_branch_md_val(d.target, "branch_width", SELECTED_BRANCH_WIDTH);
           });
 
       // .attr("stroke", function(d) { return d.target.color; });
@@ -2231,10 +2229,10 @@ function lalala(tree_input_param, mapping_input_param) {
           })
           .attr("d", link_path)
           .attr("stroke", function (d) {
-            return get_branch_md_val(d.target, "branch_color", DEFAULT_BRANCH_COLOR);
+            return get_branch_md_val(d.target, "branch_color", SELECTED_BRANCH_COLOR);
           })
           .attr("stroke-width", function (d) {
-            return get_branch_md_val(d.target, "branch_width", DEFAULT_BRANCH_WIDTH);
+            return get_branch_md_val(d.target, "branch_width", SELECTED_BRANCH_WIDTH);
           });
 
       if (biological_root_sibling_warnings.length > 0 && !biological_root_sibling_warnings_already_warned) {
@@ -2909,7 +2907,7 @@ function draw_scale_bar(user_changed) {
     container.append("path")
              .attr("id", "scale-bar")
              .attr("stroke", "black")
-             .attr("stroke-width", DEFAULT_BRANCH_WIDTH > 2 ? 2 : DEFAULT_BRANCH_WIDTH)
+             .attr("stroke-width", SELECTED_BRANCH_WIDTH > 2 ? 2 : SELECTED_BRANCH_WIDTH)
              .attr("d", path_d)
              .attr("transform", scale_bar_transform);
 
@@ -3424,14 +3422,14 @@ function reset_all_to_defaults() {
   // Bar options
   jq(global.html.id.bars_show).prop("checked", viewer.defaults.bars_show);
   jq(global.html.id.bars_axis_show).prop("checked", viewer.defaults.bars_axis_show);
-  jq(global.html.id.bars_color).val(viewer.defaults.bar_color);
+  jq(global.html.id.bars_color).val(viewer.defaults.bars_color);
   jq(global.html.id.bars_height).val(viewer.defaults.bars_height);
   jq(global.html.id.bars_width).val(viewer.defaults.bars_width);
   jq(global.html.id.bars_padding).val(viewer.defaults.bars_padding);
 
   // Branch options
-  $("#branch-color").val("#000000");
-  $("#branch-width").val(2);
+  jq(global.html.id.branches_color).val(viewer.defaults.branches_color);
+  jq(global.html.id.branches_width).val(viewer.defaults.branches_width);
 
   // Viewer options
   check(ID_VIEWER_SIZE_FIXED);
@@ -3673,9 +3671,9 @@ function validate_bar_padding_input(id) {
   // Basic decimal number matcher
   if (raw_val && !raw_val.match(/^\d*\.?\d*$/)) {
     // Set the user option
-    jq(id).val(defaults.bar_padding);
+    jq(id).val(viewer.defaults.bars_padding);
     // And return the actual usable value
-    return defaults.bar_padding;
+    return viewer.defaults.bars_padding;
   }
 
   // If raw_val is undefined, then this will be NaN.
@@ -3685,17 +3683,17 @@ function validate_bar_padding_input(id) {
   if (isNaN(val)) {
 
     // Set the user option
-    jq(id).val(defaults.bar_padding);
+    jq(id).val(viewer.defaults.bars_padding);
     // And return the actual usable value
-    return defaults.bar_padding;
+    return viewer.defaults.bars_padding;
   }
-  else if (val > defaults.bar_padding_max) {
-    jq(id).val(defaults.bar_padding_max);
-    return defaults.bar_padding_max;
+  else if (val > viewer.defaults.bars_padding_max) {
+    jq(id).val(viewer.defaults.bars_padding_max);
+    return viewer.defaults.bars_padding_max;
   }
-  else if (val < defaults.bar_padding_min) {
-    jq(id).val(defaults.bar_padding_min);
-    return defaults.bar_padding_min;
+  else if (val < viewer.defaults.bars_padding_min) {
+    jq(id).val(viewer.defaults.bars_padding_min);
+    return viewer.defaults.bars_padding_min;
   }
   else {
     // It's fine return the actual val.
