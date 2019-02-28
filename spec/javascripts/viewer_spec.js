@@ -165,6 +165,10 @@ describe("viewer", function () {
                 $("#" + global.html.id.leaf_labels_align).prop("checked")
               ).to.equal(viewer.defaults.leaf_labels_align);
             });
+
+            it("sets the default label rotation", function() {
+
+            })
           });
         });
       });

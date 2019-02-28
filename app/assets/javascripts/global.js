@@ -43,9 +43,10 @@ global.html.id.inner_labels_font           = "inner-label-font";
 global.html.id.inner_labels_font_helvetica = "helvetica";
 
 // Leaf label options
-global.html.id.leaf_labels_show    = "show-leaf-labels";
-global.html.id.leaf_labels_size    = "leaf-label-size";
-global.html.id.leaf_labels_padding = "leaf-label-padding";
-global.html.id.leaf_labels_align   = "align-tip-labels";
+global.html.id.leaf_labels_show     = "show-leaf-labels";
+global.html.id.leaf_labels_size     = "leaf-label-size";
+global.html.id.leaf_labels_padding  = "leaf-label-padding";
+global.html.id.leaf_labels_align    = "align-tip-labels";
+global.html.id.leaf_labels_rotation = "label-rotation";
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;

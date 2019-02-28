@@ -58,6 +58,7 @@ viewer.defaults.leaf_labels_padding     = 0;
 viewer.defaults.leaf_labels_padding_min = 0;
 viewer.defaults.leaf_labels_padding_max = 10000;
 viewer.defaults.leaf_labels_align       = false;
+viewer.defaults.leaf_labels_rotation    = 0;
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -979,7 +980,7 @@ function lalala(tree_input_param, mapping_input_param) {
         leaf_label_align_listener_actions();
       }, TIMEOUT);
     });
-    listener("label-rotation", "change", function () {
+    listener(global.html.id.leaf_labels_rotation, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1491,10 +1492,10 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
       if (LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
-        LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value) + 90;
+        LABEL_ROTATION = parseInt(document.getElementById(global.html.id.leaf_labels_rotation).value) + 90;
       }
       else {
-        LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value);
+        LABEL_ROTATION = parseInt(document.getElementById(global.html.id.leaf_labels_rotation).value);
       }
       SHOW_INNER_LABELS = document.getElementById(global.html.id.inner_labels_show).checked;
       SHOW_LEAF_LABELS  = document.getElementById(global.html.id.leaf_labels_show).checked;
@@ -1529,10 +1530,10 @@ function lalala(tree_input_param, mapping_input_param) {
 
       // If it's circle the label rotation gets disabled
       if (LAYOUT_STRAIGHT && (SHOW_LEAF_LABELS || SHOW_INNER_LABELS)) {
-        document.getElementById("label-rotation").removeAttribute("disabled");
+        document.getElementById(global.html.id.leaf_labels_rotation).removeAttribute("disabled");
       }
       else {
-        document.getElementById("label-rotation").setAttribute("disabled", "");
+        document.getElementById(global.html.id.leaf_labels_rotation).setAttribute("disabled", "");
       }
 
       if (SHOW_INNER_LABELS) {
@@ -3392,7 +3393,7 @@ function reset_all_to_defaults() {
 
   // not checked, not disabled
   sync_align_buttons_and_vals(false, false);
-  $("#label-rotation").val(0);
+  jq(global.html.id.leaf_labels_rotation).val(viewer.defaults.leaf_labels_rotation);
 
   jq(ID_LEAF_LABEL_COLOR).val("#000000");
   jq(ID_LEAF_LABEL_FONT).val(viewer.defaults.inner_labels_font);
