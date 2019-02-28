@@ -1,8 +1,12 @@
 var viewer = {
   defaults: {
+    // Defaults not specific to a certain layout.
+    tree_rotation: 0,
+
+    // Defaults specific to a certain layout.
     radial: {
       width: 7,
-      height: 7
+      height: 7,
     },
     circular: {
       width: 22,
@@ -205,10 +209,10 @@ var ID_MATCHING_TYPE               = "matching-type";
 var ID_LAYOUT_RECTANGULAR          = "rectangular-tree",
     ID_LAYOUT_CIRCULAR             = "circular-tree";
 
-var ID_SORT                        = "tree-sort",
-    ID_SORT_FORWARD                = "descending",
-    ID_SORT_REVERSE                = "ascending",
-    ID_SORT_UNSORTED               = "not-sorted";
+// var ID_SORT                        = "tree-sort",
+//     ID_SORT_FORWARD                = "descending",
+//     ID_SORT_REVERSE                = "ascending",
+//     ID_SORT_UNSORTED               = "not-sorted";
 var ID_SCALE_BAR_SHOW              = "show-scale-bar",
     ID_SCALE_BAR_OFFSET_WEIGHT     = "scale-bar-offset-weight",
     ID_SCALE_BAR_AUTOSIZE          = "scale-bar-auto-size",
@@ -809,7 +813,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT);
     });
 
-    listener("tree-rotation", "change", set_msg_and_draw);
+    listener(global.html.id.tree_rotation, "change", set_msg_and_draw);
 
     listener(ID_BIOLOGICALLY_ROOTED, "change", function () {
       // TODO which things actaully need to be updates?
@@ -831,7 +835,7 @@ function lalala(tree_input_param, mapping_input_param) {
     });
 
     // TODO needs longer timer to actually work.  Not sure why.
-    listener("tree-sort", "change", function () {
+    listener(global.html.id.tree_sorting, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -893,7 +897,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT);
     });
 
-    // listener("tree-sort", "change", function() {
+    // listener(global.html.id.tree_sorting, "change", function() {
     //   update_form_constants();
     //   set_up_hierarchy(); // The regular redraw skips this step.
     //   draw_inner_dots();
@@ -1354,7 +1358,7 @@ function lalala(tree_input_param, mapping_input_param) {
       SORT_NONE       = "not-sorted";
       SORT_ASCENDING  = "ascending";
       SORT_DESCENDING = "descending";
-      SORT_STATE      = document.getElementById("tree-sort").value;
+      SORT_STATE      = document.getElementById(global.html.id.tree_sorting).value;
 
       if (SORT_STATE === SORT_NONE) {
         sort_function = sort_none;
@@ -1443,7 +1447,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
       if (LAYOUT_STRAIGHT) {
         // It could be coming from the circle which has a different slider behavior
-        elem          = document.getElementById("tree-rotation");
+        elem          = document.getElementById(global.html.id.tree_rotation);
         TREE_ROTATION = 270;
         elem.setAttribute("disabled", "");
         // var val = parseInt(elem.value);
@@ -1461,7 +1465,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }
       else {
         // Works for both circular and radial
-        elem = document.getElementById("tree-rotation");
+        elem = document.getElementById(global.html.id.tree_rotation);
         elem.removeAttribute("disabled");
 
         TREE_ROTATION = parseInt(elem.value);
@@ -3340,13 +3344,13 @@ function reset_all_to_defaults() {
   $("#width").val(viewer.defaults.radial.width);
   $("#height").prop("disabled", true).val(viewer.defaults.radial.height);
   $("#padding").val(0.05);
-  $("#tree-rotation").val(0);
+  $("#" + global.html.id.tree_rotation).val(viewer.defaults.tree_rotation);
 
   jq(global.html.id.tree_layout).val(global.html.id.tree_layout_radial);
 
   jq(global.html.id.tree_branch_style).val(global.html.id.tree_branch_style_normal);
 
-  jq(ID_SORT).val(ID_SORT_FORWARD);
+  jq(global.html.id.tree_sorting).val(global.html.id.tree_sorting_forward);
 
   // Scale bar options
   check(ID_SCALE_BAR_SHOW);

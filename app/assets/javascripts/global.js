@@ -1,6 +1,6 @@
 var global = {};
 
-global.html = {};
+global.html    = {};
 global.html.id = {
   // Tree layout options
   tree_layout: "tree-shape",
@@ -8,7 +8,16 @@ global.html.id = {
 
   // Branch style options
   tree_branch_style: "tree-branch-style",
-  tree_branch_style_normal: "normalogram"
+  tree_branch_style_normal: "normalogram",
+
+  // Tree sorting
+  tree_sorting: "tree-sort",
+  tree_sorting_forward: "descending",
+  tree_sorting_reverse: "ascending",
+  tree_sorting_unsorted: "not-sorted",
+
+  // Tree rotation
+  tree_rotation: "tree-rotation"
 };
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;

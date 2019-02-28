@@ -24,7 +24,7 @@ describe("viewer", function () {
           ).to.be.true;
         });
 
-        it("sets default branch style", function() {
+        it("sets default branch style", function () {
           expect(
             $("#" + global.html.id.tree_branch_style).val()
           ).to.equal(global.html.id.tree_branch_style_normal);
@@ -32,7 +32,23 @@ describe("viewer", function () {
           expect(
             $("#" + global.html.id.tree_branch_style_normal).prop("selected")
           ).to.be.true;
-        })
+        });
+
+        it("sets default sorting", function () {
+          expect(
+            $("#" + global.html.id.tree_sorting).val()
+          ).to.equal(global.html.id.tree_sorting_forward);
+
+          expect(
+            $("#" + global.html.id.tree_sorting_forward).prop("selected")
+          ).to.be.true;
+        });
+
+        it("sets default tree rotation", function () {
+          expect(
+            parseInt($("#" + global.html.id.tree_rotation).val())
+          ).to.equal(viewer.defaults.tree_rotation);
+        });
       });
     });
   });
