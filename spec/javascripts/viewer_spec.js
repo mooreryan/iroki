@@ -146,6 +146,12 @@ describe("viewer", function () {
                 $("#" + global.html.id.leaf_labels_show).prop("checked")
               ).to.equal(viewer.defaults.leaf_labels_show);
             });
+
+            it("sets default leaf label size", function() {
+              expect(
+                parseInt($("#" + global.html.id.leaf_labels_size).val())
+              ).to.equal(viewer.defaults.leaf_labels_size)
+            })
           });
         });
       });

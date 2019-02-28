@@ -53,6 +53,7 @@ viewer.defaults.scale_bar_show_is_checked     = true;
 
 // Leaf label defaults
 viewer.defaults.leaf_labels_show = true;
+viewer.defaults.leaf_labels_size = 16;
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -326,7 +327,7 @@ var defaults = {
 var md_cat_name2id = {
   "leaf_label_color": null,
   "leaf_label_font": null,
-  "leaf_label_size": "leaf-label-size",
+  "leaf_label_size": global.html.id.leaf_labels_size,
   "leaf_dot_color": null,
   "leaf_dot_size": ID_LEAF_DOT_SIZE,
   "new_name": null,
@@ -953,7 +954,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("leaf-label-size", "change", function () {
+    listener(global.html.id.leaf_labels_size, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1445,7 +1446,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
 
       INNER_LABEL_SIZE       = parseInt(document.getElementById(global.html.id.inner_labels_size).value);
-      LEAF_LABEL_SIZE        = parseInt(document.getElementById("leaf-label-size").value);
+      LEAF_LABEL_SIZE        = parseInt(document.getElementById(global.html.id.leaf_labels_size).value);
       VAL_LEAF_LABEL_PADDING = validate_leaf_label_padding_input(ID_LEAF_LABEL_PADDING);
 
       TREE_BRANCH_CLADOGRAM = "cladogram";
@@ -1519,11 +1520,11 @@ function lalala(tree_input_param, mapping_input_param) {
 
       // Show/hide labels size
       if (SHOW_LEAF_LABELS) {
-        document.getElementById("leaf-label-size").removeAttribute("disabled");
+        document.getElementById(global.html.id.leaf_labels_size).removeAttribute("disabled");
         document.getElementById("leaf-label-padding").removeAttribute("disabled");
       }
       else {
-        document.getElementById("leaf-label-size").setAttribute("disabled", "");
+        document.getElementById(global.html.id.leaf_labels_size).setAttribute("disabled", "");
         document.getElementById("leaf-label-padding").setAttribute("disabled", "");
       }
 
@@ -3385,7 +3386,7 @@ function reset_all_to_defaults() {
   jq(global.html.id.leaf_labels_show)
     .prop("checked", viewer.defaults.leaf_labels_show);
 
-  $("#leaf-label-size").val(16);
+  jq(global.html.id.leaf_labels_size).val(viewer.defaults.leaf_labels_size);
   jq(ID_LEAF_LABEL_PADDING).val(defaults.leaf_label_padding);
 
   // not checked, not disabled

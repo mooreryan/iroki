@@ -44,5 +44,6 @@ global.html.id.inner_labels_font_helvetica = "helvetica";
 
 // Leaf label options
 global.html.id.leaf_labels_show = "show-leaf-labels";
+global.html.id.leaf_labels_size = "leaf-label-size";
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;
