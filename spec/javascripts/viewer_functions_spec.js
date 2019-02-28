@@ -14,6 +14,27 @@ describe("viewer functions", function () {
           viewer.fn.reset_all_to_defaults();
         });
 
+        describe("setting global vars", function () {
+          it("resets EXTRA_NAMES_WARNINGS", function () {
+            // Make sure it's something other than false before running.
+            EXTRA_NAME_WARNINGS = ["warning"];
+            viewer.fn.reset_all_to_defaults();
+            expect(EXTRA_NAME_WARNINGS).to.be.false;
+          });
+
+          it("resets tree_input", function () {
+            tree_input = "arostienarston";
+            viewer.fn.reset_all_to_defaults();
+            expect(tree_input).to.be.null;
+          });
+
+          it("resets mapping_input", function () {
+            mapping_input = "astoien";
+            viewer.fn.reset_all_to_defaults();
+            expect(mapping_input).to.be.null;
+          });
+        });
+
         describe("tree format options", function () {
           it("sets default layout shape", function () {
             expect(
