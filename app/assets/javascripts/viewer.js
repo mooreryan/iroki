@@ -324,6 +324,8 @@ var mapping_input, tree_input;
 
 // The mega function
 function lalala(tree_input_param, mapping_input_param) {
+  // First thing to do is set all options to defaults
+  reset_all_to_defaults();
 
   tree_input    = tree_input_param;
   mapping_input = mapping_input_param;

@@ -10,7 +10,7 @@ describe("viewer", function () {
 
     context("setting the default options", function () {
       describe("reset_all_to_defaults()", function () {
-        before(function () {
+        beforeEach(function () {
           reset_all_to_defaults();
         });
 
