@@ -2,11 +2,12 @@ var viewer = {
   defaults: {
     // Defaults not specific to a certain layout.
     tree_rotation: 0,
+    tree_padding: 0.05,
 
     // Defaults specific to a certain layout.
     radial: {
-      width: 7,
-      height: 7,
+      width: 10,
+      height: 10,
     },
     circular: {
       width: 22,
@@ -23,7 +24,7 @@ var viewer = {
       id: "height"
     },
     tree_width: {
-      id: "width"
+      id: global.html.id.tree_width
     },
 
     layout: {
@@ -681,14 +682,14 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     });
 
-    listener("padding", "change", set_msg_and_draw);
+    listener(global.html.id.tree_padding, "change", set_msg_and_draw);
 
-    listener(viewer.html.tree_width.id, "change", function () {
+    listener(global.html.id.tree_width, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
         // Make sure the input is not negative
-        var w_val = jq(viewer.html.tree_width.id).val();
+        var w_val = jq(global.html.id.tree_width).val();
 
         var layout_value  = jq(global.html.id.tree_layout).val();
         var default_value = null;
@@ -704,11 +705,11 @@ function lalala(tree_input_param, mapping_input_param) {
         }
 
         if (isNaN(parseFloat(w_val))) {
-          jq(viewer.html.tree_width.id).val(default_value);
+          jq(global.html.id.tree_width).val(default_value);
         }
 
         if (w_val < 1) {
-          jq(viewer.html.tree_width.id).val(default_value);
+          jq(global.html.id.tree_width).val(default_value);
         }
 
         draw_tree();
@@ -755,8 +756,8 @@ function lalala(tree_input_param, mapping_input_param) {
       setTimeout(function () {
 
         // First adjust the slider.
-        var width_elem  = $("#width");
-        var height_elem = $("#height");
+        var width_elem  = $("#" + global.html.id.tree_width);
+        var height_elem = $("#" + global.html.id.tree_height);
 
         if (document.getElementById("rectangular-tree").selected) {
           width_elem
@@ -1530,32 +1531,32 @@ function lalala(tree_input_param, mapping_input_param) {
       // Set the height to match the width
       if (LAYOUT_CIRCLE || LAYOUT_RADIAL) {
         // Disable the height slider
-        elem          = document.getElementById("height");
+        elem          = document.getElementById(global.html.id.tree_height);
         elem.disabled = true;
 
-        width  = size_transform(parseInt(document.getElementById("width").value));
+        width  = size_transform(parseInt(document.getElementById(global.html.id.tree_width).value));
         height = width;
 
-        padding = parseFloat(document.getElementById("padding").value);
+        padding = parseFloat(document.getElementById(global.html.id.tree_padding).value);
 
-        set_value_of("height", width);
+        set_value_of(global.html.id.tree_height, width);
 
         $("#width-label").html("Size");
 
       }
       else {
-        elem          = document.getElementById("height");
+        elem          = document.getElementById(global.html.id.tree_height);
         elem.disabled = false;
 
-        width  = size_transform(parseInt(document.getElementById("width").value));
-        height = size_transform(parseInt(document.getElementById("height").value));
+        width  = size_transform(parseInt(document.getElementById(global.html.id.tree_width).value));
+        height = size_transform(parseInt(document.getElementById(global.html.id.tree_height).value));
 
-        padding = parseFloat(document.getElementById("padding").value);
+        padding = parseFloat(document.getElementById(global.html.id.tree_padding).value);
 
         $("#width-label").html("Horizontal");
       }
 
-      elem                 = document.getElementById("width");
+      elem                 = document.getElementById(global.html.id.tree_width);
       RADIAL_LAYOUT_WEIGHT = size_transform(elem.value);
 
       //  padding is the total % of padding.  If it is set to 0.1, then the inner width will be 90% of the svg.
@@ -1641,7 +1642,7 @@ function lalala(tree_input_param, mapping_input_param) {
       if (document.getElementById("svg-tree")) {
         svg.merge(svg)
            .attr("width", the_width * 1)
-           .attr("height", the_height * 1)
+           .attr(global.html.id.tree_height, the_height * 1)
            .style("background-color", "white"); // TODO make bg color an option
       }
       else {
@@ -2667,8 +2668,8 @@ function resize_svg_straight_layout(svg_id, chart_id) {
   var the_svg   = document.getElementById(svg_id);
 
   var chart_bbox = the_chart.getBBox();
-  the_chart.setAttribute("width", chart_bbox.width);
-  the_chart.setAttribute("height", chart_bbox.height);
+  the_chart.setAttribute(global.html.id.tree_width, chart_bbox.width);
+  the_chart.setAttribute(global.html.id.tree_height, chart_bbox.height);
 
   var new_svg_height, new_svg_width;
 
@@ -2712,13 +2713,13 @@ function resize_svg_straight_layout(svg_id, chart_id) {
     g_chart_transform = "translate(" + (new_svg_width / 2) + "," + (new_svg_height / 2) +
       ") rotate(" + TREE_ROTATION + ")";
 
-    the_chart.setAttribute("width", new_svg_width);
-    the_chart.setAttribute("height", new_svg_height);
+    the_chart.setAttribute(global.html.id.tree_width, new_svg_width);
+    the_chart.setAttribute(global.html.id.tree_height, new_svg_height);
   }
 
   // Update elements
-  the_svg.setAttribute("width", new_svg_width);
-  the_svg.setAttribute("height", new_svg_height);
+  the_svg.setAttribute(global.html.id.tree_width, new_svg_width);
+  the_svg.setAttribute(global.html.id.tree_height, new_svg_height);
 
   the_chart.setAttribute("transform", g_chart_transform);
 }
@@ -3339,9 +3340,9 @@ function reset_all_to_defaults() {
   // Tree options
   // jq(ID_MATCHING_TYPE).val("partial");
 
-  // $("#width").attr("min", 3).attr("max", 55).attr("step", 1).val(7);
-  $("#width").val(viewer.defaults.radial.width);
-  $("#height").prop("disabled", true).val(viewer.defaults.radial.height);
+  // $("#" + global.html.id.tree_width).attr("min", 3).attr("max", 55).attr("step", 1).val(7);
+  $("#" + global.html.id.tree_width).val(viewer.defaults.radial.width);
+  $("#" + global.html.id.tree_height).prop("disabled", true).val(viewer.defaults.radial.height);
   $("#padding").val(0.05);
   $("#" + global.html.id.tree_rotation).val(viewer.defaults.tree_rotation);
 

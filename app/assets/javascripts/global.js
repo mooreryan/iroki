@@ -23,4 +23,9 @@ global.html.id = {
   biologically_rooted: "biological-root"
 };
 
+// Tree size options
+global.html.id.tree_width = "width";
+global.html.id.tree_height = "height";
+global.html.id.tree_padding = "padding";
+
 global.ZERO_REPLACEMENT_VAL = 1e-5;

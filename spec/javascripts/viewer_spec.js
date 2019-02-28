@@ -57,6 +57,26 @@ describe("viewer", function () {
             ).to.be.true;
           });
         });
+
+        describe("tree size options", function () {
+          it("sets default tree width", function () {
+            expect(
+              parseInt($("#" + global.html.id.tree_width).val())
+            ).to.equal(viewer.defaults.radial.width);
+          });
+
+          it("sets default tree height", function () {
+            expect(
+              parseInt($("#" + global.html.id.tree_height).val())
+            ).to.equal(viewer.defaults.radial.height);
+          });
+
+          it("sets default tree padding", function () {
+            expect(
+              parseInt($("#" + global.html.id.tree_padding).val())
+            ).to.equal(viewer.defaults.tree_padding);
+          });
+        });
       });
     });
   });
