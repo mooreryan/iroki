@@ -109,33 +109,43 @@ describe("viewer", function () {
           });
         });
 
-        describe("inner label options", function () {
-          it("unchecks show leaf labels", function () {
-            expect(
-              $("#" + global.html.id.inner_labels_show).prop("checked")
-            ).to.be.false;
+        describe("label options", function () {
+          describe("inner label options", function () {
+            it("unchecks show leaf labels", function () {
+              expect(
+                $("#" + global.html.id.inner_labels_show).prop("checked")
+              ).to.be.false;
+            });
+
+            it("sets inner label default size", function () {
+              expect(
+                parseInt($("#" + global.html.id.inner_labels_size).val())
+              ).to.equal(viewer.defaults.inner_labels_size);
+            });
+
+            it("sets inner label default color", function () {
+              expect(
+                $("#" + global.html.id.inner_labels_color).val()
+              ).to.equal(viewer.defaults.inner_labels_color);
+            });
+
+            it("sets the inner label default font", function () {
+              expect(
+                $("#" + global.html.id.inner_labels_font).val()
+              ).to.equal(viewer.defaults.inner_labels_font);
+
+              expect(
+                $("#" + global.html.id.inner_labels_font_helvetica).prop("selected")
+              ).to.be.true;
+            });
           });
 
-          it("sets inner label default size", function () {
-            expect(
-              parseInt($("#" + global.html.id.inner_labels_size).val())
-            ).to.equal(viewer.defaults.inner_labels_size);
-          });
-
-          it("sets inner label default color", function () {
-            expect(
-              $("#" + global.html.id.inner_labels_color).val()
-            ).to.equal(viewer.defaults.inner_labels_color);
-          });
-
-          it("sets the inner label default font", function () {
-            expect(
-              $("#" + global.html.id.inner_labels_font).val()
-            ).to.equal(viewer.defaults.inner_labels_font);
-
-            expect(
-              $("#" + global.html.id.inner_labels_font_helvetica).prop("selected")
-            ).to.be.true;
+          describe("leaf label options", function () {
+            it("sets show leaf labels to default", function () {
+              expect(
+                $("#" + global.html.id.leaf_labels_show).prop("checked")
+              ).to.equal(viewer.defaults.leaf_labels_show);
+            });
           });
         });
       });

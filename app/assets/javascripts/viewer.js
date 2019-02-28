@@ -51,6 +51,9 @@ viewer.defaults.scale_bar_offset_weight       = 1;
 viewer.defaults.scale_bar_autosize_is_checked = true;
 viewer.defaults.scale_bar_show_is_checked     = true;
 
+// Leaf label defaults
+viewer.defaults.leaf_labels_show = true;
+
 var MAPPING_CHANGED, TREE_CHANGED;
 
 
@@ -936,7 +939,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("show-leaf-labels", "change", function () {
+    listener(global.html.id.leaf_labels_show, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1494,7 +1497,7 @@ function lalala(tree_input_param, mapping_input_param) {
         LABEL_ROTATION = parseInt(document.getElementById("label-rotation").value);
       }
       SHOW_INNER_LABELS = document.getElementById(global.html.id.inner_labels_show).checked;
-      SHOW_LEAF_LABELS  = document.getElementById("show-leaf-labels").checked;
+      SHOW_LEAF_LABELS  = document.getElementById(global.html.id.leaf_labels_show).checked;
 
       // Show or hide align tip labels TODO also account for bars here
       if (
@@ -3133,7 +3136,7 @@ function set_options_by_metadata() {
 
     // Show leaf labels if leaf label options are present.
     if (leaf_label_options_present) {
-      check("show-leaf-labels");
+      check(global.html.id.leaf_labels_show);
     }
   }
 }
@@ -3374,11 +3377,14 @@ function reset_all_to_defaults() {
   jq(global.html.id.scale_bar_offset_weight)
     .val(viewer.defaults.scale_bar_offset_weight);
 
-  // Label options
+  // Inner label options
   uncheck(global.html.id.inner_labels_show);
   $("#" + global.html.id.inner_labels_size).val(viewer.defaults.inner_labels_size);
 
-  check("show-leaf-labels");
+  // Leaf label options
+  jq(global.html.id.leaf_labels_show)
+    .prop("checked", viewer.defaults.leaf_labels_show);
+
   $("#leaf-label-size").val(16);
   jq(ID_LEAF_LABEL_PADDING).val(defaults.leaf_label_padding);
 

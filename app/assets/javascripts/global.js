@@ -29,17 +29,20 @@ global.html.id.tree_height  = "height";
 global.html.id.tree_padding = "padding";
 
 // Scale bar options
-global.html.id.scale_bar_show = "show-scale-bar";
+global.html.id.scale_bar_show          = "show-scale-bar";
 global.html.id.scale_bar_offset_weight = "scale-bar-offset-weight";
-global.html.id.scale_bar_autosize = "scale-bar-auto-size";
-global.html.id.scale_bar_length = "scale-bar-length";
+global.html.id.scale_bar_autosize      = "scale-bar-auto-size";
+global.html.id.scale_bar_length        = "scale-bar-length";
 
 // Label options
-global.html.id.inner_labels_show = "show-inner-labels";
-global.html.id.inner_labels_size = "inner-label-size";
-global.html.id.inner_labels_color = "inner-label-color";
-global.html.id.inner_labels_font = "inner-label-font";
+global.html.id.inner_labels_show           = "show-inner-labels";
+global.html.id.inner_labels_size           = "inner-label-size";
+global.html.id.inner_labels_color          = "inner-label-color";
+global.html.id.inner_labels_font           = "inner-label-font";
 // TODO this ID matches the leaf label font ID for helvetica
 global.html.id.inner_labels_font_helvetica = "helvetica";
+
+// Leaf label options
+global.html.id.leaf_labels_show = "show-leaf-labels";
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;
