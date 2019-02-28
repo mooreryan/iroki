@@ -205,9 +205,6 @@ var ID_MATCHING_TYPE               = "matching-type";
 var ID_LAYOUT_RECTANGULAR          = "rectangular-tree",
     ID_LAYOUT_CIRCULAR             = "circular-tree";
 
-var ID_TREE_BRANCH_STYLE           = "tree-branch-style",
-    ID_TREE_BRANCH_STYLE_NORMAL    = "normalogram",
-    ID_TREE_BRANCH_STYLE_CLADOGRAM = "cladogram";
 var ID_SORT                        = "tree-sort",
     ID_SORT_FORWARD                = "descending",
     ID_SORT_REVERSE                = "ascending",
@@ -803,7 +800,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, 10);
     });
-    listener("tree-branch-style", "change", function () {
+    listener(global.html.id.tree_branch_style, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1437,11 +1434,11 @@ function lalala(tree_input_param, mapping_input_param) {
       TREE_BRANCH_NORMAL    = "normalogram";
       if (LAYOUT_RADIAL) {
         TREE_BRANCH_STYLE = "normalogram";
-        $("#tree-branch-style").prop("disabled", true);
+        $("#" + global.html.id.tree_branch_style).prop("disabled", true);
       }
       else {
-        $("#tree-branch-style").prop("disabled", false);
-        TREE_BRANCH_STYLE = document.getElementById("tree-branch-style").value;
+        $("#" + global.html.id.tree_branch_style).prop("disabled", false);
+        TREE_BRANCH_STYLE = document.getElementById(global.html.id.tree_branch_style).value;
       }
 
       if (LAYOUT_STRAIGHT) {
@@ -3347,7 +3344,7 @@ function reset_all_to_defaults() {
 
   jq(global.html.id.tree_layout).val(global.html.id.tree_layout_radial);
 
-  jq(ID_TREE_BRANCH_STYLE).val(ID_TREE_BRANCH_STYLE_NORMAL);
+  jq(global.html.id.tree_branch_style).val(global.html.id.tree_branch_style_normal);
 
   jq(ID_SORT).val(ID_SORT_FORWARD);
 

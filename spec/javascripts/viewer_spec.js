@@ -17,12 +17,22 @@ describe("viewer", function () {
         it("sets default layout shape", function () {
           expect(
             $("#" + global.html.id.tree_layout).val()
-          ).to.equal("radial-tree");
+          ).to.equal(global.html.id.tree_layout_radial);
 
           expect(
             $("#" + global.html.id.tree_layout_radial).prop("selected")
           ).to.be.true;
         });
+
+        it("sets default branch style", function() {
+          expect(
+            $("#" + global.html.id.tree_branch_style).val()
+          ).to.equal(global.html.id.tree_branch_style_normal);
+
+          expect(
+            $("#" + global.html.id.tree_branch_style_normal).prop("selected")
+          ).to.be.true;
+        })
       });
     });
   });
