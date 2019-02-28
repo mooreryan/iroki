@@ -17,7 +17,7 @@ describe("viewer functions", function () {
         describe("setting global vars", function () {
           it("resets EXTRA_NAMES_WARNINGS", function () {
             // Make sure it's something other than false before running.
-            EXTRA_NAME_WARNINGS = ["warning"];
+            EXTRA_NAME_WARNINGS = true;
             viewer.fn.reset_all_to_defaults();
             expect(EXTRA_NAME_WARNINGS).to.be.false;
           });
