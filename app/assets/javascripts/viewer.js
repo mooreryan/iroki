@@ -52,8 +52,11 @@ viewer.defaults.scale_bar_autosize_is_checked = true;
 viewer.defaults.scale_bar_show_is_checked     = true;
 
 // Leaf label defaults
-viewer.defaults.leaf_labels_show = true;
-viewer.defaults.leaf_labels_size = 16;
+viewer.defaults.leaf_labels_show        = true;
+viewer.defaults.leaf_labels_size        = 16;
+viewer.defaults.leaf_labels_padding     = 0;
+viewer.defaults.leaf_labels_padding_min = 0;
+viewer.defaults.leaf_labels_padding_max = 10000;
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -237,7 +240,6 @@ var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
 var ID_OPTIONS_ACCORDION = "options-accordion";
 var ID_LEAF_LABEL_COLOR  = "leaf-label-color",
   ID_LEAF_LABEL_FONT     = "leaf-label-font",
-  ID_LEAF_LABEL_PADDING  = "leaf-label-padding",
   ID_LEAF_LABEL_ALIGN    = "align-tip-labels",
   VAL_LEAF_LABEL_COLOR,
   VAL_LEAF_LABEL_FONT,
@@ -307,9 +309,6 @@ var defaults = {
   "leaf_label_color": "#000000",
   "leaf_label_font": viewer.defaults.inner_labels_font,
   "leaf_label_size": 16,
-  "leaf_label_padding": 0,
-  "leaf_label_padding_min": 0,
-  "leaf_label_padding_max": 10000,
   "leaf_dot_color": "#000000",
   "leaf_dot_size": 2,
   "new_name": null,
@@ -962,7 +961,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_LABEL_PADDING, "change", function () {
+    listener(global.html.id.leaf_labels_padding, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1447,7 +1446,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
       INNER_LABEL_SIZE       = parseInt(document.getElementById(global.html.id.inner_labels_size).value);
       LEAF_LABEL_SIZE        = parseInt(document.getElementById(global.html.id.leaf_labels_size).value);
-      VAL_LEAF_LABEL_PADDING = validate_leaf_label_padding_input(ID_LEAF_LABEL_PADDING);
+      VAL_LEAF_LABEL_PADDING = validate_leaf_label_padding_input(global.html.id.leaf_labels_padding);
 
       TREE_BRANCH_CLADOGRAM = "cladogram";
       TREE_BRANCH_NORMAL    = "normalogram";
@@ -1521,11 +1520,11 @@ function lalala(tree_input_param, mapping_input_param) {
       // Show/hide labels size
       if (SHOW_LEAF_LABELS) {
         document.getElementById(global.html.id.leaf_labels_size).removeAttribute("disabled");
-        document.getElementById("leaf-label-padding").removeAttribute("disabled");
+        document.getElementById(global.html.id.leaf_labels_padding).removeAttribute("disabled");
       }
       else {
         document.getElementById(global.html.id.leaf_labels_size).setAttribute("disabled", "");
-        document.getElementById("leaf-label-padding").setAttribute("disabled", "");
+        document.getElementById(global.html.id.leaf_labels_padding).setAttribute("disabled", "");
       }
 
       // If it's circle the label rotation gets disabled
@@ -3387,7 +3386,7 @@ function reset_all_to_defaults() {
     .prop("checked", viewer.defaults.leaf_labels_show);
 
   jq(global.html.id.leaf_labels_size).val(viewer.defaults.leaf_labels_size);
-  jq(ID_LEAF_LABEL_PADDING).val(defaults.leaf_label_padding);
+  jq(global.html.id.leaf_labels_padding).val(viewer.defaults.leaf_labels_padding);
 
   // not checked, not disabled
   sync_align_buttons_and_vals(false, false);
@@ -3624,9 +3623,9 @@ function validate_leaf_label_padding_input(id) {
   // Basic decimal number matcher
   if (raw_val && !raw_val.match(/^\d*\.?\d*$/)) {
     // Set the user option
-    jq(id).val(defaults.leaf_label_padding);
+    jq(id).val(viewer.defaults.leaf_labels_padding);
     // And return the actual usable value
-    return defaults.leaf_label_padding;
+    return viewer.defaults.leaf_labels_padding;
   }
 
   // If raw_val is undefined, then this will be NaN.
@@ -3636,17 +3635,17 @@ function validate_leaf_label_padding_input(id) {
   if (isNaN(val)) {
 
     // Set the user option
-    jq(id).val(defaults.leaf_label_padding);
+    jq(id).val(viewer.defaults.leaf_labels_padding);
     // And return the actual usable value
-    return defaults.leaf_label_padding;
+    return viewer.defaults.leaf_labels_padding;
   }
-  else if (val > defaults.leaf_label_padding_max) {
-    jq(id).val(defaults.leaf_label_padding_max);
-    return defaults.leaf_label_padding_max;
+  else if (val > viewer.defaults.leaf_labels_padding_max) {
+    jq(id).val(viewer.defaults.leaf_labels_padding_max);
+    return viewer.defaults.leaf_labels_padding_max;
   }
-  else if (val < defaults.leaf_label_padding_min) {
-    jq(id).val(defaults.leaf_label_padding_min);
-    return defaults.leaf_label_padding_min;
+  else if (val < viewer.defaults.leaf_labels_padding_min) {
+    jq(id).val(viewer.defaults.leaf_labels_padding_min);
+    return viewer.defaults.leaf_labels_padding_min;
   }
   else {
     // It's fine return the actual val.

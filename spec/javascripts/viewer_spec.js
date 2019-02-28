@@ -147,11 +147,15 @@ describe("viewer", function () {
               ).to.equal(viewer.defaults.leaf_labels_show);
             });
 
-            it("sets default leaf label size", function() {
+            it("sets default leaf label size", function () {
               expect(
                 parseInt($("#" + global.html.id.leaf_labels_size).val())
-              ).to.equal(viewer.defaults.leaf_labels_size)
-            })
+              ).to.equal(viewer.defaults.leaf_labels_size);
+            });
+
+            it("sets default leaf label padding", function () {
+              parseFloat($("#" + global.html.id.leaf_labels_padding));
+            }).to.equal(viewer.defaults.leaf_labels_padding);
           });
         });
       });
