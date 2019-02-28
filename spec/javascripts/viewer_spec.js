@@ -1,7 +1,7 @@
 describe("viewer", function () {
-  // afterEach("Remove all fixtures", function () {
-  //   MagicLamp.polish();
-  // });
+  afterEach("Remove all fixtures", function () {
+    MagicLamp.polish();
+  });
 
   describe("options panel", function () {
     beforeEach("load the thing", function () {
@@ -310,6 +310,12 @@ describe("viewer", function () {
               parseFloat($("#" + global.html.id.branches_width).val())
             ).to.equal(viewer.defaults.branches_width);
           });
+        });
+
+        describe("viewer options", function () {
+          expect(
+            $("#" + global.html.id.viewer_size_fixed).prop("checked")
+          ).to.equal(viewer.defaults.viewer_size_fixed);
         });
       });
     });

@@ -94,6 +94,9 @@ viewer.defaults.bars_color  = "#000000";
 viewer.defaults.branches_color = "#000000";
 viewer.defaults.branches_width = 2;
 
+// Viewer size defaults
+viewer.defaults.viewer_size_fixed = true;
+
 var MAPPING_CHANGED, TREE_CHANGED;
 
 var OPTIONS_DIV;
@@ -271,7 +274,6 @@ var //ID_SCALE_BAR_SHOW          = "show-scale-bar",
     //ID_SCALE_BAR_OFFSET_WEIGHT = "scale-bar-offset-weight",
   ID_SCALE_BAR_AUTOSIZE  = "scale-bar-auto-size";
 //ID_SCALE_BAR_LENGTH        = "scale-bar-length";
-var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
 var ID_OPTIONS_ACCORDION = "options-accordion";
 var ID_LEAF_LABEL_COLOR  = "leaf-label-color",
   VAL_LEAF_LABEL_COLOR,
@@ -387,7 +389,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // If it is a big tree, uncheck the viewer size fixed button.  It goes way faster.
     if (tmp_root.descendants().length > LARGE_TREE_CUTOFF) {
-      uncheck(ID_VIEWER_SIZE_FIXED);
+      uncheck(global.html.id.viewer_size_fixed);
     }
 
     // Check if there is as many branchlengths as there are number of nodes.
@@ -1303,7 +1305,7 @@ function lalala(tree_input_param, mapping_input_param) {
     });
 
 
-    listener(ID_VIEWER_SIZE_FIXED, "change", function () {
+    listener(global.html.id.viewer_size_fixed, "change", function () {
       // utils__set_status_msg_to_rendering();
       update_viewer_size_fixed();
       // utils__set_status_msg_to_done();
@@ -1339,7 +1341,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // Start here.  TODO this function is wonky.
     function update_viewer_size_fixed() {
-      var is_checked = jq(ID_VIEWER_SIZE_FIXED).prop("checked");
+      var is_checked = jq(global.html.id.viewer_size_fixed).prop("checked");
       if (is_checked) {
         jq("tree-div").attr("style", "overflow: scroll; display: block; height: " + (verge.viewportH() * 0.8) + "px;");
       }
@@ -3432,7 +3434,7 @@ function reset_all_to_defaults() {
   jq(global.html.id.branches_width).val(viewer.defaults.branches_width);
 
   // Viewer options
-  check(ID_VIEWER_SIZE_FIXED);
+  jq(global.html.id.viewer_size_fixed).prop("checked", viewer.defaults.viewer_size_fixed);
 
 
   check(global.html.id.biologically_rooted);

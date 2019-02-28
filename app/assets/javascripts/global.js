@@ -81,5 +81,8 @@ global.html.id.bars_axis_show = "show-bar-start-axis";
 global.html.id.branches_color = "branch-color"; // #000
 global.html.id.branches_width = "branch-width"; // 2
 
+// Viewer options
+global.html.id.viewer_size_fixed = "viewer-size-fixed";
+
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;
