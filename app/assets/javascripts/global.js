@@ -40,14 +40,16 @@ global.html.id.inner_labels_size           = "inner-label-size";
 global.html.id.inner_labels_color          = "inner-label-color";
 global.html.id.inner_labels_font           = "inner-label-font";
 // TODO this ID matches the leaf label font ID for helvetica
-global.html.id.inner_labels_font_helvetica = "helvetica";
+global.html.id.inner_labels_font_helvetica = "inner-label-font-helvetica";
 
 // Leaf label options
-global.html.id.leaf_labels_show     = "show-leaf-labels";
-global.html.id.leaf_labels_size     = "leaf-label-size";
-global.html.id.leaf_labels_padding  = "leaf-label-padding";
-global.html.id.leaf_labels_align    = "align-tip-labels";
-global.html.id.leaf_labels_rotation = "label-rotation";
-global.html.id.leaf_labels_color    = "leaf-label-color";
+global.html.id.leaf_labels_show           = "show-leaf-labels";
+global.html.id.leaf_labels_size           = "leaf-label-size";
+global.html.id.leaf_labels_padding        = "leaf-label-padding";
+global.html.id.leaf_labels_align          = "align-tip-labels";
+global.html.id.leaf_labels_rotation       = "label-rotation";
+global.html.id.leaf_labels_color          = "leaf-label-color";
+global.html.id.leaf_labels_font           = "leaf-label-font";
+global.html.id.leaf_labels_font_helvetica = "leaf-label-font-helvetica";
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;

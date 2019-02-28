@@ -177,6 +177,16 @@ describe("viewer", function () {
                 $("#" + global.html.id.leaf_labels_color).val()
               ).to.equal(viewer.defaults.leaf_labels_color);
             });
+
+            it("sets the default leaf label font", function () {
+              expect(
+                $("#" + global.html.id.leaf_labels_font).val()
+              ).to.equal(viewer.defaults.leaf_labels_font);
+
+              expect(
+                $("#" + global.html.id.leaf_labels_font_helvetica).prop("selected")
+              ).to.be.true;
+            });
           });
         });
       });
