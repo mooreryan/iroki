@@ -57,6 +57,7 @@ viewer.defaults.leaf_labels_size        = 16;
 viewer.defaults.leaf_labels_padding     = 0;
 viewer.defaults.leaf_labels_padding_min = 0;
 viewer.defaults.leaf_labels_padding_max = 10000;
+viewer.defaults.leaf_labels_align       = false;
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -240,7 +241,6 @@ var ID_VIEWER_SIZE_FIXED = "viewer-size-fixed";
 var ID_OPTIONS_ACCORDION = "options-accordion";
 var ID_LEAF_LABEL_COLOR  = "leaf-label-color",
   ID_LEAF_LABEL_FONT     = "leaf-label-font",
-  ID_LEAF_LABEL_ALIGN    = "align-tip-labels",
   VAL_LEAF_LABEL_COLOR,
   VAL_LEAF_LABEL_FONT,
   VAL_LEAF_LABEL_PADDING,
@@ -969,12 +969,12 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_LABEL_ALIGN, "change", function () {
+    listener(global.html.id.leaf_labels_align, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
         // First sync all the align buttons.
-        sync_align_buttons_and_vals(is_checked(ID_LEAF_LABEL_ALIGN), false);
+        sync_align_buttons_and_vals(is_checked(global.html.id.leaf_labels_align), false);
 
         leaf_label_align_listener_actions();
       }, TIMEOUT);
@@ -1507,13 +1507,13 @@ function lalala(tree_input_param, mapping_input_param) {
       ) {
         // not checked, disabled.
         sync_align_buttons_and_vals(false, true);
-        // document.getElementById(ID_LEAF_LABEL_ALIGN).setAttribute("disabled", "");
-        // document.getElementById(ID_LEAF_LABEL_ALIGN).removeAttribute("checked");
+        // document.getElementById(global.html.id.leaf_labels_align).setAttribute("disabled", "");
+        // document.getElementById(global.html.id.leaf_labels_align).removeAttribute("checked");
         // VAL_LEAF_LABEL_ALIGN = false;
       }
       else {
-        undisable(ID_LEAF_LABEL_ALIGN);
-        VAL_LEAF_LABEL_ALIGN = is_checked(ID_LEAF_LABEL_ALIGN);
+        undisable(global.html.id.leaf_labels_align);
+        VAL_LEAF_LABEL_ALIGN = is_checked(global.html.id.leaf_labels_align);
         sync_align_buttons_and_vals(VAL_LEAF_LABEL_ALIGN, false);
       }
 
@@ -3384,6 +3384,8 @@ function reset_all_to_defaults() {
   // Leaf label options
   jq(global.html.id.leaf_labels_show)
     .prop("checked", viewer.defaults.leaf_labels_show);
+  jq(global.html.id.leaf_labels_align)
+    .prop("checked", viewer.defaults.leaf_labels_align);
 
   jq(global.html.id.leaf_labels_size).val(viewer.defaults.leaf_labels_size);
   jq(global.html.id.leaf_labels_padding).val(viewer.defaults.leaf_labels_padding);
@@ -3757,11 +3759,11 @@ function set_and_validate_bootstrap_cutoff_input() {
 //
 // Also makes sure that the option is disabled or not.
 var sync_align_buttons_and_vals = function (checked, disabled) {
-  jq(ID_LEAF_LABEL_ALIGN).prop("checked", checked);
+  jq(global.html.id.leaf_labels_align).prop("checked", checked);
   jq(ID_LEAF_DOT_ALIGN).prop("checked", checked);
   jq(ID_BAR_ALIGN).prop("checked", checked);
 
-  jq(ID_LEAF_LABEL_ALIGN).prop("disabled", disabled);
+  jq(global.html.id.leaf_labels_align).prop("disabled", disabled);
   jq(ID_LEAF_DOT_ALIGN).prop("disabled", disabled);
   jq(ID_BAR_ALIGN).prop("disabled", disabled);
 

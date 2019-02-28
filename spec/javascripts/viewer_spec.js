@@ -154,8 +154,17 @@ describe("viewer", function () {
             });
 
             it("sets default leaf label padding", function () {
-              parseFloat($("#" + global.html.id.leaf_labels_padding));
-            }).to.equal(viewer.defaults.leaf_labels_padding);
+              expect(
+                parseFloat($("#" + global.html.id.leaf_labels_padding).val())
+              ).to.equal(viewer.defaults.leaf_labels_padding);
+            });
+
+            it("sets the default for aligning tip labels", function () {
+              "align-tip-labels";
+              expect(
+                $("#" + global.html.id.leaf_labels_align).prop("checked")
+              ).to.equal(viewer.defaults.leaf_labels_align);
+            });
           });
         });
       });
