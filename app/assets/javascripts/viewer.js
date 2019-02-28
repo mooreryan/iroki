@@ -496,18 +496,18 @@ function lalala(tree_input_param, mapping_input_param) {
       function rebind_labels() {
         // And now rebind the data.
         var new_labels = d3.select("#leaf-label-container")
-            .selectAll("text")
-            .data(ROOT.descendants().filter(is_leaf));
+                           .selectAll("text")
+                           .data(ROOT.descendants().filter(is_leaf));
 
         // And now add the selected class to the DOM elements that have just been selected.
         new_labels
           .merge(new_labels).classed("selected-label", function (d) {
-            return d.is_selected;
-          });
+          return d.is_selected;
+        });
       }
 
       function clear_selected() {
-        ROOT.descendants().forEach(function(node) {
+        ROOT.descendants().forEach(function (node) {
           node.is_selected = false;
         });
 
@@ -515,13 +515,12 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
 
-
       if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.arrow_up) {
         add_previously_selected();
 
-        var par = null;
+        var par     = null;
         var old_par = null;
-        var pars = [];
+        var pars    = [];
 
         d3.selectAll("text.selected-label").each(function (dat, idx, nodes) {
           par = dat.parent;
@@ -531,7 +530,7 @@ function lalala(tree_input_param, mapping_input_param) {
           while (par && par.is_selected) {
             // The root will not have a parent, so we want to keep the root in that case.
             old_par = par;
-            par = par.parent;
+            par     = par.parent;
           }
 
           // If par is null that means you asked the root for a parent, so go back one to get a reference to the root again.
@@ -544,11 +543,11 @@ function lalala(tree_input_param, mapping_input_param) {
         });
 
 
-        pars.forEach(function(par) {
+        pars.forEach(function (par) {
           if (par) {
             par.is_selected = true;
-            z = par;
-            par.descendants().forEach(function(node) {
+            z               = par;
+            par.descendants().forEach(function (node) {
               node.is_selected = true;
             });
           }
@@ -564,7 +563,7 @@ function lalala(tree_input_param, mapping_input_param) {
         // Select all!
         add_previously_selected();
 
-        ROOT.descendants().forEach(function(node) {
+        ROOT.descendants().forEach(function (node) {
           node.is_selected = true;
         });
 
@@ -586,12 +585,12 @@ function lalala(tree_input_param, mapping_input_param) {
       else if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.arrow_down) {
         // Go back!
 
-        var nodes = PREVIOUSLY_SELECTED.pop()
+        var nodes = PREVIOUSLY_SELECTED.pop();
         // Make sure there is actually something to pop.
         if (nodes) {
           clear_selected();
 
-          nodes.forEach(function(d) {
+          nodes.forEach(function (d) {
             d.is_selected = true;
           });
         }
@@ -606,22 +605,22 @@ function lalala(tree_input_param, mapping_input_param) {
         var selected_names = [];
 
         ROOT.descendants()
-          .filter(function(d) {
-            return is_leaf(d) && d.is_selected;
-          })
-          .forEach(function(d) {
-            var name = null;
-            if (d.data) {
-              // We want to use the new name if it is available
-              if (d.metadata && d.metadata.new_name) {
-                selected_names.push(d.metadata.new_name);
+            .filter(function (d) {
+              return is_leaf(d) && d.is_selected;
+            })
+            .forEach(function (d) {
+              var name = null;
+              if (d.data) {
+                // We want to use the new name if it is available
+                if (d.metadata && d.metadata.new_name) {
+                  selected_names.push(d.metadata.new_name);
+                }
+                else if (d.data.name) {
+                  // Else push the orig name.
+                  selected_names.push(d.data.name);
+                }
               }
-              else if (d.data.name) {
-                // Else push the orig name.
-                selected_names.push(d.data.name);
-              }
-            }
-          })
+            });
 
         // Create a temporary element to hold the text
         var text_elem = document.createElement("textarea");
@@ -2126,7 +2125,7 @@ function lalala(tree_input_param, mapping_input_param) {
           .remove();
 
         // If labels get removed, then we want all the nodes unselected.
-        ROOT.descendants().forEach(function(node) {
+        ROOT.descendants().forEach(function (node) {
           node.is_selected = false;
         });
       }
@@ -3770,8 +3769,9 @@ function how_many_bar_sets(name2md) {
   // If you've gotten here, there are no bar sets.
   return 0;
 }
+
 function add_previously_selected() {
-  var selected = ROOT.descendants().filter(function(d) {
+  var selected = ROOT.descendants().filter(function (d) {
     return d.is_selected;
   });
 
@@ -3786,11 +3786,11 @@ function add_previously_selected() {
 // Adds the selected-branch class to branches that need it, based on whether the node is selected or not.
 function select_branches() {
   ROOT.descendants()
-    .forEach(function(d) {
-      if (d.linkNode) {
-        d3.select(d.linkNode).classed("selected-branch", d.is_selected);
-      }
-    })
+      .forEach(function (d) {
+        if (d.linkNode) {
+          d3.select(d.linkNode).classed("selected-branch", d.is_selected);
+        }
+      });
 }
 
 function toggle_selected(d) {
@@ -3810,4 +3810,4 @@ function toggle_selected(d) {
 
 var z;
 var PREVIOUSLY_SELECTED = [];
-var HISTORY_LIMIT = 10
+var HISTORY_LIMIT       = 10;
