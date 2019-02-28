@@ -166,9 +166,17 @@ describe("viewer", function () {
               ).to.equal(viewer.defaults.leaf_labels_align);
             });
 
-            it("sets the default label rotation", function() {
+            it("sets the default label rotation", function () {
+              expect(
+                parseFloat($("#" + global.html.id.leaf_labels_rotation).val())
+              ).to.equal(viewer.defaults.leaf_labels_rotation);
+            });
 
-            })
+            it("sets the default leaf label color", function () {
+              expect(
+                $("#" + global.html.id.leaf_labels_color).val()
+              ).to.equal(viewer.defaults.leaf_labels_color);
+            });
           });
         });
       });

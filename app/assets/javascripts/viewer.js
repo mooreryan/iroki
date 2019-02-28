@@ -59,6 +59,7 @@ viewer.defaults.leaf_labels_padding_min = 0;
 viewer.defaults.leaf_labels_padding_max = 10000;
 viewer.defaults.leaf_labels_align       = false;
 viewer.defaults.leaf_labels_rotation    = 0;
+viewer.defaults.leaf_labels_color       = "#000000";
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -993,7 +994,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_LABEL_COLOR, "change", function () {
+    listener(global.html.id.leaf_labels_color, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1354,7 +1355,7 @@ function lalala(tree_input_param, mapping_input_param) {
       VAL_BIOLOGICALLY_ROOTED = is_checked(global.html.id.biologically_rooted);
       // try_disable_bio_rooted();
 
-      VAL_LEAF_LABEL_COLOR = jq(ID_LEAF_LABEL_COLOR).val();
+      VAL_LEAF_LABEL_COLOR = jq(global.html.id.leaf_labels_color).val();
       VAL_LEAF_LABEL_FONT  = jq(ID_LEAF_LABEL_FONT).val();
 
       VAL_INNER_LABEL_COLOR = jq(global.html.id.inner_labels_color).val();
@@ -3395,7 +3396,7 @@ function reset_all_to_defaults() {
   sync_align_buttons_and_vals(false, false);
   jq(global.html.id.leaf_labels_rotation).val(viewer.defaults.leaf_labels_rotation);
 
-  jq(ID_LEAF_LABEL_COLOR).val("#000000");
+  jq(global.html.id.leaf_labels_color).val(viewer.defaults.leaf_labels_color);
   jq(ID_LEAF_LABEL_FONT).val(viewer.defaults.inner_labels_font);
 
   jq(global.html.id.inner_labels_color).val(viewer.defaults.inner_labels_color);
