@@ -254,7 +254,49 @@ describe("viewer", function () {
           });
         });
 
-        describe("bar options"); // START HERE
+        describe("bar options", function () {
+          it("sets show bars default", function () {
+            expect(
+              $("#" + global.html.id.bars_show).prop("checked")
+            ).to.eq(viewer.defaults.bars_show);
+          });
+
+          it("sets show bar axis default", function () {
+            expect(
+              $("#" + global.html.id.bars_axis_show).prop("checked")
+            ).to.eq(viewer.defaults.bars_axis_show);
+          });
+
+          it("sets align bars default", function () {
+            expect(
+              $("#" + global.html.id.bars_align).prop("checked")
+            ).to.eq(viewer.defaults.bars_align);
+          });
+
+          it("sets default bar and axis color", function () {
+            expect(
+              $("#" + global.html.id.bars_color).val()
+            ).to.equal(viewer.defaults.bar_color);
+          });
+
+          it("sets default bar padding", function () {
+            expect(
+              parseFloat($("#" + global.html.id.bars_padding).val())
+            ).to.eq(viewer.defaults.bars_padding);
+          });
+
+          it("sets default bar height", function () {
+            expect(
+              parseFloat($("#" + global.html.id.bars_height).val())
+            ).to.eq(viewer.defaults.bars_height);
+          });
+
+          it("sets default bar width", function () {
+            expect(
+              parseFloat($("#" + global.html.id.bars_width).val())
+            ).to.eq(viewer.defaults.bars_width);
+          });
+        });
       });
     });
   });

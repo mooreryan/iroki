@@ -76,7 +76,16 @@ viewer.defaults.inner_dots_size            = 5;
 viewer.defaults.leaf_dots_show  = false;
 viewer.defaults.leaf_dots_align = viewer.defaults.tip_decorations_align;
 viewer.defaults.leaf_dots_color = "#000000";
-viewer.defaults.leaf_dots_size = 5;
+viewer.defaults.leaf_dots_size  = 5;
+
+// Bars defaults
+viewer.defaults.bars_show      = false;
+viewer.defaults.bars_axis_show = false;
+viewer.defaults.bars_padding   = 10;
+viewer.defaults.bars_height    = 100;
+viewer.defaults.bars_width     = 10;
+viewer.defaults.bars_align     = false;
+viewer.defaults.bar_color      = "#000000";
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -268,17 +277,12 @@ var ID_INNER_LABEL_FONT = "inner-label-font",
     VAL_INNER_LABEL_FONT;
 
 // Bar option IDs
-var ID_BAR_SHOW            = "show-bars",
-    VAL_BAR_SHOW,
-    ID_BAR_COLOR           = "bar-color",
+var VAL_BAR_SHOW,
     VAL_BAR_COLOR,
-    ID_BAR_HEIGHT          = "bar-height",
     VAL_BAR_HEIGHT,
-    ID_BAR_WIDTH           = "bar-width",
     VAL_BAR_WIDTH,
-    ID_BAR_PADDING         = "bar-padding",
-    VAL_BAR_PADDING,
-    ID_BAR_ALIGN           = "align-bars";
+    VAL_BAR_PADDING;
+
 var ID_BAR_SHOW_START_AXIS = "show-bar-start-axis",
     VAL_BAR_SHOW_START_AXIS;
 
@@ -1168,12 +1172,12 @@ function lalala(tree_input_param, mapping_input_param) {
     });
 
     // Bar listeners ///////////////////////////////////////////////
-    listener(ID_BAR_SHOW, "change", function () {
+    listener(global.html.id.bars_show, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
         // First, activate the align tip decorations opts if you are turning bars on.  If you do it here, as soon as bars are added, everything lines up, but the user can still turn it off later.
-        if (is_checked(ID_BAR_SHOW)) {
+        if (is_checked(global.html.id.bars_show)) {
           // Check to see if there are any bar columns in the metadata file.  If not, we want to warnt he user that they should add some.
           // TODO might be nice to lock all the bar opts if there aren't any in a mapping file
           if (!check_for_bar_options()) {
@@ -1194,7 +1198,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_BAR_SHOW_START_AXIS, "change", function () {
+    listener(global.html.id.bars_axis_show, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1208,18 +1212,18 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_BAR_ALIGN, "change", function () {
+    listener(global.html.id.bars_align, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
         // First sync all the align buttons.
-        sync_align_buttons_and_vals(is_checked(ID_BAR_ALIGN), false);
+        sync_align_buttons_and_vals(is_checked(global.html.id.bars_align), false);
 
         // Then do the rest of the actions.
         leaf_label_align_listener_actions();
       }, TIMEOUT);
     });
-    listener(ID_BAR_PADDING, "change", function () {
+    listener(global.html.id.bars_padding, "change", function () {
       utils__set_status_msg_to_rendering();
 
       validate_bar_padding_input();
@@ -1235,7 +1239,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_BAR_COLOR, "change", function () {
+    listener(global.html.id.bars_color, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1243,7 +1247,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_BAR_HEIGHT, "change", function () {
+    listener(global.html.id.bars_height, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1257,7 +1261,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_BAR_WIDTH, "change", function () {
+    listener(global.html.id.bars_width, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1402,12 +1406,12 @@ function lalala(tree_input_param, mapping_input_param) {
       document.getElementById("save-png").removeAttribute("disabled");
 
       // Bars
-      VAL_BAR_SHOW            = document.getElementById(ID_BAR_SHOW).checked;
-      VAL_BAR_SHOW_START_AXIS = is_checked(ID_BAR_SHOW_START_AXIS);
-      VAL_BAR_PADDING         = validate_bar_padding_input(ID_BAR_PADDING);
-      VAL_BAR_WIDTH           = jq(ID_BAR_WIDTH).val();
-      VAL_BAR_HEIGHT          = jq(ID_BAR_HEIGHT).val();
-      VAL_BAR_COLOR           = jq(ID_BAR_COLOR).val();
+      VAL_BAR_SHOW            = document.getElementById(global.html.id.bars_show).checked;
+      VAL_BAR_SHOW_START_AXIS = is_checked(global.html.id.bars_axis_show);
+      VAL_BAR_PADDING         = validate_bar_padding_input(global.html.id.bars_padding);
+      VAL_BAR_WIDTH           = jq(global.html.id.bars_width).val();
+      VAL_BAR_HEIGHT          = jq(global.html.id.bars_height).val();
+      VAL_BAR_COLOR           = jq(global.html.id.bars_color).val();
 
       // Dots
       VAL_SHOW_INNER_DOTS = jq(global.html.id.inner_dots_show).val();
@@ -3418,12 +3422,12 @@ function reset_all_to_defaults() {
   jq(global.html.id.inner_dots_color).val(viewer.defaults.inner_dots_color);
 
   // Bar options
-  uncheck(ID_BAR_SHOW);
-  uncheck(ID_BAR_SHOW_START_AXIS);
-  jq(ID_BAR_COLOR).val(defaults.bar_color);
-  jq(ID_BAR_HEIGHT).val(defaults.bar_height);
-  jq(ID_BAR_WIDTH).val(defaults.bar_width);
-  jq(ID_BAR_PADDING).val(defaults.bar_padding);
+  jq(global.html.id.bars_show).prop("checked", viewer.defaults.bars_show);
+  jq(global.html.id.bars_axis_show).prop("checked", viewer.defaults.bars_axis_show);
+  jq(global.html.id.bars_color).val(viewer.defaults.bar_color);
+  jq(global.html.id.bars_height).val(viewer.defaults.bars_height);
+  jq(global.html.id.bars_width).val(viewer.defaults.bars_width);
+  jq(global.html.id.bars_padding).val(viewer.defaults.bars_padding);
 
   // Branch options
   $("#branch-color").val("#000000");
@@ -3768,11 +3772,11 @@ function set_and_validate_bootstrap_cutoff_input() {
 var sync_align_buttons_and_vals = function (checked, disabled) {
   jq(global.html.id.leaf_labels_align).prop("checked", checked);
   jq(global.html.id.leaf_dots_align).prop("checked", checked);
-  jq(ID_BAR_ALIGN).prop("checked", checked);
+  jq(global.html.id.bars_align).prop("checked", checked);
 
   jq(global.html.id.leaf_labels_align).prop("disabled", disabled);
   jq(global.html.id.leaf_dots_align).prop("disabled", disabled);
-  jq(ID_BAR_ALIGN).prop("disabled", disabled);
+  jq(global.html.id.bars_align).prop("disabled", disabled);
 
   // Make sure the val variable is also set so that everything is sync'd.
   VAL_LEAF_LABEL_ALIGN = checked;

@@ -68,5 +68,13 @@ global.html.id.leaf_dots_align = "align-leaf-dots";
 global.html.id.leaf_dots_color = "leaf-dot-color";
 global.html.id.leaf_dots_size  = "leaf-dot-size";
 
+// Bars option
+global.html.id.bars_show      = "show-bars";
+global.html.id.bars_color     = "bar-color";
+global.html.id.bars_height    = "bar-height";
+global.html.id.bars_width     = "bar-width";
+global.html.id.bars_padding   = "bar-padding";
+global.html.id.bars_align     = "align-bars";
+global.html.id.bars_axis_show = "show-bar-start-axis";
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;
