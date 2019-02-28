@@ -189,6 +189,44 @@ describe("viewer", function () {
             });
           });
         });
+
+        describe("dot options", function () {
+          describe("inner dot options", function () {
+            it("sets show inner dots default", function () {
+              expect(
+                $("#" + global.html.id.inner_dots_show).val()
+              ).to.equal(viewer.defaults.inner_dots_show);
+
+              expect(
+                $("#" + viewer.defaults.inner_dots_show).prop("selected")
+              ).to.be.true;
+            });
+
+            it("sets open dot cutoff default", function () {
+              expect(
+                parseFloat($("#" + global.html.id.inner_dots_cutoff_unfilled).val())
+              ).to.equal(viewer.defaults.inner_dots_cutoff_unfilled);
+            });
+
+            it("sets filled dot cutoff default", function () {
+              expect(
+                parseFloat($("#" + global.html.id.inner_dots_cutoff_filled).val())
+              ).to.equal(viewer.defaults.inner_dots_cutoff_filled);
+            });
+
+            it("sets inner dot color default", function () {
+              expect(
+                $("#" + global.html.id.inner_dots_color).val()
+              ).to.equal(viewer.defaults.inner_dots_color);
+            });
+
+            it("sets inner dot size default", function () {
+              expect(
+                parseFloat($("#" + global.html.id.inner_dots_size).val())
+              ).to.equal(viewer.defaults.inner_dots_size);
+            });
+          });
+        });
       });
     });
   });

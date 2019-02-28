@@ -52,4 +52,14 @@ global.html.id.leaf_labels_color          = "leaf-label-color";
 global.html.id.leaf_labels_font           = "leaf-label-font";
 global.html.id.leaf_labels_font_helvetica = "leaf-label-font-helvetica";
 
+// Inner dots
+global.html.id.inner_dots_show            = "show-inner-dots";
+global.html.id.inner_dots_show_none       = "show-inner-dots-none";
+global.html.id.inner_dots_show_normal     = "show-inner-dots-normal";
+global.html.id.inner_dots_show_bootstrap  = "show-inner-dots-bootstrap";
+global.html.id.inner_dots_cutoff_unfilled = "bootstrap-cutoff-unfilled-dot";
+global.html.id.inner_dots_cutoff_filled   = "bootstrap-cutoff-filled-dot";
+global.html.id.inner_dots_color           = "inner-dot-color";
+global.html.id.inner_dots_size            = "inner-dot-size";
+
 global.ZERO_REPLACEMENT_VAL = 1e-5;
