@@ -86,3 +86,5 @@ global.html.id.viewer_size_fixed = "viewer-size-fixed";
 
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;
+
+var viewer = {};

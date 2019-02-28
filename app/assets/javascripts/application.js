@@ -22,6 +22,7 @@
 //= require_directory ../../../vendor/assets/javascripts/require_last
 
 //= require global
+//= require viewer_functions
 //= require fn
 //= require biom_helpers
 

@@ -6,4 +6,5 @@
 //= require functions_spec
 //= require newick_spec
 //= require parse_mapping_file_spec
+//= require viewer_functions_spec
 //= require viewer_spec
