@@ -1986,16 +1986,17 @@ function lalala(tree_input_param, mapping_input_param) {
                      .attr("stroke-width", 2);
         }
         else if (VAL_BAR_SHOW_START_AXIS && LAYOUT_STRAIGHT) {
-          rad_circles.enter()
-                     .append("circle")
-                     .merge(rad_circles)
-                     .attr("r", function (d) {
-                       return d;
-                     })
-                     .attr("fill", "none")
-                     // TODO currently uses the default bar color
-                     .attr("stroke", VAL_BAR_COLOR)
-                     .attr("stroke-width", 2);
+          alert("Bar axes are currently only available in circular mode!")
+          // rad_circles.enter()
+          //            .append("circle")
+          //            .merge(rad_circles)
+          //            .attr("r", function (d) {
+          //              return d;
+          //            })
+          //            .attr("fill", "none")
+          //            // TODO currently uses the default bar color
+          //            .attr("stroke", VAL_BAR_COLOR)
+          //            .attr("stroke-width", 2);
         }
         else {
           rad_circles.remove();
