@@ -205,30 +205,30 @@ var elem;
 var RADIAL_LAYOUT_WEIGHT = 1;
 
 // These vars hold elem IDs
-var ID_MATCHING_TYPE               = "matching-type";
-var ID_LAYOUT_RECTANGULAR          = "rectangular-tree",
-    ID_LAYOUT_CIRCULAR             = "circular-tree";
+var ID_MATCHING_TYPE      = "matching-type";
+var ID_LAYOUT_RECTANGULAR = "rectangular-tree",
+    ID_LAYOUT_CIRCULAR    = "circular-tree";
 
 // var ID_SORT                        = "tree-sort",
 //     ID_SORT_FORWARD                = "descending",
 //     ID_SORT_REVERSE                = "ascending",
 //     ID_SORT_UNSORTED               = "not-sorted";
-var ID_SCALE_BAR_SHOW              = "show-scale-bar",
-    ID_SCALE_BAR_OFFSET_WEIGHT     = "scale-bar-offset-weight",
-    ID_SCALE_BAR_AUTOSIZE          = "scale-bar-auto-size",
-    ID_SCALE_BAR_LENGTH            = "scale-bar-length";
-var ID_VIEWER_SIZE_FIXED           = "viewer-size-fixed";
-var ID_OPTIONS_ACCORDION           = "options-accordion";
-var ID_LEAF_LABEL_COLOR            = "leaf-label-color",
-    ID_LEAF_LABEL_FONT             = "leaf-label-font",
-    ID_LEAF_LABEL_PADDING          = "leaf-label-padding",
-    ID_LEAF_LABEL_ALIGN            = "align-tip-labels",
+var ID_SCALE_BAR_SHOW          = "show-scale-bar",
+    ID_SCALE_BAR_OFFSET_WEIGHT = "scale-bar-offset-weight",
+    ID_SCALE_BAR_AUTOSIZE      = "scale-bar-auto-size",
+    ID_SCALE_BAR_LENGTH        = "scale-bar-length";
+var ID_VIEWER_SIZE_FIXED       = "viewer-size-fixed";
+var ID_OPTIONS_ACCORDION       = "options-accordion";
+var ID_LEAF_LABEL_COLOR        = "leaf-label-color",
+    ID_LEAF_LABEL_FONT         = "leaf-label-font",
+    ID_LEAF_LABEL_PADDING      = "leaf-label-padding",
+    ID_LEAF_LABEL_ALIGN        = "align-tip-labels",
     VAL_LEAF_LABEL_COLOR,
     VAL_LEAF_LABEL_FONT,
     VAL_LEAF_LABEL_PADDING,
     VAL_LEAF_LABEL_ALIGN;
-var ID_INNER_LABEL_COLOR           = "inner-label-color",
-    ID_INNER_LABEL_FONT            = "inner-label-font",
+var ID_INNER_LABEL_COLOR       = "inner-label-color",
+    ID_INNER_LABEL_FONT        = "inner-label-font",
     VAL_INNER_LABEL_COLOR,
     VAL_INNER_LABEL_FONT;
 
@@ -257,8 +257,7 @@ var ID_LEAF_DOT_COLOR  = "leaf-dot-color",
 
 var ID_LEAF_DOT_ALIGN = "align-leaf-dots";
 
-var ID_BIOLOGICALLY_ROOTED = "biological-root",
-    VAL_BIOLOGICALLY_ROOTED;
+var VAL_BIOLOGICALLY_ROOTED;
 
 var ID_SHOW_INNER_DOTS           = "show-inner-dots",
     ID_SHOW_INNER_DOTS_NONE      = "show-inner-dots-none",
@@ -815,7 +814,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     listener(global.html.id.tree_rotation, "change", set_msg_and_draw);
 
-    listener(ID_BIOLOGICALLY_ROOTED, "change", function () {
+    listener(global.html.id.biologically_rooted, "change", function () {
       // TODO which things actaully need to be updates?
       utils__set_status_msg_to_rendering();
 
@@ -1336,7 +1335,7 @@ function lalala(tree_input_param, mapping_input_param) {
       // Make sure bar padding text input is good
       validate_bar_padding_input();
 
-      VAL_BIOLOGICALLY_ROOTED = is_checked(ID_BIOLOGICALLY_ROOTED);
+      VAL_BIOLOGICALLY_ROOTED = is_checked(global.html.id.biologically_rooted);
       // try_disable_bio_rooted();
 
       VAL_LEAF_LABEL_COLOR = jq(ID_LEAF_LABEL_COLOR).val();
@@ -3402,7 +3401,7 @@ function reset_all_to_defaults() {
   check(ID_VIEWER_SIZE_FIXED);
 
 
-  check(ID_BIOLOGICALLY_ROOTED);
+  check(global.html.id.biologically_rooted);
 }
 
 
@@ -3524,13 +3523,13 @@ var tree_debug;
 // TODO this will not work properly unless TREE_IS_ROOTED_ON_A_LEAF_NODE has been set.
 function try_disable_bio_rooted() {
   if (LAYOUT_RADIAL && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
-    jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", true);
+    jq(global.html.id.biologically_rooted).prop("disabled", true);
   }
   else if (!LAYOUT_RADIAL) {
-    jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", true);
+    jq(global.html.id.biologically_rooted).prop("disabled", true);
   }
   else {
-    jq(ID_BIOLOGICALLY_ROOTED).prop("disabled", false);
+    jq(global.html.id.biologically_rooted).prop("disabled", false);
   }
 }
 

@@ -49,6 +49,12 @@ describe("viewer", function () {
             parseInt($("#" + global.html.id.tree_rotation).val())
           ).to.equal(viewer.defaults.tree_rotation);
         });
+
+        it("sets default tree root option", function() {
+          expect(
+            $("#" + global.html.id.biologically_rooted).prop("checked")
+          ).to.be.true;
+        })
       });
     });
   });

@@ -17,7 +17,10 @@ global.html.id = {
   tree_sorting_unsorted: "not-sorted",
 
   // Tree rotation
-  tree_rotation: "tree-rotation"
+  tree_rotation: "tree-rotation",
+
+  // Root
+  biologically_rooted: "biological-root"
 };
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;
