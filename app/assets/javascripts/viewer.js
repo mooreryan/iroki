@@ -31,9 +31,6 @@ var viewer = {
       circular: {
         id: "circular-tree"
       },
-      radial: {
-        id: "radial-tree"
-      }
     }
   }
 };
@@ -205,10 +202,9 @@ var RADIAL_LAYOUT_WEIGHT = 1;
 
 // These vars hold elem IDs
 var ID_MATCHING_TYPE               = "matching-type";
-var ID_LAYOUT                      = "tree-shape",
-    ID_LAYOUT_RECTANGULAR          = "rectangular-tree",
-    ID_LAYOUT_CIRCULAR             = "circular-tree",
-    ID_LAYOUT_RADIAL               = "radial-tree";
+var ID_LAYOUT_RECTANGULAR          = "rectangular-tree",
+    ID_LAYOUT_CIRCULAR             = "circular-tree";
+
 var ID_TREE_BRANCH_STYLE           = "tree-branch-style",
     ID_TREE_BRANCH_STYLE_NORMAL    = "normalogram",
     ID_TREE_BRANCH_STYLE_CLADOGRAM = "cladogram";
@@ -692,7 +688,7 @@ function lalala(tree_input_param, mapping_input_param) {
         // Make sure the input is not negative
         var w_val = jq(viewer.html.tree_width.id).val();
 
-        var layout_value  = jq(viewer.html.layout.id).val();
+        var layout_value  = jq(global.html.id.tree_layout).val();
         var default_value = null;
 
         if (layout_value === viewer.html.layout.rectangular.id) {
@@ -725,7 +721,7 @@ function lalala(tree_input_param, mapping_input_param) {
         // Make sure the input is not negative
         var h_val = jq(viewer.html.tree_height.id).val();
 
-        var layout_value  = jq(viewer.html.layout.id).val();
+        var layout_value  = jq(global.html.id.tree_layout).val();
         var default_value = null;
 
         if (layout_value === viewer.html.layout.rectangular.id) {
@@ -752,7 +748,7 @@ function lalala(tree_input_param, mapping_input_param) {
     });
 
     // TODO no status-msg
-    listener(ID_LAYOUT, "change", function () {
+    listener(global.html.id.tree_layout, "change", function () {
       utils__set_status_msg_to_rendering();
       setTimeout(function () {
 
@@ -1378,7 +1374,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
       LAYOUT_CIRCLE   = document.getElementById("circular-tree").selected;
       LAYOUT_STRAIGHT = document.getElementById("rectangular-tree").selected;
-      LAYOUT_RADIAL   = document.getElementById("radial-tree").selected;
+      LAYOUT_RADIAL   = document.getElementById(global.html.id.tree_layout_radial).selected;
 
       // Enable the save button
       document.getElementById("save-svg").removeAttribute("disabled");
@@ -3347,7 +3343,7 @@ function reset_all_to_defaults() {
   $("#padding").val(0.05);
   $("#tree-rotation").val(0);
 
-  jq(ID_LAYOUT).val(ID_LAYOUT_RADIAL);
+  jq(global.html.id.tree_layout).val(global.html.id.tree_layout_radial);
 
   jq(ID_TREE_BRANCH_STYLE).val(ID_TREE_BRANCH_STYLE_NORMAL);
 

@@ -15,8 +15,13 @@ describe("viewer", function () {
         });
 
         it("sets default layout shape", function () {
-          expect($("#tree-shape").val()).to.equal("radial-tree");
-          expect($("#radial-tree").prop("selected")).to.be.true;
+          expect(
+            $("#" + global.html.id.tree_layout).val()
+          ).to.equal("radial-tree");
+
+          expect(
+            $("#" + global.html.id.tree_layout_radial).prop("selected")
+          ).to.be.true;
         });
       });
     });
