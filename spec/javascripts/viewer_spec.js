@@ -226,7 +226,35 @@ describe("viewer", function () {
               ).to.equal(viewer.defaults.inner_dots_size);
             });
           });
+
+          describe("leaf dot options", function () {
+            it("sets show leaf dots default", function () {
+              expect(
+                $("#" + global.html.id.leaf_dots_show).prop("checked")
+              ).to.eq(viewer.defaults.leaf_dots_show);
+            });
+
+            it("sets align leaf dots default", function () {
+              expect(
+                $("#" + global.html.id.leaf_dots_align).prop("checked")
+              ).to.eq(viewer.defaults.leaf_dots_align);
+            });
+
+            it("sets leaf dot color default", function () {
+              expect(
+                $("#" + global.html.id.leaf_dots_color).val()
+              ).to.equal(viewer.defaults.leaf_dots_color);
+            });
+
+            it("sets leaf dot size default", function () {
+              expect(
+                parseFloat($("#" + global.html.id.leaf_dots_size).val())
+              ).to.equal(viewer.defaults.leaf_dots_size);
+            });
+          });
         });
+
+        describe("bar options"); // START HERE
       });
     });
   });

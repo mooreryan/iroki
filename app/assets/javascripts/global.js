@@ -62,4 +62,11 @@ global.html.id.inner_dots_cutoff_filled   = "bootstrap-cutoff-filled-dot";
 global.html.id.inner_dots_color           = "inner-dot-color";
 global.html.id.inner_dots_size            = "inner-dot-size";
 
+// Leaf dots
+global.html.id.leaf_dots_show  = "show-leaf-dots";
+global.html.id.leaf_dots_align = "align-leaf-dots";
+global.html.id.leaf_dots_color = "leaf-dot-color";
+global.html.id.leaf_dots_size  = "leaf-dot-size";
+
+
 global.ZERO_REPLACEMENT_VAL = 1e-5;

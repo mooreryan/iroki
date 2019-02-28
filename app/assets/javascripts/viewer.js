@@ -40,6 +40,9 @@ var viewer = {
   }
 };
 
+// This will be passed to all things that could be aligned (leaf labels, dots, bars, etc)
+viewer.defaults.tip_decorations_align = false;
+
 viewer.defaults.inner_labels_size  = 12;
 viewer.defaults.inner_labels_color = "#000000";
 viewer.defaults.inner_labels_font  = "Helvetica";
@@ -57,7 +60,7 @@ viewer.defaults.leaf_labels_size        = 16;
 viewer.defaults.leaf_labels_padding     = 0;
 viewer.defaults.leaf_labels_padding_min = 0;
 viewer.defaults.leaf_labels_padding_max = 10000;
-viewer.defaults.leaf_labels_align       = false;
+viewer.defaults.leaf_labels_align       = viewer.defaults.tip_decorations_align;
 viewer.defaults.leaf_labels_rotation    = 0;
 viewer.defaults.leaf_labels_color       = "#000000";
 viewer.defaults.leaf_labels_font        = "Helvetica";
@@ -68,6 +71,12 @@ viewer.defaults.inner_dots_cutoff_unfilled = 0.5;
 viewer.defaults.inner_dots_cutoff_filled   = 0.75;
 viewer.defaults.inner_dots_color           = "#000000";
 viewer.defaults.inner_dots_size            = 5;
+
+// Leaf dots defaults
+viewer.defaults.leaf_dots_show  = false;
+viewer.defaults.leaf_dots_align = viewer.defaults.tip_decorations_align;
+viewer.defaults.leaf_dots_color = "#000000";
+viewer.defaults.leaf_dots_size = 5;
 
 var MAPPING_CHANGED, TREE_CHANGED;
 
@@ -273,14 +282,8 @@ var ID_BAR_SHOW            = "show-bars",
 var ID_BAR_SHOW_START_AXIS = "show-bar-start-axis",
     VAL_BAR_SHOW_START_AXIS;
 
-var
-    ID_LEAF_DOT_SIZE  = "leaf-dot-size";
-
-var ID_LEAF_DOT_COLOR = "leaf-dot-color",
-    VAL_LEAF_DOT_COLOR,
+var VAL_LEAF_DOT_COLOR,
     VAL_INNER_DOT_COLOR;
-
-var ID_LEAF_DOT_ALIGN = "align-leaf-dots";
 
 var VAL_BIOLOGICALLY_ROOTED;
 
@@ -329,7 +332,7 @@ var md_cat_name2id = {
   "leaf_label_font": null,
   "leaf_label_size": global.html.id.leaf_labels_size,
   "leaf_dot_color": null,
-  "leaf_dot_size": ID_LEAF_DOT_SIZE,
+  "leaf_dot_size": global.html.id.leaf_dots_size,
   "new_name": null,
   "branch_width": "branch-width",
   "branch_color": null
@@ -1062,7 +1065,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener("show-leaf-dots", "change", function () {
+    listener(global.html.id.leaf_dots_show, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1076,17 +1079,17 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_DOT_ALIGN, "change", function () {
+    listener(global.html.id.leaf_dots_align, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
         // First sync all the align buttons.
-        sync_align_buttons_and_vals(is_checked(ID_LEAF_DOT_ALIGN), false);
+        sync_align_buttons_and_vals(is_checked(global.html.id.leaf_dots_align), false);
 
         leaf_label_align_listener_actions();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_DOT_SIZE, "change", function () {
+    listener(global.html.id.leaf_dots_size, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1094,7 +1097,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_LEAF_DOT_COLOR, "change", function () {
+    listener(global.html.id.leaf_dots_color, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
@@ -1363,7 +1366,7 @@ function lalala(tree_input_param, mapping_input_param) {
       DEFAULT_BRANCH_COLOR = document.getElementById("branch-color").value;
       DEFAULT_BRANCH_WIDTH = parseInt(document.getElementById("branch-width").value);
 
-      VAL_LEAF_DOT_COLOR  = jq(ID_LEAF_DOT_COLOR).val();
+      VAL_LEAF_DOT_COLOR  = jq(global.html.id.leaf_dots_color).val();
       VAL_INNER_DOT_COLOR = jq(global.html.id.inner_dots_color).val();
 
 
@@ -1409,9 +1412,9 @@ function lalala(tree_input_param, mapping_input_param) {
       // Dots
       VAL_SHOW_INNER_DOTS = jq(global.html.id.inner_dots_show).val();
       SHOW_INNER_DOTS     = document.getElementById(global.html.id.inner_dots_show).checked;
-      SHOW_LEAF_DOTS      = document.getElementById("show-leaf-dots").checked;
+      SHOW_LEAF_DOTS      = document.getElementById(global.html.id.leaf_dots_show).checked;
       INNER_DOT_SIZE      = parseInt(document.getElementById(global.html.id.inner_dots_size).value);
-      LEAF_DOT_SIZE       = parseInt(document.getElementById(ID_LEAF_DOT_SIZE).value);
+      LEAF_DOT_SIZE       = parseInt(document.getElementById(global.html.id.leaf_dots_size).value);
 
       switch (VAL_SHOW_INNER_DOTS) {
         case global.html.id.inner_dots_show_none:
@@ -1438,10 +1441,10 @@ function lalala(tree_input_param, mapping_input_param) {
       }
 
       if (SHOW_LEAF_DOTS) {
-        undisable(ID_LEAF_DOT_SIZE);
+        undisable(global.html.id.leaf_dots_size);
       }
       else {
-        disable(ID_LEAF_DOT_SIZE);
+        disable(global.html.id.leaf_dots_size);
       }
 
 
@@ -3132,7 +3135,7 @@ function set_options_by_metadata() {
 
     // Show leaf dots if leaf dot options are present
     if (leaf_dot_options_present) {
-      check("show-leaf-dots");
+      check(global.html.id.leaf_dots_show);
     }
 
     // Show leaf labels if leaf label options are present.
@@ -3408,10 +3411,10 @@ function reset_all_to_defaults() {
   jq(global.html.id.inner_dots_cutoff_unfilled).val(viewer.defaults.inner_dots_cutoff_unfilled);
 
   // Leaf dot options
-  uncheck("show-leaf-dots");
-  $("#leaf-dot-size").val(5);
+  uncheck(global.html.id.leaf_dots_show);
+  jq(global.html.id.leaf_dots_size).val(viewer.defaults.leaf_dots_size);
 
-  jq(ID_LEAF_DOT_COLOR).val("#000000");
+  jq(global.html.id.leaf_dots_color).val(viewer.defaults.leaf_dots_color);
   jq(global.html.id.inner_dots_color).val(viewer.defaults.inner_dots_color);
 
   // Bar options
@@ -3764,11 +3767,11 @@ function set_and_validate_bootstrap_cutoff_input() {
 // Also makes sure that the option is disabled or not.
 var sync_align_buttons_and_vals = function (checked, disabled) {
   jq(global.html.id.leaf_labels_align).prop("checked", checked);
-  jq(ID_LEAF_DOT_ALIGN).prop("checked", checked);
+  jq(global.html.id.leaf_dots_align).prop("checked", checked);
   jq(ID_BAR_ALIGN).prop("checked", checked);
 
   jq(global.html.id.leaf_labels_align).prop("disabled", disabled);
-  jq(ID_LEAF_DOT_ALIGN).prop("disabled", disabled);
+  jq(global.html.id.leaf_dots_align).prop("disabled", disabled);
   jq(ID_BAR_ALIGN).prop("disabled", disabled);
 
   // Make sure the val variable is also set so that everything is sync'd.
