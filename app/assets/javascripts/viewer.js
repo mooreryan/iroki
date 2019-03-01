@@ -1428,47 +1428,6 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     }
 
-
-    function draw_leaf_dots() {
-      leaf_dots = d3.select("#leaf-dot-container")
-                    .selectAll("circle")
-                    .data(ROOT.descendants().filter(is_leaf));
-
-      if (SHOW_LEAF_DOTS) {
-        leaf_dots
-          .enter().append("circle")
-          .attr("class", "leaf")
-          .attr("transform", function (d) {
-            return pick_transform(d);
-          })
-          .attr("r", function (d) {
-            var val = d.metadata.leaf_dot_size;
-            return val ? val : LEAF_DOT_SIZE;
-          })
-          .attr("fill", function (d) {
-            var val = d.metadata.leaf_dot_color;
-            return val ? val : VAL_LEAF_DOT_COLOR;
-          });
-
-        leaf_dots.merge(leaf_dots)
-                 .attr("transform", function (d) {
-                   return pick_transform(d);
-                 })
-                 .attr("r", function (d) {
-                   var val = d.metadata.leaf_dot_size;
-                   return val ? val : LEAF_DOT_SIZE;
-                 })
-                 .attr("fill", function (d) {
-                   var val = d.metadata.leaf_dot_color;
-                   return val ? val : VAL_LEAF_DOT_COLOR;
-                 });
-      }
-      else {
-        leaf_dots
-          .remove();
-      }
-    }
-
     function draw_inner_labels() {
       inner_labels = d3.select("#inner-label-container")
                        .selectAll("text")
