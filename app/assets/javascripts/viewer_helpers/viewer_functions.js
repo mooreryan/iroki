@@ -107,3 +107,6 @@ viewer.fn.reset_all_to_defaults = function () {
   viewer.fn.reset_branch_opts_to_defaults();
   viewer.fn.reset_viewer_opts_to_defaults();
 };
+
+
+
