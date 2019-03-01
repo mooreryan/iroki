@@ -814,3 +814,87 @@ function get_translation(transform_str) {
 function size_transform(val) {
   return Math.pow(val, 2);
 }
+
+// Inner dot helpers
+function inner_dot_fill(d) {
+  var val           = parseFloat(d.data.name);
+  var bootstrap_val = isNaN(val) ? 0.0 : val;
+
+  if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_none) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_normal) {
+    return VAL_INNER_DOT_COLOR;
+  }
+  else if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_bootstrap) {
+    if (bootstrap_val >= VAL_BOOTSTRAP_CUTOFF_FILLED_DOT) {
+      return VAL_INNER_DOT_COLOR;
+    }
+    else {
+      return "none";
+    }
+  }
+}
+function inner_dot_stroke(d) {
+  var val           = parseFloat(d.data.name);
+  var bootstrap_val = isNaN(val) ? 0.0 : val;
+
+  if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_none) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_normal) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_bootstrap) {
+    if (bootstrap_val >= VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT) {
+      return VAL_INNER_DOT_COLOR;
+    }
+    else {
+      return "none";
+    }
+  }
+}
+function inner_dot_stroke_width(d) {
+  var val           = parseFloat(d.data.name);
+  var bootstrap_val = isNaN(val) ? 0.0 : val;
+
+  if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_none) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_normal) {
+    return "none";
+  }
+  else if (VAL_SHOW_INNER_DOTS === global.html.id.inner_dots_show_bootstrap) {
+    if (bootstrap_val >= VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT) {
+      return "2px";
+    }
+    else {
+      return "none";
+    }
+  }
+}
+
+
+
+// Bars helpers
+function how_many_bar_sets(name2md) {
+  if (name2md) {
+    var first_thing = name2md[Object.keys(name2md)[0]];
+
+    // TODO this is just to prevent an infinite loop.  Need a real check.
+    var max  = 1000;
+    var iter = 1;
+    while (iter < max) {
+      var idx = "bar" + iter + "_height";
+
+      if (first_thing[idx] === undefined) {
+        return iter - 1;
+      }
+
+      iter += 1;
+    }
+  }
+
+  // If you've gotten here, there are no bar sets.
+  return 0;
+}

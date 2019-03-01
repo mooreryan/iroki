@@ -239,6 +239,20 @@ function is_rooted_on_a_leaf_node(d3_tree) {
   return false;
 }
 
+// TODO this will not work properly unless TREE_IS_ROOTED_ON_A_LEAF_NODE has been set.
+function try_disable_bio_rooted() {
+  if (LAYOUT_RADIAL && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
+    jq(global.html.id.biologically_rooted).prop("disabled", true);
+  }
+  else if (!LAYOUT_RADIAL) {
+    jq(global.html.id.biologically_rooted).prop("disabled", true);
+  }
+  else {
+    jq(global.html.id.biologically_rooted).prop("disabled", false);
+  }
+}
+
+
 function get_leaves(target) {
   function get_leaves_iter(target) {
     if (is_leaf(target)) {
