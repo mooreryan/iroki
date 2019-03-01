@@ -23,8 +23,7 @@
 
 //= require global
 //= require fn
-//= require viewer_helpers/viewer_functions.js
-//= require viewer_helpers/viewer_draw.js
+//= require viewer_helpers/index.js
 //= require biom_helpers
 
 //= require_tree .

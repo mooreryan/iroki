@@ -50,7 +50,6 @@ function rectangle_transform(d, x, y, is_bar) {
     LABEL_ROTATION + ")";
 }
 
-
 // TODO when picking transform for bars, we don't want the final rotate_by at all (or just set it to 0).
 function pick_transform(d, is_bar) {
   if (LAYOUT_CIRCLE && is_leaf(d)) {

@@ -1,4 +1,3 @@
-
 // handle upload button
 function upload_button(submit_id, uploader_id, callback) {
   // document.getElementById("everything")
@@ -2091,7 +2090,6 @@ function lalala(tree_input_param, mapping_input_param) {
   }
 }
 
-
 // These are for saving
 function svg_elem_to_string(id) {
   var svg_elem = document.getElementById(id);
@@ -2187,15 +2185,6 @@ function resize_svg_straight_layout(svg_id, chart_id) {
   the_chart.setAttribute("transform", g_chart_transform);
 }
 
-function ary_mean(ary) {
-  var num_elems = ary.length;
-  var total     = 0;
-  ary.map(function (d) {
-    total += d;
-  });
-
-  return total / num_elems;
-}
 
 /**
  *
@@ -2374,6 +2363,7 @@ function draw_scale_bar(user_changed) {
   }
 }
 
+//// Metadata helper functions
 function add_metadata(root, name2md, match_style) {
   // Everything starts with black metadata.  Later functions should handle defualts with blank metadata later.
   add_blank_metadata(root);
@@ -2423,7 +2413,6 @@ function add_metadata(root, name2md, match_style) {
     }
   }
 }
-
 
 function add_blank_metadata(root) {
   root.leaves().forEach(function (d) {
@@ -2499,7 +2488,6 @@ function get_branch_md_val(node, branch_option, default_value) {
     return md_val_for_this_node;
   }
 }
-
 
 // The node is silly if the tree is in radial layout and parent is the true root and one of the siblings is the biological root.  OR if the parent is a true root and the biological root and the node is depth 1.
 function is_silly(node) {
@@ -2634,24 +2622,9 @@ function get_leaves(target) {
   return flatten(leaves);
 }
 
-function flatten(ary) {
-  function flatten_iter(ary) {
-    for (var i = 0; i < ary.length; ++i) {
-      var val = ary[i];
-      if (Array.isArray(val)) {
-        flatten_iter(val);
-      }
-      else {
-        flat_ary.push(val);
-      }
-    }
-  }
+//// End of the metadata helper functions
 
-  var flat_ary = [];
-  flatten_iter(ary);
 
-  return flat_ary;
-}
 
 // For drawing the radial trees
 function radial_cluster(root) {
@@ -2742,21 +2715,6 @@ function size_transform(val) {
 }
 
 
-function ary_min_max(ary) {
-  var min = null;
-  var max = null;
-  ary.forEach(function (val) {
-    if (!max || val > max) {
-      max = val;
-    }
-
-    if (!min || val < min) {
-      min = val;
-    }
-  });
-
-  return { min: min, max: max };
-}
 
 
 // TODO this will not work properly unless TREE_IS_ROOTED_ON_A_LEAF_NODE has been set.
@@ -2942,7 +2900,6 @@ function set_and_validate_bootstrap_cutoff_input() {
   }
 
 }
-
 
 var sync_align_buttons_and_vals = function (checked, disabled) {
   jq(global.html.id.leaf_labels_align).prop("checked", checked);

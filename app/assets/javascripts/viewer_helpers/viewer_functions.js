@@ -110,6 +110,52 @@ viewer.fn.reset_all_to_defaults = function () {
   viewer.fn.reset_viewer_opts_to_defaults();
 };
 
+//// Random utils
+function ary_mean(ary) {
+  var num_elems = ary.length;
+  var total     = 0;
+  ary.map(function (d) {
+    total += d;
+  });
+
+  return total / num_elems;
+}
+function flatten(ary) {
+  function flatten_iter(ary) {
+    for (var i = 0; i < ary.length; ++i) {
+      var val = ary[i];
+      if (Array.isArray(val)) {
+        flatten_iter(val);
+      }
+      else {
+        flat_ary.push(val);
+      }
+    }
+  }
+
+  var flat_ary = [];
+  flatten_iter(ary);
+
+  return flat_ary;
+}
+function ary_min_max(ary) {
+  var min = null;
+  var max = null;
+  ary.forEach(function (val) {
+    if (!max || val > max) {
+      max = val;
+    }
+
+    if (!min || val < min) {
+      min = val;
+    }
+  });
+
+  return { min: min, max: max };
+}
+
+
+
 //// Tiny jquery helpers (lots of things depend on these)
 function jq(id) {
   return $("#" + id);
