@@ -1428,48 +1428,6 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     }
 
-    function draw_inner_dots() {
-
-      var no_root_dot = LAYOUT_RADIAL && (TREE_IS_ROOTED_ON_A_LEAF_NODE || !VAL_BIOLOGICALLY_ROOTED);
-
-      var dat = no_root_dot ?
-        ROOT.descendants().filter(function (d) {
-          return is_inner(d) && !is_root(d);
-        }) :
-        ROOT.descendants().filter(is_inner);
-
-      inner_dots = d3.select("#inner-dot-container")
-                     .selectAll("circle")
-                     .data(dat);
-
-      if (SHOW_INNER_DOTS) {
-        inner_dots
-          .enter().append("circle")
-          .attr("class", "inner")
-          .attr("r", INNER_DOT_SIZE)
-          .attr("transform", function (d) {
-            return pick_transform(d);
-          })
-          .attr("fill", inner_dot_fill)
-          .attr("stroke", inner_dot_stroke)
-          .attr("stroke-width", inner_dot_stroke_width); // TODO make this an option.
-
-        inner_dots.merge(inner_dots)
-                  .attr("r", INNER_DOT_SIZE)
-                  .attr("transform", function (d) {
-                    return pick_transform(d);
-                  })
-                  .attr("fill", inner_dot_fill)
-                  .attr("stroke", inner_dot_stroke)
-                  .attr("stroke-width", inner_dot_stroke_width); // TODO make this an option.
-
-
-      }
-      else {
-        inner_dots
-          .remove();
-      }
-    }
 
     function draw_leaf_dots() {
       leaf_dots = d3.select("#leaf-dot-container")
