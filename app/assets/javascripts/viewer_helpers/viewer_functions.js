@@ -1,5 +1,7 @@
 viewer.fn = {};
 
+//// Reseting options
+
 viewer.fn.reset_tree_format_opts_to_defaults = function () {
   // Tree options
   jq(global.html.id.tree_width).val(viewer.defaults.radial.width);
@@ -107,6 +109,41 @@ viewer.fn.reset_all_to_defaults = function () {
   viewer.fn.reset_branch_opts_to_defaults();
   viewer.fn.reset_viewer_opts_to_defaults();
 };
+
+//// Tiny jquery helpers (lots of things depend on these)
+function jq(id) {
+  return $("#" + id);
+}
+function disable(id) {
+  return jq(id).prop("disabled", true);
+}
+function undisable(id) {
+  return jq(id).prop("disabled", false);
+}
+function check(id) {
+  $("#" + id).prop("checked", true);
+}
+function uncheck(id) {
+  $("#" + id).prop("checked", false);
+}
+function is_checked(id) {
+  return jq(id).prop("checked");
+}
+
+//// Boolean type functions for checking nodes of a parsed tree
+function is_root(d) {
+  return d.depth === 0;
+}
+function is_leaf(d) {
+  return d.value === 1;
+}
+function is_inner(d) {
+  return !is_leaf(d);
+}
+function is_root_node(d) {
+  return d.depth === 1;
+}
+
 
 
 

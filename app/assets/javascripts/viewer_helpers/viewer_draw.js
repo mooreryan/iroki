@@ -30,7 +30,6 @@ function circular_label_flipping_test(x) {
   }
 }
 
-// "Global" functions
 // These functions update the layout
 function circle_transform(d, x, y, is_bar) {
   if (is_bar) {

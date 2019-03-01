@@ -1,104 +1,3 @@
-viewer.defaults = {
-  // Defaults not specific to a certain layout.
-  tree_rotation: 0,
-  tree_padding: 0.05,
-
-  // Defaults specific to a certain layout.
-  radial: {
-    width: 10,
-    height: 10,
-  },
-  circular: {
-    width: 22,
-    height: 22
-  },
-  rectangular: {
-    width: 22,
-    height: 22
-  }
-};
-
-viewer.html = {
-  tree_height: {
-    id: "height"
-  },
-  tree_width: {
-    id: global.html.id.tree_width
-  },
-
-  layout: {
-    id: "tree-shape",
-
-    rectangular: {
-      id: "rectangular-tree"
-    },
-    circular: {
-      id: "circular-tree"
-    },
-  }
-};
-
-
-// This will be passed to all things that could be aligned (leaf labels, dots, bars, etc)
-viewer.defaults.tip_decorations_align = false;
-
-viewer.defaults.inner_labels_size  = 12;
-viewer.defaults.inner_labels_color = "#000000";
-viewer.defaults.inner_labels_font  = "Helvetica";
-
-// Scale bar defaults
-viewer.defaults.scale_bar_length              = 1;
-viewer.defaults.scale_bar_length_is_disabled  = true;
-viewer.defaults.scale_bar_offset_weight       = 1;
-viewer.defaults.scale_bar_autosize_is_checked = true;
-viewer.defaults.scale_bar_show_is_checked     = true;
-
-// Leaf label defaults
-viewer.defaults.leaf_labels_show        = true;
-viewer.defaults.leaf_labels_size        = 16;
-viewer.defaults.leaf_labels_padding     = 0;
-viewer.defaults.leaf_labels_padding_min = 0;
-viewer.defaults.leaf_labels_padding_max = 10000;
-viewer.defaults.leaf_labels_align       = viewer.defaults.tip_decorations_align;
-viewer.defaults.leaf_labels_rotation    = 0;
-viewer.defaults.leaf_labels_color       = "#000000";
-viewer.defaults.leaf_labels_font        = "Helvetica";
-
-// Inner dot defaults
-viewer.defaults.inner_dots_show            = global.html.id.inner_dots_show_none;
-viewer.defaults.inner_dots_cutoff_unfilled = 0.5;
-viewer.defaults.inner_dots_cutoff_filled   = 0.75;
-viewer.defaults.inner_dots_color           = "#000000";
-viewer.defaults.inner_dots_size            = 5;
-
-// Leaf dots defaults
-viewer.defaults.leaf_dots_show  = false;
-viewer.defaults.leaf_dots_align = viewer.defaults.tip_decorations_align;
-viewer.defaults.leaf_dots_color = "#000000";
-viewer.defaults.leaf_dots_size  = 5;
-
-// Bars defaults
-viewer.defaults.bars_show        = false;
-viewer.defaults.bars_axis_show   = false;
-viewer.defaults.bars_padding     = 10;
-viewer.defaults.bars_padding_min = 0;
-viewer.defaults.bars_padding_max = 10000; // TODO this is just some silly default
-
-viewer.defaults.bars_height = 100;
-viewer.defaults.bars_width  = 10;
-viewer.defaults.bars_align  = false;
-viewer.defaults.bars_color  = "#000000";
-
-// Branches default
-viewer.defaults.branches_color = "#000000";
-viewer.defaults.branches_width = 2;
-
-// Viewer size defaults
-viewer.defaults.viewer_size_fixed = true;
-
-var MAPPING_CHANGED, TREE_CHANGED;
-
-var OPTIONS_DIV;
 
 // handle upload button
 function upload_button(submit_id, uploader_id, callback) {
@@ -203,146 +102,6 @@ function upload_button(submit_id, uploader_id, callback) {
     }
   }
 }
-
-
-// TODO get this from the CSS
-var FORM_HEIGHT = 650;
-
-// Round to 100ths place.
-var ROUNDING_PRECISION = 2;
-
-var LAYOUT_CIRCLE, LAYOUT_STRAIGHT, LAYOUT_RADIAL;
-var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
-var the_x, the_y;
-var SIZE, INNER_SIZE;
-var width, padding, height;
-var ROOT, svg, chart, data, circles, labels, inner_labels, leaf_labels,
-    linkExtension, link, inner_dots, leaf_dots;
-
-var SHOW_INNER_LABELS, SHOW_LEAF_LABELS;
-
-var SHOW_SCALE_BAR;
-
-var INNER_LABEL_SIZE, LEAF_LABEL_SIZE;
-var SHOW_INNER_DOTS, SHOW_LEAF_DOTS;
-
-var LABEL_ROTATION;
-var ROTATION_STATE, ROTATED, NOT_ROTATED;
-
-var INNER_DOT_SIZE, LEAF_DOT_SIZE;
-
-var TREE_ROTATION;
-
-var VIEWER_WIDTH, VIEWER_HEIGHT, VIEWER_SIZE_FIXED;
-
-var SORT_STATE, SORT_NONE, SORT_ASCENDING, SORT_DESCENDING, sort_function;
-
-var the_width, the_height, the_width, the_height, padding;
-
-var SCALE_BAR_OFFSET_WEIGHT, SCALE_BAR_LENGTH;
-
-// The name2md var will be set to null if there is no metadata mapping data.
-var name2md = null;
-
-var MATCHING_TYPE;
-
-var EXTRA_NAME_WARNINGS       = false;
-var MIN_LENGTH_IN_TREE;
-var MIN_DEFUALT_BRANCH_LENGTH = 1e-10;
-var NEW_LENGTH_FOR_ZERO_LENGTH_BRANCHES;
-
-var LARGE_TREE_CUTOFF = 1000; // in number of nodes.  TODO tune this...phage proteomic tree is 5200, slow; tree of life 381, fast.
-
-var SELECTED_BRANCH_COLOR, SELECTED_BRANCH_WIDTH;
-
-// To hold temporary DOM elements
-var elem;
-
-var RADIAL_LAYOUT_WEIGHT = 1;
-
-// These vars hold elem IDs
-var ID_MATCHING_TYPE      = "matching-type";
-var ID_LAYOUT_RECTANGULAR = "rectangular-tree",
-    ID_LAYOUT_CIRCULAR    = "circular-tree";
-
-// var ID_SORT                        = "tree-sort",
-//     ID_SORT_FORWARD                = "descending",
-//     ID_SORT_REVERSE                = "ascending",
-//     ID_SORT_UNSORTED               = "not-sorted";
-var //ID_SCALE_BAR_SHOW          = "show-scale-bar",
-    //ID_SCALE_BAR_OFFSET_WEIGHT = "scale-bar-offset-weight",
-  ID_SCALE_BAR_AUTOSIZE  = "scale-bar-auto-size";
-//ID_SCALE_BAR_LENGTH        = "scale-bar-length";
-var ID_OPTIONS_ACCORDION = "options-accordion";
-var ID_LEAF_LABEL_COLOR  = "leaf-label-color",
-  VAL_LEAF_LABEL_COLOR,
-  VAL_LEAF_LABEL_FONT,
-  VAL_LEAF_LABEL_PADDING,
-  VAL_LEAF_LABEL_ALIGN;
-
-var ID_INNER_LABEL_FONT = "inner-label-font",
-    VAL_INNER_LABEL_COLOR,
-    VAL_INNER_LABEL_FONT;
-
-// Bar option IDs
-var VAL_BAR_SHOW,
-    VAL_BAR_COLOR,
-    VAL_BAR_HEIGHT,
-    VAL_BAR_WIDTH,
-    VAL_BAR_PADDING;
-
-var ID_BAR_SHOW_START_AXIS = "show-bar-start-axis",
-    VAL_BAR_SHOW_START_AXIS;
-
-var VAL_LEAF_DOT_COLOR,
-    VAL_INNER_DOT_COLOR;
-
-var VAL_BIOLOGICALLY_ROOTED;
-
-var ID_SHOW_INNER_DOTS           = "show-inner-dots",
-    ID_SHOW_INNER_DOTS_NONE      = "show-inner-dots-none",
-    ID_SHOW_INNER_DOTS_NORMAL    = "show-inner-dots-normal",
-    ID_SHOW_INNER_DOTS_BOOTSTRAP = "show-inner-dots-bootstrap",
-    VAL_SHOW_INNER_DOTS;
-
-var VAL_BOOTSTRAP_CUTOFF_FILLED_DOT,
-    VAL_BOOTSTRAP_CUTOFF_UNFILLED_DOT;
-
-var ID_RESET_BUTTON = "reset";
-
-var tmp_root;
-
-var TREE_IS_ROOTED_ON_A_LEAF_NODE;
-
-// TODO we have to check if we've already warned about this as it will try and warn each time the links are redrawn.
-var biological_root_sibling_warnings = [],
-    biological_root_sibling_warnings_already_warned;
-
-// Any value higher than this will be dropped down to this value.  Some tree software puts the number of bootstrap trees with support rather than a percent so this number can get pretty high.
-var MAX_BOOTSTRAP_VAL = 1e9;
-
-var defaults = {
-  "leaf_label_color": "#000000",
-  "leaf_label_font": viewer.defaults.inner_labels_font,
-  "leaf_label_size": 16,
-  "leaf_dot_color": "#000000",
-  "leaf_dot_size": 2,
-  "new_name": null,
-};
-
-var md_cat_name2id = {
-  "leaf_label_color": null,
-  "leaf_label_font": null,
-  "leaf_label_size": global.html.id.leaf_labels_size,
-  "leaf_dot_color": null,
-  "leaf_dot_size": global.html.id.leaf_dots_size,
-  "new_name": null,
-  "branch_width": global.html.id.branches_width,
-  "branch_color": null
-};
-
-// Hold these as globals so that we can make sure the reset button resets them.
-var mapping_input, tree_input;
 
 // The mega function
 function lalala(tree_input_param, mapping_input_param) {
@@ -461,6 +220,7 @@ function lalala(tree_input_param, mapping_input_param) {
     d3.select("#save-svg").on("click", save_svg_data);
     d3.select("#save-png").on("click", save_png_data);
 
+    // This is the listener for selecting label names
     d3.select("body").on("keydown", function () {
       var key_code = {
         a: 65,
@@ -880,18 +640,6 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-
-    // listener(global.html.id.tree_sorting, "change", function() {
-    //   update_form_constants();
-    //   set_up_hierarchy(); // The regular redraw skips this step.
-    //   draw_inner_dots();
-    //   draw_leaf_dots();
-    //   draw_inner_labels();
-    //   draw_leaf_labels();
-    //   draw_link_extensions();
-    //   draw_links();
-    //   adjust_tree();
-    // });
 
     listener(global.html.id.inner_labels_show, "change", function () {
       utils__set_status_msg_to_rendering();
@@ -2189,8 +1937,6 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     }
 
-
-
     function circular_text_anchor(d) {
       return circular_label_flipping_test(d[the_x]) ? "start" : "end";
     }
@@ -2849,7 +2595,6 @@ function is_rooted_on_this_leaf_node(d) {
   return is_leaf(d) && d.depth === 1;
 }
 
-
 // TODO you have to check for true or string in the output.
 function is_rooted_on_a_leaf_node(d3_tree) {
 
@@ -2869,24 +2614,6 @@ function is_rooted_on_a_leaf_node(d3_tree) {
   }
 
   return false;
-}
-
-// Start here.  If it is rooted on a leaf node, and that leaf node has a color, need to propegate the color of that leaf node's branch to the other depth 1 branch adjacent to the root node if it is a radial tree.  If not a radial tree, do nothing.
-
-function is_root(d) {
-  return d.depth === 0;
-}
-
-function is_leaf(d) {
-  return d.value === 1;
-}
-
-function is_inner(d) {
-  return !is_leaf(d);
-}
-
-function is_root_node(d) {
-  return d.depth === 1;
 }
 
 function get_leaves(target) {
@@ -2926,6 +2653,7 @@ function flatten(ary) {
   return flat_ary;
 }
 
+// For drawing the radial trees
 function radial_cluster(root) {
   // Helpers
   function postorder_traversal(vertex) {
@@ -3008,39 +2736,6 @@ function get_translation(transform_str) {
   }
 }
 
-// function select(id)
-// {
-//   $("#" + id).prop("selected", true);
-// }
-// function deselect(id)
-// {
-//   $("#" + id).prop("selected", false);
-// }
-
-function is_checked(id) {
-  return jq(id).prop("checked");
-}
-
-
-function check(id) {
-  $("#" + id).prop("checked", true);
-}
-
-function uncheck(id) {
-  $("#" + id).prop("checked", false);
-}
-
-function jq(id) {
-  return $("#" + id);
-}
-
-function disable(id) {
-  return jq(id).prop("disabled", true);
-}
-
-function undisable(id) {
-  return jq(id).prop("disabled", false);
-}
 
 function size_transform(val) {
   return Math.pow(val, 2);
@@ -3063,99 +2758,6 @@ function ary_min_max(ary) {
   return { min: min, max: max };
 }
 
-// Space hsl looks nice for an even mix of counts.  lch looks pretty good for typical power law count data.
-function color_test(space) {
-  // var counts = [1, 2, 4, 8, 16, 32, 64, 128];
-  var counts = [1, 10, 20, 30, 40, 50, 60];
-  // counts = counts.map(function(count){
-  //   return Math.round(Math.log(count));
-  // });
-  var min_max = ary_min_max(counts);
-
-  console.log(counts);
-  console.log(min_max);
-
-  d3.selectAll("circle").remove();
-
-  // var rainbow = new Rainbow();
-  // rainbow.setSpectrum("#0000ff", "#00ff00");
-  // rainbow.setNumberRange(min_max.min, min_max.max);
-
-  var colors = chroma.scale(['#00ff00', '#0000ff']).mode(space).colors(min_max.max - min_max.min + 1);
-
-  counts.forEach(function (count, idx) {
-    console.log(colors[count - min_max.min]);
-    d3.select("#svg-tree").append("circle")
-      .attr("r", 10)
-      .attr("cx", 100)
-      .attr("cy", idx * 100)
-      .attr("fill", colors[count - min_max.min]);
-  });
-}
-
-// Also can make it two colors.
-function ryan(start, mid, stop, num_colors, transform) {
-  d3.selectAll("circle").remove();
-
-  var counts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-  var color;
-
-  var colors = chroma.scale([start, mid, stop]).mode("hsl").colors(num_colors);
-  var limits = chroma.limits(counts, transform, num_colors);
-  limits.shift();
-
-  for (var i = 0; i < counts.length; ++i) {
-    var count = counts[i];
-
-    for (var j = 0; j < limits.length; ++j) {
-      if (count <= limits[j]) {
-        color = colors[j];
-        break;
-      }
-    }
-
-    d3.select("#svg-tree").append("circle")
-      .attr("r", 10)
-      .attr("cx", 100)
-      .attr("cy", count * 40)
-      .attr("fill", color);
-  }
-
-  console.log(limits);
-}
-
-// function z(num_colors, transform)
-// {
-//   d3.selectAll("circle").remove();
-//
-//   var counts = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
-//   var color;
-//
-//   var limits = chroma.limits(counts, transform, num_colors);
-//   var colors = chroma.scale('YlGnBu').classes(limits);
-//   limits.shift();
-//
-//   for (var i = 0; i < counts.length; ++i) {
-//     var count = (counts[i] - 1) / (21 - 1);
-//
-//     for (var j = 0; j < limits.length; ++j) {
-//       if (count <= limits[j]) {
-//         color = colors[j];
-//         break;
-//       }
-//     }
-//
-//     d3.select("#svg-tree").append("circle")
-//       .attr("r", 10)
-//       .attr("cx", 100)
-//       .attr("cy", count * 40)
-//       .attr("fill", color);
-//   }
-//
-//   console.log(limits);
-// }
-
-var tree_debug;
 
 // TODO this will not work properly unless TREE_IS_ROOTED_ON_A_LEAF_NODE has been set.
 function try_disable_bio_rooted() {
@@ -3342,34 +2944,6 @@ function set_and_validate_bootstrap_cutoff_input() {
 }
 
 
-// TODO the wonky thing about hcl is that the ranges are differnt for c and l depending on the hue.
-// Test lightness portion of hcl vs hsl.
-// var test_vals = [0.00, 0.17, 0.33, 0.50, 0.67, 0.83, 1.00];
-// var _hue = 0;
-// var ys = [];
-// d3.selectAll("circle").remove();
-// test_vals.forEach(function(l, idx) {
-//   ys.push((l*325) + 125);
-//   d3.select("#svg-tree")
-//     .append("circle")
-//     .attr("r", 25)
-//     .attr("fill", chroma.hcl(_hue, 75, l * 100).hex())
-//     .attr("cx", 300).attr("cy", ys[idx]);
-// });
-// test_vals.forEach(function(l, idx) {
-//   d3.select("#svg-tree")
-//     .append("circle")
-//     .attr("r", 25)
-//     .attr("fill", chroma.hsl(_hue, 0.50, l).hex())
-//     .attr("cx", 125).attr("cy", ys[idx])
-// });
-//
-
-// Same thing but varying different parts of the hcl scale.
-
-// val should be true or false.
-//
-// Also makes sure that the option is disabled or not.
 var sync_align_buttons_and_vals = function (checked, disabled) {
   jq(global.html.id.leaf_labels_align).prop("checked", checked);
   jq(global.html.id.leaf_dots_align).prop("checked", checked);
@@ -3443,6 +3017,3 @@ function toggle_selected(d) {
   }
 }
 
-var z;
-var PREVIOUSLY_SELECTED = [];
-var HISTORY_LIMIT       = 10;
