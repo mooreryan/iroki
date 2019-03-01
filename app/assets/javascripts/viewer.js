@@ -1428,91 +1428,6 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     }
 
-    function draw_leaf_labels() {
-
-      labels = d3.select("#leaf-label-container")
-                 .selectAll("text")
-                 .data(ROOT.descendants().filter(is_leaf));
-
-      if (SHOW_LEAF_LABELS) {
-        labels.exit().remove();
-
-        // TODO clean up duplicates
-        labels
-          .enter().append("text")
-          .attr("class", "leaf")
-          // .attr("font-size", 0)
-          .attr("dy", text_y_offset)
-          .attr("dx", function (d) {
-            return text_x_offset(d, VAL_LEAF_LABEL_PADDING);
-          })
-          .attr("text-anchor", text_anchor)
-          .attr("transform", function (d) {
-            return pick_transform(d);
-          })
-          .text(function (d) {
-            var new_name = d.metadata.new_name;
-
-            return new_name ? new_name : d.data.name;
-          })
-          .attr("font-size", function (d) {
-            var size = d.metadata.leaf_label_size;
-            return size ? size : LEAF_LABEL_SIZE;
-          })
-          .attr("font-family", function (d) {
-            var font = d.metadata.leaf_label_font;
-            return font ? font : VAL_LEAF_LABEL_FONT;
-          })
-          .attr("fill", function (d) {
-            var color = d.metadata.leaf_label_color;
-            return color ? color : VAL_LEAF_LABEL_COLOR;
-          })
-          .on("click", toggle_selected);
-
-        labels
-        // What to do for merging
-          .merge(labels)
-          // Same things that may change
-          .attr("dy", text_y_offset)
-          .attr("dx", function (d) {
-            return text_x_offset(d, VAL_LEAF_LABEL_PADDING);
-          })
-          .attr("text-anchor", text_anchor)
-          .attr("transform", function (d) {
-            return pick_transform(d);
-          })
-          .text(function (d) {
-            var new_name = d.metadata.new_name;
-
-            return new_name ? new_name : d.data.name;
-          })
-          .attr("font-size", function (d) {
-            var size = d.metadata.leaf_label_size;
-            return size ? size : LEAF_LABEL_SIZE;
-          })
-          .attr("font-family", function (d) {
-            var font = d.metadata.leaf_label_font;
-            return font ? font : VAL_LEAF_LABEL_FONT;
-          })
-          .attr("fill", function (d) {
-            var color = d.metadata.leaf_label_color;
-            return color ? color : VAL_LEAF_LABEL_COLOR;
-          })
-          .on("click", toggle_selected);
-
-      }
-      else {
-        labels
-        // .attr("font-size", 0)
-          .remove();
-
-        // If labels get removed, then we want all the nodes unselected.
-        ROOT.descendants().forEach(function (node) {
-          node.is_selected = false;
-        });
-      }
-    }
-
     function draw_link_extensions() {
       // Link extensions should never be drawn with radial layouts
       if (!LAYOUT_RADIAL) {
@@ -1711,7 +1626,6 @@ function lalala(tree_input_param, mapping_input_param) {
 
       // jq("status-msg").html("seanie");
     }
-
 
     function straight_link(d) {
       return "M " + (d.source[the_x] - the_width) + " " + d.source[the_y] + " L " + (d.target[the_x] - the_height) + " " + d.target[the_y];
