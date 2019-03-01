@@ -335,3 +335,7 @@ var PREVIOUSLY_SELECTED = [];
 var HISTORY_LIMIT       = 10;
 
 var tree_debug;
+
+var parsed_newick;
+
+var circle_cluster, rectangle_cluster;

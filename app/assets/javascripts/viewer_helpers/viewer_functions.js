@@ -155,6 +155,12 @@ function ary_min_max(ary) {
 }
 
 
+//// Tiny javascript element helpers
+function set_value_of(id, val) {
+  var elem   = document.getElementById(id);
+  elem.value = val;
+}
+
 
 //// Tiny jquery helpers (lots of things depend on these)
 function jq(id) {

@@ -1,6 +1,5 @@
 // Actual drawing functions
 
-// Draw bars
 function draw_bars() {
 
   var num_bar_sets = how_many_bar_sets(name2md);
@@ -217,7 +216,6 @@ function draw_bars() {
   }
 }
 
-// Draw dots
 function draw_inner_dots() {
 
   var no_root_dot = LAYOUT_RADIAL && (TREE_IS_ROOTED_ON_A_LEAF_NODE || !VAL_BIOLOGICALLY_ROOTED);
@@ -435,4 +433,208 @@ function draw_leaf_labels() {
     });
   }
 }
+
+function draw_svg() {
+  if (document.getElementById("svg-tree")) {
+    svg.merge(svg)
+       .attr("width", the_width * 1)
+       .attr(global.html.id.tree_height, the_height * 1)
+       .style("background-color", "white"); // TODO make bg color an option
+  }
+  else {
+    // First remove loading message if there is one.
+    // utils__set_status_msg_to_done();
+    // d3.select("#loading-message").remove();
+
+    // And add the svg.
+    svg = d3.select("#tree-div")
+            .append("svg")
+            .attr("id", "svg-tree")
+            .attr("width", the_width * 1)
+            .attr("height", the_height * 1)
+            .style("background-color", "white"); // TODO make bg color an option
+  }
+}
+
+function draw_chart() {
+  var chart_width, chart_height;
+  var chart_transform_width, chart_transform_height;
+  if (LAYOUT_CIRCLE) {
+    chart_width  = the_width;
+    chart_height = the_height;
+
+    chart_transform_width  = the_width;
+    chart_transform_height = the_height;
+  }
+  else {
+    chart_width  = the_width * 1;
+    chart_height = the_height * 1;
+
+    chart_transform_width  = the_width * padding;
+    chart_transform_height = the_height * padding;
+  }
+
+  if (document.getElementById("chart-container")) {
+    chart.merge(chart)
+         .attr("width", chart_width)
+         .attr("height", chart_height)
+         .attr("transform",
+           "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
+           "translate(" + chart_transform_width + ", " + chart_transform_height + ")");
+  }
+  else {
+    chart = svg.append("g")
+               .attr("id", "chart-container")
+               .attr("width", chart_width)
+               .attr("height", chart_height)
+               .attr("transform",
+                 "rotate(" + TREE_ROTATION + " " + the_width + " " + the_height + ") " +
+                 "translate(" + chart_transform_width + ", " + chart_transform_height + ")");
+  }
+}
+
+function draw_links() {
+
+  // reset the bio root warnings container
+  biological_root_sibling_warnings = [];
+
+  link = d3.select("#link-container")
+           .selectAll("path")
+           .data(ROOT.links());
+
+  link.enter().append("path")
+      .attr("fill", "none")
+      .attr("stroke", "#000")
+      .each(function (d) {
+        d.target.linkNode = this;
+      })
+      .attr("d", link_path)
+      .attr("stroke", function (d) {
+        return get_branch_md_val(d.target, "branch_color", SELECTED_BRANCH_COLOR);
+      })
+      .attr("stroke-width", function (d) {
+        return get_branch_md_val(d.target, "branch_width", SELECTED_BRANCH_WIDTH);
+      });
+
+  // .attr("stroke", function(d) { return d.target.color; });
+
+  link.merge(link)
+      .attr("fill", "none")
+      .attr("stroke", "#000")
+      .each(function (d) {
+        d.target.linkNode = this;
+      })
+      .attr("d", link_path)
+      .attr("stroke", function (d) {
+        return get_branch_md_val(d.target, "branch_color", SELECTED_BRANCH_COLOR);
+      })
+      .attr("stroke-width", function (d) {
+        return get_branch_md_val(d.target, "branch_width", SELECTED_BRANCH_WIDTH);
+      });
+
+  if (biological_root_sibling_warnings.length > 0 && !biological_root_sibling_warnings_already_warned) {
+    // There were some warnings.
+    alert(biological_root_sibling_warnings.join("\n"));
+    biological_root_sibling_warnings_already_warned = true;
+  }
+}
+
+function draw_link_extensions() {
+  // Link extensions should never be drawn with radial layouts
+  if (!LAYOUT_RADIAL) {
+    linkExtension = d3.select("#link-extension-container")
+                      .selectAll("path")
+                      .data(ROOT.links().filter(function (d) {
+                        return !d.target.children;
+                      }));
+
+    // var starts = root.links().filter(function(d) {
+    //   return !d.target.children;
+    // }).map(function(d) {
+    //   return { "the_x" : d.target[the_x], "the_y" : d.target[the_y] };
+    // });
+
+    if (VAL_LEAF_LABEL_ALIGN) {
+      linkExtension.exit().remove();
+
+      // Draw the link extensions.  Don't need merge because they are either on or off.
+      linkExtension
+        .enter().append("path")
+      // Start from the tip of the actual branch
+      //   .attr("d", function (d, i)
+      //   {
+      //     return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
+      //   })
+        .attr("fill", "none")
+        .attr("stroke", "#000")
+        .attr("stroke-opacity", "0.35")
+        .attr("stroke-width", SELECTED_BRANCH_WIDTH > 2 ? 2 : SELECTED_BRANCH_WIDTH)
+        .attr("stroke-dasharray", "1, 5")
+        .attr("class", "dotted-links")
+        .each(function (d) {
+          d.target.linkExtensionNode = this;
+        })
+        .attr("d", link_extension_path);
+    }
+    else {
+      linkExtension
+      // .attr("d", function(d, i) {
+      //   return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
+      // })
+        .remove();
+    }
+  }
+}
+
+// A magical function
+function draw_tree(lock_metadata_opts) {
+  // jq("status-msg").html("apple");
+  utils__clear_elem("svg-tree");
+
+  if (lock_metadata_opts) {
+    set_options_by_metadata();
+  }
+  update_form_constants();
+
+  set_up_hierarchy();
+
+  draw_svg();
+
+  draw_chart();
+
+  chart.append("g").attr("id", "link-container");
+  draw_links();
+
+  chart.append("g").attr("id", "link-extension-container");
+  draw_link_extensions();
+
+  chart.append("g").attr("id", "inner-dot-container");
+  draw_inner_dots();
+
+  chart.append("g").attr("id", "inner-label-container");
+  draw_inner_labels();
+
+  chart.append("g").attr("id", "leaf-dot-container");
+  draw_leaf_dots();
+
+  // We need to add the correct number of containers to hold all the bars.
+  chart.append("g").attr("id", "bars-container");
+  for (i = 0; i < how_many_bar_sets(name2md); ++i) {
+    d3.select("#bars-container").append("g")
+      .attr("id", "bars-container-" + (i + 1));
+  }
+  draw_bars();
+
+  chart.append("g").attr("id", "leaf-label-container");
+  draw_leaf_labels();
+
+  draw_scale_bar();
+
+
+  // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
+  adjust_tree();
+
+  // jq("status-msg").html("seanie");
+}
+
 

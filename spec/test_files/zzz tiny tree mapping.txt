@@ -1,4 +1,4 @@
-name	leaf_label_color	leaf_label_font	leaf_label_size	leaf_dot_color	leaf_dot_size	new_name	branch_width	branch_color	bar_height	bar_color
+name	leaf_label_color	leaf_label_font	leaf_label_size	leaf_dot_color	leaf_dot_size	new_name	branch_width	branch_color	bar1_height	bar1_color
 eggplant	red	Helvetica	6	orange	8		6	blue	50	ptm_rose
 banana	blue	Times	10		6		1	blue	150	ptm_indigo
 clock	purple	Times		blue	2		15	orange	300	ptm_sand
