@@ -88,6 +88,148 @@ function pick_transform(d, is_bar) {
   }
 }
 
+// Stuff dealing with text label positioning
+function text_x_offset(d, padding) {
+  // Set padding to 0 if it is not passed in.
+  if (!padding) {
+    padding = 0;
+  }
+  else {
+    // Use the 16 px == 1 em convention
+    padding /= 16;
+  }
+
+  var positive_padding = 0.6 + padding + "em";
+  var negative_padding = -0.6 - padding + "em";
+
+
+  // TODO replace these with function params
+  // var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
+
+  if (LAYOUT_CIRCLE) { // circular
+    if (circular_label_flipping_test(d[the_x])) {
+      return positive_padding;
+    }
+    else {
+      return negative_padding;
+    }
+  }
+  else if (LAYOUT_RADIAL) {
+    // Positive moves text anchor start labels away from branch tip, but moves text anchor end labels closer to the branch tip.
+    var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
+
+    if (-90 < rotate_by && rotate_by < 90) {
+      // Don't change rotate by
+      // return "start";
+      return positive_padding;
+    }
+    else if (rotate_by >= 90) { // TODO which should have the equal part
+      // rotate_by += 180; // TODO also flip the text-anchor to end
+      // return "end";
+      return negative_padding;
+    }
+    else if (rotate_by <= -90) {
+      // rotate_by -= 180; // TODO also flip the text anchor to end
+      // return "end";
+      return negative_padding;
+
+    }
+
+    return "1.0em"; // TODO radial layout placeholder
+  }
+  else {
+    if (LABEL_ROTATION === 90) {
+      return positive_padding; // They're going up and down so move away from branch
+    }
+    else if (LABEL_ROTATION === -90) {
+      return negative_padding;
+    }
+    else {
+      return "0em";
+    }
+  }
+}
+function text_y_offset(d) {
+  if (LAYOUT_CIRCLE) { // circular
+    return "0.2em";  // center the label on the branch;
+  }
+  else if (LAYOUT_RADIAL) {
+    return "0.3em";
+  }
+  else {
+    if (TREE_ROTATION === 0) {
+      if (LABEL_ROTATION === 90 || LABEL_ROTATION === -90) {
+        return "0.3em"; // They're going up and down so center them
+      }
+      else {
+        return "1.2em";
+      }
+    }
+    else {
+      if (LABEL_ROTATION === 0 || LABEL_ROTATION === 45) {
+        return "1.2em";
+      }
+      else if (LABEL_ROTATION === 90) {
+        return "0.3em";
+      }
+      else if (LABEL_ROTATION === 135 || LABEL_ROTATION === 180) {
+        return "-1.2em";
+      }
+    }
+  }
+}
+function circular_text_anchor(d) {
+  return circular_label_flipping_test(d[the_x]) ? "start" : "end";
+}
+function straight_text_anchor(d) {
+  if (TREE_ROTATION == 0) {
+    if (LABEL_ROTATION == 0) {
+      return "middle";
+    }
+    else if (LABEL_ROTATION < 0) {
+      return "end";
+    }
+    else {
+      return "start";
+    }
+  }
+  else {
+    if (LABEL_ROTATION == 0 || LABEL_ROTATION == 180) {
+      return "middle";
+    }
+    else {
+      return "start";
+    }
+  }
+}
+function radial_text_anchor(d) {
+  var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
+
+  if (-90 < rotate_by && rotate_by < 90) {
+    // Don't change rotate by
+    return "start";
+  }
+  else if (rotate_by >= 90) { // TODO which should have the equal part
+    // rotate_by += 180; // TODO also flip the text-anchor to end
+    return "end";
+  }
+  else if (rotate_by <= -90) {
+    // rotate_by -= 180; // TODO also flip the text anchor to end
+    return "end";
+  }
+}
+function text_anchor(d) {
+  if (LAYOUT_CIRCLE) {
+    return circular_text_anchor(d);
+  }
+  else if (LAYOUT_STRAIGHT) {
+    return straight_text_anchor(d);
+  }
+  else {
+    return radial_text_anchor(d);
+  }
+}
+
 // Actual drawing functions
 
 // Draw bars
@@ -387,6 +529,56 @@ function draw_leaf_dots() {
   }
   else {
     leaf_dots
+      .remove();
+  }
+}
+
+function draw_inner_labels() {
+  inner_labels = d3.select("#inner-label-container")
+                   .selectAll("text")
+                   .data(ROOT.descendants().filter(is_inner));
+
+  if (SHOW_INNER_LABELS) {
+
+    inner_labels.exit().remove();
+
+    inner_labels
+      .enter().append("text")
+      .attr("class", "inner")
+      // .attr("font-size", 0)
+      .attr("dy", text_y_offset)
+      .attr("dx", function (d) {
+        return text_x_offset(d, null);
+      })
+      .attr("text-anchor", text_anchor)
+      .attr("transform", function (d) {
+        return pick_transform(d);
+      })
+      .text(function (d) {
+        return d.data.name;
+      })
+      .attr("fill", VAL_INNER_LABEL_COLOR)
+      .attr("font-size", INNER_LABEL_SIZE)
+      .attr("font-family", VAL_INNER_LABEL_FONT);
+
+    inner_labels
+      .merge(inner_labels)
+      .attr("dy", text_y_offset)
+      .attr("dx", function (d) {
+        return text_x_offset(d, null);
+      })
+      .attr("text-anchor", text_anchor)
+      .attr("transform", function (d) {
+        return pick_transform(d);
+      })
+      .attr("fill", VAL_INNER_LABEL_COLOR)
+      .attr("font-size", INNER_LABEL_SIZE)
+      .attr("font-family", VAL_INNER_LABEL_FONT);
+
+  }
+  else {
+    inner_labels
+    // .attr("font-size", 0)
       .remove();
   }
 }
