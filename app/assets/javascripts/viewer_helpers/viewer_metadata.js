@@ -176,6 +176,28 @@ function check_for_bar_options() {
   return false;
 }
 
+function check_for_arc_options() {
+  var category_names = [];
+
+  if (name2md) {
+
+    json_each(name2md, function (seq_name, metadata) {
+      json_each(metadata, function (category_name, value) {
+        push_unless_present(category_names, category_name);
+      });
+    });
+
+    var i;
+    for (i = 0; i < category_names.length; ++i) {
+      if (category_names[i].match(/^arc[?:0-9]+_color$/)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 function set_options_by_metadata() {
   var category_names = [];
 

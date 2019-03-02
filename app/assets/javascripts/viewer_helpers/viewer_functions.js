@@ -79,6 +79,14 @@ viewer.fn.reset_bar_opts_to_defaults = function () {
   jq(global.html.id.bars_padding).val(viewer.defaults.bars_padding);
 };
 
+viewer.fn.reset_arc_opts_to_defaults = function () {
+  // arc options
+  jq(global.html.id.arcs_show).prop("checked", viewer.defaults.arcs_show);
+  jq(global.html.id.arcs_padding).val(viewer.defaults.arcs_padding);
+  jq(global.html.id.arcs_height).val(viewer.defaults.arcs_height);
+  jq(global.html.id.arcs_cap_radius).val(viewer.defaults.arcs_cap_radius);
+};
+
 viewer.fn.reset_branch_opts_to_defaults = function () {
   // Branch options
   jq(global.html.id.branches_color).val(viewer.defaults.branches_color);
@@ -106,6 +114,7 @@ viewer.fn.reset_all_to_defaults = function () {
   viewer.fn.reset_label_opts_to_defaults();
   viewer.fn.reset_dot_opts_to_defaults();
   viewer.fn.reset_bar_opts_to_defaults();
+  viewer.fn.reset_arc_opts_to_defaults();
   viewer.fn.reset_branch_opts_to_defaults();
   viewer.fn.reset_viewer_opts_to_defaults();
 };

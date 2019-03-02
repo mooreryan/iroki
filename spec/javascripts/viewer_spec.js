@@ -1,11 +1,14 @@
+//= require spec_helper
+//= require spec_helper_functions
+
 describe("viewer functions", function () {
   afterEach("Remove all fixtures", function () {
-    MagicLamp.polish();
+    // MagicLamp.polish();
   });
 
   describe("dealing with the options panel", function () {
     beforeEach("load the fixture", function () {
-      MagicLamp.wish("options_panel");
+      MagicLamp.wish("upload_panel", "options_panel", "save_panel");
     });
 
     context("setting the default options", function () {
@@ -319,6 +322,32 @@ describe("viewer functions", function () {
           });
         });
 
+        describe("arc options", function () {
+          it("sets show arcs default", function () {
+            expect(
+              $("#" + global.html.id.arcs_show).prop("checked")
+            ).to.eq(viewer.defaults.arcs_show);
+          });
+
+          it("sets default arc padding", function () {
+            expect(
+              parseFloat($("#" + global.html.id.arcs_padding).val())
+            ).to.eq(viewer.defaults.arcs_padding);
+          });
+
+          it("sets default arc height", function () {
+            expect(
+              parseFloat($("#" + global.html.id.arcs_height).val())
+            ).to.eq(viewer.defaults.arcs_height);
+          });
+
+          it("sets default arc cap radius", function () {
+            expect(
+              parseFloat($("#" + global.html.id.arcs_cap_radius).val())
+            ).to.eq(viewer.defaults.arcs_cap_radius);
+          });
+        });
+
         describe("branch options", function () {
           it("sets default branch color", function () {
             expect(
@@ -339,6 +368,39 @@ describe("viewer functions", function () {
               $("#" + global.html.id.viewer_size_fixed).prop("checked")
             ).to.equal(viewer.defaults.viewer_size_fixed);
           });
+        });
+      });
+    });
+
+    context("setting the form globals", function () {
+      describe("update_form_constants()", function () {
+        beforeEach(function () {
+          viewer.fn.reset_all_to_defaults();
+          update_form_constants();
+        });
+
+        it("sets the arcs_show val", function () {
+          expect(
+            global.html.val.arcs_show
+          ).to.equal(viewer.defaults.arcs_show);
+        });
+
+        it("sets the arcs_padding val", function () {
+          expect(
+            global.html.val.arcs_padding
+          ).to.equal(viewer.defaults.arcs_padding);
+        });
+
+        it("sets the arcs_height val", function () {
+          expect(
+            global.html.val.arcs_height
+          ).to.equal(viewer.defaults.arcs_height);
+        });
+
+        it("sets the arcs_cap_radius val", function () {
+          expect(
+            global.html.val.arcs_cap_radius
+          ).to.equal(viewer.defaults.arcs_cap_radius);
         });
       });
     });

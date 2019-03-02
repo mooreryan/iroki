@@ -1,6 +1,8 @@
 var global = {};
 
-global.html    = {};
+global.html = {};
+
+// To hold IDs of html elements
 global.html.id = {
   // Tree layout options
   tree_layout: "tree-shape",
@@ -77,12 +79,27 @@ global.html.id.bars_padding   = "bar-padding";
 global.html.id.bars_align     = "align-bars";
 global.html.id.bars_axis_show = "show-bar-start-axis";
 
+// Arcs options
+global.html.id.arcs_show       = "arcs-show";
+global.html.id.arcs_padding    = "arcs-padding";
+global.html.id.arcs_height     = "arcs-height";
+global.html.id.arcs_cap_radius = "arcs-cap-radius";
+
 // Branch options
 global.html.id.branches_color = "branch-color"; // #000
 global.html.id.branches_width = "branch-width"; // 2
 
 // Viewer options
 global.html.id.viewer_size_fixed = "viewer-size-fixed";
+
+// To hold values associated with html elements
+global.html.val = {};
+
+// Arcs values
+global.html.val.arcs_show       = undefined;
+global.html.val.arcs_padding    = undefined;
+global.html.val.arcs_height     = undefined;
+global.html.val.arcs_cap_radius = undefined;
 
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;
@@ -179,6 +196,13 @@ viewer.defaults.bars_height = 100;
 viewer.defaults.bars_width  = 10;
 viewer.defaults.bars_align  = false;
 viewer.defaults.bars_color  = "#000000";
+
+// Arcs defaults
+viewer.defaults.arcs_show       = false;
+viewer.defaults.arcs_padding    = 10;
+viewer.defaults.arcs_height     = 20;
+viewer.defaults.arcs_cap_radius = 2;
+
 
 // Branches default
 viewer.defaults.branches_color = "#000000";

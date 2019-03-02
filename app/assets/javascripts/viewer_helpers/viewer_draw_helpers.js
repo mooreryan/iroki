@@ -424,6 +424,7 @@ function update_form_constants() {
   VAL_INNER_DOT_COLOR = jq(global.html.id.inner_dots_color).val();
 
 
+  // Note that this is on the upload panel!
   MATCHING_TYPE = document.getElementById(ID_MATCHING_TYPE).value;
 
   // Get sorting options
@@ -451,7 +452,7 @@ function update_form_constants() {
   LAYOUT_STRAIGHT = document.getElementById("rectangular-tree").selected;
   LAYOUT_RADIAL   = document.getElementById(global.html.id.tree_layout_radial).selected;
 
-  // Enable the save button
+  // Enable the save button.  Note that these are on the save panel
   document.getElementById("save-svg").removeAttribute("disabled");
   document.getElementById("save-png").removeAttribute("disabled");
 
@@ -462,6 +463,12 @@ function update_form_constants() {
   VAL_BAR_WIDTH           = jq(global.html.id.bars_width).val();
   VAL_BAR_HEIGHT          = jq(global.html.id.bars_height).val();
   VAL_BAR_COLOR           = jq(global.html.id.bars_color).val();
+
+  // Arcs
+  global.html.val.arcs_show       = jq(global.html.id.arcs_show).prop("checked");
+  global.html.val.arcs_padding    = parseFloat(jq(global.html.id.arcs_padding).val());
+  global.html.val.arcs_height     = parseFloat(jq(global.html.id.arcs_height).val());
+  global.html.val.arcs_cap_radius = parseFloat(jq(global.html.id.arcs_cap_radius).val());
 
   // Dots
   VAL_SHOW_INNER_DOTS = jq(global.html.id.inner_dots_show).val();

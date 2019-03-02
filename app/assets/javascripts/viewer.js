@@ -985,7 +985,78 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT);
     });
 
+    // Arc listeners //////////////////////////////////////////////
+    listener(global.html.id.arcs_show, "change", function () {
+      utils__set_status_msg_to_rendering();
 
+      setTimeout(function () {
+        if (is_checked(global.html.id.arcs_show)) {
+          if (!check_for_arc_options()) {
+            alert("WARNING -- you don't have any arc info in your mapping file.  Try adding some!");
+          }
+        }
+
+        // These are all the things that happen when leaf dots are drawn.  Pretty sure you need to redraw all the stuff up to the labels and tips and dots, then the bars, then the scale bar and tree adjust as adding bars will change the overall tree size.
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_arcs();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(global.html.id.arcs_padding, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      validate_bar_padding_input();
+
+      setTimeout(function () {
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_arcs();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(global.html.id.arcs_height, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_arcs();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+    listener(global.html.id.arcs_cap_radius, "change", function () {
+      utils__set_status_msg_to_rendering();
+
+      setTimeout(function () {
+        update_form_constants();
+        draw_link_extensions(); // may need to be removed.
+        draw_leaf_dots();
+        draw_leaf_labels();
+        draw_bars();
+        draw_arcs();
+        draw_scale_bar();
+        adjust_tree();
+        utils__set_status_msg_to_done();
+      }, TIMEOUT);
+    });
+
+    // Branch listeners ///////////////////////////////////////////
     listener(global.html.id.branches_color, "change", function () {
       utils__set_status_msg_to_rendering();
 
