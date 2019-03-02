@@ -8,3 +8,4 @@
 //= require parse_mapping_file_spec
 //= require viewer_functions_spec
 //= require viewer_spec
+//= require viewer_draw

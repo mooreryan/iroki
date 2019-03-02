@@ -149,6 +149,7 @@ function text_x_offset(d, padding) {
     }
   }
 }
+
 function text_y_offset(d) {
   if (LAYOUT_CIRCLE) { // circular
     return "0.2em";  // center the label on the branch;
@@ -178,9 +179,11 @@ function text_y_offset(d) {
     }
   }
 }
+
 function circular_text_anchor(d) {
   return circular_label_flipping_test(d[the_x]) ? "start" : "end";
 }
+
 function straight_text_anchor(d) {
   if (TREE_ROTATION == 0) {
     if (LABEL_ROTATION == 0) {
@@ -202,6 +205,7 @@ function straight_text_anchor(d) {
     }
   }
 }
+
 function radial_text_anchor(d) {
   var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
@@ -218,6 +222,7 @@ function radial_text_anchor(d) {
     return "end";
   }
 }
+
 function text_anchor(d) {
   if (LAYOUT_CIRCLE) {
     return circular_text_anchor(d);
@@ -245,7 +250,6 @@ function setRadius(d, y0, k) {
 function maxLength(d) {
   return d.data.branch_length + (d.children ? d3.max(d.children, maxLength) : 0);
 }
-
 
 
 // Setting up the tree data structure for plotting
@@ -302,20 +306,22 @@ function set_up_hierarchy() {
 }
 
 
-
 // Link helpers
 function straight_link(d) {
   return "M " + (d.source[the_x] - the_width) + " " + d.source[the_y] + " L " + (d.target[the_x] - the_height) + " " + d.target[the_y];
 }
+
 function link_radial(d) {
   var start_point = (d.target.radial_layout_info.parent_x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.parent_y * RADIAL_LAYOUT_WEIGHT);
   var end_point   = (d.target.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.target.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT);
 
   return "M " + start_point + " L " + end_point;
 }
+
 function linkCircle(d) {
   return linkStep(d.source[the_x], d.source[the_y], d.target[the_x], d.target[the_y]);
 }
+
 function rectangle_link(d, x, y) {
   var start_point, mid_point, end_point;
 
@@ -333,6 +339,7 @@ function rectangle_link(d, x, y) {
 
   return "M " + start_point + " L " + mid_point + " L " + end_point;
 }
+
 // Like d3.svg.diagonal.radial, but with square corners.
 function linkStep(startAngle, startRadius, endAngle, endRadius) {
   var c0 = Math.cos(startAngle = (startAngle) / 180 * Math.PI),
@@ -343,6 +350,7 @@ function linkStep(startAngle, startRadius, endAngle, endRadius) {
     + (endAngle === startAngle ? "" : "A" + startRadius + "," + startRadius + " 0 0 " + (endAngle > startAngle ? 1 : 0) + " " + startRadius * c1 + "," + startRadius * s1)
     + "L" + endRadius * c1 + "," + endRadius * s1;
 }
+
 function link_path(d) {
 
   if (LAYOUT_CIRCLE) {
@@ -355,12 +363,14 @@ function link_path(d) {
     return link_radial(d);
   }
 }
+
 function link_extension_path(d) {
   // TODO need an option for labels lined up on the radius or labels at the end of the links.
   // the_width here is actually the diameter, not the radius.
   function linkCircleExtension(d) {
     return linkStep(d.target[the_x], d.target[the_y], d.target[the_x], the_width / 2);
   }
+
   function link_rectangle_extension(d, x, y) {
     var start_point = d.target[x] + " " + d.target["radius"];
     var end_point   = d.target[x] + " " + d.target["y"];
@@ -378,7 +388,6 @@ function link_extension_path(d) {
 }
 
 
-
 // Updating helpers
 // Start here.  TODO this function is wonky.
 function update_viewer_size_fixed() {
@@ -390,6 +399,7 @@ function update_viewer_size_fixed() {
     jq("tree-div").attr("style", null);
   }
 }
+
 function update_form_constants() {
 
   // Make sure the bootstrap cutoffs are good
@@ -711,19 +721,21 @@ function resize_svg_straight_layout(svg_id, chart_id) {
 
   the_chart.setAttribute("transform", g_chart_transform);
 }
+
 function adjust_tree() {
   resize_svg_straight_layout("svg-tree", "chart-container");
 }
-
 
 
 // Sorting functions
 function sort_descending(a, b) {
   return (a.value - b.value) || d3.ascending(a.data.branch_length, b.data.branch_length);
 }
+
 function sort_ascending(a, b) {
   return (b.value - a.value) || d3.descending(a.data.branch_length, b.data.branch_length);
 }
+
 function sort_none(a, b) {
   return 0;
 }
@@ -802,6 +814,7 @@ function radial_cluster(root) {
   postorder_traversal(root);
   preorder_traversal(root);
 }
+
 function get_translation(transform_str) {
   var match = transform_str.match(/translate\((\d+\.?\d*) (\d+\.?\d*)\)/);
   if (match) {
@@ -811,6 +824,7 @@ function get_translation(transform_str) {
     return { "x": 0, "y": 0 };
   }
 }
+
 function size_transform(val) {
   return Math.pow(val, 2);
 }
@@ -835,6 +849,7 @@ function inner_dot_fill(d) {
     }
   }
 }
+
 function inner_dot_stroke(d) {
   var val           = parseFloat(d.data.name);
   var bootstrap_val = isNaN(val) ? 0.0 : val;
@@ -854,6 +869,7 @@ function inner_dot_stroke(d) {
     }
   }
 }
+
 function inner_dot_stroke_width(d) {
   var val           = parseFloat(d.data.name);
   var bootstrap_val = isNaN(val) ? 0.0 : val;
@@ -873,7 +889,6 @@ function inner_dot_stroke_width(d) {
     }
   }
 }
-
 
 
 // Bars helpers
@@ -897,4 +912,36 @@ function how_many_bar_sets(name2md) {
 
   // If you've gotten here, there are no bar sets.
   return 0;
+}
+
+
+// Arc helpers
+
+// This should be called for each series of arcs.
+// @param arc_color_category will be like arc1_color, or arc2_color, etc
+function set_up_arc_data(leaves, arc_color_category) {
+  var arc_start_nodes  = [];
+  var arc_stop_indices = [];
+
+  for (var i = 0; i < leaves.length; ++i) {
+    // Always add the first one
+    if (i === 0) {
+      arc_stop_indices.push(i);
+      arc_start_nodes.push(leaves[i]);
+    }
+    else if (i < leaves.length - 1 &&
+      leaves[i].metadata[arc_color_category] !== leaves[i + 1].metadata[arc_color_category]) {
+
+      arc_stop_indices.push(i);
+      arc_start_nodes.push(leaves[i + 1]);
+    }
+  }
+
+  // The last node will always be a stop index.
+  arc_stop_indices.push(leaves.length - 1);
+
+  return {
+    arc_start_nodes: arc_start_nodes,
+    arc_stop_indices: arc_stop_indices
+  };
 }
