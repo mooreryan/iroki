@@ -217,57 +217,73 @@ function draw_bars() {
 }
 
 function draw_arcs() {
+  // TODO only draw on circular trees.
+
   function dot_angle_to_arc_angle(dot_angle) {
     return fn.math.degrees_to_radians(dot_angle + 90);
   }
 
-  var arc_color_category = "arc1_color";
+  var num_arc_sets = how_many_arc_sets(name2md);
 
   // This has all the leaves in topological order (at least in the circle tree mode).
-  var leaves            = ROOT.leaves();
-  var arc_padding       = 10;
-  var inner_radius      = leaves[0].y + arc_padding;
-  var outer_radius      = inner_radius + 10;
-  var corner_radius     = 2;
-  var max_corner_radius = (outer_radius - inner_radius) / 2;
+  var leaves        = ROOT.leaves();
+  var arc_padding   = 10;
+  var arc_size      = 20;
+  var corner_radius = 2;
 
-  var arc_data = set_up_arc_data(leaves, arc_color_category);
+  for (var i = 0; i < num_arc_sets; ++i) {
+    if (i === 0) {
+      var inner_radius = leaves[0].y + arc_padding;
+    }
+    else {
+      var inner_radius = leaves[0].y + arc_padding + (i * arc_size) + (i * arc_padding);
+    }
+    var outer_radius = inner_radius + arc_size;
 
-  var arcs = d3.select("#chart-container")
-               .append("g").attr("id", "arc-container")
-               .selectAll("path").data(arc_data.arc_start_nodes);
+    console.log(i + " " + inner_radius + " " + outer_radius);
+
+    var max_corner_radius = (outer_radius - inner_radius) / 2;
+
+    var arc_color_category = "arc" + (i + 1) + "_color";
+
+    var arc_data = set_up_arc_data(leaves, arc_color_category);
+
+    var arcs = d3.select("#chart-container")
+                 .append("g").attr("id", "arc-container-" + (i + 1))
+                 .selectAll("path").data(arc_data.arc_start_nodes);
 
 
-  arcs.enter().append("path")
-      .attr("d", function (d, i) {
+    arcs.enter().append("path")
+        .attr("d", function (d, i) {
 
-        var start = pick_transform(d)
-          .match(/^rotate\(([0-9]+\.*[0-9]*)\)/);
+          var start = pick_transform(d)
+            .match(/^rotate\(([0-9]+\.*[0-9]*)\)/);
 
-        var next_start = pick_transform(leaves[arc_data.arc_stop_indices[(i + 1) % arc_data.arc_stop_indices.length]])
-          .match(/^rotate\(([0-9]+\.*[0-9]*)\)/);
+          var next_start = pick_transform(leaves[arc_data.arc_stop_indices[(i + 1) % arc_data.arc_stop_indices.length]])
+            .match(/^rotate\(([0-9]+\.*[0-9]*)\)/);
 
-        // TODO assert start and next_start
+          // TODO assert start and next_start
 
-        var arc_ang = dot_angle_to_arc_angle(parseFloat(start[1]));
+          var arc_ang = dot_angle_to_arc_angle(parseFloat(start[1]));
 
-        var next_arc_ang = dot_angle_to_arc_angle(parseFloat(next_start[1]));
+          var next_arc_ang = dot_angle_to_arc_angle(parseFloat(next_start[1]));
 
-        var arc_generator = d3.arc()
-                              .cornerRadius(corner_radius)
-                              .innerRadius(inner_radius)
-                              .outerRadius(outer_radius)
-                              .startAngle(arc_ang)
-                              .endAngle(next_arc_ang);
+          var arc_generator = d3.arc()
+                                .cornerRadius(corner_radius)
+                                .innerRadius(inner_radius)
+                                .outerRadius(outer_radius)
+                                .startAngle(arc_ang)
+                                .endAngle(next_arc_ang);
 
-        return arc_generator();
-      })
-      .attr("fill", function (d) {
-        return d.metadata[arc_color_category] || "none";
-      })
-      .merge(arcs);
+          return arc_generator();
+        })
+        .attr("fill", function (d) {
+          return d.metadata[arc_color_category] || "none";
+        })
+        .merge(arcs);
 
-  arcs.exit().remove();
+    arcs.exit().remove();
+  }
 }
 
 function draw_inner_dots() {

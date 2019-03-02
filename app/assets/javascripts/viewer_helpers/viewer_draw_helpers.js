@@ -945,3 +945,26 @@ function set_up_arc_data(leaves, arc_color_category) {
     arc_stop_indices: arc_stop_indices
   };
 }
+
+// Bars helpers
+function how_many_arc_sets(name2md) {
+  if (name2md) {
+    var first_thing = name2md[Object.keys(name2md)[0]];
+
+    // TODO this is just to prevent an infinite loop.  Need a real check.
+    var max  = 1000;
+    var iter = 1;
+    while (iter < max) {
+      var idx = "arc" + iter + "_color";
+
+      if (first_thing[idx] === undefined) {
+        return iter - 1;
+      }
+
+      iter += 1;
+    }
+  }
+
+  // If you've gotten here, there are no arc sets.
+  return 0;
+}
