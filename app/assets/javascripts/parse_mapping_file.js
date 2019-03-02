@@ -1121,12 +1121,19 @@ function includes(ary, elem) {
 function is_bad_col_header(str) {
   // the ?: means non capturing parentheses
   var bar_field_regex = /^bar(?:[0-9]*)_(?:height|color)$/;
+  var arc_field_regex = /^arc(?:[0-9]*)_color$/;
 
-  return str !== "name" &&
-    !(includes(LEAF_DOT_OPTIONS, str) ||
+  return (
+    str !== "name" &&
+    !(
+      includes(LEAF_DOT_OPTIONS, str) ||
       includes(LEAF_LABEL_OPTIONS, str) ||
       includes(BRANCH_OPTIONS, str) ||
-      str.match(bar_field_regex));
+      str.match(bar_field_regex) ||
+      str.match(arc_field_regex)
+    )
+  );
+
 }
 
 // Returns the bad stuff if there is any.
@@ -1186,6 +1193,36 @@ function bad_bar_fields(fields) {
   return null;
 }
 
+function bad_arc_fields(fields) {
+  var arc_colors = fields.map(function (name) {
+    return name.match(/^arc([0-9]*)_color$/);
+  }).filter(function (m) {
+    // Return the good matches
+    return m !== null;
+  });
+
+  var arc_color_numbers = arc_colors.map(function (match) {
+    // Get the first parenthesis capture.  (it is the arc number)
+    return parseInt(match[1]);
+  }).sort();
+
+  // First, we check that the indexes of the arc colors start at 1 and then continue up by 1 until we get them all.
+  var bad_color_fields = arc_color_numbers.filter(function (num, idx) {
+    // Good array is like [1, 2, ..., n].  Each item always one more than the index.
+    return num - idx !== 1;
+  });
+
+  if (bad_color_fields.length !== 0) {
+    var bad_colors = bad_color_fields.map(function (num) {
+      return "arc" + num + "_color";
+    });
+
+    return ["color", bad_colors];
+  }
+
+  return null;
+}
+
 function parse_mapping_file(str) {
   // Strip spaces from the start and end of all tokens.
   var stripped_str = str
@@ -1226,6 +1263,11 @@ function parse_mapping_file(str) {
     return null;
   }
 
+  var bad_arcs = bad_arc_fields(mapping_csv.meta.fields);
+  if (bad_arcs) {
+    alert("ERROR -- bad arc " + bad_arcs[0] + " fields: " + bad_arcs[1]);
+    return null;
+  }
   var num_fields = mapping_csv.meta.fields.length;
   if (num_fields <= 1) {
     alert("ERROR -- Too few fields in mapping file!");
@@ -1281,8 +1323,18 @@ function parse_mapping_file(str) {
           return field.match(/^bar[0-9]+_color$/);
         });
 
+  var arc_color_field_names =
+        mapping_csv.meta.fields.filter(function (field) {
+          return field.match(/^arc[0-9]+_color$/);
+        });
+
   // Add the bar color field names
   bar_color_field_names.forEach(function (name) {
+    color_options.push(name);
+  });
+
+  // Add the arc color field names
+  arc_color_field_names.forEach(function (name) {
     color_options.push(name);
   });
   json_each(mapping, function (name, md) {

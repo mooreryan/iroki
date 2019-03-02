@@ -1,4 +1,4 @@
-name	branch_color	leaf_dot_color
+name	arc1_color	leaf_dot_color
 Thermoanaerobacter_tengcongensis	ptb_blue	ptb_blue
 Clostridium_acetobutylicum	ptb_blue	ptb_blue
 Phytoplasma_Onion_yellows	ptb_blue	ptb_blue

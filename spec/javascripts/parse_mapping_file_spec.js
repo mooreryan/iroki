@@ -38,6 +38,13 @@ context("parse_mapping_file.js", function () {
         expect(is_bad_col_header("bar33_height")).to.be.false;
         expect(is_bad_col_header("bar33_color")).to.be.false;
       });
+      it("returns false if header matches one of the arc options", function () {
+        expect(is_bad_col_header("arc_color")).to.be.false;
+
+        expect(is_bad_col_header("arc3_color")).to.be.false;
+
+        expect(is_bad_col_header("arc33_color")).to.be.false;
+      });
     });
 
     describe("bad_bar_fields()", function () {
@@ -84,6 +91,46 @@ context("parse_mapping_file.js", function () {
 
         var actual   = bad_bar_fields(fields);
         var expected = ["color", ["bar3_color"]];
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+    });
+
+    describe("bad_arc_fields()", function () {
+      it("returns null if there are no arc options", function () {
+        var fields = ["name", "leaf_dot_color"];
+
+        expect(bad_arc_fields(fields)).to.be.null;
+      });
+
+      it("doesn't care about the field order", function () {
+        var fields = ["name", "arc2_color", "arc1_color"];
+
+        expect(bad_arc_fields(fields)).to.be.null;
+      });
+
+      it("returns null if the arc fields are fine", function () {
+        var fields = ["name", "arc1_color"];
+
+        expect(bad_arc_fields(fields)).to.be.null;
+      });
+
+      it("returns bad colors if arc colors skip a number", function () {
+        var fields = ["name", "arc1_color", "arc3_color"];
+
+        var actual   = bad_arc_fields(fields);
+        var expected = ["color", ["arc3_color"]];
+
+        alert("SOTIEN:  " + expected);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("returns false if arc colors doesn't have a 1", function () {
+        var fields = ["name", "arc2_color", "arc3_color"];
+
+        var actual   = bad_arc_fields(fields);
+        var expected = ["color", ["arc2_color", "arc3_color"]];
 
         spec_helper.expect_stringify_equal(actual, expected);
       });
@@ -184,6 +231,17 @@ context("parse_mapping_file.js", function () {
 
         spec_helper.expect_stringify_equal(actual, expected);
       });
+
+      it("can handle arc colors", function () {
+        var good_stuff = "name\tarc1_color\napple\tptv_1\n";
+
+        var expected = {
+          "apple": { "arc1_color": "#EE7733" }
+        };
+        var actual = parse_mapping_file(good_stuff);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
     });
 
     context("returns null with bad mapping files", function () {
@@ -227,6 +285,12 @@ context("parse_mapping_file.js", function () {
 
         expect(parse_mapping_file(bad_bar_headers_str)).to.be.null;
       });
+      it("if there are bad arc headers", function () {
+        var bad_arc_headers_str = "name\tarc3_color\napple\tblack\n";
+
+        expect(parse_mapping_file(bad_arc_headers_str)).to.be.null;
+      });
+
     });
 
     context("GitHub Issue 64", function () {
