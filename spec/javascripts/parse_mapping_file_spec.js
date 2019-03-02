@@ -200,7 +200,7 @@ context("parse_mapping_file.js", function () {
 
     context("it handles wonky input", function () {
       it("sets bad colors to black instead", function () {
-        var bad_color_str = "name\tleaf_label_color\ngeode\tarstoien\n";
+        var bad_color_str = "name\tleaf_label_color\ngeode\tnone\n";
 
         var expected = {
           "geode": { "leaf_label_color": BLACK }
@@ -209,6 +209,18 @@ context("parse_mapping_file.js", function () {
 
         spec_helper.expect_stringify_equal(actual, expected);
       });
+
+      it("does NOT set 'none' to black if it is in an arc color", function () {
+        var bad_color_str = "name\tarc1_color\ngeode\tnone\n";
+
+        var expected = {
+          "geode": { "arc1_color": "none" }
+        };
+        var actual   = parse_mapping_file(bad_color_str);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
 
       it("can handle hex codes without the starting # char", function () {
         var hex_codes_without_pound = "name\tbranch_color\ngeode\tFF00FF\n";

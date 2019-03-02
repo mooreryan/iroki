@@ -1363,6 +1363,11 @@ function parse_mapping_file(str) {
 
             md[option] = ("#" + color_val);
           }
+          else if (option.match(/^arc(?:[0-9]*)_color$/) &&
+            color_val === "none") {
+            // arcs are allowed to have no fill
+            md[option] = color_val
+          }
           else {
             bad_color_errors.push("WARNING -- there was an invalid color name in the mapping file: '" + color_val + "'.  The default color will be used instead.");
 
