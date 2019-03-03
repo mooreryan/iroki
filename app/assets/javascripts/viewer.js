@@ -193,7 +193,7 @@ function lalala(tree_input_param, mapping_input_param) {
       // Also this will pop up a warning if there are any branches of length zero. and set the minbranch length.
 
 
-      if (jq(ID_MATCHING_TYPE).val() === "partial") {
+      if (jq(global.html.id.mapping_file_matching_type).val() === "partial") {
         if (has_non_specific_matching(tmp_root, name2md)) {
           // Reset name2md to null so we skip the mapping stuff and disabling certain features.
           name2md = null;
@@ -373,7 +373,7 @@ function lalala(tree_input_param, mapping_input_param) {
     // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
 
     var TIMEOUT = 10;
-    listener(ID_MATCHING_TYPE, "change", function () {
+    listener(global.html.id.mapping_file_matching_type, "change", function () {
       // First check that you actually have a tree and mapping file.
       if (tree_input && mapping_input) {
         utils__set_status_msg_to_rendering();
@@ -382,7 +382,7 @@ function lalala(tree_input_param, mapping_input_param) {
           if (mapping_input) {
             name2md = parse_mapping_file(mapping_input);
 
-            if (jq(ID_MATCHING_TYPE).val() === "partial") {
+            if (jq(global.html.id.mapping_file_matching_type).val() === "partial") {
               // Reshow the warning.
               if (has_non_specific_matching(tmp_root, name2md)) {
                 name2md = null;

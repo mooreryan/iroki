@@ -25,6 +25,8 @@ global.html.id = {
   biologically_rooted: "biological-root"
 };
 
+global.html.id.mapping_file_matching_type = "matching-type";
+
 // Tree size options
 global.html.id.tree_width   = "width";
 global.html.id.tree_height  = "height";
@@ -271,7 +273,6 @@ var elem;
 var RADIAL_LAYOUT_WEIGHT = 1;
 
 // These vars hold elem IDs
-var ID_MATCHING_TYPE      = "matching-type";
 var ID_LAYOUT_RECTANGULAR = "rectangular-tree",
     ID_LAYOUT_CIRCULAR    = "circular-tree";
 

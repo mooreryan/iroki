@@ -425,7 +425,7 @@ function update_form_constants() {
 
 
   // Note that this is on the upload panel!
-  MATCHING_TYPE = document.getElementById(ID_MATCHING_TYPE).value;
+  MATCHING_TYPE = document.getElementById(global.html.id.mapping_file_matching_type).value;
 
   // Get sorting options
   SORT_NONE       = "not-sorted";
