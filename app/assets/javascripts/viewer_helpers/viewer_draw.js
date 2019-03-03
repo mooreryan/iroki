@@ -837,8 +837,6 @@ function draw_scale_bar(user_changed) {
 
 // Recalculates hierarchy then draws everything
 function draw_tree(lock_metadata_opts) {
-  var i = 0;
-
   utils__clear_elem("svg-tree");
 
   if (lock_metadata_opts) {
@@ -869,14 +867,14 @@ function draw_tree(lock_metadata_opts) {
 
   // We need to add the correct number of containers to hold all the bars.
   d3.select("#chart-container").append("g").attr("id", "bars-container");
-  for (i = 0; i < how_many_bar_sets(name2md); ++i) {
+  for (var i = 0; i < how_many_bar_sets(name2md); ++i) {
     d3.select("#bars-container").append("g")
       .attr("id", "bars-container-" + (i + 1));
   }
   draw_bars();
 
   // And append the correct number of containers to hold the arcs
-  for (i = 0; i < how_many_arc_sets(name2md); ++i) {
+  for (var i = 0; i < how_many_arc_sets(name2md); ++i) {
     d3.select("#chart-container")
       .append("g").attr("id", "arcs-container-" + (i + 1));
   }
@@ -887,11 +885,8 @@ function draw_tree(lock_metadata_opts) {
 
   draw_scale_bar();
 
-
   // Adjust the svg size to fit the rotated chart.  Needs to be done down here as we need the bounding box.
   adjust_tree();
-
-  // jq("status-msg").html("seanie");
 }
 
 // Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
