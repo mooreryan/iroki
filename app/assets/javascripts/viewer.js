@@ -434,12 +434,12 @@ function lalala(tree_input_param, mapping_input_param) {
       });
     });
 
-    listener(viewer.html.tree_height.id, "change", function () {
+    listener(global.html.id.tree_height, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
         // Make sure the input is not negative
-        var h_val = jq(viewer.html.tree_height.id).val();
+        var h_val = jq(global.html.id.tree_height).val();
 
         var layout_value  = jq(global.html.id.tree_layout).val();
         var default_value = null;
@@ -455,11 +455,11 @@ function lalala(tree_input_param, mapping_input_param) {
         }
 
         if (isNaN(parseFloat(h_val))) {
-          jq(viewer.html.tree_height.id).val(default_value);
+          jq(global.html.id.tree_height).val(default_value);
         }
 
         if (h_val < 1) {
-          jq(viewer.html.tree_height.id).val(default_value);
+          jq(global.html.id.tree_height).val(default_value);
         }
 
         draw_tree();
