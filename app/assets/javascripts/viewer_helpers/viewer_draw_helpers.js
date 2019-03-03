@@ -975,3 +975,8 @@ function how_many_arc_sets(name2md) {
   // If you've gotten here, there are no arc sets.
   return 0;
 }
+
+// Set listeners
+function listener(id, action, fn) {
+  d3.select("#" + id).on(action, fn);
+}

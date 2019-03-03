@@ -204,12 +204,6 @@ function lalala(tree_input_param, mapping_input_param) {
       name2md = null;
     }
 
-    function listener(id, action, fn) {
-      d3.select("#" + id).on(action, fn);
-    }
-
-
-
     // Set rotation constants
     ROTATED     = 270;
     NOT_ROTATED = 0;
@@ -378,26 +372,6 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
 
-    function set_msg_and_draw() {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        draw_tree();
-        utils__set_status_msg_to_done();
-      });
-    }
-
-    function leaf_label_align_listener_actions() {
-      update_form_constants();
-      draw_link_extensions();
-      draw_leaf_dots();
-      draw_leaf_labels();
-      draw_bars(); // bars may need to be adjusted if they're shown.
-      draw_scale_bar();
-      adjust_tree();
-      utils__set_status_msg_to_done();
-    }
-
     var TIMEOUT = 10;
     listener(ID_MATCHING_TYPE, "change", function () {
       // First check that you actually have a tree and mapping file.
@@ -425,7 +399,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     });
 
-    listener(global.html.id.tree_padding, "change", set_msg_and_draw);
+    listener(global.html.id.tree_padding, "change", set_status_msg_and_redraw_tree);
 
     listener(global.html.id.tree_width, "change", function () {
       utils__set_status_msg_to_rendering();
@@ -556,7 +530,7 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT);
     });
 
-    listener(global.html.id.tree_rotation, "change", set_msg_and_draw);
+    listener(global.html.id.tree_rotation, "change", set_status_msg_and_redraw_tree);
 
     listener(global.html.id.biologically_rooted, "change", function () {
       // TODO which things actaully need to be updates?
@@ -1097,60 +1071,6 @@ function lalala(tree_input_param, mapping_input_param) {
     draw_tree(true);
 
     utils__set_status_msg_to_done();
-
-    function update_and_draw(draw_fn) {
-
-      update_form_constants();
-      draw_fn();
-      draw_scale_bar();
-      adjust_tree();
-    }
-
-    // Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
-    function redraw_tree() {
-
-      update_form_constants();
-
-      draw_links();
-      draw_link_extensions();
-
-      draw_inner_dots();
-      draw_inner_labels();
-
-      draw_leaf_dots();
-      draw_leaf_labels();
-
-      draw_scale_bar();
-
-      adjust_tree();
-    }
-
-    // For redrawing tree even when you need to recalculate hierarchy and merge svg and g chart.
-    function set_up_and_redraw() {
-
-      update_form_constants();
-
-      set_up_hierarchy();
-
-      draw_svg();
-      draw_chart();
-
-      draw_links();
-      draw_link_extensions();
-
-      draw_inner_dots();
-      draw_inner_labels();
-
-      draw_leaf_dots();
-      draw_leaf_labels();
-
-      draw_scale_bar();
-
-      adjust_tree();
-
-    }
-
-
   }
   else {
     utils__set_status_msg_to_error();

@@ -837,7 +837,9 @@ function draw_scale_bar(user_changed) {
   }
 }
 
-// A magical function
+// These are wrappers for drawing whole trees
+
+// Recalculates hierarchy then draws everything
 function draw_tree(lock_metadata_opts) {
   // jq("status-msg").html("apple");
   utils__clear_elem("svg-tree");
@@ -888,4 +890,50 @@ function draw_tree(lock_metadata_opts) {
   // jq("status-msg").html("seanie");
 }
 
+// Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
+function redraw_tree() {
+
+  update_form_constants();
+
+  draw_links();
+  draw_link_extensions();
+
+  draw_inner_dots();
+  draw_inner_labels();
+
+  draw_leaf_dots();
+  draw_leaf_labels();
+
+  draw_scale_bar();
+
+  adjust_tree();
+}
+
+function update_and_draw(draw_fn) {
+
+  update_form_constants();
+  draw_fn();
+  draw_scale_bar();
+  adjust_tree();
+}
+
+function set_status_msg_and_redraw_tree() {
+  utils__set_status_msg_to_rendering();
+
+  setTimeout(function () {
+    draw_tree();
+    utils__set_status_msg_to_done();
+  });
+}
+
+function leaf_label_align_listener_actions() {
+  update_form_constants();
+  draw_link_extensions();
+  draw_leaf_dots();
+  draw_leaf_labels();
+  draw_bars(); // bars may need to be adjusted if they're shown.
+  draw_scale_bar();
+  adjust_tree();
+  utils__set_status_msg_to_done();
+}
 
