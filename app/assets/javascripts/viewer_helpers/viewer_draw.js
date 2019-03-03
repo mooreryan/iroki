@@ -226,15 +226,12 @@ function draw_arcs() {
   var num_arc_sets = how_many_arc_sets(name2md);
 
   // This has all the leaves in topological order (at least in the circle tree mode).
-  var leaves        = ROOT.leaves();
-  var arc_padding   = global.html.val.arcs_padding;
-  var arc_size      = global.html.val.arcs_height;
-  var corner_radius = global.html.val.arcs_cap_radius;
-
-  // Make sure there are no arcs on the figure
-  for (i = 0; i < num_arc_sets; ++i) {
-    d3.select("#arcs-container-" + (i + 1)).remove();
-  }
+  var leaves            = ROOT.leaves();
+  // This is the padding from the tips of the leaves
+  var arc_padding       = global.html.val.arcs_padding;
+  var inner_arc_padding = 10;
+  var arc_size          = global.html.val.arcs_height;
+  var corner_radius     = global.html.val.arcs_cap_radius;
 
   if (global.html.val.arcs_show) {
     for (var i = 0; i < num_arc_sets; ++i) {
@@ -242,21 +239,21 @@ function draw_arcs() {
 
       var arc_data = set_up_arc_data(leaves, arc_color_category);
 
-      var arcs = d3.select("#chart-container")
-                   .append("g").attr("id", "arcs-container-" + (i + 1))
+      var arcs = d3.select("#" + "arcs-container-" + (i + 1))
                    .selectAll("path").data(arc_data.arc_start_nodes);
 
       if (i === 0) {
         var inner_radius = leaves[0].y + arc_padding;
       }
       else {
-        var inner_radius = leaves[0].y + arc_padding + (i * arc_size) + (i * arc_padding);
+        var inner_radius = leaves[0].y + arc_padding + (i * arc_size) + (i * inner_arc_padding);
       }
       var outer_radius = inner_radius + arc_size;
 
       var max_corner_radius = (outer_radius - inner_radius) / 2;
 
       arcs.enter().append("path")
+          .merge(arcs)
           .attr("d", function (d, i) {
 
             var start = pick_transform(d)
@@ -282,8 +279,7 @@ function draw_arcs() {
           })
           .attr("fill", function (d) {
             return d.metadata[arc_color_category] || "none";
-          })
-          .merge(arcs);
+          });
 
       arcs.exit().remove();
     }
@@ -841,7 +837,8 @@ function draw_scale_bar(user_changed) {
 
 // Recalculates hierarchy then draws everything
 function draw_tree(lock_metadata_opts) {
-  // jq("status-msg").html("apple");
+  var i = 0;
+
   utils__clear_elem("svg-tree");
 
   if (lock_metadata_opts) {
@@ -871,12 +868,19 @@ function draw_tree(lock_metadata_opts) {
   draw_leaf_dots();
 
   // We need to add the correct number of containers to hold all the bars.
-  chart.append("g").attr("id", "bars-container");
+  d3.select("#chart-container").append("g").attr("id", "bars-container");
   for (i = 0; i < how_many_bar_sets(name2md); ++i) {
     d3.select("#bars-container").append("g")
       .attr("id", "bars-container-" + (i + 1));
   }
   draw_bars();
+
+  // And append the correct number of containers to hold the arcs
+  for (i = 0; i < how_many_arc_sets(name2md); ++i) {
+    d3.select("#chart-container")
+      .append("g").attr("id", "arcs-container-" + (i + 1));
+  }
+  draw_arcs();
 
   chart.append("g").attr("id", "leaf-label-container");
   draw_leaf_labels();
