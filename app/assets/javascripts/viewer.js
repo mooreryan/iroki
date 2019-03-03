@@ -393,7 +393,7 @@ function lalala(tree_input_param, mapping_input_param) {
             name2md = null;
           }
           // Draw tree and set on metadata option
-          draw_tree(true);
+          set_up_and_draw_everything(true);
           utils__set_status_msg_to_done();
         }, TIMEOUT);
       }
@@ -429,7 +429,7 @@ function lalala(tree_input_param, mapping_input_param) {
           jq(global.html.id.tree_width).val(default_value);
         }
 
-        draw_tree();
+        set_up_and_draw_everything();
         utils__set_status_msg_to_done();
       });
     });
@@ -462,7 +462,7 @@ function lalala(tree_input_param, mapping_input_param) {
           jq(global.html.id.tree_height).val(default_value);
         }
 
-        draw_tree();
+        set_up_and_draw_everything();
         utils__set_status_msg_to_done();
       });
     });
@@ -517,7 +517,7 @@ function lalala(tree_input_param, mapping_input_param) {
             .val(viewer.defaults.radial.height);
         }
 
-        draw_tree();
+        set_up_and_draw_everything();
         utils__set_status_msg_to_done();
       }, 10);
     });
@@ -556,7 +556,7 @@ function lalala(tree_input_param, mapping_input_param) {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {
-        draw_tree();
+        set_up_and_draw_everything();
         utils__set_status_msg_to_done();
       }, TIMEOUT * 2);
     });
@@ -1067,8 +1067,8 @@ function lalala(tree_input_param, mapping_input_param) {
 
     utils__set_status_msg_to_rendering();
 
-    // In the lalala function, this is the first time that draw_tree is called, so lock options by metadata if it is available.
-    draw_tree(true);
+    // In the lalala function, this is the first time that set_up_and_draw_everything is called, so lock options by metadata if it is available.
+    set_up_and_draw_everything(true);
 
     utils__set_status_msg_to_done();
   }

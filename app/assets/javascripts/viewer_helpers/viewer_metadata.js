@@ -198,6 +198,7 @@ function check_for_arc_options() {
   return false;
 }
 
+// Turns things on and off depending if the metadata categories are present.
 function set_options_by_metadata() {
   var category_names = [];
 

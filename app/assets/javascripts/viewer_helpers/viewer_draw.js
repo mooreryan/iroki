@@ -1,4 +1,4 @@
-// Actual drawing functions
+//// Actual drawing functions
 
 function draw_bars() {
 
@@ -658,7 +658,7 @@ function draw_link_extensions() {
 
 /**
  *
- * @param user_changed set this to true if the user triggered this (through even listener)
+ * @param user_changed set this to true if the user triggered this (through event listener)
  */
 function draw_scale_bar(user_changed) {
   d3.select("#scale-bar-container").remove();
@@ -833,10 +833,46 @@ function draw_scale_bar(user_changed) {
   }
 }
 
-// These are wrappers for drawing whole trees
+//// These are wrappers for drawing whole trees
 
-// Recalculates hierarchy then draws everything
-function draw_tree(lock_metadata_opts) {
+// These are meant to be called in the draw_wrapper function.
+function draw_branches() {
+  draw_links();
+  draw_link_extensions();
+}
+function draw_inner_decorations() {
+  draw_inner_dots();
+  draw_inner_labels();
+}
+function draw_outer_decorations() {
+  draw_leaf_dots();
+  draw_bars();
+  draw_arcs();
+  draw_leaf_labels();
+}
+function draw_tree() {
+  draw_branches();
+  draw_inner_decorations();
+  draw_outer_decorations();
+  draw_scale_bar();
+}
+
+/**
+ * First, updates form constants, then calls the draw function, then adjusts the tree.  Basically everything you need to draw a tree, except in cases where you need to reset the entire chare or hierarchy.  Use the draw_everything function for that.
+ *
+ * @param draw_fn This is the function that will be called between update_form_constants() and adjust_tree()
+ *
+ * @example draw_wrapper(draw_tree) #=> this will do everything you need to draw a tree as long as you don't need to recalculate hierarchy or reset options by metadata mapping file
+ */
+function draw_wrapper(draw_fn) {
+  update_form_constants();
+  draw_fn();
+  adjust_tree();
+}
+
+
+// Recalculates hierarchy, sets opts by metadata, then draws everything.
+function set_up_and_draw_everything(lock_metadata_opts) {
   utils__clear_elem("svg-tree");
 
   if (lock_metadata_opts) {
@@ -889,22 +925,16 @@ function draw_tree(lock_metadata_opts) {
   adjust_tree();
 }
 
-// Similar to draw_tree but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
+
+//// OLD DRAWING HELPERS.. These are still used, but need to be phased out.
+
+// Similar to set_up_and_draw_everything but meant to be called by a listener that doesn't need to recalculate the hierarchy and replace the svg and g chart as well.
 function redraw_tree() {
-
   update_form_constants();
-
-  draw_links();
-  draw_link_extensions();
-
-  draw_inner_dots();
-  draw_inner_labels();
-
-  draw_leaf_dots();
-  draw_leaf_labels();
-
+  draw_branches();
+  draw_inner_decorations();
+  draw_outer_decorations();
   draw_scale_bar();
-
   adjust_tree();
 }
 
@@ -920,7 +950,7 @@ function set_status_msg_and_redraw_tree() {
   utils__set_status_msg_to_rendering();
 
   setTimeout(function () {
-    draw_tree();
+    set_up_and_draw_everything();
     utils__set_status_msg_to_done();
   });
 }
