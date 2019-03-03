@@ -415,7 +415,7 @@ function update_form_constants() {
   VAL_LEAF_LABEL_FONT  = jq(global.html.id.leaf_labels_font).val();
 
   VAL_INNER_LABEL_COLOR = jq(global.html.id.inner_labels_color).val();
-  VAL_INNER_LABEL_FONT  = jq(ID_INNER_LABEL_FONT).val();
+  VAL_INNER_LABEL_FONT  = jq(global.html.id.inner_labels_font).val();
 
   SELECTED_BRANCH_COLOR = document.getElementById(global.html.id.branches_color).value;
   SELECTED_BRANCH_WIDTH = parseInt(document.getElementById(global.html.id.branches_width).value);

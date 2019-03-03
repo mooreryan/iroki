@@ -129,9 +129,6 @@ viewer.defaults = {
 };
 
 viewer.html = {
-  tree_height: {
-    id: "height"
-  },
   tree_width: {
     id: global.html.id.tree_width
   },
@@ -291,9 +288,10 @@ var ID_LEAF_LABEL_COLOR  = "leaf-label-color",
   VAL_LEAF_LABEL_PADDING,
   VAL_LEAF_LABEL_ALIGN;
 
-var ID_INNER_LABEL_FONT = "inner-label-font",
-    VAL_INNER_LABEL_COLOR,
-    VAL_INNER_LABEL_FONT;
+
+var
+  VAL_INNER_LABEL_COLOR,
+  VAL_INNER_LABEL_FONT;
 
 // Bar option IDs
 var VAL_BAR_SHOW,

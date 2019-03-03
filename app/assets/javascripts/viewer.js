@@ -722,7 +722,7 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(ID_INNER_LABEL_FONT, "change", function () {
+    listener(global.html.id.inner_labels_font, "change", function () {
       utils__set_status_msg_to_rendering();
 
       setTimeout(function () {

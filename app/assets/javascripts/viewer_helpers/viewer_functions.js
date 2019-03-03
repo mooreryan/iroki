@@ -51,7 +51,7 @@ viewer.fn.reset_label_opts_to_defaults = function () {
   jq(global.html.id.leaf_labels_font).val(viewer.defaults.leaf_labels_font);
 
   jq(global.html.id.inner_labels_color).val(viewer.defaults.inner_labels_color);
-  jq(ID_INNER_LABEL_FONT).val(viewer.defaults.inner_labels_font);
+  jq(global.html.id.inner_labels_font).val(viewer.defaults.inner_labels_font);
 };
 
 viewer.fn.reset_dot_opts_to_defaults = function () {
