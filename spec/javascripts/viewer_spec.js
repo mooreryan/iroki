@@ -371,32 +371,95 @@ describe("viewer functions", function () {
         beforeEach(function () {
           viewer.fn.reset_all_to_defaults();
           update_form_constants();
+          // viewer_form_add_listeners();
         });
 
-        it("sets the arcs_show val", function () {
-          expect(
-            global.html.val.arcs_show
-          ).to.equal(viewer.defaults.arcs_show);
+        context("updating arc global options", function () {
+          it("sets the arcs_show val", function () {
+            expect(
+              global.html.val.arcs_show
+            ).to.equal(viewer.defaults.arcs_show);
+          });
+
+          it("sets the arcs_padding val", function () {
+            expect(
+              global.html.val.arcs_padding
+            ).to.equal(viewer.defaults.arcs_padding);
+          });
+
+          it("sets the arcs_height val", function () {
+            expect(
+              global.html.val.arcs_height
+            ).to.equal(viewer.defaults.arcs_height);
+          });
+
+          it("sets the arcs_cap_radius val", function () {
+            expect(
+              global.html.val.arcs_cap_radius
+            ).to.equal(viewer.defaults.arcs_cap_radius);
+          });
         });
 
-        it("sets the arcs_padding val", function () {
-          expect(
-            global.html.val.arcs_padding
-          ).to.equal(viewer.defaults.arcs_padding);
-        });
+        context("updating layout global options", function () {
+          it("sets the tree_layout val", function () {
+            expect(
+              global.html.val.tree_layout
+            ).to.equal(viewer.defaults.tree_layout);
+          });
 
-        it("sets the arcs_height val", function () {
-          expect(
-            global.html.val.arcs_height
-          ).to.equal(viewer.defaults.arcs_height);
-        });
+          it("sets the tree_layout_rectangular val to default", function () {
+            expect(
+              global.html.val.tree_layout_rectangular
+            ).to.be.false;
+          });
 
-        it("sets the arcs_cap_radius val", function () {
-          expect(
-            global.html.val.arcs_cap_radius
-          ).to.equal(viewer.defaults.arcs_cap_radius);
+          it("sets the tree_layout_radial val to default", function () {
+            expect(
+              global.html.val.tree_layout_radial
+            ).to.be.true;
+          });
+
+          it("sets the tree_layout_circular val to default", function () {
+            expect(
+              global.html.val.tree_layout_circular
+            ).to.be.false;
+          });
+
         });
       });
     });
+
+    // context("warning user about arc options", function () {
+    //   describe("warn_about_arcs()", function () {
+    //     context("when in rectangular mode", function () {
+    //
+    //
+    //       it("resets the val to the default (radial)", function () {
+    //         // User selects rectangular layout
+    //         $("#" + global.html.id.tree_layout).val(global.html.id.tree_layout_rectangular);
+    //         global.html.val.tree_layout = global.html.id.tree_layout_rectangular;
+    //
+    //         $("#" + global.html.id.arcs_show).prop("checked", true);
+    //         global.html.val.arcs_show = true;
+    //
+    //         expect(
+    //           global.html.val.tree_layout
+    //         ).to.equal(viewer.defaults.tree_layout);
+    //       });
+    //
+    //       it("makes sure the show arc option is not checked", function () {
+    //         $("#" + global.html.id.tree_layout).val(global.html.id.tree_layout_rectangular);
+    //         global.html.val.tree_layout = global.html.id.tree_layout_rectangular;
+    //
+    //         $("#" + global.html.id.arcs_show).prop("checked", true);
+    //         global.html.val.arcs_show = true;
+    //
+    //         expect(
+    //           $("#" + global.html.id.arcs_show).prop("checked")
+    //         ).to.be.false;
+    //       });
+    //     });
+    //   });
+    // });
   });
 });

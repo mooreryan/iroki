@@ -95,7 +95,7 @@ function draw_bars() {
     // If the bar height is a negative number (e.g., negative fold change) we need to flip the bar 180 and adjust the verticle nudge.  But ONLY if the layout is circle.  (not yet implemented for rectangle)
     var barh = d.metadata["bar" + (i + 1) + "_height"];
 
-    if (LAYOUT_CIRCLE && barh < 0) {
+    if (global.html.val.tree_layout_circular && barh < 0) {
       var nudge_vert = VAL_BAR_WIDTH / 2;
     }
     else {
@@ -107,10 +107,10 @@ function draw_bars() {
     var ajusted_transform = transform + " translate(" + nudge_horiz + ", " + nudge_vert + ")";
 
     // Finally, if barh is negative we need to add a 180 degree rotation to get the bar going in the opposite direction.
-    if (LAYOUT_CIRCLE && barh < 0) {
+    if (global.html.val.tree_layout_circular && barh < 0) {
       ajusted_transform += " rotate(180)";
     }
-    else if (LAYOUT_STRAIGHT && barh < 0) {
+    else if (global.html.val.tree_layout_rectangular && barh < 0) {
       // Do a little something different for rectangle layouts
       ajusted_transform += " rotate(180) translate(0, -" + VAL_BAR_WIDTH + ")";
     }
@@ -172,7 +172,7 @@ function draw_bars() {
                         .data(start_radii);
 
     // Draw the radii (only circle layout)
-    if (VAL_BAR_SHOW_START_AXIS && LAYOUT_CIRCLE) {
+    if (VAL_BAR_SHOW_START_AXIS && global.html.val.tree_layout_circular) {
       rad_circles.enter()
                  .append("circle")
                  .merge(rad_circles)
@@ -184,7 +184,7 @@ function draw_bars() {
                  .attr("stroke", VAL_BAR_COLOR)
                  .attr("stroke-width", 2);
     }
-    else if (VAL_BAR_SHOW_START_AXIS && LAYOUT_STRAIGHT) {
+    else if (VAL_BAR_SHOW_START_AXIS && global.html.val.tree_layout_rectangular) {
       alert("Bar axes are currently only available in circular mode!");
       // rad_circles.enter()
       //            .append("circle")
@@ -294,7 +294,7 @@ function draw_arcs() {
 
 function draw_inner_dots() {
 
-  var no_root_dot = LAYOUT_RADIAL && (TREE_IS_ROOTED_ON_A_LEAF_NODE || !VAL_BIOLOGICALLY_ROOTED);
+  var no_root_dot = global.html.val.tree_layout_radial && (TREE_IS_ROOTED_ON_A_LEAF_NODE || !VAL_BIOLOGICALLY_ROOTED);
 
   var dat = no_root_dot ?
     ROOT.descendants().filter(function (d) {
@@ -535,7 +535,7 @@ function draw_svg() {
 function draw_chart() {
   var chart_width, chart_height;
   var chart_transform_width, chart_transform_height;
-  if (LAYOUT_CIRCLE) {
+  if (global.html.val.tree_layout_circular) {
     chart_width  = the_width;
     chart_height = the_height;
 
@@ -617,7 +617,7 @@ function draw_links() {
 
 function draw_link_extensions() {
   // Link extensions should never be drawn with radial layouts
-  if (!LAYOUT_RADIAL) {
+  if (!global.html.val.tree_layout_radial) {
     linkExtension = d3.select("#link-extension-container")
                       .selectAll("path")
                       .data(ROOT.links().filter(function (d) {
@@ -680,7 +680,7 @@ function draw_scale_bar(user_changed) {
     var first_link = ROOT.links()[0];
     var pixels_per_unit_length;
 
-    if (LAYOUT_RADIAL) {
+    if (global.html.val.tree_layout_radial) {
       lengths = ROOT.descendants().map(function (d) {
         return d.data.branch_length;
       });
@@ -707,14 +707,14 @@ function draw_scale_bar(user_changed) {
     }
 
 
-    var rotated_rectangle = LAYOUT_STRAIGHT && TREE_ROTATION === ROTATED;
+    var rotated_rectangle = global.html.val.tree_layout_rectangular && TREE_ROTATION === ROTATED;
     mean_length           = fn.math.round(ary_mean(lengths), ROUNDING_PRECISION);
 
     var min_scale_bar_size;
-    if (LAYOUT_CIRCLE) {
+    if (global.html.val.tree_layout_circular) {
       min_scale_bar_size = 50; // circles look a bit smaller so make this half.
     }
-    else if (LAYOUT_STRAIGHT) {
+    else if (global.html.val.tree_layout_rectangular) {
       min_scale_bar_size = 100;
     }
     else {
@@ -765,7 +765,7 @@ function draw_scale_bar(user_changed) {
 
     // For the straight layouts adjust the scale bar offset weight to half as much weighting.
 
-    if (LAYOUT_STRAIGHT && TREE_ROTATION == NOT_ROTATED) {
+    if (global.html.val.tree_layout_rectangular && TREE_ROTATION == NOT_ROTATED) {
       start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
       start_y = (chart_bbox.height + SCALE_BAR_PADDING) * (1 + ((SCALE_BAR_OFFSET_WEIGHT - 1) / 4)); // Reduce the weighting power by a lot.
 
@@ -775,7 +775,7 @@ function draw_scale_bar(user_changed) {
       label_x = start_x + (scale_bar_pixels / 2);
       label_y = start_y + SCALE_BAR_TEXT_PADDING;
     }
-    else if (LAYOUT_RADIAL) {
+    else if (global.html.val.tree_layout_radial) {
       start_x = ((chart_bbox.width - scale_bar_pixels) / 2) + chart_bbox.x;
       start_y = (chart_bbox.height + SCALE_BAR_PADDING + chart_bbox.y) * (1 + ((SCALE_BAR_OFFSET_WEIGHT - 1) / 4)); // Reduce the weighting power by a lot.
 

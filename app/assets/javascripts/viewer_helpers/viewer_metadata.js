@@ -95,15 +95,15 @@ function get_branch_md_val(node, branch_option, default_value) {
 
   if (is_silly(node)) {
     // This is a silly node and we need to check for odd rooting behavior.
-    if (LAYOUT_RADIAL && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
+    if (global.html.val.tree_layout_radial && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
       // Give the styling of this node the same styling as its sibling (the biological root of the tree).
       return get_sibling_md_val(node, branch_option, default_value);
     }
-    else if (LAYOUT_RADIAL && VAL_BIOLOGICALLY_ROOTED) {
+    else if (global.html.val.tree_layout_radial && VAL_BIOLOGICALLY_ROOTED) {
       // The tree is rooted somewhere between two leaf nodes.  In this case the root is known to be biologically meaningful, so the biological node and the computational node are the same.  In this case coloring of clades coming from the root are colored normally.
       return md_val_for_this_node;
     }
-    else if (LAYOUT_RADIAL) {
+    else if (global.html.val.tree_layout_radial) {
       // Same as above except that in this case the computational root is not biologically meaningful, so we don't want a case where the backbone of a radial tree is two different colors.  Only color this node's branch if it's sibling is the same color.
       var sibling_md_val = get_sibling_md_val(node, branch_option, default_value);
       if (sibling_md_val === md_val_for_this_node) {
@@ -126,7 +126,7 @@ function get_branch_md_val(node, branch_option, default_value) {
 
 // The node is silly if the tree is in radial layout and parent is the true root and one of the siblings is the biological root.  OR if the parent is a true root and the biological root and the node is depth 1.
 function is_silly(node) {
-  if (!LAYOUT_RADIAL) {
+  if (!global.html.val.tree_layout_radial) {
     return false;
   }
   // Is this branch attached to the root of the tree?
@@ -264,10 +264,10 @@ function is_rooted_on_a_leaf_node(d3_tree) {
 
 // TODO this will not work properly unless TREE_IS_ROOTED_ON_A_LEAF_NODE has been set.
 function try_disable_bio_rooted() {
-  if (LAYOUT_RADIAL && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
+  if (global.html.val.tree_layout_radial && TREE_IS_ROOTED_ON_A_LEAF_NODE) {
     jq(global.html.id.biologically_rooted).prop("disabled", true);
   }
-  else if (!LAYOUT_RADIAL) {
+  else if (!global.html.val.tree_layout_radial) {
     jq(global.html.id.biologically_rooted).prop("disabled", true);
   }
   else {

@@ -1,5 +1,17 @@
 viewer.fn = {};
 
+//// Warning about arcs
+viewer.fn.warn_about_arcs = function () {
+  if (
+    global.html.val.tree_layout === global.html.id.tree_layout_rectangular ||
+    global.html.val.tree_layout === global.html.id.tree_layout_radial
+  ) {
+    alert("Currenly, arcs are only available with circular trees!");
+
+    jq(global.html.id.arcs_show).prop("checked", false);
+  }
+};
+
 //// Reseting options
 
 viewer.fn.reset_tree_format_opts_to_defaults = function () {
@@ -128,6 +140,7 @@ function ary_mean(ary) {
 
   return total / num_elems;
 }
+
 function flatten(ary) {
   function flatten_iter(ary) {
     for (var i = 0; i < ary.length; ++i) {
@@ -146,6 +159,7 @@ function flatten(ary) {
 
   return flat_ary;
 }
+
 function ary_min_max(ary) {
   var min = null;
   var max = null;
@@ -174,18 +188,23 @@ function set_value_of(id, val) {
 function jq(id) {
   return $("#" + id);
 }
+
 function disable(id) {
   return jq(id).prop("disabled", true);
 }
+
 function undisable(id) {
   return jq(id).prop("disabled", false);
 }
+
 function check(id) {
   $("#" + id).prop("checked", true);
 }
+
 function uncheck(id) {
   $("#" + id).prop("checked", false);
 }
+
 function is_checked(id) {
   return jq(id).prop("checked");
 }
@@ -194,12 +213,15 @@ function is_checked(id) {
 function is_root(d) {
   return d.depth === 0;
 }
+
 function is_leaf(d) {
   return d.value === 1;
 }
+
 function is_inner(d) {
   return !is_leaf(d);
 }
+
 function is_root_node(d) {
   return d.depth === 1;
 }

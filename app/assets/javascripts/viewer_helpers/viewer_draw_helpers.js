@@ -52,16 +52,16 @@ function rectangle_transform(d, x, y, is_bar) {
 
 // TODO when picking transform for bars, we don't want the final rotate_by at all (or just set it to 0).
 function pick_transform(d, is_bar) {
-  if (LAYOUT_CIRCLE && is_leaf(d)) {
+  if (global.html.val.tree_layout_circular && is_leaf(d)) {
     return circle_transform(d, the_x, VAL_LEAF_LABEL_ALIGN ? "y" : the_y, is_bar);
   }
-  else if (LAYOUT_CIRCLE) {
+  else if (global.html.val.tree_layout_circular) {
     return circle_transform(d, the_x, the_y, is_bar);
   }
-  else if (LAYOUT_STRAIGHT && is_leaf(d)) {
+  else if (global.html.val.tree_layout_rectangular && is_leaf(d)) {
     return rectangle_transform(d, the_x, VAL_LEAF_LABEL_ALIGN ? "y" : the_y, is_bar);
   }
-  else if (LAYOUT_STRAIGHT) {
+  else if (global.html.val.tree_layout_rectangular) {
     return rectangle_transform(d, the_x, the_y, is_bar);
   }
   else {
@@ -106,7 +106,7 @@ function text_x_offset(d, padding) {
   // TODO replace these with function params
   // var test = TREE_ROTATION == ROTATED ? d[the_x] < 180 : (d[the_x] < 90 || d[the_x] > 270);
 
-  if (LAYOUT_CIRCLE) { // circular
+  if (global.html.val.tree_layout_circular) { // circular
     if (circular_label_flipping_test(d[the_x])) {
       return positive_padding;
     }
@@ -114,7 +114,7 @@ function text_x_offset(d, padding) {
       return negative_padding;
     }
   }
-  else if (LAYOUT_RADIAL) {
+  else if (global.html.val.tree_layout_radial) {
     // Positive moves text anchor start labels away from branch tip, but moves text anchor end labels closer to the branch tip.
     var rotate_by = utils__rad_to_deg(Math.atan2((d.radial_layout_info.y - d.radial_layout_info.parent_y), (d.radial_layout_info.x - d.radial_layout_info.parent_x)));
 
@@ -151,10 +151,10 @@ function text_x_offset(d, padding) {
 }
 
 function text_y_offset(d) {
-  if (LAYOUT_CIRCLE) { // circular
+  if (global.html.val.tree_layout_circular) { // circular
     return "0.2em";  // center the label on the branch;
   }
-  else if (LAYOUT_RADIAL) {
+  else if (global.html.val.tree_layout_radial) {
     return "0.3em";
   }
   else {
@@ -224,10 +224,10 @@ function radial_text_anchor(d) {
 }
 
 function text_anchor(d) {
-  if (LAYOUT_CIRCLE) {
+  if (global.html.val.tree_layout_circular) {
     return circular_text_anchor(d);
   }
-  else if (LAYOUT_STRAIGHT) {
+  else if (global.html.val.tree_layout_rectangular) {
     return straight_text_anchor(d);
   }
   else {
@@ -287,17 +287,17 @@ function set_up_hierarchy() {
   }
 
   // Set the root branch length to zero each time.
-  if (LAYOUT_CIRCLE) {
+  if (global.html.val.tree_layout_circular) {
     circle_cluster(ROOT);
     setRadius(ROOT, ROOT.data.branch_length = 0, (the_width / 2) / maxLength(ROOT));
 
   }
-  else if (LAYOUT_STRAIGHT) {
+  else if (global.html.val.tree_layout_rectangular) {
     rectangle_cluster(ROOT);
     // TODO should this be width or height
     setRadius(ROOT, ROOT.data.branch_length = 0, (the_height * 1) / maxLength(ROOT));
   }
-  else { // LAYOUT_RADIAL
+  else { // global.html.val.tree_layout_radial
     radial_cluster(ROOT);
     // TODO should this actually be the same as for straight layout?
     setRadius(ROOT, ROOT.data.branch_length = 0, (the_height * 1) / maxLength(ROOT));
@@ -353,10 +353,10 @@ function linkStep(startAngle, startRadius, endAngle, endRadius) {
 
 function link_path(d) {
 
-  if (LAYOUT_CIRCLE) {
+  if (global.html.val.tree_layout_circular) {
     return linkCircle(d);
   }
-  else if (LAYOUT_STRAIGHT) {
+  else if (global.html.val.tree_layout_rectangular) {
     return rectangle_link(d, the_x, the_y);
   }
   else {
@@ -379,7 +379,7 @@ function link_extension_path(d) {
   }
 
 
-  if (LAYOUT_CIRCLE) {
+  if (global.html.val.tree_layout_circular) {
     return linkCircleExtension(d);
   }
   else {
@@ -448,9 +448,14 @@ function update_form_constants() {
   SCALE_BAR_LENGTH        = parseFloat(document.getElementById(global.html.id.scale_bar_length).value);
 
 
-  LAYOUT_CIRCLE   = document.getElementById("circular-tree").selected;
-  LAYOUT_STRAIGHT = document.getElementById("rectangular-tree").selected;
-  LAYOUT_RADIAL   = document.getElementById(global.html.id.tree_layout_radial).selected;
+  global.html.val.tree_layout             = jq(global.html.id.tree_layout).val();
+  global.html.val.tree_layout_rectangular = jq(global.html.id.tree_layout_rectangular).prop("selected");
+  global.html.val.tree_layout_circular    = jq(global.html.id.tree_layout_circular).prop("selected");
+  global.html.val.tree_layout_radial      = jq(global.html.id.tree_layout_radial).prop("selected");
+
+  // global.html.val.tree_layout_circular   = document.getElementById("circular-tree").selected;
+  // global.html.val.tree_layout_rectangular = document.getElementById("rectangular-tree").selected;
+  // global.html.val.tree_layout_radial   = document.getElementById(global.html.id.tree_global.html.val.tree_layout_radial).selected;
 
   // Enable the save button.  Note that these are on the save panel
   document.getElementById("save-svg").removeAttribute("disabled");
@@ -515,7 +520,7 @@ function update_form_constants() {
 
   TREE_BRANCH_CLADOGRAM = "cladogram";
   TREE_BRANCH_NORMAL    = "normalogram";
-  if (LAYOUT_RADIAL) {
+  if (global.html.val.tree_layout_radial) {
     TREE_BRANCH_STYLE = "normalogram";
     $("#" + global.html.id.tree_branch_style).prop("disabled", true);
   }
@@ -524,7 +529,7 @@ function update_form_constants() {
     TREE_BRANCH_STYLE = document.getElementById(global.html.id.tree_branch_style).value;
   }
 
-  if (LAYOUT_STRAIGHT) {
+  if (global.html.val.tree_layout_rectangular) {
     // It could be coming from the circle which has a different slider behavior
     elem          = document.getElementById(global.html.id.tree_rotation);
     TREE_ROTATION = 270;
@@ -556,7 +561,7 @@ function update_form_constants() {
   }
 
   // We removed the label rotation option from the user, but still ensure they are set correctly in case tree roation returns as a feature.
-  if (LAYOUT_STRAIGHT && TREE_ROTATION === ROTATED) { // ie rectangle tree on its side
+  if (global.html.val.tree_layout_rectangular && TREE_ROTATION === ROTATED) { // ie rectangle tree on its side
     LABEL_ROTATION = viewer.defaults.leaf_labels_rotation + 90;
   }
   else {
@@ -569,7 +574,7 @@ function update_form_constants() {
   if (
     (!SHOW_LEAF_LABELS && !SHOW_LEAF_DOTS && !VAL_BAR_SHOW) ||
     TREE_BRANCH_STYLE === TREE_BRANCH_CLADOGRAM ||
-    LAYOUT_RADIAL
+    global.html.val.tree_layout_radial
   ) {
     // not checked, disabled.
     sync_align_buttons_and_vals(false, true);
@@ -601,7 +606,7 @@ function update_form_constants() {
   }
 
   // Set the height to match the width
-  if (LAYOUT_CIRCLE || LAYOUT_RADIAL) {
+  if (global.html.val.tree_layout_circular || global.html.val.tree_layout_radial) {
     // Disable the height slider
     elem          = document.getElementById(global.html.id.tree_height);
     elem.disabled = true;
@@ -678,7 +683,7 @@ function resize_svg_straight_layout(svg_id, chart_id) {
   // var g_chart_rotation;
   // var g_chart_translation
 
-  if (LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) {
+  if (global.html.val.tree_layout_rectangular && TREE_ROTATION == ROTATED) {
 
     new_svg_height = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_width  = chart_bbox.height + (2 * chart_bbox_height_padding);
@@ -688,7 +693,7 @@ function resize_svg_straight_layout(svg_id, chart_id) {
       chart_bbox_height_padding + ")";
 
   }
-  else if (LAYOUT_STRAIGHT || LAYOUT_RADIAL) {
+  else if (global.html.val.tree_layout_rectangular || global.html.val.tree_layout_radial) {
     new_svg_width  = chart_bbox.width + (2 * chart_bbox_width_padding);
     new_svg_height = chart_bbox.height + (2 * chart_bbox_height_padding);
 
@@ -697,7 +702,7 @@ function resize_svg_straight_layout(svg_id, chart_id) {
       (chart_bbox_width_padding - chart_bbox.x) + " " +
       (chart_bbox_height_padding - chart_bbox.y) + ")";
   }
-  else if (LAYOUT_CIRCLE) {
+  else if (global.html.val.tree_layout_circular) {
     var radius     = chart_bbox.width > chart_bbox.height ? chart_bbox.width / 2 : chart_bbox.height / 2;
     var diameter   = radius * 2;
     var padding_px = diameter * padding;

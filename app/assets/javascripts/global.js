@@ -2,11 +2,12 @@ var global = {};
 
 global.html = {};
 
+// To hold values associated with html elements
+global.html.val = {};
+
+
 // To hold IDs of html elements
 global.html.id = {
-  // Tree layout options
-  tree_layout: "tree-shape",
-  tree_layout_radial: "radial-tree",
 
   // Branch style options
   tree_branch_style: "tree-branch-style",
@@ -26,6 +27,18 @@ global.html.id = {
 };
 
 global.html.id.mapping_file_matching_type = "matching-type";
+
+// Tree layout options
+global.html.id.tree_layout             = "tree-shape";
+global.html.id.tree_layout_radial      = "radial-tree";
+global.html.id.tree_layout_rectangular = "rectangular-tree";
+global.html.id.tree_layout_circular    = "circular-tree";
+
+global.html.val.tree_layout             = null;
+global.html.val.tree_layout_radial      = null;
+global.html.val.tree_layout_rectangular = null;
+global.html.val.tree_layout_circular    = null;
+
 
 // Tree size options
 global.html.id.tree_width   = "width";
@@ -94,8 +107,6 @@ global.html.id.branches_width = "branch-width"; // 2
 // Viewer options
 global.html.id.viewer_size_fixed = "viewer-size-fixed";
 
-// To hold values associated with html elements
-global.html.val = {};
 
 // Arcs values
 global.html.val.arcs_show       = undefined;
@@ -148,6 +159,8 @@ viewer.html = {
 
 // This will be passed to all things that could be aligned (leaf labels, dots, bars, etc)
 viewer.defaults.tip_decorations_align = false;
+
+viewer.defaults.tree_layout = global.html.id.tree_layout_radial;
 
 viewer.defaults.inner_labels_size  = 12;
 viewer.defaults.inner_labels_color = "#000000";
@@ -220,7 +233,6 @@ var FORM_HEIGHT = 650;
 // Round to 100ths place.
 var ROUNDING_PRECISION = 2;
 
-var LAYOUT_CIRCLE, LAYOUT_STRAIGHT, LAYOUT_RADIAL;
 var TREE_BRANCH_STYLE, TREE_BRANCH_CLADOGRAM, TREE_BRANCH_NORMAL;
 var the_x, the_y;
 var SIZE, INNER_SIZE;
