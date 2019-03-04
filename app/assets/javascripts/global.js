@@ -2,7 +2,8 @@ var global = {};
 
 global.warnings = {};
 
-global.warnings.arcs_not_available = "Currenly, arcs are only available with circular trees!";
+global.warnings.arcs_not_available      = "Currenly, arcs are only available with circular trees!";
+global.warnings.bars_axis_not_available = "Currently, bar axes are only available with circular trees!";
 
 global.html = {};
 

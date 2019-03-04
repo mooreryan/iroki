@@ -1,6 +1,14 @@
 //= require spec_helper
 //= require spec_helper_functions
 
+viewer_spec_helpers = {};
+
+viewer_spec_helpers.user_selects_a_new_layout = function (tree_layout_id) {
+  var selector = $("#" + global.html.id.tree_layout);
+  selector.val(tree_layout_id);
+  global.html.val.tree_layout = selector.val();
+};
+
 describe("viewer functions", function () {
   afterEach("Remove all fixtures", function () {
     // MagicLamp.polish();
@@ -492,6 +500,90 @@ describe("viewer functions", function () {
             expect(
               window.alert.calledWith(global.warnings.arcs_not_available)
             ).to.be.true;
+          });
+
+          it("resets the global val variable", function () {
+            expect(
+              global.html.val.arcs_show
+            ).to.be.false;
+          });
+        });
+      });
+    });
+
+    context("warning user about bar options", function () {
+      context("warning user about showing bar axes", function () {
+        describe("warn_about_bars_axis_show()", function () {
+          beforeEach("set up the spy", function () {
+            // Spy on the alert function
+            sinon.spy(window, "alert");
+          });
+
+          afterEach("tear down the spy", function () {
+            window.alert.restore();
+          });
+
+          context("when in rectangular mode", function () {
+            beforeEach("user makes selections", function () {
+              viewer_spec_helpers.user_selects_a_new_layout(global.html.id.tree_layout_rectangular);
+
+              var selector = $("#" + global.html.id.bars_axis_show);
+
+              selector.prop("checked", true);
+              global.html.val.bars_axis_show = selector.prop("checked");
+
+              viewer.fn.warn_about_bars_axis_show();
+            });
+
+            it("unchecks the show bars axis option", function () {
+              expect(
+                $("#" + global.html.id.bars_axis_show).prop("checked")
+              ).to.be.false;
+            });
+
+            it("alerts the user to what happened", function () {
+              expect(
+                window.alert.calledWith(global.warnings.bars_axis_not_available)
+              );
+            });
+
+            it("resets the global val variable", function () {
+              expect(
+                global.html.val.bars_axis_show
+              ).to.be.false;
+            });
+          });
+
+
+          context("when in radial mode", function () {
+            beforeEach("user makes selections", function () {
+              viewer_spec_helpers.user_selects_a_new_layout(global.html.id.tree_layout_radial);
+
+              var selector = $("#" + global.html.id.bars_axis_show);
+
+              selector.prop("checked", true);
+              global.html.val.bars_axis_show = selector.prop("checked");
+
+              viewer.fn.warn_about_bars_axis_show();
+            });
+
+            it("unchecks the show bars axis option", function () {
+              expect(
+                $("#" + global.html.id.bars_axis_show).prop("checked")
+              ).to.be.false;
+            });
+
+            it("alerts the user to what happened", function () {
+              expect(
+                window.alert.calledWith(global.warnings.bars_axis_not_available)
+              );
+            });
+
+            it("resets the global val variable", function () {
+              expect(
+                global.html.val.bars_axis_show
+              ).to.be.false;
+            });
           });
         });
       });

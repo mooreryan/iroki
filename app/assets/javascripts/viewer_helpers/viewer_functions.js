@@ -1,6 +1,6 @@
 viewer.fn = {};
 
-//// Warning about arcs
+//// Warning about bad options
 viewer.fn.warn_about_arcs = function () {
   if (
     global.html.val.tree_layout === global.html.id.tree_layout_rectangular ||
@@ -9,6 +9,22 @@ viewer.fn.warn_about_arcs = function () {
     alert(global.warnings.arcs_not_available);
 
     jq(global.html.id.arcs_show).prop("checked", false);
+
+    global.html.val.arcs_show = false;
+  }
+};
+
+viewer.fn.warn_about_bars_axis_show = function () {
+  if (
+    global.html.val.bars_axis_show === true &&
+    (global.html.val.tree_layout === global.html.id.tree_layout_radial ||
+      global.html.val.tree_layout === global.html.id.tree_layout_rectangular)
+  ) {
+    alert(global.warnings.bars_axis_not_available);
+
+    jq(global.html.id.bars_axis_show).prop("checked", false);
+
+    global.html.val.bars_axis_show = false;
   }
 };
 
