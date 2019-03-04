@@ -1,5 +1,9 @@
 var global = {};
 
+global.warnings = {};
+
+global.warnings.arcs_not_available = "Currenly, arcs are only available with circular trees!";
+
 global.html = {};
 
 // To hold values associated with html elements

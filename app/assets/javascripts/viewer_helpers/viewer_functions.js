@@ -6,7 +6,7 @@ viewer.fn.warn_about_arcs = function () {
     global.html.val.tree_layout === global.html.id.tree_layout_rectangular ||
     global.html.val.tree_layout === global.html.id.tree_layout_radial
   ) {
-    alert("Currenly, arcs are only available with circular trees!");
+    alert(global.warnings.arcs_not_available);
 
     jq(global.html.id.arcs_show).prop("checked", false);
   }

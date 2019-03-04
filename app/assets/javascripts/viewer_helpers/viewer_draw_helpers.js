@@ -401,7 +401,6 @@ function update_viewer_size_fixed() {
 }
 
 function update_form_constants() {
-
   // Make sure the bootstrap cutoffs are good
   set_and_validate_bootstrap_cutoff_input();
 

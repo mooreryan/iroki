@@ -9,6 +9,13 @@ describe("viewer functions", function () {
   describe("dealing with the options panel", function () {
     beforeEach("load the fixture", function () {
       MagicLamp.wish("upload_panel", "options_panel", "save_panel");
+      viewer.fn.reset_all_to_defaults();
+      update_form_constants();
+    });
+
+    afterEach("reset everything to default", function () {
+      // viewer.fn.reset_all_to_defaults();
+      // update_form_constants();
     });
 
     context("setting the default options", function () {
@@ -368,12 +375,6 @@ describe("viewer functions", function () {
 
     context("setting the form globals", function () {
       describe("update_form_constants()", function () {
-        beforeEach(function () {
-          viewer.fn.reset_all_to_defaults();
-          update_form_constants();
-          // viewer_form_add_listeners();
-        });
-
         context("updating arc global options", function () {
           it("sets the arcs_show val", function () {
             expect(
@@ -429,37 +430,71 @@ describe("viewer functions", function () {
       });
     });
 
-    // context("warning user about arc options", function () {
-    //   describe("warn_about_arcs()", function () {
-    //     context("when in rectangular mode", function () {
-    //
-    //
-    //       it("resets the val to the default (radial)", function () {
-    //         // User selects rectangular layout
-    //         $("#" + global.html.id.tree_layout).val(global.html.id.tree_layout_rectangular);
-    //         global.html.val.tree_layout = global.html.id.tree_layout_rectangular;
-    //
-    //         $("#" + global.html.id.arcs_show).prop("checked", true);
-    //         global.html.val.arcs_show = true;
-    //
-    //         expect(
-    //           global.html.val.tree_layout
-    //         ).to.equal(viewer.defaults.tree_layout);
-    //       });
-    //
-    //       it("makes sure the show arc option is not checked", function () {
-    //         $("#" + global.html.id.tree_layout).val(global.html.id.tree_layout_rectangular);
-    //         global.html.val.tree_layout = global.html.id.tree_layout_rectangular;
-    //
-    //         $("#" + global.html.id.arcs_show).prop("checked", true);
-    //         global.html.val.arcs_show = true;
-    //
-    //         expect(
-    //           $("#" + global.html.id.arcs_show).prop("checked")
-    //         ).to.be.false;
-    //       });
-    //     });
-    //   });
-    // });
+    context("warning user about arc options", function () {
+      describe("warn_about_arcs()", function () {
+        beforeEach("set up the spy", function () {
+          // Spy on the alert function
+          sinon.spy(window, "alert");
+        });
+
+        afterEach("tear down the spy", function () {
+          window.alert.restore();
+        });
+
+        context("when in rectangular mode", function () {
+          beforeEach("user selects rectangular layout", function () {
+            var tree_layout = $("#" + global.html.id.tree_layout);
+            var arcs_show   = $("#" + global.html.id.arcs_show);
+
+            tree_layout.val(global.html.id.tree_layout_rectangular);
+            global.html.val.tree_layout = tree_layout.val();
+
+            arcs_show.prop("checked", true);
+            global.html.val.arcs_show = arcs_show.prop("checked");
+
+            viewer.fn.warn_about_arcs();
+          });
+
+          it("makes sure the show arc option is not checked", function () {
+            expect(
+              $("#" + global.html.id.arcs_show).prop("checked")
+            ).to.be.false;
+          });
+
+          it("alerts the user what happened", function () {
+            expect(
+              window.alert.calledWith(global.warnings.arcs_not_available)
+            ).to.be.true;
+          });
+        });
+
+        context("when in radial mode", function () {
+          beforeEach("user selects radial layout", function () {
+            var tree_layout = $("#" + global.html.id.tree_layout);
+            var arcs_show   = $("#" + global.html.id.arcs_show);
+
+            tree_layout.val(global.html.id.tree_layout_radial);
+            global.html.val.tree_layout = tree_layout.val();
+
+            arcs_show.prop("checked", true);
+            global.html.val.arcs_show = arcs_show.prop("checked");
+
+            viewer.fn.warn_about_arcs();
+          });
+
+          it("makes sure the show arc option is not checked", function () {
+            expect(
+              $("#" + global.html.id.arcs_show).prop("checked")
+            ).to.be.false;
+          });
+
+          it("alerts the user what happened", function () {
+            expect(
+              window.alert.calledWith(global.warnings.arcs_not_available)
+            ).to.be.true;
+          });
+        });
+      });
+    });
   });
 });
