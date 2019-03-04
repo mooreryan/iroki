@@ -339,15 +339,6 @@ function viewer_form_add_listeners() {
       });
     });
   });
-  listener(global.html.id.leaf_labels_rotation, "change", function () {
-    set_status_msg_wrapper(function () {
-      draw_wrapper(function () {
-        draw_link_extensions();
-        draw_outer_decorations();
-        draw_scale_bar();
-      });
-    });
-  });
   listener(global.html.id.bars_color, "change", function () {
     set_status_msg_wrapper(function () {
       draw_wrapper(function () {

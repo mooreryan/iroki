@@ -549,17 +549,18 @@ function update_form_constants() {
 
     TREE_ROTATION = parseInt(elem.value);
     // Flip tree rotation to 0
-    TREE_ROTATION = TREE_ROTATION == 360 ? 0 : TREE_ROTATION;
+    TREE_ROTATION = TREE_ROTATION === 360 ? 0 : TREE_ROTATION;
     elem.setAttribute("min", "0");
     elem.setAttribute("max", "360");
     elem.setAttribute("step", "1");
   }
 
-  if (LAYOUT_STRAIGHT && TREE_ROTATION == ROTATED) { // ie rectangle tree on its side
-    LABEL_ROTATION = parseInt(document.getElementById(global.html.id.leaf_labels_rotation).value) + 90;
+  // We removed the label rotation option from the user, but still ensure they are set correctly in case tree roation returns as a feature.
+  if (LAYOUT_STRAIGHT && TREE_ROTATION === ROTATED) { // ie rectangle tree on its side
+    LABEL_ROTATION = viewer.defaults.leaf_labels_rotation + 90;
   }
   else {
-    LABEL_ROTATION = parseInt(document.getElementById(global.html.id.leaf_labels_rotation).value);
+    LABEL_ROTATION = viewer.defaults.leaf_labels_rotation;
   }
   SHOW_INNER_LABELS = document.getElementById(global.html.id.inner_labels_show).checked;
   SHOW_LEAF_LABELS  = document.getElementById(global.html.id.leaf_labels_show).checked;
@@ -590,14 +591,6 @@ function update_form_constants() {
   else {
     document.getElementById(global.html.id.leaf_labels_size).setAttribute("disabled", "");
     document.getElementById(global.html.id.leaf_labels_padding).setAttribute("disabled", "");
-  }
-
-  // If it's circle the label rotation gets disabled
-  if (LAYOUT_STRAIGHT && (SHOW_LEAF_LABELS || SHOW_INNER_LABELS)) {
-    document.getElementById(global.html.id.leaf_labels_rotation).removeAttribute("disabled");
-  }
-  else {
-    document.getElementById(global.html.id.leaf_labels_rotation).setAttribute("disabled", "");
   }
 
   if (SHOW_INNER_LABELS) {
