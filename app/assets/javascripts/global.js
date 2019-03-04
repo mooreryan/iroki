@@ -362,3 +362,6 @@ var tree_debug;
 var parsed_newick;
 
 var circle_cluster, rectangle_cluster;
+
+// For the setTimeout function.  10 ms.
+var TIMEOUT = 10;

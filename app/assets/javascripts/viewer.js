@@ -372,7 +372,7 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // Listeners for form elements.  Some redraw the whole tree, others update only parts of it.
 
-    var TIMEOUT = 10;
+    //// These listeners eventually call set_up_and_draw_everything()
     listener(global.html.id.mapping_file_matching_type, "change", function () {
       // First check that you actually have a tree and mapping file.
       if (tree_input && mapping_input) {
@@ -398,9 +398,6 @@ function lalala(tree_input_param, mapping_input_param) {
         }, TIMEOUT);
       }
     });
-
-    listener(global.html.id.tree_padding, "change", set_status_msg_and_redraw_tree);
-
     listener(global.html.id.tree_width, "change", function () {
       utils__set_status_msg_to_rendering();
 
@@ -431,9 +428,8 @@ function lalala(tree_input_param, mapping_input_param) {
 
         set_up_and_draw_everything();
         utils__set_status_msg_to_done();
-      });
+      }, TIMEOUT);
     });
-
     listener(global.html.id.tree_height, "change", function () {
       utils__set_status_msg_to_rendering();
 
@@ -464,10 +460,8 @@ function lalala(tree_input_param, mapping_input_param) {
 
         set_up_and_draw_everything();
         utils__set_status_msg_to_done();
-      });
+      }, TIMEOUT);
     });
-
-    // TODO no status-msg
     listener(global.html.id.tree_layout, "change", function () {
       utils__set_status_msg_to_rendering();
       setTimeout(function () {
@@ -478,80 +472,32 @@ function lalala(tree_input_param, mapping_input_param) {
 
         if (document.getElementById("rectangular-tree").selected) {
           width_elem
-          // .attr("min", 15)
-          // .attr("max", 150)
-          // .attr("step", 1)
             .val(viewer.defaults.rectangular.width);
 
           height_elem
-          // .attr("min", 15)
-          // .attr("max", 150)
-          // .attr("step", 1)
             .val(viewer.defaults.rectangular.height);
         }
         else if (document.getElementById("circular-tree").selected) {
           width_elem
-          // .attr("min", 15)
-          // .attr("max", 150)
-          // .attr("step", 1)
             .val(viewer.defaults.circular.width);
 
           height_elem
-          // .attr("min", 15)
-          // .attr("max", 150)
-          // .attr("step", 1)
             .val(viewer.defaults.circular.height);
         }
         else { // radial
           // The values look weird since they are polynomial transformed later.
           width_elem
-          // .attr("min", 5)
-          // .attr("max", 125)
-          // .attr("step", 1)
             .val(viewer.defaults.radial.width);
 
           width_elem
-          // .attr("min", 5)
-          // .attr("max", 125)
-          // .attr("step", 1)
             .val(viewer.defaults.radial.height);
         }
 
         set_up_and_draw_everything();
         utils__set_status_msg_to_done();
-      }, 10);
-    });
-    listener(global.html.id.tree_branch_style, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        redraw_tree();
-        utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-
-    listener(global.html.id.tree_rotation, "change", set_status_msg_and_redraw_tree);
-
-    listener(global.html.id.biologically_rooted, "change", function () {
-      // TODO which things actaully need to be updates?
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-
-        update_form_constants();
-        draw_links();
-        draw_link_extensions();
-
-        // Changing this option might need to draw root node dot, might not.
-        draw_inner_dots();
-
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
-    });
-
-    // TODO needs longer timer to actually work.  Not sure why.
+    // This one needs longer timer to actually work.  Not sure why.
     listener(global.html.id.tree_sorting, "change", function () {
       utils__set_status_msg_to_rendering();
 
@@ -560,28 +506,28 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT * 2);
     });
+    listener(global.html.id.tree_rotation, "change", function () {
+      set_status_msg_wrapper(set_up_and_draw_everything);
+    });
+    listener(global.html.id.tree_padding, "change", function () {
+      set_status_msg_wrapper(set_up_and_draw_everything);
+    });
 
+    //// These eventually call draw_tree()
+    listener(global.html.id.tree_branch_style, "change", function () {
+      set_status_msg_wrapper(draw_wrapper, draw_tree);
+    });
+    listener(global.html.id.biologically_rooted, "change", function () {
+      set_status_msg_wrapper(draw_wrapper, draw_tree);
+    });
+
+
+    //// These only need to call draw_scale_bar
     listener(global.html.id.scale_bar_show, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-
-        update_form_constants();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
+      set_status_msg_wrapper(draw_wrapper, draw_scale_bar);
     });
     listener(global.html.id.scale_bar_offset_weight, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-
-        update_form_constants();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
+      set_status_msg_wrapper(draw_wrapper, draw_scale_bar);
     });
     listener(global.html.id.scale_bar_autosize, "change", function () {
       utils__set_status_msg_to_rendering();
@@ -594,10 +540,8 @@ function lalala(tree_input_param, mapping_input_param) {
           jq(global.html.id.scale_bar_length).prop("disabled", false);
         }
 
+        draw_wrapper(draw_scale_bar);
 
-        update_form_constants();
-        draw_scale_bar();
-        adjust_tree();
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
@@ -614,36 +558,133 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT);
     });
 
+    //// These eventually call draw_inner_decorations
     listener(global.html.id.inner_labels_show, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        update_and_draw(draw_inner_labels);
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
+      set_status_msg_wrapper(draw_wrapper, draw_inner_decorations);
     });
     listener(global.html.id.inner_labels_size, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        update_and_draw(draw_inner_labels);
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
+      set_status_msg_wrapper(draw_wrapper, draw_inner_decorations);
     });
+
+    // Outer decoration show/unshow listeners need to draw link extensions, outer decorations, and scale bars.
     listener(global.html.id.leaf_labels_show, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-
-        update_form_constants();
-        draw_link_extensions();
-        draw_leaf_dots();
-        draw_leaf_labels();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
+      set_status_msg_wrapper(function () {
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
     });
+    listener(global.html.id.leaf_dots_show, "change", function () {
+      set_status_msg_wrapper(function () {
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+    listener(global.html.id.leaf_dots_align, "change", function () {
+      set_status_msg_wrapper(function () {
+        // First sync all the align buttons.
+        sync_align_buttons_and_vals(is_checked(global.html.id.leaf_dots_align), false);
+
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+    listener(global.html.id.bars_show, "change", function () {
+      set_status_msg_wrapper(function () {
+        // First, activate the align tip decorations opts if you are turning bars on.  If you do it here, as soon as bars are added, everything lines up, but the user can still turn it off later.
+        if (is_checked(global.html.id.bars_show)) {
+          // Check to see if there are any bar columns in the metadata file.  If not, we want to warnt he user that they should add some.
+          // TODO might be nice to lock all the bar opts if there aren't any in a mapping file
+          if (!check_for_bar_options()) {
+            alert("WARNING -- you don't have any bar info in your mapping file.  Try adding some!");
+          }
+
+          sync_align_buttons_and_vals(true, false);
+        }
+
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+    listener(global.html.id.bars_axis_show, "change", function () {
+      set_status_msg_wrapper(function () {
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+    listener(global.html.id.bars_align, "change", function () {
+      set_status_msg_wrapper(function () {
+        // First sync all the align buttons.
+        sync_align_buttons_and_vals(is_checked(global.html.id.bars_align), false);
+
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+    listener(global.html.id.bars_padding, "change", function () {
+      set_status_msg_wrapper(function () {
+        validate_bar_padding_input();
+
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+    listener(global.html.id.bars_height, "change", function () {
+      set_status_msg_wrapper(function () {
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+    listener(global.html.id.bars_width, "change", function () {
+      set_status_msg_wrapper(function () {
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+    // TODO this one could actually just redraw bars
+    listener(global.html.id.bars_color, "change", function () {
+      set_status_msg_wrapper(function () {
+        draw_wrapper(function () {
+          draw_link_extensions();
+          draw_outer_decorations();
+          draw_scale_bar();
+        });
+      });
+    });
+
+
+
+
+
+
+
+
     listener(global.html.id.leaf_labels_size, "change", function () {
       utils__set_status_msg_to_rendering();
 
@@ -752,30 +793,8 @@ function lalala(tree_input_param, mapping_input_param) {
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     });
-    listener(global.html.id.leaf_dots_show, "change", function () {
-      utils__set_status_msg_to_rendering();
 
-      setTimeout(function () {
 
-        update_form_constants();
-        draw_link_extensions(); // may need to be removed.
-        draw_leaf_dots();
-        draw_leaf_labels();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
-    });
-    listener(global.html.id.leaf_dots_align, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        // First sync all the align buttons.
-        sync_align_buttons_and_vals(is_checked(global.html.id.leaf_dots_align), false);
-
-        leaf_label_align_listener_actions();
-      }, TIMEOUT);
-    });
     listener(global.html.id.leaf_dots_size, "change", function () {
       utils__set_status_msg_to_rendering();
 
@@ -854,110 +873,6 @@ function lalala(tree_input_param, mapping_input_param) {
       }, TIMEOUT);
     });
 
-    // Bar listeners ///////////////////////////////////////////////
-    listener(global.html.id.bars_show, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        // First, activate the align tip decorations opts if you are turning bars on.  If you do it here, as soon as bars are added, everything lines up, but the user can still turn it off later.
-        if (is_checked(global.html.id.bars_show)) {
-          // Check to see if there are any bar columns in the metadata file.  If not, we want to warnt he user that they should add some.
-          // TODO might be nice to lock all the bar opts if there aren't any in a mapping file
-          if (!check_for_bar_options()) {
-            alert("WARNING -- you don't have any bar info in your mapping file.  Try adding some!");
-          }
-
-          sync_align_buttons_and_vals(true, false);
-        }
-
-        // These are all the things that happen when leaf dots are drawn.  Pretty sure you need to redraw all the stuff up to the labels and tips and dots, then the bars, then the scale bar and tree adjust as adding bars will change the overall tree size.
-        update_form_constants();
-        draw_link_extensions(); // may need to be removed.
-        draw_leaf_dots();
-        draw_leaf_labels();
-        draw_bars();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
-    });
-    listener(global.html.id.bars_axis_show, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        update_form_constants();
-        draw_link_extensions(); // may need to be removed.
-        draw_leaf_dots();
-        draw_leaf_labels();
-        draw_bars();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
-    });
-    listener(global.html.id.bars_align, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        // First sync all the align buttons.
-        sync_align_buttons_and_vals(is_checked(global.html.id.bars_align), false);
-
-        // Then do the rest of the actions.
-        leaf_label_align_listener_actions();
-      }, TIMEOUT);
-    });
-    listener(global.html.id.bars_padding, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      validate_bar_padding_input();
-
-      setTimeout(function () {
-        update_form_constants();
-        draw_link_extensions(); // may need to be removed.
-        draw_leaf_dots();
-        draw_leaf_labels();
-        draw_bars();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
-    });
-    listener(global.html.id.bars_color, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        update_and_draw(draw_bars);
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
-    });
-    listener(global.html.id.bars_height, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        update_form_constants();
-        draw_link_extensions(); // may need to be removed.
-        draw_leaf_dots();
-        draw_leaf_labels();
-        draw_bars();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
-    });
-    listener(global.html.id.bars_width, "change", function () {
-      utils__set_status_msg_to_rendering();
-
-      setTimeout(function () {
-        update_form_constants();
-        draw_link_extensions(); // may need to be removed.
-        draw_leaf_dots();
-        draw_leaf_labels();
-        draw_bars();
-        draw_scale_bar();
-        adjust_tree();
-        utils__set_status_msg_to_done();
-      }, TIMEOUT);
-    });
 
     // Arc listeners //////////////////////////////////////////////
     listener(global.html.id.arcs_show, "change", function () {

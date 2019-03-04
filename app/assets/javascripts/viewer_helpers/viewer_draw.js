@@ -840,16 +840,19 @@ function draw_branches() {
   draw_links();
   draw_link_extensions();
 }
+
 function draw_inner_decorations() {
   draw_inner_dots();
   draw_inner_labels();
 }
+
 function draw_outer_decorations() {
   draw_leaf_dots();
   draw_bars();
   draw_arcs();
   draw_leaf_labels();
 }
+
 function draw_tree() {
   draw_branches();
   draw_inner_decorations();
@@ -860,6 +863,7 @@ function draw_tree() {
 /**
  * First, updates form constants, then calls the draw function, then adjusts the tree.  Basically everything you need to draw a tree, except in cases where you need to reset the entire chare or hierarchy.  Use the draw_everything function for that.
  *
+ *
  * @param draw_fn This is the function that will be called between update_form_constants() and adjust_tree()
  *
  * @example draw_wrapper(draw_tree) #=> this will do everything you need to draw a tree as long as you don't need to recalculate hierarchy or reset options by metadata mapping file
@@ -869,6 +873,43 @@ function draw_wrapper(draw_fn) {
   draw_fn();
   adjust_tree();
 }
+
+// /**
+//  * @note Like draw_wrapper, except that this function will handle setting a timeout for properly updating the status rendering message.
+//
+//  * @param draw_fn
+//  */
+// function draw_wrapper_with_status_msg(draw_fn) {
+//   utils__set_status_msg_to_rendering();
+//
+//   setTimeout(function () {
+//     update_form_constants();
+//     draw_fn();
+//     adjust_tree();
+//
+//     utils__set_status_msg_to_done();
+//   }, TIMEOUT);
+// }
+
+/**
+ *
+ * @param func
+ * @param arg Optional argument to be passed in to func
+ */
+function set_status_msg_wrapper(func, arg) {
+  utils__set_status_msg_to_rendering();
+
+  setTimeout(function () {
+    if (arg === undefined) {
+      func();
+    } else {
+      func(arg)
+    }
+    utils__set_status_msg_to_done();
+  }, TIMEOUT);
+}
+
+
 
 
 // Recalculates hierarchy, sets opts by metadata, then draws everything.
@@ -946,14 +987,15 @@ function update_and_draw(draw_fn) {
   adjust_tree();
 }
 
-function set_status_msg_and_redraw_tree() {
-  utils__set_status_msg_to_rendering();
+// function set_status_msg_and_redraw_tree() {
+//   utils__set_status_msg_to_rendering();
+//
+//   setTimeout(function () {
+//     set_up_and_draw_everything();
+//     utils__set_status_msg_to_done();
+//   }, TIMEOUT);
+// }
 
-  setTimeout(function () {
-    set_up_and_draw_everything();
-    utils__set_status_msg_to_done();
-  });
-}
 
 function leaf_label_align_listener_actions() {
   update_form_constants();
