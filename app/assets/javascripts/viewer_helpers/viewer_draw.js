@@ -874,27 +874,10 @@ function draw_wrapper(draw_fn) {
   adjust_tree();
 }
 
-// /**
-//  * @note Like draw_wrapper, except that this function will handle setting a timeout for properly updating the status rendering message.
-//
-//  * @param draw_fn
-//  */
-// function draw_wrapper_with_status_msg(draw_fn) {
-//   utils__set_status_msg_to_rendering();
-//
-//   setTimeout(function () {
-//     update_form_constants();
-//     draw_fn();
-//     adjust_tree();
-//
-//     utils__set_status_msg_to_done();
-//   }, TIMEOUT);
-// }
-
 /**
  *
  * @param func
- * @param arg Optional argument to be passed in to func
+ * @param arg Optional argument to be passed in to func.  Often will be a draw function.
  */
 function set_status_msg_wrapper(func, arg) {
   utils__set_status_msg_to_rendering();
@@ -908,8 +891,6 @@ function set_status_msg_wrapper(func, arg) {
     utils__set_status_msg_to_done();
   }, TIMEOUT);
 }
-
-
 
 
 // Recalculates hierarchy, sets opts by metadata, then draws everything.
