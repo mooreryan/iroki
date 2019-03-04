@@ -284,6 +284,12 @@ function draw_arcs() {
       arcs.exit().remove();
     }
   }
+  else {
+    // Make sure the arcs are removed
+    for (var i = 0; i < num_arc_sets; ++i) {
+      d3.select("#arcs-container-" + (i + 1)).selectAll("path").remove();
+    }
+  }
 }
 
 function draw_inner_dots() {
