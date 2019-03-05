@@ -395,7 +395,7 @@ function viewer_form_add_listeners() {
       }
 
       // Warn about arcs not being implemented in certain times.  Also, changes option back to off.
-      viewer.fn.warn_about_arcs();
+      viewer.fn.warn_about_arcs_show();
 
       draw_wrapper(function () {
         draw_link_extensions();
