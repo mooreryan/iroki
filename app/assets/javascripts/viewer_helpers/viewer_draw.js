@@ -126,6 +126,10 @@ function draw_bars() {
     var start_radii = [];
 
     for (var i = 0; i < num_bar_sets; ++i) {
+      // First we need to set the start_radius for this set of bars
+      var first_datum         = ROOT.descendants().filter(is_leaf)[0];
+      start_radii[i]          = first_datum.y + global.html.val.bars_padding;
+
       var bars = d3.select("#bars-container-" + (i + 1))
                    .selectAll("rect")
                    .data(ROOT.descendants().filter(is_leaf));
@@ -138,10 +142,6 @@ function draw_bars() {
           var transform = pick_transform(d, true);
           // We only want to adjust for min bar height if the first series has min values
           var new_trans = new_transform(d, transform, i, global.html.val.bars_height, max_bar_heights[0], min_bar_heights[0]);
-
-          if (start_radii[i] === undefined) {
-            start_radii.push(get_radius_from_translate(new_trans));
-          }
 
           return new_trans;
         })
@@ -891,8 +891,9 @@ function set_status_msg_wrapper(func, arg) {
   setTimeout(function () {
     if (arg === undefined) {
       func();
-    } else {
-      func(arg)
+    }
+    else {
+      func(arg);
     }
     utils__set_status_msg_to_done();
   }, TIMEOUT);
