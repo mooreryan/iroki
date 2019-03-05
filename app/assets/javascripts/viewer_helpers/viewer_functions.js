@@ -1,12 +1,12 @@
 viewer.fn = {};
 
 //// Warning about bad options
-viewer.fn.warn_about_arcs = function () {
+viewer.fn.warn_about_arcs_show = function () {
   if (
     global.html.val.tree_layout === global.html.id.tree_layout_rectangular ||
     global.html.val.tree_layout === global.html.id.tree_layout_radial
   ) {
-    alert(global.warnings.arcs_not_available);
+    alert(global.warnings.arcs_show);
 
     jq(global.html.id.arcs_show).prop("checked", false);
 
@@ -20,7 +20,7 @@ viewer.fn.warn_about_bars_axis_show = function () {
     (global.html.val.tree_layout === global.html.id.tree_layout_radial ||
       global.html.val.tree_layout === global.html.id.tree_layout_rectangular)
   ) {
-    alert(global.warnings.bars_axis_not_available);
+    alert(global.warnings.bars_axis_show);
 
     jq(global.html.id.bars_axis_show).prop("checked", false);
 

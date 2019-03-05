@@ -9,6 +9,52 @@ viewer_spec_helpers.user_selects_a_new_layout = function (tree_layout_id) {
   global.html.val.tree_layout = selector.val();
 };
 
+/**
+ *
+ * @param thing_to_show something like bars_axis_show, arcs_show
+ * @param layout_mode something like tree_layout_radial, tree_layout_rectangular
+ * @param should_be_shown true or false depending on if the thing_to_show is allowed to be shown in that layout mode.  E.g., arcs_show (thing_to_show) should NOT be shown in tree_layout_rectangular (layout_mode) so should_be_shown would be false.
+ */
+viewer_spec_helpers.test_warn_user_about_showing_stuff = function (thing_to_show, layout_mode, should_be_shown) {
+  context("when in " + layout_mode + " mode", function () {
+    beforeEach("user makes selections", function () {
+      viewer_spec_helpers.user_selects_a_new_layout(global.html.id[layout_mode]);
+
+      var selector = $("#" + global.html.id[thing_to_show]);
+
+      selector.prop("checked", true);
+      global.html.val[thing_to_show] = selector.prop("checked");
+
+      viewer.fn["warn_about_" + thing_to_show]();
+    });
+
+    it("unchecks the " + thing_to_show + " option", function () {
+      expect(
+        $("#" + global.html.id[thing_to_show]).prop("checked")
+      ).to.equal(should_be_shown);
+    });
+
+    // For these two, if the thing should_be_shown, then there should be NO alerts.
+    it("passes the correct message to alert", function () {
+      expect(
+        window.alert.calledWith(global.warnings[thing_to_show])
+      ).to.equal(!should_be_shown);
+    });
+
+    it("alerts the user to what happened one time", function () {
+      expect(
+        window.alert.calledOnce
+      ).to.equal(!should_be_shown);
+    });
+
+    it("resets the global val variable", function () {
+      expect(
+        global.html.val[thing_to_show]
+      ).to.equal(should_be_shown);
+    });
+  });
+};
+
 describe("viewer functions", function () {
   afterEach("Remove all fixtures", function () {
     // MagicLamp.polish();
@@ -449,65 +495,9 @@ describe("viewer functions", function () {
           window.alert.restore();
         });
 
-        context("when in rectangular mode", function () {
-          beforeEach("user selects rectangular layout", function () {
-            var tree_layout = $("#" + global.html.id.tree_layout);
-            var arcs_show   = $("#" + global.html.id.arcs_show);
-
-            tree_layout.val(global.html.id.tree_layout_rectangular);
-            global.html.val.tree_layout = tree_layout.val();
-
-            arcs_show.prop("checked", true);
-            global.html.val.arcs_show = arcs_show.prop("checked");
-
-            viewer.fn.warn_about_arcs();
-          });
-
-          it("makes sure the show arc option is not checked", function () {
-            expect(
-              $("#" + global.html.id.arcs_show).prop("checked")
-            ).to.be.false;
-          });
-
-          it("alerts the user what happened", function () {
-            expect(
-              window.alert.calledWith(global.warnings.arcs_not_available)
-            ).to.be.true;
-          });
-        });
-
-        context("when in radial mode", function () {
-          beforeEach("user selects radial layout", function () {
-            var tree_layout = $("#" + global.html.id.tree_layout);
-            var arcs_show   = $("#" + global.html.id.arcs_show);
-
-            tree_layout.val(global.html.id.tree_layout_radial);
-            global.html.val.tree_layout = tree_layout.val();
-
-            arcs_show.prop("checked", true);
-            global.html.val.arcs_show = arcs_show.prop("checked");
-
-            viewer.fn.warn_about_arcs();
-          });
-
-          it("makes sure the show arc option is not checked", function () {
-            expect(
-              $("#" + global.html.id.arcs_show).prop("checked")
-            ).to.be.false;
-          });
-
-          it("alerts the user what happened", function () {
-            expect(
-              window.alert.calledWith(global.warnings.arcs_not_available)
-            ).to.be.true;
-          });
-
-          it("resets the global val variable", function () {
-            expect(
-              global.html.val.arcs_show
-            ).to.be.false;
-          });
-        });
+        viewer_spec_helpers.test_warn_user_about_showing_stuff("arcs_show", "tree_layout_rectangular", false);
+        viewer_spec_helpers.test_warn_user_about_showing_stuff("arcs_show", "tree_layout_radial", false);
+        viewer_spec_helpers.test_warn_user_about_showing_stuff("arcs_show", "tree_layout_circular", true);
       });
     });
 
@@ -523,70 +513,12 @@ describe("viewer functions", function () {
             window.alert.restore();
           });
 
-          context("when in rectangular mode", function () {
-            beforeEach("user makes selections", function () {
-              viewer_spec_helpers.user_selects_a_new_layout(global.html.id.tree_layout_rectangular);
-
-              var selector = $("#" + global.html.id.bars_axis_show);
-
-              selector.prop("checked", true);
-              global.html.val.bars_axis_show = selector.prop("checked");
-
-              viewer.fn.warn_about_bars_axis_show();
-            });
-
-            it("unchecks the show bars axis option", function () {
-              expect(
-                $("#" + global.html.id.bars_axis_show).prop("checked")
-              ).to.be.false;
-            });
-
-            it("alerts the user to what happened", function () {
-              expect(
-                window.alert.calledWith(global.warnings.bars_axis_not_available)
-              );
-            });
-
-            it("resets the global val variable", function () {
-              expect(
-                global.html.val.bars_axis_show
-              ).to.be.false;
-            });
-          });
-
-
-          context("when in radial mode", function () {
-            beforeEach("user makes selections", function () {
-              viewer_spec_helpers.user_selects_a_new_layout(global.html.id.tree_layout_radial);
-
-              var selector = $("#" + global.html.id.bars_axis_show);
-
-              selector.prop("checked", true);
-              global.html.val.bars_axis_show = selector.prop("checked");
-
-              viewer.fn.warn_about_bars_axis_show();
-            });
-
-            it("unchecks the show bars axis option", function () {
-              expect(
-                $("#" + global.html.id.bars_axis_show).prop("checked")
-              ).to.be.false;
-            });
-
-            it("alerts the user to what happened", function () {
-              expect(
-                window.alert.calledWith(global.warnings.bars_axis_not_available)
-              );
-            });
-
-            it("resets the global val variable", function () {
-              expect(
-                global.html.val.bars_axis_show
-              ).to.be.false;
-            });
-          });
+          viewer_spec_helpers.test_warn_user_about_showing_stuff("bars_axis_show", "tree_layout_rectangular", false);
+          viewer_spec_helpers.test_warn_user_about_showing_stuff("bars_axis_show", "tree_layout_radial", false);
+          viewer_spec_helpers.test_warn_user_about_showing_stuff("bars_axis_show", "tree_layout_circular", true);
         });
       });
     });
   });
 });
+
