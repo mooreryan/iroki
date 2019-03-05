@@ -452,21 +452,16 @@ function update_form_constants() {
   global.html.val.tree_layout_circular    = jq(global.html.id.tree_layout_circular).prop("selected");
   global.html.val.tree_layout_radial      = jq(global.html.id.tree_layout_radial).prop("selected");
 
-  // global.html.val.tree_layout_circular   = document.getElementById("circular-tree").selected;
-  // global.html.val.tree_layout_rectangular = document.getElementById("rectangular-tree").selected;
-  // global.html.val.tree_layout_radial   = document.getElementById(global.html.id.tree_global.html.val.tree_layout_radial).selected;
-
   // Enable the save button.  Note that these are on the save panel
   document.getElementById("save-svg").removeAttribute("disabled");
   document.getElementById("save-png").removeAttribute("disabled");
 
-  // Bars
-  VAL_BAR_SHOW            = document.getElementById(global.html.id.bars_show).checked;
-  VAL_BAR_SHOW_START_AXIS = is_checked(global.html.id.bars_axis_show);
-  VAL_BAR_PADDING         = validate_bar_padding_input(global.html.id.bars_padding);
-  VAL_BAR_WIDTH           = jq(global.html.id.bars_width).val();
-  VAL_BAR_HEIGHT          = jq(global.html.id.bars_height).val();
-  VAL_BAR_COLOR           = jq(global.html.id.bars_color).val();
+  global.html.val.bars_show      = jq(global.html.id.bars_show).prop("checked");
+  global.html.val.bars_axis_show = jq(global.html.id.bars_axis_show).prop("checked");
+  global.html.val.bars_padding   = validate_bar_padding_input(global.html.id.bars_padding);
+  global.html.val.bars_width     = parseFloat(jq(global.html.id.bars_width).val());
+  global.html.val.bars_height    = parseFloat(jq(global.html.id.bars_height).val());
+  global.html.val.bars_color     = jq(global.html.id.bars_color).val();
 
   // Arcs
   global.html.val.arcs_show       = jq(global.html.id.arcs_show).prop("checked");
@@ -571,7 +566,7 @@ function update_form_constants() {
 
   // Show or hide align tip labels TODO also account for bars here
   if (
-    (!SHOW_LEAF_LABELS && !SHOW_LEAF_DOTS && !VAL_BAR_SHOW) ||
+    (!SHOW_LEAF_LABELS && !SHOW_LEAF_DOTS && !global.html.val.bars_show) ||
     TREE_BRANCH_STYLE === TREE_BRANCH_CLADOGRAM ||
     global.html.val.tree_layout_radial
   ) {

@@ -261,6 +261,8 @@ function viewer_form_add_listeners() {
   });
   listener(global.html.id.bars_axis_show, "change", function () {
     set_status_msg_wrapper(function () {
+      viewer.fn.warn_about_bars_axis_show();
+
       draw_wrapper(function () {
         draw_link_extensions();
         draw_outer_decorations();

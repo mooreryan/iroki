@@ -58,7 +58,7 @@ function draw_bars() {
     // If there are negative values we need to scale bars by 1/2
     var scale_factor = min < 0 ? 2 : 1;
 
-    return Math.abs((height / max) * VAL_BAR_HEIGHT) / scale_factor;
+    return Math.abs((height / max) * global.html.val.bars_height) / scale_factor;
   }
 
   // TODO If there is more than 2 translate directives, this will braek
@@ -83,7 +83,7 @@ function draw_bars() {
     // need a bit of extra padding for sets 2 - N
     // TODO need to set the 10 to an inner bar padding option.
     var extra       = bar_set * 10;
-    var nudge_horiz = VAL_BAR_PADDING + (bar_set * max_height_user_opt) + extra;
+    var nudge_horiz = global.html.val.bars_padding + (bar_set * max_height_user_opt) + extra;
 
     // If there are some min heights less than 0, some bars will be going backwards and we'd like a little more nudge.
     if (min_height_data < 0) {
@@ -96,11 +96,11 @@ function draw_bars() {
     var barh = d.metadata["bar" + (i + 1) + "_height"];
 
     if (global.html.val.tree_layout_circular && barh < 0) {
-      var nudge_vert = VAL_BAR_WIDTH / 2;
+      var nudge_vert = global.html.val.bars_width / 2;
     }
     else {
       // This will center it on the line
-      var nudge_vert = -VAL_BAR_WIDTH / 2;
+      var nudge_vert = -global.html.val.bars_width / 2;
     }
 
 
@@ -112,13 +112,13 @@ function draw_bars() {
     }
     else if (global.html.val.tree_layout_rectangular && barh < 0) {
       // Do a little something different for rectangle layouts
-      ajusted_transform += " rotate(180) translate(0, -" + VAL_BAR_WIDTH + ")";
+      ajusted_transform += " rotate(180) translate(0, -" + global.html.val.bars_width + ")";
     }
 
     return ajusted_transform;
   }
 
-  if (VAL_BAR_SHOW) {
+  if (global.html.val.bars_show) {
     // TODO if this is slow, you could move it into the parse mapping file function or just after parsing.
     var max_bar_heights = get_max_bar_heights();
     var min_bar_heights = get_min_bar_heights();
@@ -137,7 +137,7 @@ function draw_bars() {
           // This will be the point of the tip of the branch to the leaf.
           var transform = pick_transform(d, true);
           // We only want to adjust for min bar height if the first series has min values
-          var new_trans = new_transform(d, transform, i, VAL_BAR_HEIGHT, max_bar_heights[0], min_bar_heights[0]);
+          var new_trans = new_transform(d, transform, i, global.html.val.bars_height, max_bar_heights[0], min_bar_heights[0]);
 
           if (start_radii[i] === undefined) {
             start_radii.push(get_radius_from_translate(new_trans));
@@ -148,7 +148,7 @@ function draw_bars() {
         .attr("fill", function (d) {
           var val = d.metadata["bar" + (i + 1) + "_color"]; //.bar1_color;
 
-          return val ? val : VAL_BAR_COLOR;
+          return val ? val : global.html.val.bars_color;
         })
         // This is right to left length in rectangle mode
         .attr("width", function (d) {
@@ -160,7 +160,7 @@ function draw_bars() {
         })
         // This is up and down length in rectangle mode
         .attr("height", function () {
-          return VAL_BAR_WIDTH;
+          return global.html.val.bars_width;
         });
     }
 
@@ -172,7 +172,7 @@ function draw_bars() {
                         .data(start_radii);
 
     // Draw the radii (only circle layout)
-    if (VAL_BAR_SHOW_START_AXIS && global.html.val.tree_layout_circular) {
+    if (global.html.val.bars_axis_show && global.html.val.tree_layout_circular) {
       rad_circles.enter()
                  .append("circle")
                  .merge(rad_circles)
@@ -181,10 +181,10 @@ function draw_bars() {
                  })
                  .attr("fill", "none")
                  // TODO currently uses the default bar color
-                 .attr("stroke", VAL_BAR_COLOR)
+                 .attr("stroke", global.html.val.bars_color)
                  .attr("stroke-width", 2);
     }
-    else if (VAL_BAR_SHOW_START_AXIS && global.html.val.tree_layout_rectangular) {
+    else if (global.html.val.bars_axis_show && global.html.val.tree_layout_rectangular) {
       alert("Bar axes are currently only available in circular mode!");
       // rad_circles.enter()
       //            .append("circle")
@@ -194,7 +194,7 @@ function draw_bars() {
       //            })
       //            .attr("fill", "none")
       //            // TODO currently uses the default bar color
-      //            .attr("stroke", VAL_BAR_COLOR)
+      //            .attr("stroke", global.html.val.bars_color)
       //            .attr("stroke-width", 2);
     }
     else {

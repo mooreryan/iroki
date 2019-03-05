@@ -455,7 +455,45 @@ describe("viewer functions", function () {
           });
         });
 
-        context("updating layout global options", function () {
+        context("updating bar global options", function () {
+          it("sets the bars_show val", function () {
+            expect(
+              global.html.val.bars_show
+            ).to.equal(viewer.defaults.bars_show);
+          });
+
+          it("sets the bars_axis_show val", function () {
+            expect(
+              global.html.val.bars_axis_show
+            ).to.equal(viewer.defaults.bars_axis_show);
+          });
+
+          it("sets the bars_padding val", function () {
+            expect(
+              global.html.val.bars_padding
+            ).to.equal(viewer.defaults.bars_padding);
+          });
+
+          it("sets the bars_width val", function () {
+            expect(
+              global.html.val.bars_width
+            ).to.equal(viewer.defaults.bars_width);
+          });
+
+          it("sets the bars_height val", function () {
+            expect(
+              global.html.val.bars_height
+            ).to.equal(viewer.defaults.bars_height);
+          });
+
+          it("sets the bars_color val", function () {
+            expect(
+              global.html.val.bars_color
+            ).to.equal(viewer.defaults.bars_color);
+          });
+        });
+
+        context("updating tree layout global options", function () {
           it("sets the tree_layout val", function () {
             expect(
               global.html.val.tree_layout
