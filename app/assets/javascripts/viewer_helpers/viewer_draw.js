@@ -88,7 +88,7 @@ function draw_bars() {
     // If there are some min heights less than 0, some bars will be going backwards and we'd like a little more nudge.
     if (min_height_data < 0) {
       // We also want to scale the min height in terms of this max and min.
-      nudge_horiz += scale_bar_height(min_height_data, max_height_data, min_height_data);
+      anudge_horiz += scale_bar_height(min_height_data, max_height_data, min_height_data);
     }
 
 
@@ -128,7 +128,17 @@ function draw_bars() {
     for (var i = 0; i < num_bar_sets; ++i) {
       // First we need to set the start_radius for this set of bars
       var first_datum         = ROOT.descendants().filter(is_leaf)[0];
-      start_radii[i]          = first_datum.y + global.html.val.bars_padding;
+
+      var aextra       = i * 10;
+      var anudge_horiz = global.html.val.bars_padding + (i * global.html.val.bars_height) + aextra;
+
+      // If there are some min heights less than 0, some bars will be going backwards and we'd like a little more nudge.
+      if (min_bar_heights[0] < 0) {
+        // We also want to scale the min height in terms of this max and min.
+        anudge_horiz += scale_bar_height(min_bar_heights[0], max_bar_heights[0], min_bar_heights[0]);
+      }
+
+      start_radii[i]          = first_datum.y + anudge_horiz; // TODO axis bug
 
       var bars = d3.select("#bars-container-" + (i + 1))
                    .selectAll("rect")
