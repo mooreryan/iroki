@@ -25,6 +25,8 @@ Rails.application.routes.draw do
   get 'large' => 'pages#canvas_viewer', as: :large
   get 'cluster' => 'pages#tree_cluster', as: :tree_cluster
 
+  get 'pd' => 'pages#pd', as: :pd
+
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

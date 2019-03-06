@@ -1,0 +1,22 @@
+.row
+  h1 Phylogenetic distance calculator
+
+.row
+  h4 Upload tree
+  form id="pd-upload-tree-form"
+    .small-12.columns
+      label for="pd-uploader-tree" Newick tree
+      input id="pd-uploader-tree" type="file"
+    .small-12.columns
+      label for="pd-group-names" Group names
+      input id="pd-group-names" type="file"
+    .small-12.columns
+      input id="pd-submit" type="button" value="Submit!"
+
+.row
+  h4 Results
+
+  #pd-results
+
+javascript:
+  global.pd.fn.main();
