@@ -78,8 +78,6 @@ global.pd.fn.handle_newick_string = function (newick_string, group_string) {
         }
       }
     });
-
-    console.log(group_membership);
   }
   else {
     alert("Upload a group file!");
@@ -101,23 +99,21 @@ global.pd.fn.handle_newick_string = function (newick_string, group_string) {
   global.pd.tree   = tree;
   global.pd.leaves = tree.leaves();
 
-  // tree.leaves().map(function (d) {
-  //   console.log(d.data.name + " " + global.pd.fn.len_to_root(d));
-  // });
-  //
-  // console.log(global.pd.fn.avg_len_to_root(tree.leaves()));
-
   var results = $("#" + global.pd.html.id.results);
   results.empty();
 
-  fn.obj.each(group_membership, function (group, names) {
-    console.log(group);
-    console.log(names);
+  results.append(
+    "<tr>" +
+    "<th>Group</th>" +
+    "<th>PhyloDist</th>" +
+    "<th>NormPhyloDist</th>" +
+    "</tr>"
+  );
 
+  fn.obj.each(group_membership, function (group, names) {
     var dist = global.pd.fn.avg_phylo_dist(tree.leaves(), names);
 
-    var result_str = "Group " + group + ": " + fn.math.round(dist, 2) + " (" + fn.math.round(dist / names.length, 2) + ")";
-    results.append("<p>" + result_str + "</p>");
+    results.append("<tr><td>" + group + "</td><td>" + fn.math.round(dist, 2) + "</td><td>" + fn.math.round(dist / names.length, 2) + "</td></tr>");
   });
 };
 
@@ -188,8 +184,6 @@ global.pd.fn.avg_phylo_dist = function (leaves, names) {
     }
   }
   else {
-    alert("Not all names had an associated node.");
-
     return -1;
   }
 
