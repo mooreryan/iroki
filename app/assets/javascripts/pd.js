@@ -1,35 +1,8 @@
-global.pd         = {};
-global.pd.html    = {};
-global.pd.html.id = {};
-
-global.pd.html.id.upload_tree_form   = "pd-upload-tree-form";
-global.pd.html.id.upload_tree_input  = "pd-uploader-tree";
-global.pd.html.id.upload_tree_submit = "pd-submit";
-
-global.pd.html.id.upload_group_input = "pd-group-names";
-
-global.pd.html.id.results        = "pd-results";
-global.pd.html.id.results_status = "pd-table-status";
-global.pd.html.id.results_save   = "pd-table-save";
-
-global.pd.html.id.hist_container = "pd-hist-container";
-global.pd.html.id.hist_svg       = "pd-hist-svg";
-global.pd.html.id.hist_status    = "pd-hist-status";
-global.pd.html.id.hist_save      = "pd-hist-save";
-
-global.pd.hist                = {};
-global.pd.hist.height         = 500;
-global.pd.hist.width          = 500;//"100%";
-global.pd.hist.width_padding  = 50;
-global.pd.hist.height_padding = 50;
-
-global.pd.hist.jackknife_iters = 100;
-
-global.pd.all_table_data = [];
-
-
-global.pd.fn = {};
-
+/**
+ * Saves SVGs!
+ *
+ * @param id The ID of the svg element you want to save.
+ */
 global.pd.fn.save_svg = function (id) {
   function svg_elem_to_string(id) {
     var svg_elem = document.getElementById(id);
@@ -55,6 +28,11 @@ global.pd.fn.save_svg = function (id) {
   }
 };
 
+/**
+ * Call this function to convert the table data into a TSV and send it for download.
+ *
+ * @param table_data an array of arrays with table data
+ */
 global.pd.fn.save_table = function (table_data) {
   if (table_data.length > 0) {
     var header = [
@@ -87,6 +65,7 @@ global.pd.fn.save_table = function (table_data) {
           else {
             // just push the whole value as it doesn't have p value
             row.push(dat);
+            // And a placeholder for the missing p value.
             row.push("");
           }
         }
@@ -110,20 +89,136 @@ global.pd.fn.save_table = function (table_data) {
   }
 };
 
+/**
+ * @param proj responds to mat and names
+ */
+global.pd.fn.draw.proj_scatter = function (group, proj) {
+  var svg = d3.select("body")
+              .append("svg")
+              .attr("width", 500)
+              .attr("height", 500)
+              .classed("pd-svg", true)
+
+  var xs = [],
+      ys = []
+
+  proj.mat.forEach(function (row) {
+    var x = row[0],
+        y = row[1];
+
+    xs.push(x)
+    ys.push(y)
+  })
+
+  var xmin = d3.min(xs)
+  var xmax = d3.max(xs)
+
+  var ymin = d3.min(ys)
+  var ymax = d3.max(ys)
+
+  var x_scale = d3.scaleLinear()
+                  .domain([xmin, xmax])
+                  .range([
+                    50,
+                    450
+                  ]);
+
+  var y_scale = d3.scaleLinear()
+                  .domain([ymin, ymax])
+                  .range([
+                    50,
+                    450
+                  ]);
+
+  // Add x axis
+  svg.append("g")
+     .attr("class", "x axis")
+     // Shove it to the bottom of the chart.
+     .attr(
+       "transform",
+       "translate(0, " +
+       Math.floor(
+         450
+       ) +
+       ")"
+     )
+     .call(d3.axisBottom(x_scale));
+
+  // Name
+  svg.append("g").append("text").text(group)
+     .attr("transform", "translate(250, 25)")
+
+  // Add y axis
+  svg.append("g")
+     .attr("class", "y axis")
+     // Shove it to the bottom of the chart.
+     .attr(
+       "transform",
+       "translate(50, 0)"
+     )
+     .call(d3.axisLeft(y_scale));
+
+  var data = proj.mat.map(function (row) {
+    return {
+      x: x_scale(row[0]),
+      y: y_scale(row[1]),
+    }
+  })
+
+  var simulation =
+        d3.forceSimulation(data)
+          .force("collide", d3.forceCollide(function (d) {
+            // give it a little padding so nodes aren't right up against each other
+            return 1.5;
+          }))
+          .on("tick", draw_circles)
+
+
+
+  function draw_circles() {
+    var circles = svg.selectAll("circle").data(data)
+
+    circles
+      .enter().append("circle")
+      .attr("r", function (d) {
+        return isNaN(d.x) || isNaN(d.y) ? 15 : 5;
+      })
+      .attr("fill", function (d) {
+        return isNaN(d.x) || isNaN(d.y) ? "red" : "rgba(10, 10, 10, 0.35)";
+      })
+      .merge(circles)
+      .attr("cx", function (d, i) {
+        return isNaN(d.x) ? x_scale(xmin) : (d.x);
+      })
+      .attr("cy", function (d) {
+        return isNaN(d.y) ? y_scale(ymin) : (d.y);
+      });
+
+    circles.exit().remove();
+  }
+
+  draw_circles()
+
+}
+
 global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
   jq(global.pd.html.id.hist_svg).remove();
 
+  // This svg will hold the histogram
   var svg = d3.select("#" + global.pd.html.id.hist_container)
               .append("svg")
               .attr("width", global.pd.hist.width)
               .attr("height", global.pd.hist.height)
               .attr("id", global.pd.html.id.hist_svg);
 
+  // radius for the subsample dots
   var radius = 3;
-
-  stats.type = "actual";
+  // actual data is a little bigger so we can see it
   stats.r    = radius * 2;
 
+  stats.type = "actual";
+
+  // this data array will hold actual data and subsamples
   var data = [];
   data.push(stats);
 
@@ -143,20 +238,35 @@ global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
 
   var x_scale = d3.scaleLinear()
                   .domain([xmin, xmax])
-                  .range([global.pd.hist.width_padding, global.pd.hist.width - global.pd.hist.width_padding]);
+                  .range([
+                    global.pd.hist.width_padding,
+                    global.pd.hist.width - global.pd.hist.width_padding
+                  ]);
 
   // Add x axis
   svg.append("g")
      .attr("class", "x axis")
      // Shove it to the bottom of the chart.
-     .attr("transform", "translate(0, " + Math.floor(global.pd.hist.height - global.pd.hist.height_padding) + ")")
+     .attr(
+       "transform",
+       "translate(0, " +
+       Math.floor(
+         global.pd.hist.height - global.pd.hist.height_padding
+       ) +
+       ")"
+     )
      .call(d3.axisBottom(x_scale));
 
   // Add x axis label
   svg.append("text")
-     .attr("transform",
-       "translate(" + (global.pd.hist.width / 2) + " ," +
-       (Math.floor(global.pd.hist.height - (global.pd.hist.height_padding / 4))) + ")")
+     .attr(
+       "transform",
+       "translate(" +
+       (global.pd.hist.width / 2) +
+       " ," +
+       (Math.floor(global.pd.hist.height - (global.pd.hist.height_padding / 4))) +
+       ")"
+     )
      .style("text-anchor", "middle")
      .text("Dispersion");
 
@@ -165,8 +275,10 @@ global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
                      .force("x", d3.forceX(function (d) {
                        return x_scale(d.disp);
                      }).strength(1))
+                     // Center the graph in the middle heightwise
                      .force("y", d3.forceY(Math.floor(global.pd.hist.height / 2)))
                      .force("collide", d3.forceCollide(function (d) {
+                       // give it a little padding so nodes aren't right up against each other
                        return d.r + 1;
                      }))
                      .on("tick", ticked);
@@ -248,6 +360,11 @@ global.pd.fn.main = function () {
     };
   };
 
+  // For easier testing, this lets you just click submit and get some test data.
+  // submit_button.addEventListener("click", function () {
+  //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
+  // });
+
   submit_button.addEventListener("click", function pd_submit_handler() {
     var tree_file = tree_uploader.files[0];
 
@@ -258,14 +375,14 @@ global.pd.fn.main = function () {
       alert("Don't forget a tree file!");
     }
   });
-
-
-  // For easier testing, comment the above submit handler and use this one.
-  // submit_button.addEventListener("click", function () {
-  //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
-  // });
 };
 
+/**
+ * Returns an object with keys being group name and values being an array of node names in that group.
+ *
+ * @param group_string
+ * @returns {null}
+ */
 global.pd.fn.parse_group_membership = function (group_string) {
   if (group_string) {
     var lines = group_string.split("\n");
@@ -334,7 +451,7 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
       "</tr>"
     );
 
-    var leaves = tree.leaves();
+    var leaves    = tree.leaves();
     var group_idx = 0;
 
     fn.obj.each(group_membership, function (group, names) {
@@ -344,13 +461,22 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
         return names.includes(node.data.name);
       });
 
-      var stats = global.pd.fn.calc_stats(group_nodes);
+      var stats = global.pd.fn.stats.calc_stats(group_nodes, true);
+
+      var proj       = global.pd.fn.stats.project_pairs(stats.pairs);
+      var name_count = 0;
+      proj.names.forEach(function (name) {
+        // console.log(name, name_count, proj.mat[name_count]);
+
+        name_count++;
+      })
+
+      global.pd.fn.draw.proj_scatter(group, proj)
+
+      var jackknife_stats = global.pd.fn.stats.jackknife_stats(leaves, group_nodes.length, global.pd.hist.jackknife_iters);
 
 
-      var jackknife_stats = global.pd.fn.jackknife_stats(leaves, group_nodes.length, global.pd.hist.jackknife_iters);
-
-
-      var pvals = global.pd.fn.compare_to_jackknife_stats(stats, jackknife_stats);
+      var pvals = global.pd.fn.stats.compare_to_jackknife_stats(stats, jackknife_stats);
 
       var table_row_data = global.pd.fn.make_table_row_data(group, stats, pvals);
 
@@ -364,7 +490,7 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
         $("#" + global.pd.html.id.hist_status).text("Rendering!");
 
         setTimeout(function () {
-          // var jk_stats = global.pd.fn.jackknife_stats(
+          // var jk_stats = global.pd.fn.stats.jackknife_stats(
           //   leaves,
           //   group_nodes.length,
           //   global.pd.hist.jackknife_iters
@@ -391,6 +517,7 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
   }, TIMEOUT);
 };
 
+/*
 global.pd.fn.len_to_root = function (node) {
   var len   = 0;
   var depth = node.depth;
@@ -409,25 +536,6 @@ global.pd.fn.avg_len_to_root = function (nodes) {
   return fn.ary.mean(nodes.map(function (d) {
     return global.pd.fn.len_to_root(d);
   }));
-};
-
-global.pd.fn.len_to = function (n1, n2) {
-  var path      = n1.path(n2);
-  var depths    = path.map(function (d) {
-    return d.depth;
-  });
-  var min_depth = d3.min(depths);
-
-  var len = 0;
-
-  path.forEach(function (n) {
-    // The node at the min depth is the least common ancestor.  The branch length of that node is not part of the dispance between the two nodes.
-    if (n.depth !== min_depth) {
-      len += n.data.branch_length;
-    }
-  });
-
-  return len;
 };
 
 global.pd.fn.all_phylo_disp = function (leaves) {
@@ -463,38 +571,25 @@ global.pd.fn.sort_all_phylo_disp = function (all_phylo_disp) {
   });
 };
 
-/**
- * Returns the mean phylogenetic dispance between all nodes in the names arg.
- *
- * @param all the leaf nodes of the tree
- * @param names names of the nodes taht you care about
- * @returns {number}
- */
-global.pd.fn.avg_phylo_disp = function (leaves, names) {
-  var total_len = 0;
-  var node1, node2;
+*/
 
-  // First get all the nodes in the names ary
-  var nodes = leaves.filter(function (node) {
-    return names.includes(node.data.name);
+global.pd.fn.len_to = function (n1, n2) {
+  var path      = n1.path(n2);
+  var depths    = path.map(function (d) {
+    return d.depth;
+  });
+  var min_depth = d3.min(depths);
+
+  var len = 0;
+
+  path.forEach(function (n) {
+    // The node at the min depth is the least common ancestor.  The branch length of that node is not part of the dispance between the two nodes.
+    if (n.depth !== min_depth) {
+      len += n.data.branch_length;
+    }
   });
 
-  if (nodes.length === names.length) {
-    for (var i = 0; i < nodes.length - 1; ++i) {
-      node1 = nodes[i];
-
-      for (var j = i + 1; j < nodes.length; ++j) {
-        node2 = nodes[j];
-
-        total_len += global.pd.fn.len_to(node1, node2);
-      }
-    }
-  }
-  else {
-    return -1;
-  }
-
-  return total_len / nodes.length;
+  return len;
 };
 
 // See https://bost.ocks.org/mike/shuffle/
@@ -516,6 +611,14 @@ global.pd.fn.fy_shuf = function (array) {
   return array;
 };
 
+/**
+ * Format the stats into an array of data ready to be turned into HTML row.
+ *
+ * @param group
+ * @param stats
+ * @param pvals
+ * @returns {*[]}
+ */
 global.pd.fn.make_table_row_data = function (group, stats, pvals) {
   var precision = 3;
 
@@ -541,6 +644,13 @@ global.pd.fn.make_table_row_data = function (group, stats, pvals) {
   return [group, node_count, pair_count, sum, mean, disp];
 };
 
+/**
+ * Convert the array of table data into HTML row.  Also adds a unique id based on the index.
+ *
+ * @param idx
+ * @param ary
+ * @returns {string}
+ */
 global.pd.fn.make_table_row = function (idx, ary) {
   var row_html = ary.map(function (elem) {
     return "<td>" + elem + "</td>";
@@ -550,18 +660,78 @@ global.pd.fn.make_table_row = function (idx, ary) {
   return "<tr id=\"pd-row-" + idx + "\">" + row_html + "</tr>";
 };
 
+var t, l;
 
-// I shuffle the original array in place, so make sure that's what you want!  Also, I return shallow copies!
-global.pd.fn.random_sample = function (ary, size) {
+
+//// Stats
+
+/**
+ * The main tree stats function to calculate phylo dist and disp for all pairs of nodes.
+ *
+ * @param nodes
+ * @param keep_pairs if this is true, will also return an array of all dists.  Could take up a lot of space!
+ * @returns {{node_count: *, pair_count: number, sum: number, mean: number, disp: number}}
+ */
+global.pd.fn.stats.calc_stats = function (nodes, keep_pairs) {
+  // The total distance for all tip to tip pairs of nodes.
+  var total = 0.0;
+  var dist  = 0.0;
+
+  // The number of tip to tip pairs.
+  var npairs = 0;
+  var n1, n2;
+
+  var pairs = []
+
+  for (var i = 0; i < nodes.length - 1; ++i) {
+    n1 = nodes[i];
+
+    for (var j = i + 1; j < nodes.length; ++j) {
+      n2 = nodes[j];
+
+      dist = global.pd.fn.len_to(n1, n2);
+      total += dist
+      npairs += 1;
+
+      if (keep_pairs) {
+        pairs.push([n1, n2, dist])
+      }
+    }
+  }
+
+  return {
+    pairs: pairs,
+    node_count: nodes.length,
+    pair_count: npairs,
+    sum: total,
+    mean: total / npairs,
+    disp: total / nodes.length
+  };
+
+};
+
+/**
+ * I shuffle the original array in place, so make sure that's what you want!
+ * Also, I return shallow copies!
+ */
+global.pd.fn.stats.random_sample = function (ary, size) {
   return global.pd.fn.fy_shuf(ary).slice(0, size);
 };
 
-global.pd.fn.jackknife_stats = function (nodes, sample_size, iters) {
-  var sample, stats, all_stats = [];
+/**
+ * Calculate stats of random samples of the data.
+ *
+ * @param nodes
+ * @param sample_size
+ * @param iters
+ * @returns {Array}
+ */
+global.pd.fn.stats.jackknife_stats = function (nodes, sample_size, iters) {
+  var sample, all_stats = [];
   for (var i = 0; i < iters; ++i) {
-    sample = global.pd.fn.random_sample(nodes, sample_size);
+    sample = global.pd.fn.stats.random_sample(nodes, sample_size);
 
-    all_stats.push(global.pd.fn.calc_stats(sample));
+    all_stats.push(global.pd.fn.stats.calc_stats(sample));
   }
 
   return all_stats;
@@ -572,7 +742,7 @@ global.pd.fn.jackknife_stats = function (nodes, sample_size, iters) {
  * @param stats
  * @param jackknife_stats
  */
-global.pd.fn.compare_to_jackknife_stats = function (stats, jackknife_stats) {
+global.pd.fn.stats.compare_to_jackknife_stats = function (stats, jackknife_stats) {
   var sum = 0, mean = 0, disp = 0;
 
   jackknife_stats.forEach(function (jstats, i) {
@@ -596,63 +766,50 @@ global.pd.fn.compare_to_jackknife_stats = function (stats, jackknife_stats) {
   };
 };
 
-global.pd.fn.collate_jackknife_stats = function (jackknife_stats) {
-  var mean_stats = {},
-      node_count = 0,
-      pair_count = 0,
-      sum        = 0,
-      mean       = 0,
-      disp       = 0,
-      len        = jackknife_stats.length;
+global.pd.fn.stats.project_pairs = function (pairs) {
+  var names    = new Set();
+  var graph    = {};
+  var dist_mat = []
 
-  jackknife_stats.forEach(function (stats, i) {
-    if (i === 0) {
-      node_count = stats.node_count;
-      pair_count = stats.pair_count;
+
+  pairs.forEach(function (pair) {
+    var source = pair[0].data.name;
+    var target = pair[1].data.name;
+    var dist   = pair[2]
+
+    if (graph[source] === undefined) {
+      graph[source] = {}
+    }
+    if (graph[target] === undefined) {
+      graph[target] = {}
     }
 
-    sum += stats.sum;
-    mean += stats.mean;
-    disp += stats.disp;
-  });
+    graph[source][target] = dist
+    graph[target][source] = dist
 
-  return {
-    node_count: node_count,
-    pair_count: pair_count,
-    sum: sum / len,
-    mean: mean / len,
-    disp: disp / len
-  };
-};
+    // Self hits have zero distance.
+    graph[source][source] = 0.0
+    graph[target][target] = 0.0
 
+    names.add(source)
+    names.add(target)
+  })
 
-global.pd.fn.calc_stats = function (nodes) {
-  // The total distance for all tip to tip pairs of nodes.
-  var total = 0.0;
+  names.forEach(function (k1) {
+    var row = []
+    names.forEach(function (k2) {
+      row.push(graph[k1][k2])
+    })
 
-  // The number of tip to tip pairs.
-  var npairs = 0;
-  var n1, n2;
+    dist_mat.push(row)
+  })
 
-  for (var i = 0; i < nodes.length - 1; ++i) {
-    n1 = nodes[i];
+  var proj     = fn.project.project_with_num_pcs_cutoff(
+    lalolib.array2mat(dist_mat),
+    2
+  )
+  //console.log(dist_mat)
+  var proj_mat = fn.lalolib.mat2array(proj)
 
-    for (var j = i + 1; j < nodes.length; ++j) {
-      n2 = nodes[j];
-
-      total += global.pd.fn.len_to(n1, n2);
-      npairs += 1;
-    }
-  }
-
-  return {
-    node_count: nodes.length,
-    pair_count: npairs,
-    sum: total,
-    mean: total / npairs,
-    disp: total / nodes.length
-  };
-
-};
-
-var t, l;
+  return { names: names, mat: proj_mat };
+}

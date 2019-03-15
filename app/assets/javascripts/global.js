@@ -119,6 +119,42 @@ global.html.val.arcs_padding    = undefined;
 global.html.val.arcs_height     = undefined;
 global.html.val.arcs_cap_radius = undefined;
 
+//// Phylogenetic dispersion globals
+global.pd         = {};
+global.pd.html    = {};
+global.pd.html.id = {};
+
+global.pd.fn       = {};
+global.pd.fn.stats = {};
+global.pd.fn.draw  = {};
+
+global.pd.hist = {};
+
+global.pd.html.id.upload_tree_form   = "pd-upload-tree-form";
+global.pd.html.id.upload_tree_input  = "pd-uploader-tree";
+global.pd.html.id.upload_tree_submit = "pd-submit";
+
+global.pd.html.id.upload_group_input = "pd-group-names";
+
+global.pd.html.id.results        = "pd-results";
+global.pd.html.id.results_status = "pd-table-status";
+global.pd.html.id.results_save   = "pd-table-save";
+
+global.pd.html.id.hist_container = "pd-hist-container";
+global.pd.html.id.hist_svg       = "pd-hist-svg";
+global.pd.html.id.hist_status    = "pd-hist-status";
+global.pd.html.id.hist_save      = "pd-hist-save";
+
+global.pd.hist.height         = 500;
+global.pd.hist.width          = 500;//"100%";
+global.pd.hist.width_padding  = 50;
+global.pd.hist.height_padding = 50;
+
+global.pd.hist.jackknife_iters = 100;
+
+global.pd.all_table_data = [];
+//// End phylogentic dispersion globals
+
 
 global.ZERO_REPLACEMENT_VAL = 1e-5;
 
