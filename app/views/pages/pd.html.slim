@@ -1,5 +1,5 @@
 .row
-  h1 Phylogenetic distance calculator
+  h1 Phylogenetic dispersion calculator
 
 .row
   h4 Upload tree
@@ -17,7 +17,30 @@
   h2 Results
 
 .row
-  table#pd-results
+  .small-12.medium-6.columns
+    .row
+      h3 Stats
+    .row
+      p#pd-table-status Upload your data and click submit!
+    .row
+      .small-12.columns
+        input id="pd-table-save" type="button" value="Save table!"
+    .row
+      br
+    .row.results-table
+      table#pd-results
+  .small-12.medium-6.columns
+    .row
+      h3 Jackknife info
+    .row
+      p#pd-hist-status Click a row to see jackknife results!
+    .row
+      .small-12.columns
+        input id="pd-hist-save" type="button" value="Save hist!"
+    .row
+      br
+    .row#pd-hist-container
+
 
 
 javascript:

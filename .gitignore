@@ -60,3 +60,5 @@ simple_cov_output
 thing.pdf
 
 manuscript
+
+app/assets/javascripts/silly.js

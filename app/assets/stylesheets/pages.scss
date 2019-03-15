@@ -1,14 +1,11 @@
 // Place all the styles related to the pages controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-
 @import 'settings';
 
 .hideme {
   display: none;
 }
-
-
 
 // This is for the viewer
 #show-length {
@@ -123,19 +120,18 @@ label {
   border-right-width: 3px;
 }
 
-
 #save-tab-button {
   border-left-width: 1.5px;
 }
 
 // See https://gist.github.com/corilam/5c935e6fb6bdef40b78b4c66e4b78dc9
 .tabs-title {
-  float:none !important;
-  display:inline-block;
+  float: none !important;
+  display: inline-block;
 }
 
 .tabs {
-  text-align:center;
+  text-align: center;
 }
 
 #iroki-logo {
@@ -160,6 +156,7 @@ hr.row {
 .thick-right-border {
   border-right-width: 3px;
 }
+
 .thin-right-border {
   border-right-width: 1.5px;
 }
@@ -167,6 +164,7 @@ hr.row {
 .thick-left-border {
   border-left-width: 3px;
 }
+
 .thin-left-border {
   border-left-width: 1.5px;
 }
@@ -221,7 +219,6 @@ hr.row {
 /*     } */
 /* } */
 
-
 /* .blink { */
 /*     animation-duration: 1s; */
 /*     animation-name: blink; */
@@ -237,3 +234,24 @@ hr.row {
 /*         opacity: 0; */
 /*     } */
 /* } */
+
+.results-table {
+  max-height: 500px;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+#pd-hist-svg {
+  background-color: white;
+}
+
+#pd-hist-svg {
+  line {
+    stroke: #272727;
+    stroke-width: 1px;
+  }
+
+  text {
+    fill: #272727;
+  }
+}
