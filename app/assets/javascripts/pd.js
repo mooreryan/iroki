@@ -392,7 +392,7 @@ global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
         return d.r;
       })
       .attr("fill", function (d) {
-        return d.type === "actual" ? "#528EC7" : "#272727";
+        return d.type === "actual" ? global.pd.colors.blue : global.pd.colors.black;
       })
       .merge(circles)
       .attr("cx", function (d) {
@@ -457,21 +457,21 @@ global.pd.fn.main = function () {
   };
 
   // For easier testing, this lets you just click submit and get some test data.
-  // submit_button.addEventListener("click", function () {
-  //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
-  //   // global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
-  // });
-  //
-  submit_button.addEventListener("click", function pd_submit_handler() {
-    var tree_file = tree_uploader.files[0];
-
-    if (tree_file) {
-      tree_reader.readAsText(tree_file);
-    }
-    else {
-      alert("Don't forget a tree file!");
-    }
+  submit_button.addEventListener("click", function () {
+    // global.pd.fn.handle_data(silly.tree, silly.name_graph);
+    global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
   });
+
+  // submit_button.addEventListener("click", function pd_submit_handler() {
+  //   var tree_file = tree_uploader.files[0];
+  //
+  //   if (tree_file) {
+  //     tree_reader.readAsText(tree_file);
+  //   }
+  //   else {
+  //     alert("Don't forget a tree file!");
+  //   }
+  // });
 };
 
 /**
@@ -528,6 +528,10 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
               return d.branchset ? 0 : 1;
             })
             .sort(sort_ascending);
+
+    // Set x, y, r
+    global.pd.fn.set_up_hierarchy(tree);
+    global.pd.fn.draw.tree(tree);
 
     t                = tree;
     l                = tree.leaves();
@@ -608,6 +612,10 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
           global.pd.fn.draw.color_points_by_name(tree_scatter, names);
 
           global.pd.fn.draw_jk_hist(stats, jackknife_stats, svg);
+
+          // Update the tree with new colors
+          global.pd.fn.draw.tree(tree, names);
+
 
           // Set status msg to done
           $("#" + global.pd.html.id.hist_status).text("Done!");
@@ -947,3 +955,187 @@ global.pd.fn.stats.project_pairs = function (pairs) {
   return { names: names, mat: proj.proj_mat, var_exp: proj.var_exp };
 
 };
+
+
+/**
+ * Call this to set the x, y, and radius values for the tree so that you can draw it later!
+ *
+ * @param d3_hier I will modify this arg in place!
+ */
+global.pd.fn.set_up_hierarchy = function (d3_hier) {
+  /**
+   * From the given `node`, what is sum of branches to the furthest leaf node?
+   * @param node
+   */
+  function len_to_furthest_leaf(node) {
+    return node.data.branch_length + (node.children ? d3.max(node.children, len_to_furthest_leaf) : 0);
+  }
+
+  /**
+   * Set the radius of each node by recursively summing and scaling the distance from the root.
+   *
+   * @param node You probably want to start with the root.
+   * @param r If you start with the root, you'll want to pass 0 for this.
+   * @param scale_factor Probably you want to weight the radius by the longest root to leaf length.
+   */
+  function set_radius(node, r, scale_factor) {
+    node.radius = (r += node.data.branch_length) * scale_factor;
+
+    if (node.children) {
+      node.children.forEach(function (child) {
+        set_radius(child, r, scale_factor);
+      });
+    }
+  }
+
+  var theta  = 360,
+      radius = 200;
+
+  var cluster = d3.cluster().size([theta, radius]);
+
+  // This modifies d3_hier!
+  cluster(d3_hier);
+
+  // The root is defined to have 0 branch length.
+  d3_hier.data.branch_length = 0;
+
+  set_radius(
+    d3_hier,
+    d3_hier.data.branch_length,
+    radius / len_to_furthest_leaf(d3_hier)
+  );
+
+  // Now d3_hier is ready to be plotted!
+};
+
+/**
+ * You need to make sure to run set_up_hierarchy() on `d3_hier` before running this function!
+ *
+ * @param d3_hier
+ */
+global.pd.fn.draw.tree = function (d3_hier, group_names) {
+  // remove tree TODO merge the old values rather than remove.
+  d3.select("#pd-tree").remove();
+
+  var svg = d3.select("body").append("svg")
+              .attr("width", 500).attr("height", 500)
+              .attr("id", "pd-tree").classed("pd-svg", true)
+              .append("g")
+              .attr("transform", "translate(250, 250)");
+
+  var leaves = d3_hier.leaves();
+
+  if (group_names !== undefined) {
+    // We want to make sure all paths to the root for these group nodes will be colored.  So mark it.
+    leaves.forEach(function (node) {
+      var group_status = group_names.includes(node.data.name) ? "in-current-group" : "not-current-group";
+
+      node.group_status = group_status;
+      node.ancestors().forEach(function (parent) {
+        parent.group_status = group_status;
+      });
+    });
+  }
+  else {
+    // No group names, make sure all the color vals are unset
+    leaves.forEach(function (node) {
+      node.group_status = "not-current-group";
+      node.ancestors().forEach(function (parent) {
+        parent.group_status = "not-current-group";
+      });
+    });
+  }
+
+  // var all_nodes = d3_hier.descendants();
+  var all_links = d3_hier.links();
+  // var circles   = svg.selectAll("circle").data(all_nodes);
+
+  // function transform_circle(d) {
+  //   return "rotate(" + d.x + ") translate(" + d.radius + ", 0)";
+  // }
+
+  // circles.enter().append("circle")
+  //        .attr("r", 4)
+  //        .merge(circles)
+  //        .attr("transform", function (d) {
+  //          return transform_circle(d);
+  //        })
+  //        // .attr("cx", function (d) {
+  //        //   return Math.cos(d.x) * d.radius;
+  //        // })
+  //        // .attr("cy", function (d) {
+  //        //   return Math.sin(d.y) * d.radius;
+  //        // })
+  //        .attr("class", function (d) {
+  //          return d.data.name;
+  //        });
+  //
+  // circles.exit().remove();
+
+  var links = svg.selectAll("path").data(all_links);
+
+  function link_path(start_angle, start_radius, end_angle, end_radius) {
+    var start_radians = start_angle / 180 * Math.PI;
+    var end_radians   = end_angle / 180 * Math.PI;
+
+    var x0 = Math.cos(start_radians) * start_radius,
+        y0 = Math.sin(start_radians) * start_radius,
+        x1 = Math.cos(end_radians) * end_radius,
+        y1 = Math.sin(end_radians) * end_radius;
+
+    var arc;
+
+    if (end_angle === start_angle) {
+      // e.g., coming straight from the root, no arc necessary
+      arc = "";
+    }
+    else {
+      // sweep from the inner node to the outer node
+      var sweep_positive  = 1; // clockwise
+      var sweep_negative  = 0; // counter clockwise
+      var arc_start_x     = start_radius;
+      var arc_start_y     = start_radius;
+      var x_axis_rotation = 0; // do not rotate x-axis of the ellipse
+      var large_arc_flag  = 0; // draw the smaller arc
+      var sweep_flag      = end_angle > start_angle ? sweep_positive : sweep_negative;
+      var arc_end_x       = start_radius * Math.cos(end_radians);
+      var arc_end_y       = start_radius * Math.sin(end_radians);
+
+      arc = " A" + [
+        arc_start_x,
+        arc_start_y,
+        x_axis_rotation,
+        large_arc_flag,
+        sweep_flag,
+        arc_end_x,
+        arc_end_y
+      ].join(",");
+    }
+
+
+    var path =
+          // Move to the source location
+          "M" + x0 + "," + y0 +
+          // draw the arc if necessary
+          arc +
+          // Finally draw the line to the endpoint
+          " L" + x1 + "," + y1;
+
+    return path;
+  }
+
+  links.enter().append("path")
+       .attr("fill", "none")
+       .attr("stroke-width", 2)
+       .merge(links)
+       .attr("stroke", function (d) {
+         return d.target.group_status === "in-current-group" ? global.pd.colors.yellow : global.pd.colors.black;
+       })
+       .attr("d", function (d) {
+         return link_path(d.source.x, d.source.radius, d.target.x, d.target.radius);
+       });
+
+  links.exit().remove();
+};
+
+// x is always x, y is y in cladograms and r in true dist trees

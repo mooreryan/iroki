@@ -152,10 +152,16 @@ global.pd.hist.height_padding = 50;
 
 global.pd.hist.jackknife_iters = 100;
 
-global.pd.html.id.tree_scatter_svg  = "pd-tree-scatter-svg";
-global.pd.html.id.tree_scatter_container  = "pd-tree-scatter-container";
-global.pd.html.id.tree_scatter_status  = "pd-tree-scatter-status";
-global.pd.html.id.tree_scatter_save  = "pd-tree-scatter-save";
+global.pd.colors = {
+  yellow: "rgba(255, 150, 30, 0.95)",
+  black: "#272727",
+  blue: "#528EC7"
+};
+
+global.pd.html.id.tree_scatter_svg       = "pd-tree-scatter-svg";
+global.pd.html.id.tree_scatter_container = "pd-tree-scatter-container";
+global.pd.html.id.tree_scatter_status    = "pd-tree-scatter-status";
+global.pd.html.id.tree_scatter_save      = "pd-tree-scatter-save";
 
 global.pd.html.id.group_scatter = "pd-group-scatter";
 
