@@ -56,6 +56,37 @@ fn.project.project_with_num_pcs_cutoff = function (M, num_pcs_to_keep, scale) {
 };
 
 /**
+ *  * Pretty much like project_with_num_pcs_cutoff except that it differs in return value and always gives 2d projection.
+ *
+ * Mainly just used in the phylo disp.
+
+ * @param M
+ * @param scale
+ * @returns {{proj_mat: Array, var_exp: *[]}}
+ */
+fn.project.project_2d_ret_var_exp = function (M, scale) {
+  var num_pcs_to_keep = 2;
+  var proj_mat;
+  var svd = fn.lalolib.svd.svd(M, true, scale);
+
+  var pca_scores = fn.lalolib.svd.pca_scores(svd);
+
+  var num_cols = pca_scores.n;
+  if (num_pcs_to_keep > num_cols) {
+    proj_mat = fn.lalolib.first_n_cols(pca_scores, num_cols);
+  }
+  else {
+    proj_mat = fn.lalolib.first_n_cols(pca_scores, num_pcs_to_keep);
+  }
+
+  var variance_explained = fn.lalolib.svd.variance_explained(svd);
+  // TODO might blow up if passed 1d M
+  var var_ary = variance_explained.slice(0, num_pcs_to_keep);
+
+  return { proj_mat: fn.lalolib.mat2array(proj_mat), var_exp: var_ary}
+};
+
+/**
  * Return a 1D projection of the samples in PC space.
  *
  * The output is scaled from 0 to 1 for use in the chroma.js color scale functions.

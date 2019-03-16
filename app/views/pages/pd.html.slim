@@ -4,10 +4,10 @@
 .row
   h4 Upload tree
   form id="pd-upload-tree-form"
-    .small-12.columns
+    .small-12.medium-6.columns
       label for="pd-uploader-tree" Newick tree
       input id="pd-uploader-tree" type="file"
-    .small-12.columns
+    .small-12.medium-6.columns
       label for="pd-group-names" Group names
       input id="pd-group-names" type="file"
     .small-12.columns
@@ -17,7 +17,7 @@
   h2 Results
 
 .row
-  .small-12.medium-6.columns
+  .row.small-12.columns
     .row
       h3 Stats
     .row
@@ -29,18 +29,29 @@
       br
     .row.results-table
       table#pd-results
-  .small-12.medium-6.columns
-    .row
-      h3 Jackknife info
-    .row
-      p#pd-hist-status Click a row to see jackknife results!
-    .row
-      .small-12.columns
-        input id="pd-hist-save" type="button" value="Save hist!"
-    .row
-      br
-    .row#pd-hist-container
-
+  .row
+    .small-12.medium-6.columns
+      .row
+        h3 Tree projection
+      .row
+        p#pd-tree-scatter-status Click a row to highlight nodes!
+      .row
+        .small-12.columns
+          input id="pd-tree-scatter-save" type="button" value="Save proj!"
+      .row
+        br
+      .row#pd-tree-scatter-container
+    .small-12.medium-6.columns
+      .row
+        h3 Jackknife info
+      .row
+        p#pd-hist-status Click a row to see jackknife results!
+      .row
+        .small-12.columns
+          input id="pd-hist-save" type="button" value="Save hist!"
+      .row
+        br
+      .row#pd-hist-container
 
 
 javascript:

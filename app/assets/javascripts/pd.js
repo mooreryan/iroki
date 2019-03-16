@@ -3,7 +3,7 @@
  *
  * @param id The ID of the svg element you want to save.
  */
-global.pd.fn.save_svg = function (id) {
+global.pd.fn.save_svg = function (id, fname) {
   function svg_elem_to_string(id) {
     var svg_elem = document.getElementById(id);
 
@@ -23,7 +23,7 @@ global.pd.fn.save_svg = function (id) {
         [str],
         { type: "application/svg+xml" }
       ),
-      "histogram.svg"
+      fname
     );
   }
 };
@@ -40,38 +40,45 @@ global.pd.fn.save_table = function (table_data) {
       "NodeCount",
       "PairCount",
       "PairDistTotal",
-      "PairDistTotalP",
       "PairDistMean",
-      "PairDistMeanP",
       "Dispersion",
-      "DispersionP",
+      "P",
     ].join("\t");
 
+    // Note, all three p values will match.
+    var pval;
+
     var table = table_data.map(function (row_data) {
-      var row = [];
+      return row_data.join("\t");
+      // var row = [];
+      //
+      // row_data.forEach(function (dat, i) {
+      //   if (i < 3) {
+      //     // First three columns don't have p values
+      //     row.push(dat);
+      //   }
+      //   else {
+      //     // vals are like 1231.32 (p = 0.0021)
+      //     var m = dat.match(/^(.*) \(p = (.*)\)$/);
+      //     if (m) {
+      //       row.push(m[1]);
+      //       if (pval === undefined) {
+      //         pval = m[2];
+      //       }
+      //       else {
+      //         console.log("WARNING -- p val mismatch encountered.");
+      //       }
+      //     }
+      //     else {
+      //       // just push the whole value as it doesn't have p value
+      //       row.push(dat);
+      //     }
+      //   }
+      // });
+      //
+      // row.push(pval);
 
-      row_data.forEach(function (dat, i) {
-        if (i < 3) {
-          // First three columns don't have p values
-          row.push(dat);
-        }
-        else {
-          // vals are like 1231.32 (p = 0.0021)
-          var m = dat.match(/^(.*) \(p = (.*)\)$/);
-          if (m) {
-            row.push(m[1]);
-            row.push(m[2]);
-          }
-          else {
-            // just push the whole value as it doesn't have p value
-            row.push(dat);
-            // And a placeholder for the missing p value.
-            row.push("");
-          }
-        }
-      });
-
-      return row.join("\t");
+      // return row.join("\t");
     }).join("\n");
 
     var table_str = [header, table].join("\n");
@@ -89,32 +96,95 @@ global.pd.fn.save_table = function (table_data) {
   }
 };
 
+g = {};
+
 /**
- * @param proj responds to mat and names
+ *
+ * @param tree_scatter this should be from the output of proj_scatter().  Is responds to names and svg.
  */
-global.pd.fn.draw.proj_scatter = function (group, proj) {
-  var svg = d3.select("body")
+global.pd.fn.draw.color_points_by_name = function (tree_scatter, group_names) {
+
+  g.tree_scatter = tree_scatter;
+  g.group_names  = group_names;
+
+  var circles = tree_scatter.svg
+                            .selectAll("circle")
+                            .data(tree_scatter.data);
+
+  g.circles = circles;
+
+  circles
+    .enter().append("circle")
+    .attr("cx", function (d) {
+      return 250;
+    })
+    .attr("cy", function (d) {
+      return 250;
+    })
+    .merge(circles)
+    // You have to adjust the location of the nodes so that they are in the correct location for the correct data point.
+    .attr("cx", function (d) {
+      return d.x;
+    })
+    .attr("cy", function (d) {
+      return d.y;
+    })
+    // Set the fill here so it will show up on save.
+    .attr("fill", function (d) {
+      if (group_names.includes(d.name)) {
+        return "rgba(255,150,30, 0.95)";
+      }
+      else {
+        return "rgba(10, 10, 10, 0.35)";
+      }
+    })
+    .attr("class", function (d) {
+      if (group_names.includes(d.name)) {
+        return "in-current-group";
+      }
+      else {
+        return "not-current-group";
+      }
+    });
+
+  tree_scatter.svg
+              .selectAll("circle.in-current-group")
+              .raise();
+};
+
+/**
+ * Draws and returns the svg and the data (x, y, name)
+ *
+ * @param group the name of the group (used for the title)
+ * @param proj responds to mat (which is an array of arrays), var_exp (an array of var explained 2d), and names (which is a set)
+ * @param id id for svg element
+ */
+global.pd.fn.draw.proj_scatter = function (group, proj, id) {
+  d3.select("#" + global.pd.html.id.tree_scatter_svg).remove();
+
+  var svg = d3.select("#" + global.pd.html.id.tree_scatter_container)
               .append("svg")
               .attr("width", 500)
               .attr("height", 500)
-              .classed("pd-svg", true)
+              .attr("id", global.pd.html.id.tree_scatter_svg)
+              .classed("pd-svg", true);
 
   var xs = [],
-      ys = []
+      ys = [];
 
   proj.mat.forEach(function (row) {
     var x = row[0],
         y = row[1];
 
-    xs.push(x)
-    ys.push(y)
-  })
+    xs.push(x);
+    ys.push(y);
+  });
 
-  var xmin = d3.min(xs)
-  var xmax = d3.max(xs)
+  var xmin = d3.min(xs);
+  var xmax = d3.max(xs);
 
-  var ymin = d3.min(ys)
-  var ymax = d3.max(ys)
+  var ymin = d3.min(ys);
+  var ymax = d3.max(ys);
 
   var x_scale = d3.scaleLinear()
                   .domain([xmin, xmax])
@@ -144,9 +214,16 @@ global.pd.fn.draw.proj_scatter = function (group, proj) {
      )
      .call(d3.axisBottom(x_scale));
 
-  // Name
-  svg.append("g").append("text").text(group)
-     .attr("transform", "translate(250, 25)")
+  // X axis label
+  var pc1_var_exp = fn.math.round(proj.var_exp[0], 1);
+  svg.append("text")
+     .attr("transform", "translate(250, 482)")
+     .style("text-anchor", "middle")
+     .text("PC1 (" + pc1_var_exp + "%)");
+
+  // // Name
+  // svg.append("g").append("text").text(group)
+  //    .attr("transform", "translate(250, 25)");
 
   // Add y axis
   svg.append("g")
@@ -158,34 +235,47 @@ global.pd.fn.draw.proj_scatter = function (group, proj) {
      )
      .call(d3.axisLeft(y_scale));
 
-  var data = proj.mat.map(function (row) {
+  // Y axis label
+  var pc2_var_exp = fn.math.round(proj.var_exp[1], 1);
+  svg.append("text")
+     .attr("transform", "translate(20, 250) rotate(-90)")
+     .style("text-anchor", "middle")
+     .text("PC2 (" + pc2_var_exp + "%)");
+
+  // .text("PC2");
+
+  var names = Array.from(proj.names);
+  var data  = proj.mat.map(function (row, i) {
     return {
       x: x_scale(row[0]),
       y: y_scale(row[1]),
-    }
-  })
+      name: names[i]
+    };
+  });
 
-  var simulation =
-        d3.forceSimulation(data)
-          .force("collide", d3.forceCollide(function (d) {
-            // give it a little padding so nodes aren't right up against each other
-            return 1.5;
-          }))
-          .on("tick", draw_circles)
-
+  // var simulation =
+  //       d3.forceSimulation(data)
+  //         .force("collide", d3.forceCollide(function (d) {
+  //           // give it a little padding so nodes aren't right up against each other
+  //           return 1.5;
+  //         }))
+  //         .on("tick", draw_circles);
 
 
   function draw_circles() {
-    var circles = svg.selectAll("circle").data(data)
+    var circles = svg.selectAll("circle").data(data);
 
     circles
       .enter().append("circle")
+    // For the default non selected styling
+      .attr("class", "not-current-group")
       .attr("r", function (d) {
         return isNaN(d.x) || isNaN(d.y) ? 15 : 5;
       })
-      .attr("fill", function (d) {
-        return isNaN(d.x) || isNaN(d.y) ? "red" : "rgba(10, 10, 10, 0.35)";
-      })
+      .attr("fill", "rgba(10, 10, 10, 0.35)")
+      // .attr("fill", function (d) {
+      //   return isNaN(d.x) || isNaN(d.y) ? "red" : "rgba(10, 10, 10, 0.35)";
+      // })
       .merge(circles)
       .attr("cx", function (d, i) {
         return isNaN(d.x) ? x_scale(xmin) : (d.x);
@@ -197,9 +287,10 @@ global.pd.fn.draw.proj_scatter = function (group, proj) {
     circles.exit().remove();
   }
 
-  draw_circles()
+  draw_circles();
 
-}
+  return { svg: svg, data: data };
+};
 
 global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
   jq(global.pd.html.id.hist_svg).remove();
@@ -209,7 +300,9 @@ global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
               .append("svg")
               .attr("width", global.pd.hist.width)
               .attr("height", global.pd.hist.height)
-              .attr("id", global.pd.html.id.hist_svg);
+              .attr("id", global.pd.html.id.hist_svg)
+              .classed("pd-svg", true);
+
 
   // radius for the subsample dots
   var radius = 3;
@@ -299,7 +392,7 @@ global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
         return d.r;
       })
       .attr("fill", function (d) {
-        return d.type === "actual" ? "red" : "#272727";
+        return d.type === "actual" ? "#528EC7" : "#272727";
       })
       .merge(circles)
       .attr("cx", function (d) {
@@ -327,18 +420,21 @@ global.pd.fn.main = function () {
 
   var save_hist_button =
         document.getElementById(global.pd.html.id.hist_save);
-
   save_hist_button.addEventListener("click", function () {
-    global.pd.fn.save_svg(global.pd.html.id.hist_svg);
+    global.pd.fn.save_svg(global.pd.html.id.hist_svg, "jackknife_beeswarm.svg");
   });
 
   var save_table_button =
         document.getElementById(global.pd.html.id.results_save);
-
   save_table_button.addEventListener("click", function () {
     global.pd.fn.save_table(global.pd.all_table_data);
   });
 
+  var save_scatter_button =
+        document.getElementById(global.pd.html.id.tree_scatter_save);
+  save_scatter_button.addEventListener("click", function () {
+    global.pd.fn.save_svg(global.pd.html.id.tree_scatter_svg, "projection_scatter.svg");
+  });
 
   tree_reader.onload = function tree_reader_onload(event) {
     var newick_string = event.target.result;
@@ -363,8 +459,9 @@ global.pd.fn.main = function () {
   // For easier testing, this lets you just click submit and get some test data.
   // submit_button.addEventListener("click", function () {
   //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
+  //   // global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
   // });
-
+  //
   submit_button.addEventListener("click", function pd_submit_handler() {
     var tree_file = tree_uploader.files[0];
 
@@ -443,16 +540,24 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
     results.append(
       "<tr>" +
       "<th>Group</th>" +
-      "<th>NodeCount</th>" +
-      "<th>PairCount</th>" +
-      "<th>PairDistTotal</th>" +
-      "<th>PairDistMean</th>" +
+      "<th>Node Count</th>" +
+      "<th>Pair Count</th>" +
+      "<th>Pair Dist Total</th>" +
+      "<th>Pair Dist Mean</th>" +
       "<th>Dispersion</th>" +
+      "<th>P Value</th>" +
       "</tr>"
     );
 
     var leaves    = tree.leaves();
     var group_idx = 0;
+
+    // Whole tree stats
+    var whole_tree_stats = global.pd.fn.stats.calc_stats(leaves, true);
+    var whole_tree_proj  = global.pd.fn.stats.project_pairs(whole_tree_stats.pairs);
+
+    var tree_scatter = global.pd.fn.draw.proj_scatter("Whole Tree", whole_tree_proj);
+
 
     fn.obj.each(group_membership, function (group, names) {
       group_idx++;
@@ -461,17 +566,20 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
         return names.includes(node.data.name);
       });
 
-      var stats = global.pd.fn.stats.calc_stats(group_nodes, true);
+      // false says don't keep the pair data
+      var stats = global.pd.fn.stats.calc_stats(group_nodes, false);
 
-      var proj       = global.pd.fn.stats.project_pairs(stats.pairs);
-      var name_count = 0;
-      proj.names.forEach(function (name) {
-        // console.log(name, name_count, proj.mat[name_count]);
+      // var proj = global.pd.fn.stats.project_pairs(stats.pairs);
 
-        name_count++;
-      })
+      // var group_scatter = global.pd.fn.draw.proj_scatter(group, proj, global.pd.html.id.group_scatter);
 
-      global.pd.fn.draw.proj_scatter(group, proj)
+
+      // var name_count = 0;
+      // proj.names.forEach(function (name) {
+      //   // console.log(name, name_count, proj.mat[name_count]);
+      //
+      //   name_count++;
+      // })
 
       var jackknife_stats = global.pd.fn.stats.jackknife_stats(leaves, group_nodes.length, global.pd.hist.jackknife_iters);
 
@@ -495,6 +603,9 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
           //   group_nodes.length,
           //   global.pd.hist.jackknife_iters
           // );
+
+          // We also want to show the user which points in the main scatter are in this group.
+          global.pd.fn.draw.color_points_by_name(tree_scatter, names);
 
           global.pd.fn.draw_jk_hist(stats, jackknife_stats, svg);
 
@@ -627,21 +738,36 @@ global.pd.fn.make_table_row_data = function (group, stats, pvals) {
   var sum        = fn.math.round(stats.sum, precision);
   var mean       = fn.math.round(stats.mean, precision);
   var disp       = fn.math.round(stats.disp, precision);
+  var pval;
 
-  if (!(pvals === undefined)) {
-    if (!(pvals.sum === undefined)) {
-      sum += " (p = " + fn.math.round(pvals.sum, precision) + ")";
-    }
-
-    if (!(pvals.mean === undefined)) {
-      mean += " (p = " + fn.math.round(pvals.mean, precision) + ")";
-    }
-    if (!(pvals.disp === undefined)) {
-      disp += " (p = " + fn.math.round(pvals.disp, precision) + ")";
-    }
+  // pvals should all be the same
+  if (pvals.sum !== undefined) {
+    pval = pvals.sum;
+  }
+  else if (pvals.mean !== undefined) {
+    pval = pvals.mean;
+  }
+  else if (pvals.disp !== undefined) {
+    pval = pvals.disp;
+  }
+  else {
+    pval = "";
   }
 
-  return [group, node_count, pair_count, sum, mean, disp];
+  // if (!(pvals === undefined)) {
+  //   if (!(pvals.sum === undefined)) {
+  //     sum += " (p = " + fn.math.round(pvals.sum, precision) + ")";
+  //   }
+  //
+  //   if (!(pvals.mean === undefined)) {
+  //     mean += " (p = " + fn.math.round(pvals.mean, precision) + ")";
+  //   }
+  //   if (!(pvals.disp === undefined)) {
+  //     disp += " (p = " + fn.math.round(pvals.disp, precision) + ")";
+  //   }
+  // }
+
+  return [group, node_count, pair_count, sum, mean, disp, pval];
 };
 
 /**
@@ -681,7 +807,7 @@ global.pd.fn.stats.calc_stats = function (nodes, keep_pairs) {
   var npairs = 0;
   var n1, n2;
 
-  var pairs = []
+  var pairs = [];
 
   for (var i = 0; i < nodes.length - 1; ++i) {
     n1 = nodes[i];
@@ -690,11 +816,11 @@ global.pd.fn.stats.calc_stats = function (nodes, keep_pairs) {
       n2 = nodes[j];
 
       dist = global.pd.fn.len_to(n1, n2);
-      total += dist
+      total += dist;
       npairs += 1;
 
       if (keep_pairs) {
-        pairs.push([n1, n2, dist])
+        pairs.push([n1, n2, dist]);
       }
     }
   }
@@ -769,47 +895,55 @@ global.pd.fn.stats.compare_to_jackknife_stats = function (stats, jackknife_stats
 global.pd.fn.stats.project_pairs = function (pairs) {
   var names    = new Set();
   var graph    = {};
-  var dist_mat = []
+  var dist_mat = [];
 
 
   pairs.forEach(function (pair) {
     var source = pair[0].data.name;
     var target = pair[1].data.name;
-    var dist   = pair[2]
+    var dist   = pair[2];
 
     if (graph[source] === undefined) {
-      graph[source] = {}
+      graph[source] = {};
     }
     if (graph[target] === undefined) {
-      graph[target] = {}
+      graph[target] = {};
     }
 
-    graph[source][target] = dist
-    graph[target][source] = dist
+    graph[source][target] = dist;
+    graph[target][source] = dist;
 
     // Self hits have zero distance.
-    graph[source][source] = 0.0
-    graph[target][target] = 0.0
+    graph[source][source] = 0.0;
+    graph[target][target] = 0.0;
 
-    names.add(source)
-    names.add(target)
-  })
+    names.add(source);
+    names.add(target);
+  });
 
   names.forEach(function (k1) {
-    var row = []
+    var row = [];
     names.forEach(function (k2) {
-      row.push(graph[k1][k2])
-    })
+      row.push(graph[k1][k2]);
+    });
 
-    dist_mat.push(row)
-  })
+    dist_mat.push(row);
+  });
 
-  var proj     = fn.project.project_with_num_pcs_cutoff(
+  // var proj     = fn.project.project_with_num_pcs_cutoff(
+  //   lalolib.array2mat(dist_mat),
+  //   2
+  // );
+  // //console.log(dist_mat)
+  // var proj_mat = fn.lalolib.mat2array(proj);
+  //
+  // return { names: names, mat: proj_mat };
+
+  var proj = fn.project.project_2d_ret_var_exp(
     lalolib.array2mat(dist_mat),
-    2
-  )
-  //console.log(dist_mat)
-  var proj_mat = fn.lalolib.mat2array(proj)
+    false
+  );
 
-  return { names: names, mat: proj_mat };
-}
+  return { names: names, mat: proj.proj_mat, var_exp: proj.var_exp };
+
+};

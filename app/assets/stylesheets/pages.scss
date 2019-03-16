@@ -247,7 +247,14 @@ hr.row {
 
 .pd-svg {
   background-color: white;
-  border: 1px solid black;
+  border: 2px solid #272727;
+
+  //circle.in-current-group {
+  //  fill: rgba(255,150,30, 0.95);
+  //}
+  //circle.not-current-group {
+  //  fill: rgba(10, 10, 10, 0.35);
+  //}
 }
 
 #pd-hist-svg {
