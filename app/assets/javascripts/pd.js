@@ -436,6 +436,12 @@ global.pd.fn.main = function () {
     global.pd.fn.save_svg(global.pd.html.id.tree_scatter_svg, "projection_scatter.svg");
   });
 
+  var save_tree_button =
+        document.getElementById(global.pd.html.id.tree_scatter_save);
+  save_tree_button.addEventListener("click", function () {
+    global.pd.fn.save_svg(global.pd.html.id.tree_svg, "tree.svg");
+  });
+
   tree_reader.onload = function tree_reader_onload(event) {
     var newick_string = event.target.result;
     var group_file    = group_uploader.files[0];
@@ -457,21 +463,21 @@ global.pd.fn.main = function () {
   };
 
   // For easier testing, this lets you just click submit and get some test data.
-  submit_button.addEventListener("click", function () {
-    // global.pd.fn.handle_data(silly.tree, silly.name_graph);
-    global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
-  });
-
-  // submit_button.addEventListener("click", function pd_submit_handler() {
-  //   var tree_file = tree_uploader.files[0];
-  //
-  //   if (tree_file) {
-  //     tree_reader.readAsText(tree_file);
-  //   }
-  //   else {
-  //     alert("Don't forget a tree file!");
-  //   }
+  // submit_button.addEventListener("click", function () {
+  //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
+  //   // global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
   // });
+
+  submit_button.addEventListener("click", function pd_submit_handler() {
+    var tree_file = tree_uploader.files[0];
+
+    if (tree_file) {
+      tree_reader.readAsText(tree_file);
+    }
+    else {
+      alert("Don't forget a tree file!");
+    }
+  });
 };
 
 /**
@@ -511,7 +517,7 @@ global.pd.fn.parse_group_membership = function (group_string) {
 };
 
 global.pd.fn.handle_data = function (newick_string, group_string) {
-  $("#" + global.pd.html.id.results_status).text("Calculating stats! (could take a while...)");
+  $("#" + global.pd.html.id.results_status).text("Calculating stats! (could take a while...)").css("color", global.pd.colors.blue).toggleClass("blink", true);
 
   setTimeout(function () {
     // Reset the table data
@@ -598,8 +604,8 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
 
       // Attach row group handler
       $("#" + "pd-row-" + group_idx).on("click", function draw_hist() {
-        // Set status msg to rendering
-        $("#" + global.pd.html.id.hist_status).text("Rendering!");
+        // // Set status msg to rendering
+        // $("#" + global.pd.html.id.hist_status).text("Rendering!");
 
         setTimeout(function () {
           // var jk_stats = global.pd.fn.stats.jackknife_stats(
@@ -617,8 +623,8 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
           global.pd.fn.draw.tree(tree, names);
 
 
-          // Set status msg to done
-          $("#" + global.pd.html.id.hist_status).text("Done!");
+          // // Set status msg to done
+          // $("#" + global.pd.html.id.hist_status).text("Done!");
 
         }, TIMEOUT);
       });
@@ -631,7 +637,9 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
       //   )
       // );
 
-      $("#" + global.pd.html.id.results_status).text("Done!");
+      $("#" + global.pd.html.id.results_status).text("Done!")
+                                               .css("color", "")
+                                               .toggleClass("blink", false);
     });
   }, TIMEOUT);
 };
