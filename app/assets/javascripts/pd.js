@@ -464,8 +464,8 @@ global.pd.fn.main = function () {
 
   // For easier testing, this lets you just click submit and get some test data.
   // submit_button.addEventListener("click", function () {
-  //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
-  //   // global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
+  //   // global.pd.fn.handle_data(silly.tree, silly.name_graph);
+  //   global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
   // });
 
   submit_button.addEventListener("click", function pd_submit_handler() {
@@ -1148,3 +1148,50 @@ global.pd.fn.draw.tree = function (d3_hier, group_names) {
 };
 
 // x is always x, y is y in cladograms and r in true dist trees
+
+
+/**
+ * node names if given will calculate total branch length for taxa in the group
+ *
+ * @param d3_hier
+ * @param node_names
+ * @returns {number}
+ */
+global.pd.fn.total_branch_length = function (d3_hier, node_names) {
+  // node names if given will calculate total branch length for taxa in the group
+
+  var total_length = 0.0;
+
+  // before running reset all the helper variables to false
+  d3_hier.descendants().forEach(function (node) {
+    node.already_visited = false;
+  });
+
+  var leaves;
+  if (node_names !== undefined) {
+    leaves = d3_hier.leaves().filter(function (node) {
+      return node_names.includes(node.data.name);
+    });
+  }
+  else {
+    leaves = d3_hier.leaves();
+  }
+
+  leaves.forEach(function (leaf) {
+    var ancenstors = leaf.ancestors();
+    for (var i = 0; i < ancenstors.length; ++i) {
+      var node = ancenstors[i];
+
+      if (node.already_visited === true) {
+        break;
+      }
+      else {
+        node.already_visited = true;
+
+        total_length += node.data.branch_length;
+      }
+    }
+  });
+
+  return total_length;
+};
