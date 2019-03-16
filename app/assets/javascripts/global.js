@@ -145,6 +145,12 @@ global.pd.html.id.hist_svg       = "pd-hist-svg";
 global.pd.html.id.hist_status    = "pd-hist-status";
 global.pd.html.id.hist_save      = "pd-hist-save";
 
+global.pd.html.id.tree_container = "pd-tree-container";
+global.pd.html.id.tree_svg       = "pd-tree-svg";
+global.pd.html.id.tree_status    = "pd-tree-status";
+global.pd.html.id.tree_save      = "pd-tree-save";
+
+
 global.pd.hist.height         = 500;
 global.pd.hist.width          = 500;//"100%";
 global.pd.hist.width_padding  = 50;

@@ -1015,11 +1015,11 @@ global.pd.fn.set_up_hierarchy = function (d3_hier) {
  */
 global.pd.fn.draw.tree = function (d3_hier, group_names) {
   // remove tree TODO merge the old values rather than remove.
-  d3.select("#pd-tree").remove();
+  d3.select("#" + global.pd.html.id.tree_svg).remove();
 
-  var svg = d3.select("body").append("svg")
+  var svg = d3.select("#" + global.pd.html.id.tree_container).append("svg")
               .attr("width", 500).attr("height", 500)
-              .attr("id", "pd-tree").classed("pd-svg", true)
+              .attr("id", global.pd.html.id.tree_svg).classed("pd-svg", true)
               .append("g")
               .attr("transform", "translate(250, 250)");
 
@@ -1129,6 +1129,7 @@ global.pd.fn.draw.tree = function (d3_hier, group_names) {
        .attr("stroke-width", 2)
        .merge(links)
        .attr("stroke", function (d) {
+         // Only give it the color if its target is also colored.  That way it'll more or less show the Faith's PD.
          return d.target.group_status === "in-current-group" ? global.pd.colors.yellow : global.pd.colors.black;
        })
        .attr("d", function (d) {
