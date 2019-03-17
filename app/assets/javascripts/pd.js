@@ -463,21 +463,21 @@ global.pd.fn.main = function () {
   };
 
   // For easier testing, this lets you just click submit and get some test data.
-  submit_button.addEventListener("click", function () {
-    // global.pd.fn.handle_data(silly.tree, silly.name_graph);
-    global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
-  });
-
-  // submit_button.addEventListener("click", function pd_submit_handler() {
-  //   var tree_file = tree_uploader.files[0];
-  //
-  //   if (tree_file) {
-  //     tree_reader.readAsText(tree_file);
-  //   }
-  //   else {
-  //     alert("Don't forget a tree file!");
-  //   }
+  // submit_button.addEventListener("click", function () {
+  //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
+  //   // global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
   // });
+
+  submit_button.addEventListener("click", function pd_submit_handler() {
+    var tree_file = tree_uploader.files[0];
+
+    if (tree_file) {
+      tree_reader.readAsText(tree_file);
+    }
+    else {
+      alert("Don't forget a tree file!");
+    }
+  });
 };
 
 /**
@@ -557,7 +557,7 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
       "<th>Pair Dist Mean</th>" +
       "<th>Dispersion</th>" +
       "<th>Disp P Value</th>" +
-//      "<th>TBL P Value</th>" +
+      //      "<th>TBL P Value</th>" +
       "</tr>"
     );
 
@@ -770,7 +770,7 @@ global.pd.fn.make_table_row_data = function (group, stats, pvals) {
     mean,
     disp,
     pval_disp,
-//    pval_tbl
+    //    pval_tbl
   ];
 };
 
