@@ -1,3 +1,5 @@
+// TODO handle duplicated names in the tree file.
+
 /**
  * Saves SVGs!
  *
@@ -413,43 +415,6 @@ global.pd.fn.main = function () {
         document.getElementById(global.pd.html.id.upload_group_input);
   var submit_button  =
         document.getElementById(global.pd.html.id.upload_tree_submit);
-  var tree_reader    =
-        new FileReader();
-  var group_reader   =
-        new FileReader();
-
-  submit_button.addEventListener("click", function pd_submit_handler() {
-    var tree_file = tree_uploader.files[0];
-
-    if (tree_file) {
-      tree_reader.readAsText(tree_file);
-    }
-    else {
-      alert("Don't forget a tree file!");
-    }
-  });
-
-  tree_reader.onload = function tree_reader_onload(event) {
-    var newick_string = event.target.result;
-    var group_file    = group_uploader.files[0];
-    if (group_file) {
-      group_reader.readAsText(group_file);
-    }
-    else if (newick_string) {
-      global.pd.fn.handle_data(newick_string, null);
-    }
-    else {
-      alert("Something went wrong with the newick string!");
-    }
-
-    group_reader.onload = function (event) {
-      var group_string = event.target.result;
-
-      global.pd.fn.handle_data(newick_string, group_string);
-    };
-  };
-
-
 
   var save_hist_button =
         document.getElementById(global.pd.html.id.hist_save);
@@ -475,11 +440,54 @@ global.pd.fn.main = function () {
     global.pd.fn.save_svg(global.pd.html.id.tree_svg, "tree.svg");
   });
 
+
+
+
+  var tree_reader    =
+        new FileReader();
+  var group_reader   =
+        new FileReader();
+
+  submit_button.addEventListener("click", function pd_submit_handler() {
+    var tree_file = tree_uploader.files[0];
+
+    if (tree_file) {
+      tree_reader.readAsText(tree_file);
+    }
+    else {
+      alert("Don't forget a tree file!");
+    }
+  });
   // For easier testing, this lets you just click submit and get some test data.
   // submit_button.addEventListener("click", function () {
   //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
   //   // global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
   // });
+
+
+  tree_reader.onload = function tree_reader_onload(event) {
+    var newick_string = event.target.result;
+    var group_file    = group_uploader.files[0];
+    if (group_file) {
+      group_reader.readAsText(group_file);
+    }
+    else if (newick_string) {
+      global.pd.fn.handle_data(newick_string, null);
+    }
+    else {
+      alert("Something went wrong with the newick string!");
+    }
+
+    group_reader.onload = function (event) {
+      var group_string = event.target.result;
+
+      global.pd.fn.handle_data(newick_string, group_string);
+    };
+  };
+
+
+
+
 
 };
 

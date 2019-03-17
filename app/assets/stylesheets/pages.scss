@@ -242,6 +242,12 @@ hr.row {
   overflow-y: auto;
 }
 
+.scroll-xy {
+  max-height: 500px;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
 //table#pd-results {
 //  // This is how wide the svgs are currently (TODO it's hardcoded)
 //  width: 500px;

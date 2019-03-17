@@ -1,0 +1,39 @@
+.row
+  h1 Classify your seqs!
+
+.row
+  p I need two things...(1) a tree, and (2) a tsv with taxa names and class label.  I'll use k-NN algorithm (well, k nearest classified nieghbors at least) to try and classify any taxa that don't have class labels in the second file!
+
+  p Important -- I assume that names in the tree are unique!
+
+.row
+  h4 Upload tree
+  form id="classify-upload-tree-form"
+    .small-12.medium-6.columns
+      label for="classify-uploader-tree" Newick tree
+      input id="classify-uploader-tree" type="file"
+    .small-12.medium-6.columns
+      label for="classify-group-names" Class labels
+      input id="classify-group-names" type="file"
+    .small-12.columns
+      input id="classify-submit" type="button" value="Submit!"
+
+.row
+  h2 Results
+
+.row
+  .small-12.columns
+    .row
+      h3 Stats
+    .row
+      p#classify-table-status To see the stats your data and click submit!
+    .row
+      .small-12.columns
+        input id="classify-table-save" type="button" value="Save table!"
+    .row
+      br
+    .row.scroll-xy
+      table#classify-results
+
+javascript:
+  global.classify.fn.main();

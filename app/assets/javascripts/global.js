@@ -175,6 +175,102 @@ global.pd.all_table_data = [];
 //// End phylogentic dispersion globals
 
 
+//// classify
+global.classify    = {};
+global.classify.fn = {};
+global.fn    = {};
+global.fn.d3 = {};
+
+global.fn.d3.branch_length_dist = function (n1, n2) {
+  var path      = n1.path(n2);
+  var depths    = path.map(function (d) {
+    return d.depth;
+  });
+  var min_depth = d3.min(depths);
+
+  var len = 0;
+
+  path.forEach(function (n) {
+    // The node at the min depth is the least common ancestor.  The branch length of that node is not part of the dispance between the two nodes.
+    if (n.depth !== min_depth) {
+      len += n.data.branch_length;
+    }
+  });
+
+  return len;
+};
+
+
+
+// TODO this is the same function as global.pd.fn.set_up_hierarchy()
+global.fn.d3.set_up_hierarchy = function (d3_hier) {
+  /**
+   * From the given `node`, what is sum of branches to the furthest leaf node?
+   * @param node
+   */
+  function len_to_furthest_leaf(node) {
+    return node.data.branch_length + (node.children ? d3.max(node.children, len_to_furthest_leaf) : 0);
+  }
+
+  /**
+   * Set the radius of each node by recursively summing and scaling the distance from the root.
+   *
+   * @param node You probably want to start with the root.
+   * @param r If you start with the root, you'll want to pass 0 for this.
+   * @param scale_factor Probably you want to weight the radius by the longest root to leaf length.
+   */
+  function set_radius(node, r, scale_factor) {
+    node.radius = (r += node.data.branch_length) * scale_factor;
+
+    if (node.children) {
+      node.children.forEach(function (child) {
+        set_radius(child, r, scale_factor);
+      });
+    }
+  }
+
+  var theta  = 360,
+      radius = 200;
+
+  var cluster = d3.cluster().size([theta, radius]);
+
+  // This modifies d3_hier!
+  cluster(d3_hier);
+
+  // The root is defined to have 0 branch length.
+  d3_hier.data.branch_length = 0;
+
+  set_radius(
+    d3_hier,
+    d3_hier.data.branch_length,
+    radius / len_to_furthest_leaf(d3_hier)
+  );
+
+  // Now d3_hier is ready to be plotted!
+};
+
+global.classify.html    = {};
+global.classify.html.id = {};
+
+global.classify.html.id.upload_tree_form   = "classify-upload-tree-form";
+global.classify.html.id.upload_tree_input  = "classify-uploader-tree";
+global.classify.html.id.upload_submit = "classify-submit";
+
+global.classify.html.id.upload_group_input = "classify-group-names";
+
+global.classify.html.id.results_table        = "classify-results";
+global.classify.html.id.results_status = "classify-table-status";
+global.classify.html.id.results_save   = "classify-table-save";
+
+global.colors = {
+  yellow: "rgba(255, 150, 30, 0.95)",
+  black: "#272727",
+  blue: "#528EC7"
+};
+
+//// end classify
+
+
 global.ZERO_REPLACEMENT_VAL = 1e-5;
 
 var viewer = {};
