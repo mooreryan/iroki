@@ -237,14 +237,15 @@ hr.row {
 
 .results-table {
   max-height: 500px;
+  width: 500px;
   overflow-x: auto;
   overflow-y: auto;
 }
 
-table#pd-results {
-  // This is how wide the svgs are currently (TODO it's hardcoded)
-  max-width: 500px;
-}
+//table#pd-results {
+//  // This is how wide the svgs are currently (TODO it's hardcoded)
+//  width: 500px;
+//}
 
 #pd-hist-svg {
   background-color: white;

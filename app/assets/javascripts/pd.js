@@ -463,21 +463,21 @@ global.pd.fn.main = function () {
   };
 
   // For easier testing, this lets you just click submit and get some test data.
-  // submit_button.addEventListener("click", function () {
-  //   // global.pd.fn.handle_data(silly.tree, silly.name_graph);
-  //   global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
-  // });
-
-  submit_button.addEventListener("click", function pd_submit_handler() {
-    var tree_file = tree_uploader.files[0];
-
-    if (tree_file) {
-      tree_reader.readAsText(tree_file);
-    }
-    else {
-      alert("Don't forget a tree file!");
-    }
+  submit_button.addEventListener("click", function () {
+    // global.pd.fn.handle_data(silly.tree, silly.name_graph);
+    global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
   });
+
+  // submit_button.addEventListener("click", function pd_submit_handler() {
+  //   var tree_file = tree_uploader.files[0];
+  //
+  //   if (tree_file) {
+  //     tree_reader.readAsText(tree_file);
+  //   }
+  //   else {
+  //     alert("Don't forget a tree file!");
+  //   }
+  // });
 };
 
 /**
@@ -552,10 +552,12 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
       "<th>Group</th>" +
       "<th>Node Count</th>" +
       "<th>Pair Count</th>" +
+      "<th>TBL (Faith's)</th>" +
       "<th>Pair Dist Total</th>" +
       "<th>Pair Dist Mean</th>" +
       "<th>Dispersion</th>" +
-      "<th>P Value</th>" +
+      "<th>Disp P Value</th>" +
+//      "<th>TBL P Value</th>" +
       "</tr>"
     );
 
@@ -563,8 +565,9 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
     var group_idx = 0;
 
     // Whole tree stats
-    var whole_tree_stats = global.pd.fn.stats.calc_stats(leaves, true);
-    var whole_tree_proj  = global.pd.fn.stats.project_pairs(whole_tree_stats.pairs);
+    var whole_tree_stats = global.pd.fn.stats.calc_stats(tree, undefined, true);
+
+    var whole_tree_proj = global.pd.fn.stats.project_pairs(whole_tree_stats.pairs);
 
     var tree_scatter = global.pd.fn.draw.proj_scatter("Whole Tree", whole_tree_proj);
 
@@ -572,26 +575,10 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
     fn.obj.each(group_membership, function (group, names) {
       group_idx++;
 
-      var group_nodes = leaves.filter(function (node) {
-        return names.includes(node.data.name);
-      });
-
       // false says don't keep the pair data
-      var stats = global.pd.fn.stats.calc_stats(group_nodes, false);
+      var stats = global.pd.fn.stats.calc_stats(tree, names, false);
 
-      // var proj = global.pd.fn.stats.project_pairs(stats.pairs);
-
-      // var group_scatter = global.pd.fn.draw.proj_scatter(group, proj, global.pd.html.id.group_scatter);
-
-
-      // var name_count = 0;
-      // proj.names.forEach(function (name) {
-      //   // console.log(name, name_count, proj.mat[name_count]);
-      //
-      //   name_count++;
-      // })
-
-      var jackknife_stats = global.pd.fn.stats.jackknife_stats(leaves, group_nodes.length, global.pd.hist.jackknife_iters);
+      var jackknife_stats = global.pd.fn.stats.jackknife_stats(tree, names.length, global.pd.hist.jackknife_iters);
 
 
       var pvals = global.pd.fn.stats.compare_to_jackknife_stats(stats, jackknife_stats);
@@ -637,7 +624,7 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
       //   )
       // );
 
-      $("#" + global.pd.html.id.results_status).text("Done!")
+      $("#" + global.pd.html.id.results_status).text("Done! (scroll to see whole table)")
                                                .css("color", "")
                                                .toggleClass("blink", false);
     });
@@ -754,36 +741,37 @@ global.pd.fn.make_table_row_data = function (group, stats, pvals) {
   var sum        = fn.math.round(stats.sum, precision);
   var mean       = fn.math.round(stats.mean, precision);
   var disp       = fn.math.round(stats.disp, precision);
-  var pval;
 
-  // pvals should all be the same
-  if (pvals.sum !== undefined) {
-    pval = pvals.sum;
-  }
-  else if (pvals.mean !== undefined) {
-    pval = pvals.mean;
-  }
-  else if (pvals.disp !== undefined) {
-    pval = pvals.disp;
+  var total_branch_length = fn.math.round(stats.total_branch_length, precision);
+
+  var pval_disp, pval_tbl;
+
+  if (pvals.disp !== undefined) {
+    pval_disp = pvals.disp;
   }
   else {
-    pval = "";
+    pval_disp = "";
   }
 
-  // if (!(pvals === undefined)) {
-  //   if (!(pvals.sum === undefined)) {
-  //     sum += " (p = " + fn.math.round(pvals.sum, precision) + ")";
-  //   }
-  //
-  //   if (!(pvals.mean === undefined)) {
-  //     mean += " (p = " + fn.math.round(pvals.mean, precision) + ")";
-  //   }
-  //   if (!(pvals.disp === undefined)) {
-  //     disp += " (p = " + fn.math.round(pvals.disp, precision) + ")";
-  //   }
-  // }
+  if (pvals.total_branch_length !== undefined) {
+    pval_tbl = pvals.total_branch_length;
+  }
+  else {
+    pval_tbl = "";
+  }
 
-  return [group, node_count, pair_count, sum, mean, disp, pval];
+
+  return [
+    group,
+    node_count,
+    pair_count,
+    total_branch_length,
+    sum,
+    mean,
+    disp,
+    pval_disp,
+//    pval_tbl
+  ];
 };
 
 /**
@@ -814,7 +802,21 @@ var t, l;
  * @param keep_pairs if this is true, will also return an array of all dists.  Could take up a lot of space!
  * @returns {{node_count: *, pair_count: number, sum: number, mean: number, disp: number}}
  */
-global.pd.fn.stats.calc_stats = function (nodes, keep_pairs) {
+global.pd.fn.stats.calc_stats = function (d3_hier, names, keep_pairs) {
+
+  var nodes;
+  if (names === undefined) {
+    nodes = d3_hier.leaves();
+  }
+  else {
+    nodes = d3_hier.leaves().filter(function (node) {
+      return names.includes(node.data.name);
+    });
+  }
+
+  // TBL function can handle undefined for names
+  var total_branch_length = global.pd.fn.total_branch_length(d3_hier, names);
+
   // The total distance for all tip to tip pairs of nodes.
   var total = 0.0;
   var dist  = 0.0;
@@ -847,7 +849,8 @@ global.pd.fn.stats.calc_stats = function (nodes, keep_pairs) {
     pair_count: npairs,
     sum: total,
     mean: total / npairs,
-    disp: total / nodes.length
+    disp: total / nodes.length,
+    total_branch_length: total_branch_length
   };
 
 };
@@ -861,50 +864,48 @@ global.pd.fn.stats.random_sample = function (ary, size) {
 };
 
 /**
- * Calculate stats of random samples of the data.
+ * Calculate stats of random samples of the data
  *
- * @param nodes
+ * @param d3_hier
  * @param sample_size
  * @param iters
  * @returns {Array}
  */
-global.pd.fn.stats.jackknife_stats = function (nodes, sample_size, iters) {
+global.pd.fn.stats.jackknife_stats = function (d3_hier, sample_size, iters) {
+  var names = d3_hier.leaves().map(function (node) {
+    return node.data.name;
+  });
+
   var sample, all_stats = [];
   for (var i = 0; i < iters; ++i) {
-    sample = global.pd.fn.stats.random_sample(nodes, sample_size);
+    sample = global.pd.fn.stats.random_sample(names, sample_size);
 
-    all_stats.push(global.pd.fn.stats.calc_stats(sample));
+    all_stats.push(global.pd.fn.stats.calc_stats(d3_hier, sample));
   }
 
   return all_stats;
 };
 
 /**
- * Want to get (sort of) p-values for your stats?  Use this fn.  P value represents number of samples where the jackknife stat was less than actual stat.
+ * Want to get (sort of) p-values for your disp and total branch length?  Use this fn.  P value represents number of samples where the jackknife stat was less than actual stat.
  * @param stats
  * @param jackknife_stats
  */
 global.pd.fn.stats.compare_to_jackknife_stats = function (stats, jackknife_stats) {
-  var sum = 0, mean = 0, disp = 0;
+  var disp = 0, total_branch_length = 0;
 
   jackknife_stats.forEach(function (jstats, i) {
-    if (jstats.sum < stats.sum) {
-      sum++;
-    }
-
-    if (jstats.mean < stats.mean) {
-      mean++;
-    }
-
     if (jstats.disp < stats.disp) {
       disp++;
+    }
+    if (jstats.total_branch_length < stats.total_branch_length) {
+      total_branch_length++;
     }
   });
 
   return {
-    sum: sum / jackknife_stats.length,
-    mean: mean / jackknife_stats.length,
     disp: disp / jackknife_stats.length,
+    total_branch_length: total_branch_length / jackknife_stats.length
   };
 };
 
