@@ -97,7 +97,8 @@ global.fn.d3.hierarchy_from_newick = function (parsed_newick) {
 
 global.classify.fn.name2label = function (group_string) {
   if (group_string) {
-    var lines = group_string.split("\n");
+    // line endings of \r\n, \n, or \r
+    var lines = group_string.split(/(?:\r?\n|\r)/);
 
     var name2label = {};
 
