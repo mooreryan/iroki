@@ -104,7 +104,7 @@ g = {};
  *
  * @param tree_scatter this should be from the output of proj_scatter().  Is responds to names and svg.
  */
-global.pd.fn.draw.color_points_by_name = function (tree_scatter, group_names) {
+global.pd.fn.draw.color_points_by_name = function (tree_scatter, group_names, group) {
 
   g.tree_scatter = tree_scatter;
   g.group_names  = group_names;
@@ -112,6 +112,10 @@ global.pd.fn.draw.color_points_by_name = function (tree_scatter, group_names) {
   var circles = tree_scatter.svg
                             .selectAll("circle")
                             .data(tree_scatter.data);
+
+  // update title
+  d3.select("#" + global.pd.html.id.tree_scatter_svg + "-title")
+    .text(group)
 
   g.circles = circles;
 
@@ -201,6 +205,21 @@ global.pd.fn.draw.proj_scatter = function (group, proj, id) {
                     50,
                     450
                   ]);
+
+  // add title
+  svg.append("g")
+     .append("text")
+     .attr("id", global.pd.html.id.tree_scatter_svg + "-title")
+     .attr(
+       "transform",
+       "translate(" +
+       (global.pd.hist.width / 2) +
+       " ," +
+       (Math.floor(global.pd.hist.height_padding / 2)) +
+       ")"
+     )
+     .style("text-anchor", "middle")
+     .text(group);
 
   // Add x axis
   svg.append("g")
@@ -294,7 +313,7 @@ global.pd.fn.draw.proj_scatter = function (group, proj, id) {
   return { svg: svg, data: data };
 };
 
-global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
+global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg, group) {
   jq(global.pd.html.id.hist_svg).remove();
 
   // This svg will hold the histogram
@@ -337,6 +356,20 @@ global.pd.fn.draw_jk_hist = function (stats, jk_stats, svg) {
                     global.pd.hist.width_padding,
                     global.pd.hist.width - global.pd.hist.width_padding
                   ]);
+
+  // add title
+  svg.append("g")
+     .append("text")
+     .attr(
+       "transform",
+       "translate(" +
+       (global.pd.hist.width / 2) +
+       " ," +
+       (Math.floor(global.pd.hist.height_padding / 2)) +
+       ")"
+     )
+     .style("text-anchor", "middle")
+     .text(group);
 
   // Add x axis
   svg.append("g")
@@ -441,28 +474,26 @@ global.pd.fn.main = function () {
   });
 
 
-
-
-  var tree_reader    =
+  var tree_reader  =
         new FileReader();
-  var group_reader   =
+  var group_reader =
         new FileReader();
 
-  submit_button.addEventListener("click", function pd_submit_handler() {
-    var tree_file = tree_uploader.files[0];
-
-    if (tree_file) {
-      tree_reader.readAsText(tree_file);
-    }
-    else {
-      alert("Don't forget a tree file!");
-    }
-  });
-  // For easier testing, this lets you just click submit and get some test data.
-  // submit_button.addEventListener("click", function () {
-  //   global.pd.fn.handle_data(silly.tree, silly.name_graph);
-  //   // global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
+  // submit_button.addEventListener("click", function pd_submit_handler() {
+  //   var tree_file = tree_uploader.files[0];
+  //
+  //   if (tree_file) {
+  //     tree_reader.readAsText(tree_file);
+  //   }
+  //   else {
+  //     alert("Don't forget a tree file!");
+  //   }
   // });
+  // For easier testing, this lets you just click submit and get some test data.
+  submit_button.addEventListener("click", function () {
+    // global.pd.fn.handle_data(silly.tree, silly.name_graph);
+    global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
+  });
 
 
   tree_reader.onload = function tree_reader_onload(event) {
@@ -484,9 +515,6 @@ global.pd.fn.main = function () {
       global.pd.fn.handle_data(newick_string, group_string);
     };
   };
-
-
-
 
 
 };
@@ -613,12 +641,12 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
           // );
 
           // We also want to show the user which points in the main scatter are in this group.
-          global.pd.fn.draw.color_points_by_name(tree_scatter, names);
+          global.pd.fn.draw.color_points_by_name(tree_scatter, names, group);
 
-          global.pd.fn.draw_jk_hist(stats, jackknife_stats, svg);
+          global.pd.fn.draw_jk_hist(stats, jackknife_stats, svg, group);
 
           // Update the tree with new colors
-          global.pd.fn.draw.tree(tree, names);
+          global.pd.fn.draw.tree(tree, names, group);
 
 
           // // Set status msg to done
@@ -1033,7 +1061,7 @@ global.pd.fn.set_up_hierarchy = function (d3_hier) {
  *
  * @param d3_hier
  */
-global.pd.fn.draw.tree = function (d3_hier, group_names) {
+global.pd.fn.draw.tree = function (d3_hier, group_names, group) {
   // remove tree TODO merge the old values rather than remove.
   d3.select("#" + global.pd.html.id.tree_svg).remove();
 
@@ -1143,6 +1171,13 @@ global.pd.fn.draw.tree = function (d3_hier, group_names) {
 
     return path;
   }
+
+  // add title
+  svg.append("g")
+     .append("text")
+     .attr("transform", "translate(0, -225)")
+     .style("text-anchor", "middle")
+     .text(group);
 
   links.enter().append("path")
        .attr("fill", "none")
