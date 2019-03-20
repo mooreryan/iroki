@@ -479,21 +479,21 @@ global.pd.fn.main = function () {
   var group_reader =
         new FileReader();
 
-  // submit_button.addEventListener("click", function pd_submit_handler() {
-  //   var tree_file = tree_uploader.files[0];
-  //
-  //   if (tree_file) {
-  //     tree_reader.readAsText(tree_file);
-  //   }
-  //   else {
-  //     alert("Don't forget a tree file!");
-  //   }
-  // });
-  // For easier testing, this lets you just click submit and get some test data.
-  submit_button.addEventListener("click", function () {
-    // global.pd.fn.handle_data(silly.tree, silly.name_graph);
-    global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
+  submit_button.addEventListener("click", function pd_submit_handler() {
+    var tree_file = tree_uploader.files[0];
+
+    if (tree_file) {
+      tree_reader.readAsText(tree_file);
+    }
+    else {
+      alert("Don't forget a tree file!");
+    }
   });
+  // For easier testing, this lets you just click submit and get some test data.
+  // submit_button.addEventListener("click", function () {
+  //   // global.pd.fn.handle_data(silly.tree, silly.name_graph);
+  //   global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
+  // });
 
   tree_reader.onload = function tree_reader_onload(event) {
     var newick_string = event.target.result;
