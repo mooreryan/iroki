@@ -259,6 +259,12 @@ table#pd-results {
   }
 }
 
+table#classify-results {
+  tr:hover {
+    background-color: map-get($foundation-palette, primarydarker);
+  }
+}
+
 #pd-hist-svg {
   background-color: white;
 }
