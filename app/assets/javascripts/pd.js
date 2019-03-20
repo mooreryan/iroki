@@ -115,7 +115,7 @@ global.pd.fn.draw.color_points_by_name = function (tree_scatter, group_names, gr
 
   // update title
   d3.select("#" + global.pd.html.id.tree_scatter_svg + "-title")
-    .text(group)
+    .text(group);
 
   g.circles = circles;
 
@@ -495,7 +495,6 @@ global.pd.fn.main = function () {
     global.pd.fn.handle_data(silly.weird2, silly.weird2_groups);
   });
 
-
   tree_reader.onload = function tree_reader_onload(event) {
     var newick_string = event.target.result;
     var group_file    = group_uploader.files[0];
@@ -587,7 +586,7 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
     results.empty();
 
     results.append(
-      "<tr>" +
+      "<tr id='pd-table-header'>" +
       "<th>Group</th>" +
       "<th>Node Count</th>" +
       "<th>Pair Count</th>" +
@@ -627,6 +626,17 @@ global.pd.fn.handle_data = function (newick_string, group_string) {
       global.pd.all_table_data.push(table_row_data);
 
       results.append(global.pd.fn.make_table_row(group_idx, table_row_data));
+
+      // Add listener to the table rows
+      $("table#pd-results > tbody > tr").on("click", function () {
+        // We don't want to take action if we clicked the table header.
+        if ($(this).attr("id") !== "pd-table-header") {
+          // First make sure all are not clicked
+          $("table#pd-results > tbody > tr").toggleClass("clicked", false);
+
+          $(this).toggleClass("clicked", true);
+        }
+      });
 
       // Attach row group handler
       $("#" + "pd-row-" + group_idx).on("click", function draw_hist() {

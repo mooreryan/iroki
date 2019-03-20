@@ -219,21 +219,22 @@ hr.row {
 /*     } */
 /* } */
 
- .blink {
-     animation-duration: 0.8s;
-     animation-name: blink;
-     animation-iteration-count: infinite;
-     animation-direction: alternate;
-     animation-timing-function: ease-in-out;
- }
- @keyframes blink {
-     from {
-         opacity: 1;
-     }
-     to {
-         opacity: 0;
-     }
- }
+.blink {
+  animation-duration: 0.8s;
+  animation-name: blink;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes blink {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
 
 .results-table {
   max-height: 500px;
@@ -248,10 +249,15 @@ hr.row {
   overflow-y: auto;
 }
 
-//table#pd-results {
-//  // This is how wide the svgs are currently (TODO it's hardcoded)
-//  width: 500px;
-//}
+table#pd-results {
+  tr:hover {
+    background-color: map-get($foundation-palette, primarydarker);
+  }
+
+  tr.clicked {
+    color: map-get($foundation-palette, secondarydarker);
+  }
+}
 
 #pd-hist-svg {
   background-color: white;
