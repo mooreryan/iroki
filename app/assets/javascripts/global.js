@@ -3,7 +3,7 @@ var global = {};
 global.warnings = {};
 
 global.warnings.arcs_show      = "Currenly, arcs are only available with circular trees!";
-global.warnings.bars_axis_show = "Currently, bar axes are only available with circular trees!";
+global.warnings.bars_axis_show = "Currently, bar axes are not available with radial trees!";
 
 global.html = {};
 

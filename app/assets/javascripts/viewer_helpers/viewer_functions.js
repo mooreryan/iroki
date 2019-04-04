@@ -16,8 +16,7 @@ viewer.fn.warn_about_arcs_show = function () {
 
 viewer.fn.warn_about_bars_axis_show = function () {
   if (
-    global.html.val.tree_layout === global.html.id.tree_layout_radial ||
-    global.html.val.tree_layout === global.html.id.tree_layout_rectangular
+    global.html.val.tree_layout === global.html.id.tree_layout_radial
   ) {
     alert(global.warnings.bars_axis_show);
 

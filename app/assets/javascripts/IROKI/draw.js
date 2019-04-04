@@ -304,20 +304,25 @@ var IROKI = (function (iroki) {
                      .attr("stroke-width", 2);
         }
         else if (global.html.val.bars_axis_show && global.html.val.tree_layout_rectangular) {
-          alert("Bar axes are currently only available in circular mode!");
-          // rad_circles.enter()
-          //            .append("circle")
-          //            .merge(rad_circles)
-          //            .attr("r", function (d) {
-          //              return d;
-          //            })
-          //            .attr("fill", "none")
-          //            // TODO currently uses the default bar color
-          //            .attr("stroke", global.html.val.bars_color)
-          //            .attr("stroke-width", 2);
+          // these are in the correct order of the tree regardless of sorting. so the first thing will be at the bottom (of the screen on the tree) and the last item will be at the top.
+          var leaves     = ROOT.leaves();
+          var first_leaf = leaves[0];
+          var last_leaf  = leaves[leaves.length - 1];
+
+          rad_lines.enter()
+                   .append("path")
+                   .merge(rad_lines)
+                   .attr("d", function (radius) {
+                     // Need to adjust by 1/2 the width of the bar so the axis actually extends to cover the whole bar.
+                     return "M" + (first_leaf.x - (global.html.val.bars_width / 2)) + "," + radius + " " +
+                       "L" + (last_leaf.x + (global.html.val.bars_width / 2)) + "," + radius;
+                   })
+                   .attr("stroke", global.html.val.bars_color)
+                   .attr("stroke-width", 2);
         }
         else {
           rad_circles.remove();
+          rad_lines.remove();
         }
       }
       else {
