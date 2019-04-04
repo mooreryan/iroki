@@ -5,9 +5,46 @@ var IROKI = (function (iroki) {
    * Most methods in here will use or depend upon D3.js.
    */
   iroki.draw = (function (draw) {
-    var bars_helpers = {};
 
-    bars_helpers.get_min_bar_heights = function (num_bar_sets) {
+    var helpers = {};
+
+    /**
+     * Determines how many sets of bars are specified in the mapping file.
+     *
+     * @param name2md
+     * @returns {number}
+     */
+    helpers.how_many_bar_sets = function (name2md) {
+      if (name2md) {
+        var first_thing = name2md[Object.keys(name2md)[0]];
+
+        // TODO this is just to prevent an infinite loop.  Need a real check.
+        var max  = 1000;
+        var iter = 1;
+        while (iter < max) {
+          var idx = "bar" + iter + "_height";
+
+          if (first_thing[idx] === undefined) {
+            return iter - 1;
+          }
+
+          iter += 1;
+        }
+      }
+
+      // If you've gotten here, there are no bar sets.
+      return 0;
+    };
+
+    /**
+     * Returns an array with the minimum bar height for each series of bars.
+     *
+     * @param num_bar_sets
+     * @returns {Array} - ary[0] will be the min height for the first bar set, ary[1] will be the min for the 2nd bar set, and so on.
+     *
+     * @warning fn.ary.min() and $ from implicit global namespace are used in this function
+     */
+    helpers.get_min_bar_heights = function (num_bar_sets) {
       var i   = 0;
       var ary = [];
       for (i = 0; i < num_bar_sets; ++i) {
@@ -29,8 +66,15 @@ var IROKI = (function (iroki) {
       return ary;
     };
 
-    // Returns an ary with max heights for each set.
-    bars_helpers.get_max_bar_heights = function (num_bar_sets) {
+    /**
+     * Returns an array with the maximum bar height for each series of bars.
+     *
+     * @param num_bar_sets
+     * @returns {Array} - ary[0] will be the max height for the first bar set, ary[1] will be the max for the 2nd bar set, and so on.
+     *
+     * @warning fn.ary.max() and $ from implicit global namespace are used in this function
+     */
+    helpers.get_max_bar_heights = function (num_bar_sets) {
       var i   = 0;
       var ary = [];
       for (i = 0; i < num_bar_sets; ++i) {
@@ -54,8 +98,15 @@ var IROKI = (function (iroki) {
       return ary;
     };
 
-    // Scales bar height so the max size will be the one set by the user.
-    bars_helpers.scale_bar_height = function (height, max, min) {
+    /**
+     * If a bar series has negative heights (e.g., for fold change) each bar height would be 1/2 of what it would be otherwise.
+     *
+     * @param height - height of the current bar
+     * @param max - max bar height in the bar series
+     * @param min - min bar height in the bar series, can be negative
+     * @returns {number} - scaled bar height, always between zero and the bar height set by the user option
+     */
+    helpers.scale_bar_height = function (height, max, min) {
       // Heights can be negative, but we always want a positive value for rectangle attrs.  The flipping is taken care of elsewhere.
 
       // If there are negative values we need to scale bars by 1/2
@@ -64,40 +115,54 @@ var IROKI = (function (iroki) {
       return Math.abs((height / max) * global.html.val.bars_height) / scale_factor;
     };
 
-    // TODO If there is more than 2 translate directives, this will braek
-    bars_helpers.get_radius_from_translate = function (trans) {
-      var regex = /translate\(([0-9]+),.*translate\(([0-9]+)/;
-      var match = trans.match(regex);
-
-      if (match) {
-        return parseFloat(match[1]) + parseFloat(match[2]);
-      }
-      else {
-        return 0;
-      }
-    };
+    // // TODO If there is more than 2 translate directives, this will braek
+    // /**
+    //  * Note that rectangle_transform does NOT put a comma in the translate.  So translate(10 20) rather than translate(10, 20).
+    //  *
+    //  * @param trans - the translate
+    //  * @returns {number}
+    //  */
+    // helpers.get_radius_from_translate = function (trans) {
+    //   var regex = /translate\(([0-9]+),+.*translate\(([0-9]+)/;
+    //   var match = trans.match(regex);
+    //
+    //   if (match) {
+    //     return parseFloat(match[1]) + parseFloat(match[2]);
+    //   }
+    //   else {
+    //     return 0;
+    //   }
+    // };
 
     // Takes the old transform (the tip of the leaf) and adds some padding so each set of bars is nice and separated.
     // Max height is the one set by the user, not the one from the data
     // Min height should always be the min height of the first series
-    bars_helpers.new_transform = function (d, transform, bar_set, max_height_user_opt, max_height_data, min_height_data) {
+    helpers.new_transform = function (d, transform, bar_set, max_height_user_opt, max_height_data, min_height_data) {
       // We need to move it a bit away from the tip as well as center it on the line.  We can do that by adding another translate command tacked on to the end.  In rectangle mode, the first number moves it to the right if positive, to the left if negative.  The second number moves it down if positive, up if negative.
 
       // need a bit of extra padding for sets 2 - N
       // TODO need to set the 10 to an inner bar padding option.
-      var extra       = bar_set * 10;
+      var extra = bar_set * 10;
+
+      // This will be the new radius for the axis in circle layout and the actual right left adjustment in rectangle mode.
       var nudge_horiz = global.html.val.bars_padding + (bar_set * max_height_user_opt) + extra;
 
-      // If there are some min heights less than 0, some bars will be going backwards and we'd like a little more nudge.
       if (min_height_data < 0) {
-        // We also want to scale the min height in terms of this max and min.
-        anudge_horiz += bars_helpers.scale_bar_height(min_height_data, max_height_data, min_height_data);
+        // If there are bars going backwards, we need to move the "axis" farther out to account for the things going backwards.
+        nudge_horiz += helpers.scale_bar_height(min_height_data, max_height_data, min_height_data);
       }
+
+      // // If there are some min heights less than 0, some bars will be going backwards and we'd like a little more nudge.
+      // if (min_height_data < 0) {
+      //   // We also want to scale the min height in terms of this max and min.
+      //   anudge_horiz += helpers.scale_bar_height(min_height_data, max_height_data, min_height_data);
+      // }
 
 
       // If the bar height is a negative number (e.g., negative fold change) we need to flip the bar 180 and adjust the verticle nudge.  But ONLY if the layout is circle.  (not yet implemented for rectangle)
       var barh = d.metadata["bar" + (bar_set + 1) + "_height"];
 
+      // Vertical nudge centers the bar on the branch/dot
       if (global.html.val.tree_layout_circular && barh < 0) {
         var nudge_vert = global.html.val.bars_width / 2;
       }
@@ -121,18 +186,51 @@ var IROKI = (function (iroki) {
       return ajusted_transform;
     };
 
+    /**
+     * Add the bars container svg g elements, but only if they haven't already been created.
+     *
+     * @param {string} id_chart_container
+     * @param {string} id_bar_container
+     * @param {number} num_bar_sets - most likely output from {@link how_many_bar_sets}
+     */
+    helpers.add_bars_containers = function (
+      id_chart_container,
+      id_bar_container,
+      num_bar_sets
+    ) {
+      if (d3.select("#" + id_bar_container).empty()) {
+        d3.select("#" + id_chart_container)
+          .append("g")
+          .attr("id", id_bar_container);
+
+        for (var i = 0; i < num_bar_sets; ++i) {
+          d3.select("#" + id_bar_container)
+            .append("g")
+            .attr("id", id_bar_container + "-" + (i + 1));
+        }
+      }
+    };
+
 
     /**
      * Draws the bar chart on trees.
+     *
+     * @note If necessary, I will append the bars-container g elements.
      */
     draw.draw_bars = function () {
-      var num_bar_sets = how_many_bar_sets(name2md);
+      var num_bar_sets = helpers.how_many_bar_sets(name2md);
 
+      // First, add the bars containers if they aren't already made
+      helpers.add_bars_containers(
+        "chart-container",
+        "bars-container",
+        num_bar_sets
+      );
 
       if (global.html.val.bars_show) {
         // TODO if this is slow, you could move it into the parse mapping file function or just after parsing.
-        var max_bar_heights = bars_helpers.get_max_bar_heights(num_bar_sets);
-        var min_bar_heights = bars_helpers.get_min_bar_heights(num_bar_sets);
+        var max_bar_heights = helpers.get_max_bar_heights(num_bar_sets);
+        var min_bar_heights = helpers.get_min_bar_heights(num_bar_sets);
 
         var start_radii = [];
 
@@ -144,9 +242,9 @@ var IROKI = (function (iroki) {
           var anudge_horiz = global.html.val.bars_padding + (i * global.html.val.bars_height) + aextra;
 
           // If there are some min heights less than 0, some bars will be going backwards and we'd like a little more nudge.
-          if (min_bar_heights[0] < 0) {
+          if (min_bar_heights[i] < 0) {
             // We also want to scale the min height in terms of this max and min.
-            anudge_horiz += bars_helpers.scale_bar_height(min_bar_heights[0], max_bar_heights[0], min_bar_heights[0]);
+            anudge_horiz += helpers.scale_bar_height(min_bar_heights[i], max_bar_heights[i], min_bar_heights[i]);
           }
 
           start_radii[i] = first_datum.y + anudge_horiz; // TODO axis bug
@@ -162,7 +260,7 @@ var IROKI = (function (iroki) {
               // This will be the point of the tip of the branch to the leaf.
               var transform = pick_transform(d, true);
               // We only want to adjust for min bar height if the first series has min values
-              var new_trans = bars_helpers.new_transform(d, transform, i, global.html.val.bars_height, max_bar_heights[0], min_bar_heights[0]);
+              var new_trans = helpers.new_transform(d, transform, i, global.html.val.bars_height, max_bar_heights[i], min_bar_heights[i]);
 
               return new_trans;
             })
@@ -177,7 +275,7 @@ var IROKI = (function (iroki) {
               var val = d.metadata["bar" + (i + 1) + "_height"]; //.bar1_height;
 
               // If not, just use the max height default.  Users might want bars of all the same length but having different colors.
-              return val || val === 0 ? bars_helpers.scale_bar_height(val, max_bar_heights[i], min_bar_heights[i]) : 0;
+              return val || val === 0 ? helpers.scale_bar_height(val, max_bar_heights[i], min_bar_heights[i]) : 0;
             })
             // This is up and down length in rectangle mode
             .attr("height", function () {

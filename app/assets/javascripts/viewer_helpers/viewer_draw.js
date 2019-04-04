@@ -715,14 +715,7 @@ function set_up_and_draw_everything(lock_metadata_opts) {
   chart.append("g").attr("id", "leaf-dot-container");
   draw_leaf_dots();
 
-  // We need to add the correct number of containers to hold all the bars.
-  d3.select("#chart-container").append("g").attr("id", "bars-container");
-  for (var i = 0; i < how_many_bar_sets(name2md); ++i) {
-    d3.select("#bars-container").append("g")
-      .attr("id", "bars-container-" + (i + 1));
-  }
   IROKI.draw.draw_bars();
-  // draw_bars();
 
   // And append the correct number of containers to hold the arcs
   for (var i = 0; i < how_many_arc_sets(name2md); ++i) {

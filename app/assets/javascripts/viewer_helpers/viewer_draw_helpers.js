@@ -84,7 +84,7 @@ function pick_transform(d, is_bar) {
       rotate_by = 0;
     }
 
-    return "rotate(0) translate(" + (d.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT) + ") rotate(" + rotate_by + ")"; // TODO labels will need rotation for radial layouts
+      return "rotate(0) translate(" + (d.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT) + ") rotate(" + rotate_by + ")"; // TODO labels will need rotation for radial layouts
   }
 }
 
@@ -888,31 +888,6 @@ function inner_dot_stroke_width(d) {
     }
   }
 }
-
-
-// Bars helpers
-function how_many_bar_sets(name2md) {
-  if (name2md) {
-    var first_thing = name2md[Object.keys(name2md)[0]];
-
-    // TODO this is just to prevent an infinite loop.  Need a real check.
-    var max  = 1000;
-    var iter = 1;
-    while (iter < max) {
-      var idx = "bar" + iter + "_height";
-
-      if (first_thing[idx] === undefined) {
-        return iter - 1;
-      }
-
-      iter += 1;
-    }
-  }
-
-  // If you've gotten here, there are no bar sets.
-  return 0;
-}
-
 
 // Arc helpers
 
