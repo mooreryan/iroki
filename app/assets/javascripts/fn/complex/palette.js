@@ -137,10 +137,14 @@ fn.palette.draw = function (params) {
 
     var scaled_start = fn.math.scale(start, grad_rect_min_x, grad_rect_max_x, 0, 1);
 
+
+
     chart.append("rect")
-         .attr("x", start)
+         // If we are on the first rectangle, move it back 1 pixel to even it up as we add one pixel to each width.
+         .attr("x", idx === 0 ? start - 1 : start)
          .attr("y", grad_rect_y)
-         .attr("width", grad_rect_width)
+         // Add one pixel to the width to avoid the little white overlap lines.  If it is the first one, add 2 pixels since we move the first one back one pixel.
+         .attr("width", idx === 0 ? grad_rect_width + 2 : grad_rect_width + 1)
          .attr("height", grad_rect_height)
          .attr("fill", color_scale(scaled_start).hex());
   });
