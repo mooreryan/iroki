@@ -20,11 +20,26 @@ function utils__upload_tree_first() {
 }
 
 function utils__set_status_msg_to_rendering() {
-  jq("status-msg").html("Rendering tree!  Please wait....");
+  jq("status-msg")
+    .html("Rendering tree!  Please wait....")
+    .addClass("blink");
+
+  // Also change the submit button text to rendering msg
+  jq("submit")
+    .prop("disabled", true)
+    .val("Rendering...")
+    .addClass("blink");
 }
 
 function utils__set_status_msg_to_done() {
-  jq("status-msg").html("Here is your tree!");
+  jq("status-msg")
+    .html("Here is your tree!")
+    .removeClass("blink");
+
+  jq("submit")
+    .prop("disabled", false)
+    .val("Submit!")
+    .removeClass("blink");
 }
 
 function utils__set_status_msg_to_error() {

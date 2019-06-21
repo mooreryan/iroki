@@ -36,10 +36,14 @@ function upload_button(submit_id, uploader_id, callback) {
 
   uploader.addEventListener("change", function () {
     TREE_CHANGED = true;
+
+    // The submit button starts disabled in the html
     submit_button.removeAttribute("disabled");
+
   });
   mapping_uploader.addEventListener("change", function () {
     MAPPING_CHANGED = true;
+    // The submit button starts disabled in the html
     submit_button.removeAttribute("disabled");
   });
   submit_button.addEventListener("click", function () {
@@ -55,6 +59,7 @@ function upload_button(submit_id, uploader_id, callback) {
 
     // Add a loading tree message.
     utils__set_status_msg_to_rendering();
+
     // d3.select("#tree-div")
     //   .append("p")
     //   .attr("id", "loading-message")
@@ -89,7 +94,7 @@ function upload_button(submit_id, uploader_id, callback) {
   });
 
   function handleFiles() {
-    submit_button.setAttribute("disabled", "");
+    // submit_button.setAttribute("disabled", "");
     var file = uploader.files[0];
     if (file) {
       tree_reader.readAsText(file);
@@ -97,6 +102,7 @@ function upload_button(submit_id, uploader_id, callback) {
     else {
       // d3.select("#loading-message").remove();
       utils__set_status_msg_to_done();
+
       alert("Don't forget a tree file!");
     }
   }
