@@ -150,9 +150,10 @@ function lalala(tree_input_param, mapping_input_param) {
                  })
                  .sort(sort_function);
 
-    // If it is a big tree, uncheck the viewer size fixed button.  It goes way faster.
+    // These are some speed-ups for large trees.
     if (tmp_root.descendants().length > LARGE_TREE_CUTOFF) {
       uncheck(global.html.id.viewer_size_fixed);
+      uncheck(global.html.id.leaf_labels_show);
     }
 
     // Check if there is as many branchlengths as there are number of nodes.
