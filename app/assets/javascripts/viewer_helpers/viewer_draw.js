@@ -666,6 +666,7 @@ function draw_wrapper(draw_fn) {
 }
 
 /**
+ * Wrapper function that most listeners get passed through.
  *
  * @param func
  * @param arg Optional argument to be passed in to func.  Often will be a draw function.
@@ -680,6 +681,7 @@ function set_status_msg_wrapper(func, arg) {
     else {
       func(arg);
     }
+    update_png_size_info();
     utils__set_status_msg_to_done();
   }, TIMEOUT);
 }

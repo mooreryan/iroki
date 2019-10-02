@@ -218,7 +218,10 @@ function lalala(tree_input_param, mapping_input_param) {
     // Listen for save
     // See https://github.com/vibbits/phyd3/blob/9e5cf7edef72b1e8d4e8355eb5ab4668734816e5/js/phyd3.phylogram.js#L915
     d3.select("#save-svg").on("click", save_svg_data);
-    d3.select("#save-png").on("click", save_png_data);
+    d3.select("#save-png").on("click", function() {
+      var scaling_factor = get_scaling_factor();
+      save_png_data(scaling_factor);
+    });
 
     // This is the listener for selecting label names
     d3.select("body").on("keydown", function () {
@@ -382,6 +385,9 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // In the lalala function, this is the first time that set_up_and_draw_everything is called, so lock options by metadata if it is available.
     set_up_and_draw_everything(true);
+
+    // Saving PNG requires displaying current pixels.
+    update_png_size_info();
 
     utils__set_status_msg_to_done();
   }

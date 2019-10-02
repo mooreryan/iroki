@@ -112,6 +112,12 @@ global.html.id.branches_width = "branch-width"; // 2
 // Viewer options
 global.html.id.viewer_size_fixed = "viewer-size-fixed";
 
+// Save options
+global.html.id.save_current_size = "current-size";
+global.html.id.save_desired_ppi = "desired-ppi";
+global.html.id.size_at_desired_ppi_inches = "size-at-desired-ppi-inches";
+global.html.id.size_at_desired_ppi_pixels = "size-at-desired-ppi-pixels";
+global.html.id.save_scaling_factor = "save-scaling-factor";
 
 // Arcs values
 global.html.val.arcs_show       = undefined;

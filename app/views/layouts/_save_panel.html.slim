@@ -1,11 +1,43 @@
 hr.row
+
 .row
-  h5 Save tree
-  .small-6.columns
+  h4 Save tree
+  h5 SVG
+  .small-12.columns
     label for="save-svg" Save?
     input id="save-svg" type="button" value="Save as SVG" disabled=""
-  .small-6.columns
-    label for="save-png" Save?
-    input id="save-png" type="button" value="Save as PNG" disabled=""
+
+hr.row
+
+.row
+  h5 PNG
+  / .row
+  /   .small-12.columns
+  /     label for="current-size" Image size <em>(in pixels; as seen in the viewer)</em>
+  /     input type="text" id="current-size" disabled=""
+  .row
+    h6 Output options
+  .row
+    .small-12.columns
+      label for="save-scaling-factor" <b>Scale</b> <em>(percentage; 100% means no scaling; increase or decrease to change output image size!)</em>
+      input id="save-scaling-factor" type="text" name="save-scaling-factor" value="100"
+    .small-12.columns
+      label for="desired-ppi" <b>Image resolution?</b> <em>(72 - 4000 PPI)</em>
+      input id="desired-ppi" type="number" name="desired-ppi" min="72" max="4000" value="72"
+
+  .row
+    h6 Output image info
+  .row
+    .small-12.columns
+      label for="size-at-desired-ppi-pixels" Output image size <em>(in pixels)</em>
+      input type="text" id="size-at-desired-ppi-pixels" disabled=""
+    .small-12.columns
+      label for="size-at-desired-ppi-inches" Output image size at selected resolution <em>(in inches)</em>
+      input type="text" id="size-at-desired-ppi-inches" disabled=""
+
+  .row
+    .small-12.columns
+      label for="save-png" Save?
+      input id="save-png" type="button" value="Save as PNG" disabled=""
 
 hr.row

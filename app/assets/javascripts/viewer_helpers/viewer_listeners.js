@@ -23,6 +23,7 @@ function viewer_form_add_listeners() {
         }
         // Draw tree and set on metadata option
         set_up_and_draw_everything(true);
+        update_png_size_info();
         utils__set_status_msg_to_done();
       }, TIMEOUT);
     }
@@ -56,6 +57,7 @@ function viewer_form_add_listeners() {
       }
 
       set_up_and_draw_everything();
+      update_png_size_info();
       utils__set_status_msg_to_done();
     }, TIMEOUT);
   });
@@ -88,6 +90,7 @@ function viewer_form_add_listeners() {
       }
 
       set_up_and_draw_everything();
+      update_png_size_info();
       utils__set_status_msg_to_done();
     }, TIMEOUT);
   });
@@ -123,6 +126,7 @@ function viewer_form_add_listeners() {
       }
 
       set_up_and_draw_everything();
+      update_png_size_info();
       utils__set_status_msg_to_done();
     }, TIMEOUT);
   });
@@ -132,6 +136,7 @@ function viewer_form_add_listeners() {
 
     setTimeout(function () {
       set_up_and_draw_everything();
+      update_png_size_info();
       utils__set_status_msg_to_done();
     }, TIMEOUT * 2);
   });
@@ -454,6 +459,7 @@ function viewer_form_add_listeners() {
 
       draw_wrapper(draw_scale_bar);
 
+      update_png_size_info();
       utils__set_status_msg_to_done();
     }, TIMEOUT);
   });
@@ -466,6 +472,7 @@ function viewer_form_add_listeners() {
       // the user caused this change
       draw_scale_bar(true);
       adjust_tree();
+      update_png_size_info();
       utils__set_status_msg_to_done();
     }, TIMEOUT);
   });
@@ -474,4 +481,16 @@ function viewer_form_add_listeners() {
   listener(global.html.id.viewer_size_fixed, "change", function () {
     update_viewer_size_fixed();
   });
+
+  // Save opts
+  listener(global.html.id.save_desired_ppi, "change", function() {
+    setTimeout(function() {
+      update_png_size_info();
+    }, TIMEOUT)
+  })
+  listener(global.html.id.save_scaling_factor, "change", function() {
+    setTimeout(function() {
+      update_png_size_info();
+    }, TIMEOUT)
+  })
 }
