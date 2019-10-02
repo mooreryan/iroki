@@ -218,9 +218,25 @@ function lalala(tree_input_param, mapping_input_param) {
     // Listen for save
     // See https://github.com/vibbits/phyd3/blob/9e5cf7edef72b1e8d4e8355eb5ab4668734816e5/js/phyd3.phylogram.js#L915
     d3.select("#save-svg").on("click", save_svg_data);
-    d3.select("#save-png").on("click", function() {
-      var scaling_factor = get_scaling_factor();
-      save_png_data(scaling_factor);
+    d3.select("#save-png").on("click", function () {
+      // Change label and make it blink
+      jq("label-for-save-png")
+        .html("Saving PNG <em>(large trees may take a while!)</em>")
+        .addClass("blink");
+      jq("save-png").prop("disabled", true);
+
+
+      setTimeout(function () {
+        var scaling_factor = get_scaling_factor();
+        save_png_data(scaling_factor);
+
+        // Return original label, remove blinking.
+        jq("label-for-save-png")
+          .html("Save? <em>(large trees may take a while!)</em>")
+          .removeClass("blink");
+        jq("save-png").prop("disabled", false);
+
+      }, TIMEOUT);
     });
 
     // This is the listener for selecting label names
