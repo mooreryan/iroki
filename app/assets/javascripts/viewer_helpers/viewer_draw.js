@@ -248,7 +248,7 @@ function draw_leaf_labels() {
         var color = d.metadata.leaf_label_color;
         return color ? color : VAL_LEAF_LABEL_COLOR;
       })
-      .on("click", toggle_selected);
+      .on("click", handle_label_click);
 
     labels
     // What to do for merging
@@ -279,7 +279,7 @@ function draw_leaf_labels() {
         var color = d.metadata.leaf_label_color;
         return color ? color : VAL_LEAF_LABEL_COLOR;
       })
-      .on("click", toggle_selected);
+      .on("click", handle_label_click);
 
   }
   else {
@@ -309,6 +309,7 @@ function draw_svg() {
     // And add the svg.
     svg = d3.select("#tree-div")
             .append("svg")
+            .on("dblclick", handle_svg_doubleclick)
             .attr("id", "svg-tree")
             .attr("width", the_width * 1)
             .attr("height", the_height * 1)

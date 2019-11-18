@@ -241,20 +241,6 @@ function lalala(tree_input_param, mapping_input_param) {
 
     // This is the listener for selecting label names
     d3.select("body").on("keydown", function () {
-      var key_code = {
-        a: 65,
-        b: 66,
-        c: 67,
-        d: 83,
-        f: null,
-        u: 76,
-        x: 88,
-        arrow_left: 37,
-        arrow_up: 38,
-        arrow_right: 39,
-        arrow_down: 40
-      };
-
       function rebind_labels() {
         // And now rebind the data.
         var new_labels = d3.select("#leaf-label-container")
@@ -276,6 +262,10 @@ function lalala(tree_input_param, mapping_input_param) {
         rebind_labels();
       }
 
+      // track presses of e as they go with clicking on the label
+      if (d3.event.keyCode === key_code.e) {
+        global.pressed_keys.e = true;
+      }
 
       if (d3.event.shiftKey && d3.event.altKey && d3.event.keyCode === key_code.arrow_up) {
         add_previously_selected();
@@ -394,6 +384,12 @@ function lalala(tree_input_param, mapping_input_param) {
         document.body.removeChild(text_elem);
       }
     });
+
+    d3.select("body").on("keyup", function(){
+      if (d3.event.keyCode === key_code.e) {
+        global.pressed_keys.e = false;
+      }
+    })
 
     viewer_form_add_listeners();
 

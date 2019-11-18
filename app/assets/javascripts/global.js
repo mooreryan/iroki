@@ -1,4 +1,22 @@
+// TODO move this into global var.
+var key_code = {
+  a: 65,
+  b: 66,
+  c: 67,
+  d: 83,
+  e: 69,
+  f: null,
+  u: 76,
+  x: 88,
+  arrow_left: 37,
+  arrow_up: 38,
+  arrow_right: 39,
+  arrow_down: 40
+};
+
 var global = {};
+
+global.pressed_keys = {};
 
 global.warnings = {};
 
