@@ -1,10 +1,7 @@
 source 'https://rubygems.org'
-ruby "2.3.1"
+ruby "2.6.0"
 
 gem 'dotenv-rails', :groups => [:development, :test]
-
-# # Specify this version of nokogiri to address security vulnerability.
-# gem 'nokogiri', '~> 1.8', '>= 1.8.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
@@ -84,7 +81,10 @@ gem 'slim-rails'
 gem 'annotate', '~> 2.7', '>= 2.7.1'
 
 # Specify these versions because of security vulnerabilities.
-gem 'loofah', '~> 2.2', '>= 2.2.3'
-gem 'sprockets', '~> 3.7', '>= 3.7.2'
-gem 'rails-html-sanitizer', '~> 1.0', '>= 1.0.4'
+gem 'actionview', '~> 5.0', '>= 5.0.7.2'
 gem 'ffi', '~> 1.9', '>= 1.9.25'
+gem 'loofah', '~> 2.3', '>= 2.3.1'
+gem 'nokogiri', '~> 1.10', '>= 1.10.5'
+gem 'rack', '~> 2.0', '>= 2.0.7'
+gem 'rails-html-sanitizer', '~> 1.0', '>= 1.0.4'
+gem 'sprockets', '~> 3.7', '>= 3.7.2'
