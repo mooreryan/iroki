@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby "2.6.0"
+ruby "2.5.3"
 
 gem 'dotenv-rails', :groups => [:development, :test]
 
