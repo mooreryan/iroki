@@ -176,7 +176,7 @@ Teaspoon.configure do |config|
     # default excludes assets from vendor, gems and support libraries.
     coverage.ignore = [%r{/lib/ruby/gems/}, %r{/vendor/assets/}, %r{/support/}, %r{/(.+)_helper.},
                        # I've added these.
-                       "app/assets/javascripts/Blob.js", "app/assets/javascripts/FileSaver.js", "app/assets/javascripts/cable.js", "app/assets/javascripts/canvas-toBlob.js", "app/assets/javascripts/canvg.js", "app/assets/javascripts/chroma.js", "app/assets/javascripts/d3.js", "app/assets/javascripts/jszip.js", "app/assets/javascripts/papaparse.js", "app/assets/javascripts/verge.js", "app/assets/javascripts/google_analytics.js", "app/assets/javascripts/application.js", %r{/.rvm/gems/ruby-2.3.1@IrokiRails5/gems/}]
+                       "app/assets/javascripts/Blob.js", "app/assets/javascripts/FileSaver.js", "app/assets/javascripts/cable.js", "app/assets/javascripts/canvas-toBlob.js", "app/assets/javascripts/canvg.js", "app/assets/javascripts/chroma.js", "app/assets/javascripts/d3.js", "app/assets/javascripts/jszip.js", "app/assets/javascripts/papaparse.js", "app/assets/javascripts/verge.js", "app/assets/javascripts/google_analytics.js", "app/assets/javascripts/application.js", %r{/.rvm/gems/ruby-2.3.1@IrokiRails5/gems/},%r{/.rvm/gems/ruby-2.6.0@IrokiRails5/gems/}]
 
     # Various thresholds requirements can be defined, and those thresholds will be checked at the end of a run. If any
     # aren't met the run will fail with a message. Thresholds can be defined as a percentage (0-100), or nil.
