@@ -31,6 +31,29 @@ var BRANCH_OPTIONS = [
 //   "bar_color"
 // ];
 //
+
+var valid_gradients = [
+  "Blues",
+  "BuGn",
+  "BuPu",
+  "GnBu",
+  "Greens",
+  "Greys",
+  "OrRd",
+  "Oranges",
+  "PuBu",
+  "PuBuGn",
+  "PuRd",
+  "Purples",
+  "RdPu",
+  "Reds",
+  "YlGn",
+  "YlGnBu",
+  "YlOrBr",
+  "YlOrRd"
+];
+
+
 var valid_colors = {
   // These are the Kelly colors by number.
   "k_1": "#875692",
@@ -1120,7 +1143,7 @@ function includes(ary, elem) {
 
 function is_bad_col_header(str) {
   // the ?: means non capturing parentheses
-  var bar_field_regex = /^bar(?:[0-9]*)_(?:height|color)$/;
+  var bar_field_regex = /^bar(?:[0-9]*)_(?:height|color|gradient)$/;
   var arc_field_regex = /^arc(?:[0-9]*)_color$/;
 
   return (
@@ -1188,6 +1211,56 @@ function bad_bar_fields(fields) {
       return "bar" + num + "_color";
     });
     return ["color", bad_colors];
+  }
+
+  // Now check for bar gradients.
+  var bar_gradients = fields.map(function (name) {
+    return name.match(/^bar([0-9]*)_gradient$/);
+  }).filter(function (m) {
+    // Return the good matches
+    return m !== null;
+  });
+
+  // check if any bar gradients are specified for things without heights.
+  var gradients_with_bad_heights = bar_gradients.map(function (match) {
+    var num                 = match[1];
+    var matching_bar_height = "bar" + num + "_height";
+
+    var matching_bar_heights = bar_heights.filter(function (bar_height_match) {
+      return bar_height_match[0] === matching_bar_height;
+    });
+
+    if (matching_bar_heights.length !== 1) {
+      return match[0];
+    }
+  }).filter(function (m) {
+    return m !== null && m !== undefined;
+  });
+
+
+  if (gradients_with_bad_heights.length !== 0) {
+    return ["gradient with no matching bar height", gradients_with_bad_heights];
+  }
+
+  var bad_bar_gradients = bar_gradients.map(function (match) {
+    var num                = match[1];
+    var matching_bar_color = "bar" + num + "_color";
+
+    // Now check if there is a matching entry in bar_colors.
+    var matching_bar_colors = bar_colors.filter(function (bar_color_match) {
+      return bar_color_match[0] === matching_bar_color;
+    });
+
+    // If there are any matching bar colors, then we've got an error.
+    var bad_stuff = matching_bar_colors.map(function (matching_color) {
+      return match[0] + " with " + matching_color[0];
+    });
+
+    return bad_stuff;
+  });
+
+  if (flatten(bad_bar_gradients).length > 0) {
+    return ["bar color with bar gradient", flatten(bad_bar_gradients)];
   }
 
   return null;
@@ -1328,6 +1401,71 @@ function parse_mapping_file(str) {
           return field.match(/^arc[0-9]+_color$/);
         });
 
+  var bar_gradient_field_names =
+        mapping_csv.meta.fields.filter(function (fields) {
+          return fields.match(/^bar[0-9]+_gradient$/);
+        });
+
+  // Check gradient values.
+  var bad_gradient_names = [];
+  fn.obj.each(mapping, function (name, md) {
+    bar_gradient_field_names.forEach(function (field_name) {
+      var gradient_name = md[field_name];
+
+      if (!valid_gradients.includes(gradient_name)) {
+        bad_gradient_names.push(gradient_name);
+      }
+    });
+  });
+
+  if (bad_gradient_names.length > 0) {
+    var msg = "There were bad gradient names: " + bad_gradient_names.join(", ");
+
+    alert(msg);
+
+    return null;
+  }
+
+  function unique(value, index, self) {
+    return self.indexOf(value) === index;
+  }
+
+
+  var should_return_null = false;
+  // We only have good gradient names.  If there are gradient names we need to convert them to barN_color columns.
+  bar_gradient_field_names.forEach(function (field_name) {
+    // get the matching bar color name.  if you're here, you should have valid field names.
+    var field_num                  = field_name.match(/^bar([0-9]+)_gradient$/)[1];
+    var matching_color_field_name  = "bar" + field_num + "_color";
+    var matching_height_field_name = "bar" + field_num + "_height";
+
+    // make sure all palettes are the same
+    var palette_names = fn.obj.vals(mapping).map(function (md) {
+      return md[field_name];
+    }).filter(unique);
+
+    if (palette_names.length !== 1) {
+      alert("ERROR -- Multiple palettes listed for " + field_name);
+      should_return_null = true;
+    }
+
+    var palette = palette_names[0];
+
+    // todo actually pass the name of the gradient
+    var hexcodes = IROKI.auto_gradients.gradients_for_barcolors(mapping, matching_height_field_name, palette);
+
+    hexcodes.forEach(function (name_hexcode) {
+      var name    = name_hexcode[0];
+      var hexcode = name_hexcode[1];
+
+      mapping[name][matching_color_field_name] = hexcode;
+    });
+  });
+
+  if (should_return_null) {
+    return null;
+  }
+
   // Add the bar color field names
   bar_color_field_names.forEach(function (name) {
     color_options.push(name);
@@ -1366,7 +1504,7 @@ function parse_mapping_file(str) {
           else if (option.match(/^arc(?:[0-9]*)_color$/) &&
             color_val === "none") {
             // arcs are allowed to have no fill
-            md[option] = color_val
+            md[option] = color_val;
           }
           else {
             bad_color_errors.push("WARNING -- there was an invalid color name in the mapping file: '" + color_val + "'.  The default color will be used instead.");

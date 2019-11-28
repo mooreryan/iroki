@@ -31,12 +31,15 @@ context("parse_mapping_file.js", function () {
       it("returns false if header matches one of the bar options", function () {
         expect(is_bad_col_header("bar_height")).to.be.false;
         expect(is_bad_col_header("bar_color")).to.be.false;
+        expect(is_bad_col_header("bar_gradient")).to.be.false;
 
         expect(is_bad_col_header("bar3_height")).to.be.false;
         expect(is_bad_col_header("bar3_color")).to.be.false;
+        expect(is_bad_col_header("bar3_gradient")).to.be.false;
 
         expect(is_bad_col_header("bar33_height")).to.be.false;
         expect(is_bad_col_header("bar33_color")).to.be.false;
+        expect(is_bad_col_header("bar33_gradient")).to.be.false;
       });
       it("returns false if header matches one of the arc options", function () {
         expect(is_bad_col_header("arc_color")).to.be.false;
@@ -77,7 +80,7 @@ context("parse_mapping_file.js", function () {
         spec_helper.expect_stringify_equal(actual, expected);
       });
 
-      it("returns false if bar heights doesn't have a 1", function () {
+      it("returns bad stuff if bar heights doesn't have a 1", function () {
         var fields = ["name", "bar2_height", "bar3_height"];
 
         var actual   = bad_bar_fields(fields);
@@ -86,11 +89,28 @@ context("parse_mapping_file.js", function () {
         spec_helper.expect_stringify_equal(actual, expected);
       });
 
-      it("returns false if bar color doesn't have a matching height", function () {
+      it("returns bad stuff if bar color doesn't have a matching height", function () {
         var fields = ["bar1_height", "bar3_color"];
 
         var actual   = bad_bar_fields(fields);
         var expected = ["color", ["bar3_color"]];
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("returns bad stuff if a bar color and bar gradient are provided for the same series", function () {
+        var fields   = ["bar1_height", "bar1_color", "bar1_gradient"];
+        var actual   = bad_bar_fields(fields);
+        var expected = ["bar color with bar gradient", ["bar1_gradient with bar1_color"]];
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("returns bad stuff if a bar gradient doesn't have a matching bar height", function () {
+        var fields = ["bar1_height", "bar2_gradient"];
+        var actual = bad_bar_fields(fields);
+
+        var expected = ["gradient with no matching bar height", ["bar2_gradient"]];
 
         spec_helper.expect_stringify_equal(actual, expected);
       });
@@ -239,7 +259,7 @@ context("parse_mapping_file.js", function () {
         var expected = {
           "apple": { "bar1_height": 10, "bar1_color": "#EE7733" }
         };
-        var actual = parse_mapping_file(good_bar_stuff);
+        var actual   = parse_mapping_file(good_bar_stuff);
 
         spec_helper.expect_stringify_equal(actual, expected);
       });
@@ -250,10 +270,49 @@ context("parse_mapping_file.js", function () {
         var expected = {
           "apple": { "arc1_color": "#EE7733" }
         };
+        var actual   = parse_mapping_file(good_stuff);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
+      it("converts gradients to the actual colors", function () {
+        var good_stuff = "name\tbar1_height\tbar1_gradient\napple\t1\tOranges\n";
+
+        var expected = {
+          "apple": {
+            "bar1_height": 1,
+            "bar1_gradient": "Oranges",
+            "bar1_color": "#f26b15"
+          }
+        };
+
         var actual = parse_mapping_file(good_stuff);
 
         spec_helper.expect_stringify_equal(actual, expected);
       });
+
+      it("converts gradients to the actual colors (multiple names)", function () {
+        var good_stuff = "name\tbar1_height\tbar1_gradient\napple\t1\tBlues\npie\t2\tBlues\n";
+
+        var expected = {
+          "apple": {
+            "bar1_height": 1,
+            "bar1_gradient": "Blues",
+            "bar1_color": "#d0e1f2"
+          },
+          "pie": {
+            "bar1_height": 2,
+            "bar1_gradient": "Blues",
+            "bar1_color": "#093d7e"
+          }
+
+        };
+
+        var actual = parse_mapping_file(good_stuff);
+
+        spec_helper.expect_stringify_equal(actual, expected);
+      });
+
     });
 
     context("returns null with bad mapping files", function () {
@@ -301,6 +360,32 @@ context("parse_mapping_file.js", function () {
         var bad_arc_headers_str = "name\tarc3_color\napple\tblack\n";
 
         expect(parse_mapping_file(bad_arc_headers_str)).to.be.null;
+      });
+
+      it("if there are gradient and color for the same bar series", function () {
+        var bad_header = "name\tbar1_height\tbar1_color\tbar1_gradient\n";
+
+        expect(parse_mapping_file(bad_header)).to.be.null;
+      });
+
+      it("if there is a gradient that doesn't have a height", function () {
+        var bad_header = "name\tbar1_gradient\n";
+
+        console.log("arsotieanrositenaorsitenaorisentaorisetn")
+
+        expect(parse_mapping_file(bad_header)).to.be.null;
+      });
+
+      it("if there are bad gradient options", function () {
+        var bad_mapping = "name\tbar1_height\tbar1_gradient\napple\t10\tarstoien\n";
+
+        expect(parse_mapping_file(bad_mapping)).to.be.null;
+      });
+
+      it("if there are different gradient names the same bar series gradient", function () {
+        var bad_mapping = "name\tbar1_height\tbar1_gradient\napple\t1\tOranges\npie\t2\tBlues\n";
+
+        expect(parse_mapping_file(bad_mapping)).to.be.null;
       });
 
     });
