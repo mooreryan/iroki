@@ -1,23 +1,38 @@
-- provide :title, 'Viewer'
-
-= javascript_include_tag "viewer", "data-turbolinks-track" => false
-= javascript_include_tag "FileSaver", "data-turbolinks-track" => false
-= javascript_include_tag "Blob", "data-turbolinks-track" => false
-= javascript_include_tag "canvas-toBlob", "data-turbolinks-track" => false
-= javascript_include_tag "verge", "data-turbolinks-track" => false
-= javascript_include_tag "parse_mapping_file", "data-turbolinks-track" => false
-= javascript_include_tag "chroma", "data-turbolinks-track" => false
-
-= javascript_include_tag "http://canvg.github.io/canvg/rgbcolor.js", "data-turbolinks-track" => false
-= javascript_include_tag "http://canvg.github.io/canvg/StackBlur.js", "data-turbolinks-track" => false
-= javascript_include_tag "http://canvg.github.io/canvg/canvg.js", "data-turbolinks-track" => false
+- provide :title, 'Online phylogenetic tree viewer with automatic customization using metadata or biom files'
 
 .row.expanded.thick-border
   .small-12.medium-6.large-4.columns#outer-container
     .row.upload-form
       = render "layouts/viewer_form"
+
+    .row
+      h1 Iroki tree viewer
+    .row
+      p Hi! I'm the Iroki tree viewer!
+      / p Hi! I'm the Iroki tree viewer for normal sized trees!
+      / p If you have a really big tree (up to one million leaves!), you should try the #{link_to "large tree viewer", large_path}.
+
+    .row
+      h3 About
+      p Iroki is a super snazzy online tree viewer (phylogenetic or other kinds too!) with automatic customization using metadata or biom files.
+
+      p You can visualize your newick trees as well as project count data into colors that you can use to style the tree!
+      /p If you have a biom file with abundance info that you want to convert to a color map, click #{link_to "here", biom_path}.
+
+      p If you need to pick colors for your tree, we suggest using #{link_to 'one of the lovely palettes included in Iroki', "/wiki#Color%20Palettes"}!!
+    .row
+      h3 Citation
+      = render "layouts/citation"
+    .row
+      h3 Documentation
+      p To see usage examples and learn about how to customize your trees, check out the #{link_to "documentation", "/wiki"}.
+    .row
+      h3 Getting help
+      p If you have any problems running Iroki, please #{mail_to "admin@iroki.net", "send us an email", cc: "IrokiHelp@gmail.com", subject: "Iroki help", target: "blank"}!
+
   .small-12.medium-6.large-8.columns
-    h3 I'm still in pre-release alpha mode!
+    #status-msg-container
+      h3#status-msg Please report any bugs on the contact page.
     .row#tree-div
 
 javascript:

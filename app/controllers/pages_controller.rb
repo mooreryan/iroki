@@ -15,17 +15,11 @@ class PagesController < ApplicationController
   def citation
   end
 
-  def docs
-
-
+  def splash
   end
 
-  def docs_newick; end
-  def docs_mapping_files; end
-  def docs_styling_opts; end
-  def docs_branch_styling; end
-  def docs_mapping_file_priority; end
-  def docs_palettes; end
+  def viewer
+  end
 
   def canvas_viewer
   end
@@ -37,7 +31,6 @@ class PagesController < ApplicationController
   end
 
   def classify
-
   end
 
   def biom

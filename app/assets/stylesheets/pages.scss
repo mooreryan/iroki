@@ -138,16 +138,32 @@ label {
   height: 50rem;
 }
 
+$top-bar-a-color: #528EC7;
 .top-bar a {
-  color: #528EC7;
+  color: $top-bar-a-color;
   font-size: 1.5rem;
   font-weight: bold;
+  &:hover {
+    color: lighten($top-bar-a-color, 10%);
+  }
 }
 
+$a-color: #0C58A1;
 a {
-  color: #0C58A1;
+  color: $a-color;
   font-weight: bold;
+  &:hover {
+    color: lighten($a-color, 10%);
+  }
 }
+
+/* $button-color: #A1CAF1; */
+/* path#splash-wiki-button-box { */
+/*   fill: lighten($button-color, 10%); //$button-color; */
+/*   &:hover { */
+/*     color: lighten($button-color, 10%); */
+/*   } */
+/* } */
 
 hr.row {
   height: 1px;
@@ -289,5 +305,11 @@ table#classify-results {
 
   text {
     fill: #272727;
+  }
+}
+
+svg {
+  a {
+    font-weight: normal;
   }
 }

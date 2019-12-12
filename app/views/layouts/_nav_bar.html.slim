@@ -8,21 +8,14 @@
           = link_to 'Iroki', root_path
     .top-bar-right
       ul.menu.dropdown data-dropdown-menu=""
-        /li.divider
-        /li = link_to 'About', about_path
-        / li.divider
-        / li = link_to 'Large tree viewer', large_path
-        / li.divider
-        / li = link_to 'Biom', biom_path
-        / li.divider
-        / li = link_to 'Cluster', tree_cluster_path
+        li.divider
+        li = link_to 'Viewer', viewer_path
+        li.divider
+        li = link_to 'Documentation', "/wiki"
         li.divider
         li = link_to 'Contact', contact_path
         li.divider
         li = link_to 'Citation', citation_path
-        li.divider
-        / Level 0
-        li = link_to 'Documentation', "/wiki"
         / Level 0
         li
           = link_to 'Snazzy Tools!'
