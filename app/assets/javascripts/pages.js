@@ -6,10 +6,14 @@
 
 var mouseout_shadow_color = "rgba(0,0,0,0.25)";
 var mouseover_shadow_color = "rgba(0,0,0,0.5)";
-var spash_wiki_button_shadow = "splash-wiki-button-shadow";
-var spash_viewer_button_shadow = "splash-viewer-button-shadow";
-var spash_wiki_button_box = "splash-wiki-button-box";
-var spash_viewer_button_box = "splash-viewer-button-box";
+
+var wiki_splash_button_shadow = "wiki-splash-button-shadow";
+var viewer_splash_button_shadow = "viewer-splash-button-shadow";
+var cite_splash_button_shadow = "cite-splash-button-shadow";
+
+var wiki_splash_button_box = "wiki-splash-button-box";
+var viewer_splash_button_box = "viewer-splash-button-box";
+var cite_splash_button_box = "cite-splash-button-box";
 
 var mouseover_box_color = "#cde3f8"; // that's 10% lighter as SCSS would lighten it.
 var mouseout_box_color = "#A1CAF1";
@@ -20,23 +24,33 @@ var mouseout_box_color = "#A1CAF1";
 // This makes the shadow a little more solid when the user mouses over
 // the buttons.
 $(document).on('ready', function() {
-  $("#splash-wiki-button").mouseover(function () {
-    $("#" + spash_wiki_button_shadow).attr("fill", mouseover_shadow_color);
-    $("#" + spash_wiki_button_box).attr("fill", mouseover_box_color);
+  $("#wiki-splash-button").mouseover(function () {
+    $("#" + wiki_splash_button_shadow).attr("fill", mouseover_shadow_color);
+    $("#" + wiki_splash_button_box).attr("fill", mouseover_box_color);
   });
 
-  $("#splash-wiki-button").mouseout(function () {
-    $("#" + spash_wiki_button_shadow).attr("fill", mouseout_shadow_color);
-    $("#" + spash_wiki_button_box).attr("fill", mouseout_box_color);
+  $("#wiki-splash-button").mouseout(function () {
+    $("#" + wiki_splash_button_shadow).attr("fill", mouseout_shadow_color);
+    $("#" + wiki_splash_button_box).attr("fill", mouseout_box_color);
   });
 
-  $("#splash-viewer-button").mouseover(function () {
-    $("#" + spash_viewer_button_shadow).attr("fill", mouseover_shadow_color);
-    $("#" + spash_viewer_button_box).attr("fill", mouseover_box_color);
+  $("#viewer-splash-button").mouseover(function () {
+    $("#" + viewer_splash_button_shadow).attr("fill", mouseover_shadow_color);
+    $("#" + viewer_splash_button_box).attr("fill", mouseover_box_color);
   });
 
-  $("#splash-viewer-button").mouseout(function () {
-    $("#" + spash_viewer_button_shadow).attr("fill", mouseout_shadow_color);
-    $("#" + spash_viewer_button_box).attr("fill", mouseout_box_color);
+  $("#viewer-splash-button").mouseout(function () {
+    $("#" + viewer_splash_button_shadow).attr("fill", mouseout_shadow_color);
+    $("#" + viewer_splash_button_box).attr("fill", mouseout_box_color);
+  });
+
+  $("#cite-splash-button").mouseover(function () {
+    $("#" + cite_splash_button_shadow).attr("fill", mouseover_shadow_color);
+    $("#" + cite_splash_button_box).attr("fill", mouseover_box_color);
+  });
+
+  $("#cite-splash-button").mouseout(function () {
+    $("#" + cite_splash_button_shadow).attr("fill", mouseout_shadow_color);
+    $("#" + cite_splash_button_box).attr("fill", mouseout_box_color);
   });
 });
