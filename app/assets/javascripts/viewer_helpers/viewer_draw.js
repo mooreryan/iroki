@@ -26,6 +26,31 @@ function get_leaf_dot_size(d) {
   }
 }
 
+// By hidden, I mean something in the mapping file that prevents it from being drawn.
+function has_hidden_leaf_dot(d) {
+  return d.metadata && d.metadata.leaf_dot_size === 0;
+}
+
+function has_hidden_leaf_label(d) {
+  return d.metadata && d.metadata.new_name === IROKI.constants.hide_leaf_label;
+}
+
+// The only time we don't draw the branch connector is if the leaf dot, leaf label, and bars are all hidden.
+// TODO should I include arc checks in here too?
+function should_draw_link_extensions(d) {
+  return !(!global.html.val.bars_show &&
+    has_hidden_leaf_dot(d.target) &&
+    has_hidden_leaf_label(d.target));
+}
+
+function get_link_extension_stroke_opacity(d) {
+  if (should_draw_link_extensions(d)) {
+    return "0.35";
+  } else {
+    return "0.0";
+  }
+}
+
 //// Actual drawing functions
 
 function draw_arcs() {
@@ -423,26 +448,15 @@ function draw_link_extensions() {
                         return !d.target.children;
                       }));
 
-    // var starts = root.links().filter(function(d) {
-    //   return !d.target.children;
-    // }).map(function(d) {
-    //   return { "the_x" : d.target[the_x], "the_y" : d.target[the_y] };
-    // });
-
     if (VAL_LEAF_LABEL_ALIGN) {
       linkExtension.exit().remove();
 
       // Draw the link extensions.  Don't need merge because they are either on or off.
       linkExtension
         .enter().append("path")
-      // Start from the tip of the actual branch
-      //   .attr("d", function (d, i)
-      //   {
-      //     return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
-      //   })
         .attr("fill", "none")
         .attr("stroke", "#000")
-        .attr("stroke-opacity", "0.35")
+        .attr("stroke-opacity", get_link_extension_stroke_opacity)
         .attr("stroke-width", SELECTED_BRANCH_WIDTH > 2 ? 2 : SELECTED_BRANCH_WIDTH)
         .attr("stroke-dasharray", "1, 5")
         .attr("class", "dotted-links")
@@ -450,12 +464,22 @@ function draw_link_extensions() {
           d.target.linkExtensionNode = this;
         })
         .attr("d", link_extension_path);
+
+      linkExtension.merge(linkExtension)
+                   .attr("fill", "none")
+                   .attr("stroke", "#000")
+                   .attr("stroke-opacity", get_link_extension_stroke_opacity)
+                   .attr("stroke-width", SELECTED_BRANCH_WIDTH > 2 ? 2 : SELECTED_BRANCH_WIDTH)
+                   .attr("stroke-dasharray", "1, 5")
+                   .attr("class", "dotted-links")
+                   .each(function (d) {
+                     d.target.linkExtensionNode = this;
+                   })
+                   .attr("d", link_extension_path);
+
     }
     else {
       linkExtension
-      // .attr("d", function(d, i) {
-      //   return "M " + starts[i].the_x + " " + starts[i].the_y + "L " + starts[i].the_x + " " + starts[i].the_y
-      // })
         .remove();
     }
   }
