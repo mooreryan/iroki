@@ -333,8 +333,14 @@ var IROKI = (function (iroki) {
 
           bars.remove();
 
+          // Remove radius lines
           d3.select("#bars-container")
             .selectAll("circle")
+            .remove();
+
+          // Remove rectangle axis
+          d3.select("#bars-container")
+            .selectAll("path")
             .remove();
         }
       }

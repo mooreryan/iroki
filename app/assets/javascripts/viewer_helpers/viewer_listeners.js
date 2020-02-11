@@ -257,8 +257,17 @@ function viewer_form_add_listeners() {
         // If bars are shown, you are NOT allowed to unalign tip decorations.
         sync_align_buttons_vals(true);
         sync_align_buttons_disable(true);
+
+        // but you are allowed to show the bar axis
+        jq(global.html.id.bars_axis_show).prop("disabled", false);
       }
       else {
+        // if you're not showing bars, disable and uncheck the bar axis button
+        jq(global.html.id.bars_axis_show).prop("disabled", true);
+        jq(global.html.id.bars_axis_show).prop("checked", false);
+
+
+        // Make sure align tips is re-enabled.
         sync_align_buttons_disable(false);
         jq(global.html.id.leaf_labels_align).prop("disabled", false);
         jq(global.html.id.leaf_dots_align).prop("disabled", false);

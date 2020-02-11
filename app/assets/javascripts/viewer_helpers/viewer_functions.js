@@ -98,6 +98,7 @@ viewer.fn.reset_bar_opts_to_defaults = function () {
   // Bar options
   jq(global.html.id.bars_show).prop("checked", viewer.defaults.bars_show);
   jq(global.html.id.bars_axis_show).prop("checked", viewer.defaults.bars_axis_show);
+  jq(global.html.id.bars_axis_show).prop("disabled", !viewer.defaults.bars_axis_show);
   jq(global.html.id.bars_color).val(viewer.defaults.bars_color);
   jq(global.html.id.bars_height).val(viewer.defaults.bars_height);
   jq(global.html.id.bars_width).val(viewer.defaults.bars_width);
