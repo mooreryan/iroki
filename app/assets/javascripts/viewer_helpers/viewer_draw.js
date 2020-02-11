@@ -1,3 +1,18 @@
+// Meant to be a callback for d3.text function.
+function get_name(d) {
+  var new_name = d.metadata.new_name;
+
+  if (new_name && new_name === IROKI.constants.hide_leaf_label) {
+    return "";
+  }
+  else if (new_name) {
+    return new_name;
+  }
+  else {
+    return d.data.name;
+  }
+}
+
 //// Actual drawing functions
 
 function draw_arcs() {
@@ -231,11 +246,7 @@ function draw_leaf_labels() {
       .attr("transform", function (d) {
         return pick_transform(d);
       })
-      .text(function (d) {
-        var new_name = d.metadata.new_name;
-
-        return new_name ? new_name : d.data.name;
-      })
+      .text(get_name)
       .attr("font-size", function (d) {
         var size = d.metadata.leaf_label_size;
         return size ? size : LEAF_LABEL_SIZE;
@@ -262,11 +273,7 @@ function draw_leaf_labels() {
       .attr("transform", function (d) {
         return pick_transform(d);
       })
-      .text(function (d) {
-        var new_name = d.metadata.new_name;
-
-        return new_name ? new_name : d.data.name;
-      })
+      .text(get_name)
       .attr("font-size", function (d) {
         var size = d.metadata.leaf_label_size;
         return size ? size : LEAF_LABEL_SIZE;

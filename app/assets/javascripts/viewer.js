@@ -361,17 +361,19 @@ function lalala(tree_input_param, mapping_input_param) {
               return is_leaf(d) && d.is_selected;
             })
             .forEach(function (d) {
-              var name = null;
-              if (d.data) {
-                // We want to use the new name if it is available
-                if (d.metadata && d.metadata.new_name) {
-                  selected_names.push(d.metadata.new_name);
-                }
-                else if (d.data.name) {
-                  // Else push the orig name.
-                  selected_names.push(d.data.name);
-                }
+              var name                   = d.data && d.data.name;
+              var new_name               = d.metadata && d.metadata.new_name;
+              var should_show_leaf_label = new_name !== IROKI.constants.hide_leaf_label;
+
+              // Copy new leaf label.
+              if (new_name && should_show_leaf_label) {
+                selected_names.push(new_name);
               }
+              // Copy original leaf label.
+              else if (name && should_show_leaf_label) {
+                selected_names.push(name);
+              }
+              // Else copy no name.
             });
 
         // Create a temporary element to hold the text
@@ -385,11 +387,11 @@ function lalala(tree_input_param, mapping_input_param) {
       }
     });
 
-    d3.select("body").on("keyup", function(){
+    d3.select("body").on("keyup", function () {
       if (d3.event.keyCode === key_code.e) {
         global.pressed_keys.e = false;
       }
-    })
+    });
 
     viewer_form_add_listeners();
 
