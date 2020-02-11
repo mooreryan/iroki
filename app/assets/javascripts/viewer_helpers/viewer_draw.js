@@ -147,8 +147,15 @@ function draw_leaf_dots() {
         return pick_transform(d);
       })
       .attr("r", function (d) {
-        var val = d.metadata.leaf_dot_size;
-        return val ? val : LEAF_DOT_SIZE;
+        var val = d.metadata && d.metadata.leaf_dot_size;
+
+        if (val === undefined) {
+          return LEAF_DOT_SIZE;
+        }
+        else {
+          // This will allow zero to be a valid value.
+          return val;
+        }
       })
       .attr("fill", function (d) {
         var val = d.metadata.leaf_dot_color;
