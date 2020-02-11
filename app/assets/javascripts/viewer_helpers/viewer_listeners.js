@@ -235,7 +235,7 @@ function viewer_form_add_listeners() {
   listener(global.html.id.leaf_dots_align, "change", function () {
     set_status_msg_wrapper(function () {
       // First sync all the align buttons.
-      sync_align_buttons_and_vals(is_checked(global.html.id.leaf_dots_align), false);
+      sync_align_buttons_vals(is_checked(global.html.id.leaf_dots_align));
 
       draw_wrapper(function () {
         draw_link_extensions();
@@ -254,7 +254,15 @@ function viewer_form_add_listeners() {
           alert("WARNING -- you don't have any bar info in your mapping file.  Try adding some!");
         }
 
-        sync_align_buttons_and_vals(true, false);
+        // If bars are shown, you are NOT allowed to unalign tip decorations.
+        sync_align_buttons_vals(true);
+        sync_align_buttons_disable(true);
+      }
+      else {
+        sync_align_buttons_disable(false);
+        jq(global.html.id.leaf_labels_align).prop("disabled", false);
+        jq(global.html.id.leaf_dots_align).prop("disabled", false);
+        jq(global.html.id.bars_align).prop("disabled", false);
       }
 
       draw_wrapper(function () {
@@ -278,7 +286,7 @@ function viewer_form_add_listeners() {
   listener(global.html.id.bars_align, "change", function () {
     set_status_msg_wrapper(function () {
       // First sync all the align buttons.
-      sync_align_buttons_and_vals(is_checked(global.html.id.bars_align), false);
+      sync_align_buttons_vals(is_checked(global.html.id.bars_align));
 
       draw_wrapper(function () {
         draw_link_extensions();
@@ -337,7 +345,7 @@ function viewer_form_add_listeners() {
   listener(global.html.id.leaf_labels_align, "change", function () {
     set_status_msg_wrapper(function () {
       // First sync all the align buttons.
-      sync_align_buttons_and_vals(is_checked(global.html.id.leaf_labels_align), false);
+      sync_align_buttons_vals(is_checked(global.html.id.leaf_labels_align));
 
       draw_wrapper(function () {
         draw_link_extensions();
@@ -483,14 +491,14 @@ function viewer_form_add_listeners() {
   });
 
   // Save opts
-  listener(global.html.id.save_desired_ppi, "change", function() {
-    setTimeout(function() {
+  listener(global.html.id.save_desired_ppi, "change", function () {
+    setTimeout(function () {
       update_png_size_info();
-    }, TIMEOUT)
-  })
-  listener(global.html.id.save_scaling_factor, "change", function() {
-    setTimeout(function() {
+    }, TIMEOUT);
+  });
+  listener(global.html.id.save_scaling_factor, "change", function () {
+    setTimeout(function () {
       update_png_size_info();
-    }, TIMEOUT)
-  })
+    }, TIMEOUT);
+  });
 }

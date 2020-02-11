@@ -1,0 +1,3 @@
+name	new_name	leaf_dot_size	bar1_height
+geode	__IROKI_BLANK__	0	0.1
+clock	cLoCk	0	0.5

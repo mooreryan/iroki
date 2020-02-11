@@ -70,7 +70,7 @@ viewer.fn.reset_label_opts_to_defaults = function () {
   jq(global.html.id.leaf_labels_padding).val(viewer.defaults.leaf_labels_padding);
 
   // not checked, not disabled
-  sync_align_buttons_and_vals(false, false);
+  sync_align_buttons_vals(false, false);
 
   jq(global.html.id.leaf_labels_color).val(viewer.defaults.leaf_labels_color);
   jq(global.html.id.leaf_labels_font).val(viewer.defaults.leaf_labels_font);

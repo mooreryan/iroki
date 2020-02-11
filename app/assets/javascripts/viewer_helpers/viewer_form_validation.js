@@ -109,15 +109,18 @@ function set_and_validate_bootstrap_cutoff_input() {
 
 }
 
-var sync_align_buttons_and_vals = function (checked, disabled) {
+var sync_align_buttons_vals = function (checked) {
   jq(global.html.id.leaf_labels_align).prop("checked", checked);
   jq(global.html.id.leaf_dots_align).prop("checked", checked);
   jq(global.html.id.bars_align).prop("checked", checked);
 
-  jq(global.html.id.leaf_labels_align).prop("disabled", disabled);
-  jq(global.html.id.leaf_dots_align).prop("disabled", disabled);
-  jq(global.html.id.bars_align).prop("disabled", disabled);
 
   // Make sure the val variable is also set so that everything is sync'd.
   VAL_LEAF_LABEL_ALIGN = checked;
 };
+
+var sync_align_buttons_disable = function(disabled) {
+  jq(global.html.id.leaf_labels_align).prop("disabled", disabled);
+  jq(global.html.id.leaf_dots_align).prop("disabled", disabled);
+  jq(global.html.id.bars_align).prop("disabled", disabled);
+}

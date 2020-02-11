@@ -84,7 +84,7 @@ function pick_transform(d, is_bar) {
       rotate_by = 0;
     }
 
-      return "rotate(0) translate(" + (d.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT) + ") rotate(" + rotate_by + ")"; // TODO labels will need rotation for radial layouts
+    return "rotate(0) translate(" + (d.radial_layout_info.x * RADIAL_LAYOUT_WEIGHT) + " " + (d.radial_layout_info.y * RADIAL_LAYOUT_WEIGHT) + ") rotate(" + rotate_by + ")"; // TODO labels will need rotation for radial layouts
   }
 }
 
@@ -570,16 +570,21 @@ function update_form_constants() {
     TREE_BRANCH_STYLE === TREE_BRANCH_CLADOGRAM ||
     global.html.val.tree_layout_radial
   ) {
-    // not checked, disabled.
-    sync_align_buttons_and_vals(false, true);
+    // not checked
+    sync_align_buttons_vals(false);
+    // disabled
+    sync_align_buttons_disable(true);
     // document.getElementById(global.html.id.leaf_labels_align).setAttribute("disabled", "");
     // document.getElementById(global.html.id.leaf_labels_align).removeAttribute("checked");
     // VAL_LEAF_LABEL_ALIGN = false;
   }
   else {
-    undisable(global.html.id.leaf_labels_align);
+    // If bars are shown, DON't undisable the leaf labels alignment button.
+    if (!is_checked(global.html.id.bars_show)) {
+      undisable(global.html.id.leaf_labels_align);
+    }
     VAL_LEAF_LABEL_ALIGN = is_checked(global.html.id.leaf_labels_align);
-    sync_align_buttons_and_vals(VAL_LEAF_LABEL_ALIGN, false);
+    sync_align_buttons_vals(VAL_LEAF_LABEL_ALIGN);
   }
 
   // Show/hide labels size
