@@ -13,6 +13,19 @@ function get_name(d) {
   }
 }
 
+// Meant to be a callback in a d3 drawing function like .attr("r", get_leaf_dot_size)
+function get_leaf_dot_size(d) {
+  var val = d.metadata && d.metadata.leaf_dot_size;
+
+  if (val === undefined) {
+    return LEAF_DOT_SIZE;
+  }
+  else {
+    // This will allow zero to be a valid value.
+    return val;
+  }
+}
+
 //// Actual drawing functions
 
 function draw_arcs() {
@@ -146,17 +159,7 @@ function draw_leaf_dots() {
       .attr("transform", function (d) {
         return pick_transform(d);
       })
-      .attr("r", function (d) {
-        var val = d.metadata && d.metadata.leaf_dot_size;
-
-        if (val === undefined) {
-          return LEAF_DOT_SIZE;
-        }
-        else {
-          // This will allow zero to be a valid value.
-          return val;
-        }
-      })
+      .attr("r", get_leaf_dot_size)
       .attr("fill", function (d) {
         var val = d.metadata.leaf_dot_color;
         return val ? val : VAL_LEAF_DOT_COLOR;
@@ -166,10 +169,7 @@ function draw_leaf_dots() {
              .attr("transform", function (d) {
                return pick_transform(d);
              })
-             .attr("r", function (d) {
-               var val = d.metadata.leaf_dot_size;
-               return val ? val : LEAF_DOT_SIZE;
-             })
+             .attr("r", get_leaf_dot_size)
              .attr("fill", function (d) {
                var val = d.metadata.leaf_dot_color;
                return val ? val : VAL_LEAF_DOT_COLOR;
