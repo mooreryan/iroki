@@ -6,23 +6,19 @@ Rails 5 source for the [Iroki webapp](https://www.iroki.net), a viewer and custo
 
 ## Citation
 
-If you find Iroki useful in your research, please cite the (updated) [Iroki preprint](https://doi.org/10.1101/106138).  Thank you!!
+If you find Iroki useful in your research, please cite the [Iroki manuscript](https://doi.org/10.7717/peerj.8584).  Thank you!!
 
-```
-Moore RM, Harrison AO, McAllister SM, Polson SW, and Wommack KE.  Iroki: automatic customization and visualization of phylogenetic trees.  bioRxiv 106138 (2019). doi:10.1101/106138
-```
+
+> Moore RM, Harrison AO, McAllister SM, Polson SW, Wommack KE. 2020. Iroki: automatic customization and visualization of phylogenetic trees. PeerJ 8:e8584 https://doi.org/10.7717/peerj.8584
 
 You can also download the citation and import it into your favorite reference manager!
 
-- [BibTeX](https://raw.githubusercontent.com/mooreryan/iroki/master/manuscript_citation/iroki_-automatic-customization-and-visualization-of-phylogenetic-trees.bib)
-- [EndNote (tagged)](https://raw.githubusercontent.com/mooreryan/iroki/master/manuscript_citation/iroki_-automatic-customization-and-visualization-of-phylogenetic-trees.enw)
-- [EndNote 8 (xml)](https://raw.githubusercontent.com/mooreryan/iroki/master/manuscript_citation/iroki_-automatic-customization-and-visualization-of-phylogenetic-trees.xml)
-- [Refworks (tagged)](https://raw.githubusercontent.com/mooreryan/iroki/master/manuscript_citation/iroki_-automatic-customization-and-visualization-of-phylogenetic-trees.txt)
-- [RIS | Zotero | Mendeley](https://raw.githubusercontent.com/mooreryan/iroki/master/manuscript_citation/iroki_-automatic-customization-and-visualization-of-phylogenetic-trees.ris)
+- [BibTeX](https://raw.githubusercontent.com/mooreryan/iroki/master/manuscript_citation/peerj-8584.bib)
+- [RIS | Zotero | Mendeley](https://raw.githubusercontent.com/mooreryan/iroki/master/manuscript_citation/peerj-8584.ris)
 
 ### Manuscript
 
-Check out the [manuscript on bioRxiv](https://doi.org/10.1101/106138)!
+Iroki has been published!  Check out the [manuscript on PeerJ](https://doi.org/10.7717/peerj.8584)!
 
 ## Documentation
 

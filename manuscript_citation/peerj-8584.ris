@@ -1,0 +1,32 @@
+TY  - JOUR
+UR  - https://doi.org/10.7717/peerj.8584
+DO  - 10.7717/peerj.8584
+TI  - Iroki: automatic customization and visualization of phylogenetic trees
+AU  - Moore,Ryan M.
+AU  - Harrison,Amelia O.
+AU  - McAllister,Sean M.
+AU  - Polson,Shawn W.
+AU  - Wommack,K. Eric
+A2  - Venancio,Thiago
+DA  - 2020/02/26
+PY  - 2020
+KW  - Bioinformatics
+KW  - Environmental microbiology
+KW  - Phylogeny
+KW  - Sequence analysis
+KW  - Metagenomics
+KW  - Microbiome
+KW  - Viral ecology
+KW  - Microbial ecology
+KW  - Data visualization
+KW  - Software
+AB  - 
+            Phylogenetic trees are an important analytical tool for evaluating community diversity and evolutionary history. In the case of microorganisms, the decreasing cost of sequencing has enabled researchers to generate ever-larger sequence datasets, which in turn have begun to fill gaps in the evolutionary history of microbial groups. However, phylogenetic analyses of these types of datasets create complex trees that can be challenging to interpret. Scientific inferences made by visual inspection of phylogenetic trees can be simplified and enhanced by customizing various parts of the tree. Yet, manual customization is time-consuming and error prone, and programs designed to assist in batch tree customization often require programming experience or complicated file formats for annotation. Iroki, a user-friendly web interface for tree visualization, addresses these issues by providing automatic customization of large trees based on metadata contained in tab-separated text files. Iroki’s utility for exploring biological and ecological trends in sequencing data was demonstrated through a variety of microbial ecology applications in which trees with hundreds to thousands of leaf nodes were customized according to extensive collections of metadata. The Iroki web application and documentation are available at https://www.iroki.net or through the VIROME portal http://virome.dbi.udel.edu. Iroki’s source code is released under the MIT license and is available at https://github.com/mooreryan/iroki.
+         
+VL  - 8
+SP  - e8584
+T2  - PeerJ
+JO  - PeerJ
+J2  - PeerJ
+SN  - 2167-8359
+ER  - 
