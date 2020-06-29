@@ -7,8 +7,6 @@ gem 'dotenv-rails', :groups => [:development, :test]
 gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 0.18'
-# Use Puma as the app server
-gem 'puma', '~> 3.0'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -85,7 +83,8 @@ gem 'actionview', '~> 5.0', '>= 5.0.7.2'
 gem 'ffi', '~> 1.9', '>= 1.9.25'
 gem 'loofah', '~> 2.3', '>= 2.3.1'
 gem 'nokogiri', '~> 1.10', '>= 1.10.8'
-gem 'rack', '~> 2.0', '>= 2.0.7'
+gem 'puma', '~> 3.0', '>= 3.12.5'
+gem 'rack', '~> 2.0', '>= 2.1.4'
 gem 'rails-html-sanitizer', '~> 1.0', '>= 1.0.4'
 gem 'sprockets', '~> 3.7', '>= 3.7.2'
 gem 'websocket-extensions', '>= 0.1.5'
