@@ -23,6 +23,6 @@ RSpec.describe "nav_bar.html.slim" do
   it "has the Documentation link" do
     render partial: "layouts/nav_bar.html.slim"
 
-    expect(rendered).to have_link "Documentation", href: "/docs"
+    expect(rendered).to have_link "Documentation", href: "/wiki"
   end
 end
