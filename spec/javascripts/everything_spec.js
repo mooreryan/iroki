@@ -9,3 +9,4 @@
 //= require viewer_functions_spec
 //= require viewer_spec
 //= require viewer_draw
+//= require iroki/ary_spec
