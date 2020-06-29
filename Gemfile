@@ -82,9 +82,13 @@ gem 'annotate', '~> 2.7', '>= 2.7.1'
 
 # Specify these versions because of security vulnerabilities.
 gem 'actionview', '~> 5.0', '>= 5.0.7.2'
+#gem 'activesupport', '>= 5.2.4.3'
 gem 'ffi', '~> 1.9', '>= 1.9.25'
 gem 'loofah', '~> 2.3', '>= 2.3.1'
 gem 'nokogiri', '~> 1.10', '>= 1.10.5'
 gem 'rack', '~> 2.0', '>= 2.0.7'
 gem 'rails-html-sanitizer', '~> 1.0', '>= 1.0.4'
 gem 'sprockets', '~> 3.7', '>= 3.7.2'
+gem 'websocket-extensions', '>= 0.1.5'
+
+
