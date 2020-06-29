@@ -1171,7 +1171,9 @@ function bad_bar_fields(fields) {
   var bar_height_numbers = bar_heights.map(function (match) {
     // Get the first parenthesis capture.  (it is the bar number)
     return parseInt(match[1]);
-  }).sort();
+  });
+
+  IROKI.ary.in_place_numeric_sort(bar_height_numbers);
 
   // First, we check that the indexes of the bar heights start at 1 and then continue up by 1 until we get them all.
   var bad_height_fields = bar_height_numbers.filter(function (num, idx) {
@@ -1198,7 +1200,9 @@ function bad_bar_fields(fields) {
   // if bar_colors is empty, bar_color_numbers will also be empty.
   var bar_color_numbers = bar_colors.map(function (match) {
     return parseInt(match[1]);
-  }).sort();
+  });
+
+  IROKI.ary.in_place_numeric_sort(bar_color_numbers);
 
   // now the numbers should all be number - 1 = (an index into the height numbers)
   var bad_color_numbers = bar_color_numbers.filter(function (color_num) {
@@ -1277,7 +1281,9 @@ function bad_arc_fields(fields) {
   var arc_color_numbers = arc_colors.map(function (match) {
     // Get the first parenthesis capture.  (it is the arc number)
     return parseInt(match[1]);
-  }).sort();
+  });
+
+  IROKI.ary.in_place_numeric_sort(arc_color_numbers);
 
   // First, we check that the indexes of the arc colors start at 1 and then continue up by 1 until we get them all.
   var bad_color_fields = arc_color_numbers.filter(function (num, idx) {

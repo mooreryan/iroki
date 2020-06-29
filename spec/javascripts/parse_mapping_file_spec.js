@@ -63,6 +63,89 @@ context("parse_mapping_file.js", function () {
         expect(bad_bar_fields(fields)).to.be.null;
       });
 
+      it("is okay if the bar height numbers go past 10", function () {
+        var fields = ["name",
+          "bar1_height",
+          "bar2_height",
+          "bar4_height",
+          "bar5_height",
+          "bar6_height",
+          "bar7_height",
+          "bar3_height",
+          "bar8_height",
+          "bar9_height",
+          "bar10_height",
+          "bar11_height",
+        ];
+
+        expect(bad_bar_fields(fields)).to.be.null;
+      });
+
+      it("is okay if the bar color numbers go past 10", function () {
+        var fields = ["name",
+          // Need the matching bar heights here or else you get an error.
+          "bar1_height",
+          "bar2_height",
+          "bar3_height",
+          "bar4_height",
+          "bar5_height",
+          "bar6_height",
+          "bar7_height",
+          "bar8_height",
+          "bar9_height",
+          "bar10_height",
+          "bar11_height",
+
+          "bar1_color",
+          "bar3_color",
+          "bar2_color",
+          "bar5_color",
+          "bar4_color",
+          "bar6_color",
+          "bar8_color",
+          "bar7_color",
+          "bar9_color",
+          "bar11_color",
+          "bar10_color",
+        ];
+
+        var bad_fields = bad_bar_fields(fields);
+        console.log("RYAN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~: ");
+        console.log(bad_fields);
+        expect(bad_bar_fields(fields)).to.be.null;
+      });
+
+      it("is okay if the bar gradient numbers go past 10", function () {
+        var fields = ["name",
+          // Need the matching bar heights here or else you get an error.
+          "bar1_height",
+          "bar2_height",
+          "bar3_height",
+          "bar4_height",
+          "bar5_height",
+          "bar6_height",
+          "bar7_height",
+          "bar8_height",
+          "bar9_height",
+          "bar10_height",
+          "bar11_height",
+
+          "bar1_gradient",
+          "bar2_gradient",
+          "bar3_gradient",
+          "bar4_gradient",
+          "bar5_gradient",
+          "bar6_gradient",
+          "bar7_gradient",
+          "bar8_gradient",
+          "bar9_gradient",
+          "bar10_gradient",
+          "bar11_gradient",
+        ];
+
+        expect(bad_bar_fields(fields)).to.be.null;
+      });
+
       it("returns null if the bar fields are fine", function () {
         var fields = ["name", "bar2_height", "bar1_height", "bar1_color"];
 
@@ -134,6 +217,25 @@ context("parse_mapping_file.js", function () {
 
         expect(bad_arc_fields(fields)).to.be.null;
       });
+
+      it("is okay if the arc color numbers go past 10", function () {
+        var fields = ["name",
+          "arc1_color",
+          "arc2_color",
+          "arc3_color",
+          "arc4_color",
+          "arc5_color",
+          "arc6_color",
+          "arc7_color",
+          "arc8_color",
+          "arc9_color",
+          "arc10_color",
+          "arc11_color",
+        ];
+
+        expect(bad_arc_fields(fields)).to.be.null;
+      });
+
 
       it("returns bad colors if arc colors skip a number", function () {
         var fields = ["name", "arc1_color", "arc3_color"];
@@ -371,7 +473,7 @@ context("parse_mapping_file.js", function () {
       it("if there is a gradient that doesn't have a height", function () {
         var bad_header = "name\tbar1_gradient\n";
 
-        console.log("arsotieanrositenaorsitenaorisentaorisetn")
+        console.log("arsotieanrositenaorsitenaorisentaorisetn");
 
         expect(parse_mapping_file(bad_header)).to.be.null;
       });
