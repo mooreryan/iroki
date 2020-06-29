@@ -8,5 +8,5 @@
 //= require parse_mapping_file_spec
 //= require viewer_functions_spec
 //= require viewer_spec
-//= require viewer_draw
+//= require viewer_draw_spec
 //= require iroki/ary_spec
