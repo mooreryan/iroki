@@ -50,10 +50,9 @@ group :development, :test do
 
   gem "guard-teaspoon"
 
-  gem 'simplecov', require: false
-  gem 'simplecov-cobertura'
-
-  gem 'coveralls', require: false
+  gem 'simplecov', '~> 0.16.1', require: false
+  gem 'simplecov-cobertura', '~> 1.3', '>= 1.3.1', require: false
+  gem 'coveralls', '~> 0.8.23', require: false
 end
 
 group :development do
@@ -86,6 +85,7 @@ gem 'nokogiri', '~> 1.10', '>= 1.10.8'
 gem 'puma', '~> 3.0', '>= 3.12.5'
 gem 'rack', '~> 2.0', '>= 2.1.4'
 gem 'rails-html-sanitizer', '~> 1.0', '>= 1.0.4'
+gem 'rest-client', '~> 1.8', '>= 1.8.0'
 gem 'sprockets', '~> 3.7', '>= 3.7.2'
 gem 'websocket-extensions', '>= 0.1.5'
 
