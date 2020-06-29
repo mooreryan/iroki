@@ -551,7 +551,7 @@ describe("viewer functions", function () {
             window.alert.restore();
           });
 
-          viewer_spec_helpers.test_warn_user_about_showing_stuff("bars_axis_show", "tree_layout_rectangular", false);
+          viewer_spec_helpers.test_warn_user_about_showing_stuff("bars_axis_show", "tree_layout_rectangular", true);
           viewer_spec_helpers.test_warn_user_about_showing_stuff("bars_axis_show", "tree_layout_radial", false);
           viewer_spec_helpers.test_warn_user_about_showing_stuff("bars_axis_show", "tree_layout_circular", true);
         });
