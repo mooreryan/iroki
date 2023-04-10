@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby "2.5.3"
+ruby "2.7.8"
 
 gem 'dotenv-rails', :groups => [:development, :test]
 
@@ -88,5 +88,3 @@ gem 'rails-html-sanitizer', '~> 1.0', '>= 1.0.4'
 gem 'rest-client', '~> 1.8', '>= 1.8.0'
 gem 'sprockets', '~> 3.7', '>= 3.7.2'
 gem 'websocket-extensions', '>= 0.1.5'
-
-
