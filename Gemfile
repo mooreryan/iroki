@@ -80,7 +80,7 @@ gem 'annotate', '~> 2.7', '>= 2.7.1'
 # Specify these versions because of security vulnerabilities.
 gem 'actionview', '~> 5.0', '>= 5.0.7.2'
 gem 'ffi', '~> 1.9', '>= 1.9.25'
-gem 'loofah', '~> 2.3', '>= 2.3.1'
+gem 'loofah', '~> 2.19'
 gem 'nokogiri', '~> 1.10', '>= 1.10.8'
 gem 'puma', '~> 3.0', '>= 3.12.5'
 gem 'rack', '~> 2.0', '>= 2.1.4'
